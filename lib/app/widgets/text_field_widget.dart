@@ -1,13 +1,13 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, must_be_immutable, strict_top_level_inference
 
 import 'package:country_code_picker/country_code_picker.dart';
-import 'package:owner/app/utils/app_colors.dart';
-import 'package:owner/app/utils/dark_theme_provider.dart';
-import 'package:owner/app/utils/font_family.dart';
-import 'package:owner/app/utils/validate_mobile.dart';
+import 'package:maheksync/app/utils/app_colors.dart';
+import 'package:maheksync/app/utils/dark_theme_provider.dart';
+import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/utils/validate_mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:owner/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 

@@ -1,6 +1,6 @@
-// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_MahekConstant_identifier_names
 
-class ConstantModel {
+class MahekConstantModel {
   String? jsonFileURL;
   String? notificationServerKey;
   String? webNotificationKey;
@@ -13,7 +13,7 @@ class ConstantModel {
   String? countryCode;
   MapSettingModel? mapSettings;
 
-  ConstantModel(
+  MahekConstantModel(
       {this.jsonFileURL,
       this.notificationServerKey,
       this.webNotificationKey,
@@ -26,7 +26,7 @@ class ConstantModel {
       this.referralAmount,
       this.mapSettings,});
 
-  ConstantModel.fromJson(Map<String, dynamic> json) {
+  MahekConstantModel.fromJson(Map<String, dynamic> json) {
     jsonFileURL = json['jsonFileURL'] ?? '';
     notificationServerKey = json['notification_senderId'] ?? '';
     webNotificationKey = json['web_notification_key'] ?? '';

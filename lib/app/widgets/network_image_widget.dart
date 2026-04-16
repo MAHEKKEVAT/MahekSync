@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:owner/app/constant/constants.dart';
-import 'package:owner/app/dependency/shimmer.dart';
-import 'package:owner/app/utils/app_colors.dart';
-import 'package:owner/app/utils/dark_theme_provider.dart';
-import 'package:owner/app/utils/screen_size.dart';
+import 'package:maheksync/app/dependency/shimmer.dart';
+import 'package:maheksync/app/utils/app_colors.dart';
+import 'package:maheksync/app/utils/dark_theme_provider.dart';
+import 'package:maheksync/app/utils/screen_size.dart';
 import 'package:provider/provider.dart';
+
+import '../constant/constants.dart';
 
 class NetworkImageWidget extends StatelessWidget {
   final String imageUrl;
@@ -28,7 +29,7 @@ class NetworkImageWidget extends StatelessWidget {
           height: height ?? ScreenSize.height(8, context),
           width: width ?? ScreenSize.width(15, context),
           color: themeChange.isDarkTheme() ? AppThemeData.grey8 : AppThemeData.grey3,
-          child: errorWidget ?? Image.asset(Constant.userPlaceHolder, height: height ?? ScreenSize.height(8, context), width: width ?? ScreenSize.width(15, context), fit: fit ?? BoxFit.fill),
+          child: errorWidget ?? Image.asset(MahekConstant.userPlaceHolder, height: height ?? ScreenSize.height(8, context), width: width ?? ScreenSize.width(15, context), fit: fit ?? BoxFit.fill),
         ),
       );
     }
@@ -49,7 +50,7 @@ class NetworkImageWidget extends StatelessWidget {
           height: height ?? ScreenSize.height(8, context),
           width: width ?? ScreenSize.width(15, context),
           color: themeChange.isDarkTheme() ? AppThemeData.grey8 : AppThemeData.grey3,
-          child: errorWidget ?? Image.asset(Constant.userPlaceHolder, height: height ?? ScreenSize.height(8, context), width: width ?? ScreenSize.width(15, context)),
+          child: errorWidget ?? Image.asset(MahekConstant.userPlaceHolder, height: height ?? ScreenSize.height(8, context), width: width ?? ScreenSize.width(15, context)),
         ),
       ),
     );

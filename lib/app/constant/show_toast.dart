@@ -1,7 +1,6 @@
-import 'package:owner/app/constant/toast_service.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:maheksync/app/constant/toast_service.dart';
 
-export 'package:owner/app/constant/toast_service.dart' show ToastPosition;
 
 class ShowToastDialog {
   static void showLoader(String message) {

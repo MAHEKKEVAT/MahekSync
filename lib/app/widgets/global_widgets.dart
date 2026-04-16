@@ -3,7 +3,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:owner/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../utils/app_colors.dart';

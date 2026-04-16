@@ -1,4 +1,4 @@
-package com.example.maheksync
+package com.mahek.maheksync
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,9 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:owner/app/constant/constants.dart';
-import 'package:owner/app/utils/dark_theme_provider.dart';
+import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:provider/provider.dart';
+
+import '../constant/constants.dart';
 
 /// Displays the app logo dynamically:
 /// - If admin uploaded app icon for the current theme → shows network image
@@ -18,7 +19,7 @@ class AppLogoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Provider.of<DarkThemeProvider>(context).isDarkTheme();
-    final dynamicUrl = isDark ? Constant.appIconDark : Constant.appIconLight;
+    final dynamicUrl = isDark ? MahekConstant.appIconDark : MahekConstant.appIconLight;
 
     // Use dynamic icon if available
     if (dynamicUrl != null && dynamicUrl.isNotEmpty && dynamicUrl.startsWith('http')) {

@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -84,7 +83,6 @@ class PermissionDialog extends StatelessWidget {
                       color: AppThemeData.primaryWhite,
                     ),
                     onPressed: () async {
-                      await Geolocator.openAppSettings();
                       Navigator.pop(context);
                     },
                   ),

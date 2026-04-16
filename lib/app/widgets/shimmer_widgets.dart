@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:owner/app/dependency/shimmer.dart';
-import 'package:owner/app/utils/app_colors.dart';
+import 'package:maheksync/app/dependency/shimmer.dart';
+import 'package:maheksync/app/utils/app_colors.dart';
 
 import 'global_widgets.dart';
 

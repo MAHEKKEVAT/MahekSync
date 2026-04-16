@@ -1,4 +1,4 @@
-// ignore_for_file: constant_identifier_names
+// ignore_for_file: MahekConstant_identifier_names
 
 class CollectionName {
   static const String owners = "owners";

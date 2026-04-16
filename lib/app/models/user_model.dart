@@ -2,8 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'add_address_model.dart';
-
 class UserModel {
   String? fullName;
   String? slug;
@@ -17,14 +15,8 @@ class UserModel {
   String? phoneNumber;
   bool? isActive;
   Timestamp? createdAt;
-  List<AddAddressModel>? addAddresses;
-  List<dynamic>? searchNameKeywords;
-  List<dynamic>? searchEmailKeywords;
   List<String>? blockedUsers;
   bool? isVerified;
-  String? verificationStatus;
-  VerificationData? verificationData;
-  String? referralCode;
   String? gender;
 
   UserModel({
@@ -40,14 +32,8 @@ class UserModel {
     this.countryCode,
     this.phoneNumber,
     this.createdAt,
-    this.addAddresses,
-    this.searchNameKeywords,
-    this.searchEmailKeywords,
     this.blockedUsers,
     this.isVerified,
-    this.verificationStatus,
-    this.verificationData,
-    this.referralCode,
     this.gender,
   });
 
@@ -66,15 +52,8 @@ class UserModel {
     phoneNumber = json['phoneNumber'];
     createdAt = json['createdAt'];
     isActive = json['isActive'];
-    searchNameKeywords = json['searchNameKeywords'] ?? [];
-    searchEmailKeywords = json['searchEmailKeywords'] ?? [];
     blockedUsers = json['blockedUsers'] != null ? List<String>.from(json['blockedUsers']) : [];
     isVerified = json['isVerified'] ?? false;
-    verificationStatus = json['verificationStatus'] ?? 'unverified';
-    if (json['verificationData'] != null && json['verificationData'] is Map) {
-      verificationData = VerificationData.fromJson(Map<String, dynamic>.from(json['verificationData']));
-    }
-    referralCode = json['referralCode'];
     gender = json['gender'];
   }
 
@@ -93,13 +72,8 @@ class UserModel {
     data['phoneNumber'] = phoneNumber;
     data['createdAt'] = createdAt;
     data['isActive'] = isActive;
-    data['searchNameKeywords'] = searchNameKeywords;
-    data['searchEmailKeywords'] = searchEmailKeywords;
     data['blockedUsers'] = blockedUsers ?? [];
     data['isVerified'] = isVerified ?? false;
-    data['verificationStatus'] = verificationStatus ?? 'unverified';
-    data['verificationData'] = verificationData?.toJson();
-    data['referralCode'] = referralCode;
     data['gender'] = gender;
 
     return data;

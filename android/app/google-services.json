@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "75271763799",
+    "project_id": "maheksync",
+    "storage_bucket": "maheksync.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75271763799:android:acaa4cd19c4ce0c3843012",
+        "android_client_info": {
+          "package_name": "com.mahek.maheksync"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcc5fohwSGiMtehVGTZGbGv1liVVILttg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

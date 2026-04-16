@@ -1,35 +1,24 @@
-// ignore_for_file: depend_on_referenced_packages, non_constant_identifier_names, deprecated_member_use
-import 'dart:convert';
+// ignore_for_file: depend_on_referenced_packages, non_MahekConstant_identifier_names, deprecated_member_use
 import 'dart:developer' as developer;
-import 'dart:io';
 import 'dart:math';
-import 'package:owner/app/constant/show_toast.dart';
-import 'package:owner/app/dependency/shimmer.dart';
-import 'package:owner/app/models/add_address_model.dart';
-import 'package:owner/app/models/constant_model.dart';
-import 'package:owner/app/models/currency_model.dart';
-import 'package:owner/app/models/language_model.dart';
-import 'package:owner/app/models/user_model.dart';
-import 'package:owner/app/utils/dark_theme_provider.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:maheksync/app/dependency/shimmer.dart';
+import 'package:maheksync/app/models/constant_model.dart';
+import 'package:maheksync/app/models/user_model.dart';
+import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:owner/app/utils/font_family.dart';
-import 'package:owner/app/utils/preferences.dart';
-import 'package:owner/app/widgets/global_widgets.dart';
-import 'package:owner/app/widgets/permission_dialog.dart';
+import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/constant_model.dart';
 import '../utils/app_colors.dart';
 
 enum Status { active, inactive }
 
-class Constant {
+class MahekConstant {
   static bool isLogin = false;
   static bool isDemo = false;
   static String clientIdForGoogleLogin = "";
@@ -58,11 +47,6 @@ class Constant {
   static int minRange = 50;
   static int maxRange = 200;
 
-  static Rxn<AddAddressModel> currentLocation = Rxn<AddAddressModel>();
-  static ConstantModel? constantModel;
-  static CurrencyModel? currencyModel;
-
-
   static  int pageSize = 10;
 
 
@@ -86,11 +70,11 @@ class Constant {
     return TextStyle(fontSize: size, color: color, fontWeight: FontWeight.w600, fontFamily: FontFamily.medium);
   }
 
-  static void isDemoSet(bool? isDemoConstant) {
+  static void isDemoSet(bool? isDemoMahekConstant) {
     if (kDebugMode) {
-      Constant.isDemo = false;
+      MahekConstant.isDemo = false;
     } else {
-      Constant.isDemo = isDemoConstant ?? true;
+      MahekConstant.isDemo = isDemoMahekConstant ?? true;
     }
   }
 
@@ -121,29 +105,6 @@ class Constant {
         ),
       ),
     );
-  }
-
-  static void checkPermission(Function() onTap) async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.denied) {
-        ShowToastDialog.showError("You have to allow location permission to use your location".tr);
-      } else if (permission == LocationPermission.deniedForever) {
-        showDialog(
-          context: Get.context!,
-          builder: (BuildContext context) {
-            return const PermissionDialog();
-          },
-        );
-      } else {
-        onTap();
-      }
-    } catch (e, stack) {
-      developer.log('Error checking location permission: ', error: e, stackTrace: stack);
-    }
   }
 
   static bool hasValidUrl(String value) {
@@ -177,67 +138,11 @@ class Constant {
 
   static String maskMobileNumber({String? mobileNumber, String? countryCode}) {
     String maskedNumber = 'x' * (mobileNumber!.length - 2) + mobileNumber.substring(mobileNumber.length - 2);
-    return Constant.isDemo ? "$countryCode $maskedNumber" : "$countryCode $mobileNumber";
+    return MahekConstant.isDemo ? "$countryCode $maskedNumber" : "$countryCode $mobileNumber";
   }
 
-  static String amountShow({required String? amount}) {
-    if (amount == null || amount.isEmpty) {
-      return "N/A";
-    }
 
-    final parsedAmount = double.tryParse(amount);
-    if (parsedAmount == null) {
-      return "Invalid Amount";
-    }
 
-    if (Constant.currencyModel != null) {
-      if (Constant.currencyModel!.symbolAtRight == true) {
-        return "${parsedAmount.toStringAsFixed(Constant.currencyModel!.decimalDigits!)} ${Constant.currencyModel!.symbol.toString()}";
-      } else {
-        return "${Constant.currencyModel!.symbol.toString()} ${parsedAmount.toStringAsFixed(Constant.currencyModel!.decimalDigits!)}";
-      }
-    }
-    return '';
-  }
-
-  static Future<String> uploadImageToFireStorage(File image, String filePath, String fileName) async {
-    try {
-      Reference upload = FirebaseStorage.instance.ref().child('$filePath/$fileName');
-      UploadTask uploadTask = upload.putFile(image);
-      var downloadUrl = await (await uploadTask.whenComplete(() {})).ref.getDownloadURL();
-      return downloadUrl.toString();
-    } catch (e) {
-      developer.log('Error uploading image to Firestore: ', error: e);
-      rethrow;
-    }
-  }
-
-  static Future<LanguageModel> getLanguage() async {
-    try {
-      final String user = Preferences.getString(Preferences.languageCodeKey);
-      Map<String, dynamic> userMap = jsonDecode(user);
-      return LanguageModel.fromJson(userMap);
-    } catch (e) {
-      developer.log('Error getting language: ', error: e);
-      return LanguageModel(id: "biqcXAhdxABnCVJDhnYI", code: "en", name: "English");
-    }
-  }
-
-  static Future<void> redirectMail({required String email}) async {
-    final Uri emailUri = Uri(scheme: 'mailto', path: email);
-    if (await canLaunchUrl(emailUri)) {
-      await launchUrl(emailUri);
-    } else {
-      debugPrint('Could not launch email');
-    }
-  }
-
-  static Future<void> redirectCall({required String countryCode, required String phoneNumber}) async {
-    final Uri url = Uri.parse("tel:$countryCode $phoneNumber");
-    if (!await launchUrl(url)) {
-      throw Exception('Could not launch '.tr);
-    }
-  }
 
   static InputDecoration DefaultInputDecoration(BuildContext context, {Color? fillColor}) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
@@ -376,10 +281,6 @@ class Constant {
     }
   }
 
-  static Future<String> getPackageName() async {
-    final info = await PackageInfo.fromPlatform();
-    return info.packageName;
-  }
 }
 
 class StatusDetails {

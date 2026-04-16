@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:owner/app/constant/constants.dart';
-import 'package:owner/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_widget.dart';
 
+import '../constant/constants.dart';
 import 'app_colors.dart';
 import 'font_family.dart';
 import 'dark_theme_provider.dart';
@@ -14,7 +14,7 @@ class UiInterface {
   const UiInterface({Key? key});
 
   static TextCustom joinAppWidget() {
-    return TextCustom(title: "join_app".trParams({"appName": Constant.appName.value}), fontSize: 16, fontFamily: FontFamily.regular, color: AppThemeData.secondary4);
+    return TextCustom(title: "join_app".trParams({"appName": MahekConstant.appName.value}), fontSize: 16, fontFamily: FontFamily.regular, color: AppThemeData.secondary4);
   }
 
   static AppBar customAppBar(

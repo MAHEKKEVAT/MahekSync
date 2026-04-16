@@ -3,10 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:owner/app/utils/app_colors.dart';
-import 'package:owner/app/utils/dark_theme_provider.dart';
-import 'package:owner/app/utils/font_family.dart';
-import 'package:owner/app/widgets/text_widget.dart';
+import 'package:maheksync/app/utils/app_colors.dart';
+import 'package:maheksync/app/utils/dark_theme_provider.dart';
+import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/text_widget.dart';
 
 class CustomDialogBox extends StatelessWidget {
   final String title, descriptions, positiveString, negativeString;
