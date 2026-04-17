@@ -10,6 +10,7 @@ import 'package:maheksync/app/constant/toast_service.dart';
 import 'package:maheksync/app/modules/splash_screen/views/splash_screen_view.dart';
 import 'package:provider/provider.dart';
 import 'app/constant/global_controller.dart';
+import 'app/modules/auth/controllers/auth_controller.dart';
 import 'app/routes/app_pages.dart';
 import 'app/utils/app_colors.dart';
 import 'app/utils/dark_theme_provider.dart';
@@ -35,6 +36,7 @@ void main() async {
       appleProvider: AppleProvider.appAttest,
     );
   }
+  Get.put(AuthController(), permanent: true);
 
   configLoading();
   runApp(const MyApp());

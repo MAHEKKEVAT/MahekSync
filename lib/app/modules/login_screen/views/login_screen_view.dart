@@ -18,7 +18,7 @@ class LoginScreenView extends StatefulWidget {
 }
 
 class _LoginScreenViewState extends State<LoginScreenView> {
-  final AuthController controller = Get.put(AuthController());
+  final AuthController controller = Get.find<AuthController>();
   final _formKey = GlobalKey<FormState>();
   bool _rememberMe = false;
   bool _obscurePassword = true;

@@ -13,11 +13,19 @@ import '../../../constant/show_toast.dart';
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  // Make controllers late and only initialize once
+  late final TextEditingController emailController;
+  late final TextEditingController passwordController;
 
   final isLoading = false.obs;
   final obscurePassword = true.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+  }
 
   @override
   void onClose() {
@@ -25,6 +33,14 @@ class AuthController extends GetxController {
     passwordController.dispose();
     super.onClose();
   }
+
+  // Clear controllers without disposing (for reuse)
+  void clearControllers() {
+    emailController.clear();
+    passwordController.clear();
+  }
+
+
 
   Future<void> signInWithEmailAndPassword({
     required String email,

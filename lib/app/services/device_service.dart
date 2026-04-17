@@ -51,15 +51,26 @@ class DeviceService {
     }
   }
 
+  // FIXED: Client-side sorting - no index required
   static Stream<List<DeviceModel>> getUserDevices(String ownerId) {
     return _firestore
         .collection(collectionName)
         .where('ownerId', isEqualTo: ownerId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => DeviceModel.fromJson(doc.data()))
-        .toList());
+        .map((snapshot) {
+      final devices = snapshot.docs
+          .map((doc) => DeviceModel.fromJson(doc.data()))
+          .toList();
+
+      // Sort by createdAt descending (newest first) on client side
+      devices.sort((a, b) {
+        final aTime = a.createdAt?.toDate() ?? DateTime(2000);
+        final bTime = b.createdAt?.toDate() ?? DateTime(2000);
+        return bTime.compareTo(aTime);
+      });
+
+      return devices;
+    });
   }
 
   static Future<DeviceModel?> getDevice(String deviceId) async {
