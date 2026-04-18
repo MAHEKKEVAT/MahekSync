@@ -8,8 +8,8 @@ import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import '../../../constant/constants.dart';
-import '../../../routes/app_pages.dart';
 import '../../my_devices/bindings/my_devices_binding.dart';
+import '../../my_devices/controllers/my_devices_controller.dart';
 import '../../my_devices/views/my_devices_view.dart';
 import '../controllers/dashboard_controller.dart';
 
@@ -222,21 +222,9 @@ class DashboardView extends GetView<DashboardController> {
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-// Inside _buildNavItem, update the onTap:
-            onTap: onTap ?? () {
-              controller.selectedIndex.value = index;
-
-              // Update URL - simple navigation
-              switch (index) {
-                case 0:
-                  Get.toNamed(Routes.DASHBOARD);
-                  break;
-                case 1:
-                  Get.toNamed(Routes.MY_DEVICES);
-                  break;
-              // Other cases as needed
-              }
-            },
+          onTap: onTap ?? () {
+            controller.onNavItemTapped(index);
+          },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             margin: const EdgeInsets.only(bottom: 4),
@@ -407,22 +395,30 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-// Simple version - use controller's selectedIndex directly
   Widget _buildCurrentContent(bool isDark) {
     return Obx(() {
       switch (controller.selectedIndex.value) {
         case 0:
           return _buildDashboardContent(isDark);
+
         case 1:
-          return const MyDevicesView();
+          if (!Get.isRegistered<MyDevicesController>()) {
+            MyDevicesBinding().dependencies();
+          }
+          return const MyDevicesView(); // ✅ IMPORTANT (missing)
+
         case 2:
           return _buildWarrantyContent(isDark);
+
         case 3:
           return _buildExpensesContent(isDark);
+
         case 4:
           return _buildSettingsContent(isDark);
+
         case 5:
           return _buildSupportContent(isDark);
+
         default:
           return _buildDashboardContent(isDark);
       }

@@ -50,11 +50,7 @@ class AppPages {
       page: () => const DashboardView(),
       binding: DashboardBinding(),
     ),
-    GetPage(
-      name: _Paths.MY_DEVICES,
-      page: () => const DashboardView(),
-      binding: DashboardBinding(),
-    ),
+
     GetPage(
       name: _Paths.WARRANTY_TRACKER,
       page: () => const DashboardView(),

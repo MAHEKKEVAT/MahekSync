@@ -1,5 +1,4 @@
 // lib/app/modules/view_devices/controllers/view_devices_controller.dart
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/models/device_model.dart';
@@ -14,14 +13,14 @@ class ViewDevicesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Safely get arguments
-    if (Get.arguments != null) {
-      device = Get.arguments as DeviceModel;
-    }
+    // Get arguments passed via Get.toNamed
+    device = Get.arguments as DeviceModel?;
   }
 
   void changeImage(int index) {
-    currentImageIndex.value = index;
+    if (index >= 0 && index < (device?.deviceImageUrls?.length ?? 0)) {
+      currentImageIndex.value = index;
+    }
   }
 
   Future<void> deleteDevice() async {
@@ -74,7 +73,6 @@ class ViewDevicesController extends GetxController {
   }
 
   void navigateToEdit() {
-    // Navigate to edit screen with device data
     Get.back();
     Get.toNamed('/add-new-devices', arguments: device);
   }
@@ -101,17 +99,14 @@ class ViewDevicesController extends GetxController {
     return device!.isWarrantyExpired ? const Color(0xFFEF4444) : const Color(0xFF10B981);
   }
 
-  // Get all image URLs
   List<String> get allImages {
     return device?.deviceImageUrls ?? [];
   }
 
-  // Check if device has images
   bool get hasImages {
     return device?.deviceImageUrls != null && device!.deviceImageUrls!.isNotEmpty;
   }
 
-  // Get current image URL
   String get currentImageUrl {
     if (!hasImages) return '';
     return device!.deviceImageUrls![currentImageIndex.value];

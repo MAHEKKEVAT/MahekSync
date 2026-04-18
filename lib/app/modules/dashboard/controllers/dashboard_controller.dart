@@ -7,6 +7,7 @@ class DashboardController extends GetxController {
   final AuthController _authController = Get.find<AuthController>();
 
   final selectedIndex = 0.obs;
+  var isNavigating = false.obs;
 
   @override
   void onInit() {
@@ -18,28 +19,17 @@ class DashboardController extends GetxController {
     _authController.signOut();
   }
 
+
   void onNavItemTapped(int index) {
+    if (isNavigating.value) return;
+    if (selectedIndex.value == index) return;
+
+    isNavigating.value = true;
+
     selectedIndex.value = index;
 
-    switch (index) {
-      case 0:
-        Get.offNamedUntil(Routes.DASHBOARD, (route) => route.settings.name == Routes.DASHBOARD);
-        break;
-      case 1:
-        Get.offNamedUntil(Routes.MY_DEVICES, (route) => route.settings.name == Routes.DASHBOARD);
-        break;
-      case 2:
-       // Get.offNamedUntil(Routes.WARRANTY_TRACKER, (route) => route.settings.name == Routes.DASHBOARD);
-        break;
-      case 3:
-      //  Get.offNamedUntil(Routes.EXPENSES, (route) => route.settings.name == Routes.DASHBOARD);
-        break;
-      case 4:
-      //  Get.offNamedUntil(Routes.SETTINGS, (route) => route.settings.name == Routes.DASHBOARD);
-        break;
-      case 5:
-       // Get.offNamedUntil(Routes.SUPPORT, (route) => route.settings.name == Routes.DASHBOARD);
-        break;
-    }
+    Future.delayed(const Duration(milliseconds: 150), () {
+      isNavigating.value = false;
+    });
   }
 }

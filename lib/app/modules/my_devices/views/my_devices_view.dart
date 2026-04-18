@@ -5,9 +5,8 @@ import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import '../../../models/device_model.dart';
+import '../../../routes/app_pages.dart';
 import '../../../widgets/text_widget.dart';
-import '../../view_devices/controllers/view_devices_controller.dart';
-import '../../view_devices/views/view_devices_view.dart';
 import '../controllers/my_devices_controller.dart';
 
 class MyDevicesView extends GetView<MyDevicesController> {
@@ -15,7 +14,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MyDevicesController());
+    final controller = Get.find<MyDevicesController>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -28,7 +27,6 @@ class MyDevicesView extends GetView<MyDevicesController> {
       }),
     );
   }
-
 
   Widget _buildContent(bool isDark) {
     return Padding(
@@ -130,7 +128,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
         maxCrossAxisExtent: 380,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
-        childAspectRatio: 1.2,
+        childAspectRatio: 1.1,
       ),
       itemCount: controller.filteredDevices.length,
       itemBuilder: (context, index) {
@@ -155,15 +153,61 @@ class MyDevicesView extends GetView<MyDevicesController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Status Badge
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5D54F2).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    'IN USE',
+                    style: TextStyle(
+                      fontFamily: FontFamily.semiBold,
+                      fontSize: 10,
+                      color: const Color(0xFF5D54F2),
+                    ),
+                  ),
+                ),
+                if (device.warrantyEndDate != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: device.isWarrantyExpired
+                          ? const Color(0xFFEF4444).withValues(alpha: 0.1)
+                          : const Color(0xFF10B981).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      device.isWarrantyExpired ? 'Expired' : 'Active',
+                      style: TextStyle(
+                        fontFamily: FontFamily.medium,
+                        fontSize: 10,
+                        color: device.isWarrantyExpired
+                            ? const Color(0xFFEF4444)
+                            : const Color(0xFF10B981),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          // Device Image
           Container(
-            height: 140,
+            height: 130,
+            margin: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: device.primaryImageUrl.isNotEmpty
                 ? ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: BorderRadius.circular(12),
               child: Image.network(
                 device.primaryImageUrl,
                 width: double.infinity,
@@ -173,85 +217,81 @@ class MyDevicesView extends GetView<MyDevicesController> {
             )
                 : _buildPlaceholderImage(isDark),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          device.deviceName ?? 'Unknown Device',
-                          style: TextStyle(
-                            fontFamily: FontFamily.bold,
-                            fontSize: 16,
-                            color: isDark ? Colors.white : AppThemeData.grey10,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+          // Device Info
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  device.deviceName ?? 'Unknown Device',
+                  style: TextStyle(
+                    fontFamily: FontFamily.bold,
+                    fontSize: 16,
+                    color: isDark ? Colors.white : AppThemeData.grey10,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                spaceH(height: 6),
+                Text(
+                  device.formattedPrice,
+                  style: TextStyle(
+                    fontFamily: FontFamily.semiBold,
+                    fontSize: 18,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  ),
+                ),
+                spaceH(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.verified_outlined,
+                      size: 14,
+                      color: device.isWarrantyExpired ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                    ),
+                    spaceW(width: 4),
+                    Text(
+                      'Warranty: ${device.formattedWarrantyEnd}',
+                      style: TextStyle(
+                        fontFamily: FontFamily.regular,
+                        fontSize: 11,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      ),
+                    ),
+                  ],
+                ),
+                spaceH(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Get.toNamed(Routes.VIEW_DEVICES, arguments: device),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5D54F2),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: Text(
+                        'View Details',
+                        style: TextStyle(
+                          fontFamily: FontFamily.medium,
+                          fontSize: 12,
+                          color: Colors.white,
                         ),
                       ),
-                      if (device.warrantyEndDate != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: device.isWarrantyExpired
-                                ? const Color(0xFFEF4444).withValues(alpha: 0.1)
-                                : const Color(0xFF10B981).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            device.isWarrantyExpired ? 'Expired' : 'Active',
-                            style: TextStyle(
-                              fontFamily: FontFamily.medium,
-                              fontSize: 10,
-                              color: device.isWarrantyExpired
-                                  ? const Color(0xFFEF4444)
-                                  : const Color(0xFF10B981),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  spaceH(height: 8),
-                  _buildInfoRow('Brand', device.brandName ?? 'N/A', isDark),
-                  _buildInfoRow('Price', device.formattedPrice, isDark),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      // In _buildDeviceCard, update the Details button onPressed:
-                      TextButton(
-                        onPressed: () {
-                          // Register the controller before navigating
-                          Get.put(ViewDevicesController(), permanent: false);
-                          Get.to(() => const ViewDevicesView(), arguments: device);
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: Text(
-                          'Details',
-                          style: TextStyle(
-                            fontFamily: FontFamily.medium,
-                            fontSize: 13,
-                            color: const Color(0xFF5D54F2),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
   Widget _buildPlaceholderImage(bool isDark) {
     return Container(
       color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
@@ -265,47 +305,6 @@ class MyDevicesView extends GetView<MyDevicesController> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 70,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontFamily: FontFamily.regular,
-                fontSize: 12,
-                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-              ),
-            ),
-          ),
-          Text(
-            ': ',
-            style: TextStyle(
-              fontFamily: FontFamily.regular,
-              fontSize: 12,
-              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontFamily: FontFamily.medium,
-                fontSize: 13,
-                color: isDark ? AppThemeData.grey3 : AppThemeData.grey8,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmptyState(bool isDark) {
     return Center(
       child: Column(
@@ -314,7 +313,10 @@ class MyDevicesView extends GetView<MyDevicesController> {
           Container(
             width: 120,
             height: 120,
-            decoration: BoxDecoration(color: const Color(0xFF5D54F2).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(
+              color: const Color(0xFF5D54F2).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Icon(Icons.inventory_2_outlined, size: 60, color: const Color(0xFF5D54F2)),
           ),
           spaceH(height: 24),
@@ -333,4 +335,5 @@ class MyDevicesView extends GetView<MyDevicesController> {
         ],
       ),
     );
-  }}
+  }
+}
