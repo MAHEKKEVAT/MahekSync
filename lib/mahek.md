@@ -31,6 +31,14 @@ git push origin main
 
 ---
 
+### 👉 After Checking
+
+```bash
+flutter build web --base-href "/MahekSync/"
+```
+
+---
+
 ## 🌿 Branch Workflow (Recommended 🚀)
 
 ### Create New Branch
