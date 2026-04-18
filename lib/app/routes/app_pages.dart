@@ -14,6 +14,8 @@ import '../modules/sign_up/bindings/sign_up_binding.dart';
 import '../modules/sign_up/views/sign_up_view.dart';
 import '../modules/splash_screen/bindings/splash_screen_binding.dart';
 import '../modules/splash_screen/views/splash_screen_view.dart';
+import '../modules/view_devices/bindings/view_devices_binding.dart';
+import '../modules/view_devices/views/view_devices_view.dart';
 
 part 'app_routes.dart';
 
@@ -82,6 +84,11 @@ class AppPages {
       name: _Paths.ADD_NEW_DEVICES,
       page: () => const AddNewDevicesView(),
       binding: AddNewDevicesBinding(),
+    ),
+    GetPage(
+      name: _Paths.VIEW_DEVICES,
+      page: () => const ViewDevicesView(),
+      binding: ViewDevicesBinding(),
     ),
   ];
 }

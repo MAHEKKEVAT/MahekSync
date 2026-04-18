@@ -6,6 +6,8 @@ import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import '../../../models/device_model.dart';
 import '../../../widgets/text_widget.dart';
+import '../../view_devices/controllers/view_devices_controller.dart';
+import '../../view_devices/views/view_devices_view.dart';
 import '../controllers/my_devices_controller.dart';
 
 class MyDevicesView extends GetView<MyDevicesController> {
@@ -220,8 +222,13 @@ class MyDevicesView extends GetView<MyDevicesController> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      // In _buildDeviceCard, update the Details button onPressed:
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          // Register the controller before navigating
+                          Get.put(ViewDevicesController(), permanent: false);
+                          Get.to(() => const ViewDevicesView(), arguments: device);
+                        },
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

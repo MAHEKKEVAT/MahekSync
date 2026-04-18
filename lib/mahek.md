@@ -21,13 +21,14 @@ flutter run
 git pull origin main
 ```
 
-### 👉 After Coding
+### 👉 Verify manually (very important)
 
 ```bash
-git add .
-git commit -m "Update changes"
-git push origin main
 flutter build web --base-href "/MahekSync/"
+xcopy build\web\* docs\ /E /H /Y
+git add .
+git commit -m "test"
+git push origin main
 ```
 
 ---

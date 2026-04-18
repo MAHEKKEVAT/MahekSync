@@ -15,6 +15,7 @@ abstract class Routes {
   static const SUPPORT = _Paths.SUPPORT;
   static const SIGN_UP = _Paths.SIGN_UP;
   static const ADD_NEW_DEVICES = _Paths.ADD_NEW_DEVICES;
+  static const VIEW_DEVICES = _Paths.VIEW_DEVICES;
 }
 
 abstract class _Paths {
@@ -31,4 +32,5 @@ abstract class _Paths {
   static const SUPPORT = '/dashboard/support';
   static const SIGN_UP = '/sign-up';
   static const ADD_NEW_DEVICES = '/add-new-devices';
+  static const VIEW_DEVICES = '/view-devices';
 }
