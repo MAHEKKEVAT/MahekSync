@@ -6,32 +6,35 @@ import 'package:maheksync/app/utils/device_firestore_utils.dart';
 import '../../../constant/show_toast.dart';
 
 class ViewDevicesController extends GetxController {
-  DeviceModel? device;
   final isLoading = false.obs;
   final currentImageIndex = 0.obs;
+  final device = Rxn<DeviceModel>();
 
   @override
   void onInit() {
     super.onInit();
-    // Get arguments passed via Get.toNamed
-    device = Get.arguments as DeviceModel?;
+    device.value = Get.arguments as DeviceModel?;
   }
 
   void changeImage(int index) {
-    if (index >= 0 && index < (device?.deviceImageUrls?.length ?? 0)) {
+    final deviceValue = device.value;
+    if (deviceValue != null &&
+        index >= 0 &&
+        index < (deviceValue.deviceImageUrls?.length ?? 0)) {
       currentImageIndex.value = index;
     }
   }
 
   Future<void> deleteDevice() async {
-    if (device?.id == null) {
+    final deviceValue = device.value;
+    if (deviceValue?.id == null) {
       ShowToastDialog.showError('Invalid device');
       return;
     }
 
     isLoading.value = true;
     try {
-      final success = await DeviceFirestoreUtils.deleteDevice(device!.id!);
+      final success = await DeviceFirestoreUtils.deleteDevice(deviceValue!.id!);
       if (success) {
         ShowToastDialog.showSuccess('Device deleted successfully!');
         Get.back(result: true);
@@ -46,11 +49,12 @@ class ViewDevicesController extends GetxController {
   }
 
   void confirmDelete() {
+    final deviceValue = device.value;
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Delete Device'),
-        content: Text('Are you sure you want to delete "${device?.deviceName}"?'),
+        content: Text('Are you sure you want to delete "${deviceValue?.deviceName}"?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -74,41 +78,46 @@ class ViewDevicesController extends GetxController {
 
   void navigateToEdit() {
     Get.back();
-    Get.toNamed('/add-new-devices', arguments: device);
+    Get.toNamed('/add-new-devices', arguments: device.value);
   }
 
   String get paymentMethodDisplay {
-    if (device?.paymentMethod == null || device!.paymentMethod!.isEmpty) {
+    final deviceValue = device.value;
+    if (deviceValue?.paymentMethod == null || deviceValue!.paymentMethod!.isEmpty) {
       return 'Not specified';
     }
-    return device!.paymentMethod!;
+    return deviceValue.paymentMethod!;
   }
 
   int get daysRemaining {
-    if (device?.warrantyEndDate == null) return 0;
-    return device!.warrantyEndDate!.difference(DateTime.now()).inDays;
+    final deviceValue = device.value;
+    if (deviceValue?.warrantyEndDate == null) return 0;
+    return deviceValue!.warrantyEndDate!.difference(DateTime.now()).inDays;
   }
 
   String get warrantyStatus {
-    if (device?.warrantyEndDate == null) return 'No Warranty';
-    return device!.isWarrantyExpired ? 'Expired' : 'Active';
+    final deviceValue = device.value;
+    if (deviceValue?.warrantyEndDate == null) return 'No Warranty';
+    return deviceValue!.isWarrantyExpired ? 'Expired' : 'Active';
   }
 
   Color get warrantyStatusColor {
-    if (device?.warrantyEndDate == null) return Colors.grey;
-    return device!.isWarrantyExpired ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+    final deviceValue = device.value;
+    if (deviceValue?.warrantyEndDate == null) return Colors.grey;
+    return deviceValue!.isWarrantyExpired ? const Color(0xFFEF4444) : const Color(0xFF10B981);
   }
 
   List<String> get allImages {
-    return device?.deviceImageUrls ?? [];
+    return device.value?.deviceImageUrls ?? [];
   }
 
   bool get hasImages {
-    return device?.deviceImageUrls != null && device!.deviceImageUrls!.isNotEmpty;
+    final deviceValue = device.value;
+    return deviceValue?.deviceImageUrls != null && deviceValue!.deviceImageUrls!.isNotEmpty;
   }
 
   String get currentImageUrl {
     if (!hasImages) return '';
-    return device!.deviceImageUrls![currentImageIndex.value];
+    return device.value!.deviceImageUrls![currentImageIndex.value];
   }
 }

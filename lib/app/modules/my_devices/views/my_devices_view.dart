@@ -14,7 +14,6 @@ class MyDevicesView extends GetView<MyDevicesController> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MyDevicesController>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

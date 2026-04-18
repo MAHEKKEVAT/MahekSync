@@ -18,19 +18,23 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     final isDark = themeChange.isDarkTheme();
-    final device = controller.device;
+    final device = controller.device.value;
 
     if (device == null) {
       return Scaffold(
-        backgroundColor: isDark ? AppThemeData.grey10 : const Color(0xFFF6F8FC),
-        body: const Center(child: CircularProgressIndicator()),
+        backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey2,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: AppThemeData.primary50,
+          ),
+        ),
       );
     }
 
     return Scaffold(
-      backgroundColor: isDark ? AppThemeData.grey10 : const Color(0xFFF6F8FC),
+      backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey2,
       appBar: AppBar(
-        backgroundColor: isDark ? AppThemeData.primaryBlack : Colors.white,
+        backgroundColor: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -52,12 +56,15 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
           ],
         ),
         actions: [
-          // Edit Button
           Container(
             margin: const EdgeInsets.only(right: 8),
             child: OutlinedButton.icon(
               onPressed: controller.navigateToEdit,
-              icon: Icon(Icons.edit_outlined, size: 18, color: isDark ? AppThemeData.grey3 : AppThemeData.grey7),
+              icon: Icon(
+                Icons.edit_outlined,
+                size: 18,
+                color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
+              ),
               label: TextCustom(
                 title: 'Edit',
                 fontSize: 13,
@@ -67,26 +74,31 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                side: BorderSide(color: isDark ? AppThemeData.grey7 : AppThemeData.grey4),
+                side: BorderSide(
+                  color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
+                ),
               ),
             ),
           ),
-          // Delete Button
           Container(
             margin: const EdgeInsets.only(right: 16),
             child: OutlinedButton.icon(
               onPressed: controller.confirmDelete,
-              icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFFEF4444)),
+              icon: const Icon(
+                Icons.delete_outline,
+                size: 18,
+                color: AppThemeData.danger300,
+              ),
               label: TextCustom(
                 title: 'Remove Asset',
                 fontSize: 13,
                 fontFamily: FontFamily.medium,
-                color: const Color(0xFFEF4444),
+                color: AppThemeData.danger300,
               ),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                side: const BorderSide(color: Color(0xFFEF4444)),
+                side: const BorderSide(color: AppThemeData.danger300),
               ),
             ),
           ),
@@ -97,29 +109,23 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // LEFT - Image Gallery (40%)
             Expanded(
               flex: 4,
               child: _buildVerticalImageGallery(device, isDark),
             ),
             spaceW(width: 24),
-            // RIGHT - Details Cards (60%)
             Expanded(
               flex: 6,
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title & Badges
                     _buildTitleSection(device, isDark),
                     spaceH(height: 20),
-                    // Warranty Card
                     _buildWarrantyCard(device, isDark),
                     spaceH(height: 20),
-                    // Acquisition Details Card
                     _buildAcquisitionCard(device, isDark),
                     spaceH(height: 20),
-                    // Description Card (if exists)
                     if (device.description != null && device.description!.isNotEmpty)
                       _buildDescriptionCard(device, isDark),
                   ],
@@ -132,23 +138,30 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
     );
   }
 
-// LEFT: Vertical Image Gallery - FIXED
   Widget _buildVerticalImageGallery(DeviceModel device, bool isDark) {
     final images = device.deviceImageUrls;
 
     if (images == null || images.isEmpty) {
       return Container(
         decoration: BoxDecoration(
-          color: isDark ? AppThemeData.grey9 : const Color(0xFFF1F5F9),
+          color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.image_outlined, size: 64, color: isDark ? AppThemeData.grey7 : AppThemeData.grey4),
+              Icon(
+                Icons.image_outlined,
+                size: 64,
+                color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
+              ),
               spaceH(height: 12),
-              TextCustom(title: 'No images', fontSize: 14, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+              TextCustom(
+                title: 'No images',
+                fontSize: 14,
+                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+              ),
             ],
           ),
         ),
@@ -158,7 +171,6 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Vertical Thumbnails
         Container(
           width: 85,
           height: 400,
@@ -177,7 +189,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected ? const Color(0xFF5D54F2) : Colors.transparent,
+                        color: isSelected ? AppThemeData.primary50 : Colors.transparent,
                         width: 2.5,
                       ),
                     ),
@@ -188,7 +200,10 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
                           color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-                          child: Icon(Icons.broken_image, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
+                          child: Icon(
+                            Icons.broken_image,
+                            color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+                          ),
                         ),
                       ),
                     ),
@@ -198,12 +213,11 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
             },
           ),
         ),
-        // Main Image
         Expanded(
           child: Obx(() => Container(
             height: 400,
             decoration: BoxDecoration(
-              color: isDark ? AppThemeData.grey9 : const Color(0xFFF1F5F9),
+              color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
               borderRadius: BorderRadius.circular(20),
             ),
             child: ClipRRect(
@@ -212,7 +226,11 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
                 images[controller.currentImageIndex.value],
                 fit: BoxFit.contain,
                 errorBuilder: (_, __, ___) => Center(
-                  child: Icon(Icons.broken_image_outlined, size: 64, color: isDark ? AppThemeData.grey7 : AppThemeData.grey4),
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    size: 64,
+                    color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
+                  ),
                 ),
               ),
             ),
@@ -221,7 +239,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
       ],
     );
   }
-  // Title Section
+
   Widget _buildTitleSection(DeviceModel device, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,28 +256,28 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF5D54F2).withValues(alpha: 0.1),
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(30),
               ),
               child: TextCustom(
                 title: device.condition ?? 'NEW',
                 fontSize: 12,
                 fontFamily: FontFamily.semiBold,
-                color: const Color(0xFF5D54F2),
+                color: AppThemeData.primary50,
               ),
             ),
             spaceW(width: 10),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
+                color: AppThemeData.pending300.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(30),
               ),
               child: TextCustom(
                 title: 'NEW ARRIVAL',
                 fontSize: 12,
                 fontFamily: FontFamily.semiBold,
-                color: Colors.orange,
+                color: AppThemeData.pending400,
               ),
             ),
           ],
@@ -268,8 +286,13 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
     );
   }
 
-// Warranty Card - FIXED Obx placement
   Widget _buildWarrantyCard(DeviceModel device, bool isDark) {
+    final statusColor = controller.warrantyStatusColor;
+    final statusText = controller.warrantyStatus;
+    final days = controller.daysRemaining;
+    final progress = days / 365 > 1 ? 1.0 : days / 365;
+    final percent = (progress * 100).clamp(0, 100).toInt();
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -277,12 +300,14 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF5D54F2).withValues(alpha: isDark ? 0.25 : 0.1),
-            const Color(0xFF8B7EFF).withValues(alpha: isDark ? 0.15 : 0.05),
+            AppThemeData.primary50.withValues(alpha: isDark ? 0.25 : 0.1),
+            AppThemeData.primary4.withValues(alpha: isDark ? 0.15 : 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF5D54F2).withValues(alpha: 0.2)),
+        border: Border.all(
+          color: AppThemeData.primary50.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,10 +321,14 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF5D54F2).withValues(alpha: 0.15),
+                      color: AppThemeData.primary50.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.verified_outlined, color: Color(0xFF5D54F2), size: 22),
+                    child: Icon(
+                      Icons.verified_outlined,
+                      color: AppThemeData.primary50,
+                      size: 22,
+                    ),
                   ),
                   spaceW(width: 12),
                   Column(
@@ -309,7 +338,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
                         title: 'WARRANTY COVERAGE',
                         fontSize: 13,
                         fontFamily: FontFamily.semiBold,
-                        color: const Color(0xFF5D54F2),
+                        color: AppThemeData.primary50,
                       ),
                       TextCustom(
                         title: 'AppleCare+',
@@ -321,56 +350,54 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
                   ),
                 ],
               ),
-              Obx(() => Container(
+              Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: controller.warrantyStatusColor.withValues(alpha: 0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: TextCustom(
-                  title: controller.warrantyStatus,
+                  title: statusText,
                   fontSize: 12,
                   fontFamily: FontFamily.semiBold,
-                  color: controller.warrantyStatusColor,
+                  color: statusColor,
                 ),
-              )),
+              ),
             ],
           ),
           spaceH(height: 20),
-          // Progress Bar with percentage
-          Obx(() => Row(
+          Row(
             children: [
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
-                    value: controller.daysRemaining / 365 > 1 ? 1 : controller.daysRemaining / 365,
+                    value: progress,
                     minHeight: 8,
                     backgroundColor: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      controller.warrantyStatusColor,
-                    ),
+                    valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                   ),
                 ),
               ),
               spaceW(width: 12),
               TextCustom(
-                title: '${((controller.daysRemaining / 365) * 100).clamp(0, 100).toInt()}%',
+                title: '$percent%',
                 fontSize: 14,
                 fontFamily: FontFamily.semiBold,
-                color: controller.warrantyStatusColor,
+                color: statusColor,
               ),
             ],
-          )),
+          ),
           spaceH(height: 20),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Obx(() => Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextCustom(
-                      title: '${controller.daysRemaining}',
+                      title: '$days',
                       fontSize: 48,
                       fontFamily: FontFamily.bold,
                       color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
@@ -382,7 +409,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
                       color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
                     ),
                   ],
-                )),
+                ),
               ),
               Expanded(
                 child: Column(
@@ -422,12 +449,11 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
     );
   }
 
-  // Acquisition Details Card
   Widget _buildAcquisitionCard(DeviceModel device, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack : Colors.white,
+        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -447,21 +473,44 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
             color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
           ),
           spaceH(height: 20),
-          _buildDetailRow(Icons.store_outlined, 'Store', device.storeName?.isNotEmpty == true ? device.storeName! : 'Not specified', isDark),
-          _buildDetailRow(Icons.calendar_today_outlined, 'Purchase Date', device.formattedPurchaseDate, isDark),
-          _buildDetailRow(Icons.attach_money, 'Price', device.formattedPrice, isDark),
+          _buildDetailRow(
+            Icons.store_outlined,
+            'Store',
+            device.storeName?.isNotEmpty == true ? device.storeName! : 'Not specified',
+            isDark,
+          ),
+          _buildDetailRow(
+            Icons.calendar_today_outlined,
+            'Purchase Date',
+            device.formattedPurchaseDate,
+            isDark,
+          ),
+          _buildDetailRow(
+            Icons.attach_money,
+            'Price',
+            device.formattedPrice,
+            isDark,
+          ),
           spaceH(height: 16),
-          // Premium Payment Card
           _buildPremiumPaymentCard(device, isDark),
           spaceH(height: 8),
-          _buildDetailRow(Icons.business_outlined, 'Brand', device.brandName ?? 'Not specified', isDark),
-          _buildDetailRow(Icons.category_outlined, 'Category', device.category ?? 'Not specified', isDark),
+          _buildDetailRow(
+            Icons.business_outlined,
+            'Brand',
+            device.brandName ?? 'Not specified',
+            isDark,
+          ),
+          _buildDetailRow(
+            Icons.category_outlined,
+            'Category',
+            device.category ?? 'Not specified',
+            isDark,
+          ),
         ],
       ),
     );
   }
 
-  // Premium Payment Card
   Widget _buildPremiumPaymentCard(DeviceModel device, bool isDark) {
     final paymentMethod = controller.paymentMethodDisplay;
     final paymentIcon = _getPaymentIcon(paymentMethod);
@@ -470,7 +519,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.grey9 : const Color(0xFFF1F5F9),
+        color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
@@ -483,12 +532,12 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: const Color(0xFF5D54F2).withValues(alpha: 0.12),
+              color: AppThemeData.primary50.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               paymentIcon,
-              color: const Color(0xFF5D54F2),
+              color: AppThemeData.primary50,
               size: 24,
             ),
           ),
@@ -542,10 +591,14 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: isDark ? AppThemeData.grey9 : const Color(0xFFF1F5F9),
+              color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 18, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+            child: Icon(
+              icon,
+              size: 18,
+              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+            ),
           ),
           spaceW(width: 14),
           Expanded(
@@ -567,12 +620,12 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
     );
   }
 
-  // Description Card
   Widget _buildDescriptionCard(DeviceModel device, bool isDark) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack : Colors.white,
+        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -592,11 +645,14 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
             color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
           ),
           spaceH(height: 12),
-          TextCustom(
-            title: device.description ?? '',
-            fontSize: 14,
-            fontFamily: FontFamily.regular,
-            color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+          SizedBox(
+            width: double.infinity,
+            child: TextCustom(
+              title: device.description ?? '',
+              fontSize: 14,
+              fontFamily: FontFamily.regular,
+              color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+            ),
           ),
         ],
       ),

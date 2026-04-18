@@ -2,7 +2,6 @@
 import 'dart:developer' as developer;
 import 'dart:math';
 import 'package:maheksync/app/dependency/shimmer.dart';
-import 'package:maheksync/app/models/constant_model.dart';
 import 'package:maheksync/app/models/user_model.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:flutter/foundation.dart';
@@ -30,8 +29,10 @@ class MahekConstant {
   static const String appleLoginType = "apple";
   static const String emailLoginType = "email";
   static String phoneLoginType = 'phone';
+  static String adminRoleId = "e6b30c67-8bcf-4971-aaf7-b5e23284b77b";
 
   static String? ownerAppColor;
+  static bool get isSuperAdmin => ownerModel?.id == adminRoleId;
 
   static const userPlaceHolder = 'assets/images/user_placeholder.png';
   static String user = 'user';

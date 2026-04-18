@@ -1,21 +1,25 @@
 import 'package:get/get.dart';
+import 'package:maheksync/app/modules/dashboard/views/dashboard_view.dart';
+import 'package:maheksync/app/modules/my_devices/bindings/my_devices_binding.dart';
 
-import '../modules/add_new_devices/bindings/add_new_devices_binding.dart';
-import '../modules/add_new_devices/views/add_new_devices_view.dart';
+import '../modules/admin_profile/bindings/admin_profile_binding.dart';
+import '../modules/admin_profile/views/admin_profile_view.dart';
 import '../modules/auth/bindings/auth_binding.dart';
 import '../modules/auth/views/auth_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
-import '../modules/dashboard/views/dashboard_view.dart';
-import '../modules/home/bindings/home_binding.dart';
-import '../modules/home/views/home_view.dart';
 import '../modules/login_screen/bindings/login_screen_binding.dart';
 import '../modules/login_screen/views/login_screen_view.dart';
+import '../modules/policy_settings/bindings/policy_settings_binding.dart';
+import '../modules/policy_settings/views/policy_settings_view.dart';
+import '../modules/settings/bindings/settings_binding.dart';
+import '../modules/settings/views/settings_view.dart';
 import '../modules/sign_up/bindings/sign_up_binding.dart';
 import '../modules/sign_up/views/sign_up_view.dart';
 import '../modules/splash_screen/bindings/splash_screen_binding.dart';
 import '../modules/splash_screen/views/splash_screen_view.dart';
 import '../modules/view_devices/bindings/view_devices_binding.dart';
 import '../modules/view_devices/views/view_devices_view.dart';
+import '../utils/auth_middleware.dart';
 
 part 'app_routes.dart';
 
@@ -24,12 +28,20 @@ class AppPages {
 
   static const INITIAL = Routes.SPLASH_SCREEN;
 
+  static GetPage _dashboardPage(String name, {Bindings? screenBinding}) {
+    return GetPage(
+      name: name,
+      page: () => const DashboardView(),
+      bindings: [
+        DashboardBinding(),
+        if (screenBinding != null) screenBinding,
+      ],
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    );
+  }
+
   static final routes = [
-    GetPage(
-      name: _Paths.HOME,
-      page: () => const HomeView(),
-      binding: HomeBinding(),
-    ),
     GetPage(
       name: _Paths.SPLASH_SCREEN,
       page: () => const SplashScreenView(),
@@ -52,22 +64,32 @@ class AppPages {
     ),
 
     GetPage(
-      name: _Paths.WARRANTY_TRACKER,
+      name: Routes.HOME,
       page: () => const DashboardView(),
       binding: DashboardBinding(),
     ),
     GetPage(
-      name: _Paths.EXPENSES,
+      name: Routes.MY_DEVICES,
       page: () => const DashboardView(),
       binding: DashboardBinding(),
     ),
     GetPage(
-      name: _Paths.SETTINGS,
+      name: Routes.WARRANTY_TRACKER,
       page: () => const DashboardView(),
       binding: DashboardBinding(),
     ),
     GetPage(
-      name: _Paths.SUPPORT,
+      name: Routes.EXPENSES,
+      page: () => const DashboardView(),
+      binding: DashboardBinding(),
+    ),
+    GetPage(
+      name: Routes.SETTINGS,
+      page: () => const DashboardView(),
+      binding: DashboardBinding(),
+    ),
+    GetPage(
+      name: Routes.SUPPORT,
       page: () => const DashboardView(),
       binding: DashboardBinding(),
     ),
@@ -77,14 +99,34 @@ class AppPages {
       binding: SignUpBinding(),
     ),
     GetPage(
-      name: _Paths.ADD_NEW_DEVICES,
-      page: () => const AddNewDevicesView(),
-      binding: AddNewDevicesBinding(),
-    ),
-    GetPage(
       name: _Paths.VIEW_DEVICES,
       page: () => const ViewDevicesView(),
       binding: ViewDevicesBinding(),
+      children: [
+        GetPage(
+          name: _Paths.POLICY_SETTINGS,
+          page: () => const PolicySettingsView(),
+          binding: PolicySettingsBinding(),
+          children: [
+            GetPage(
+              name: _Paths.SETTINGS,
+              page: () => const SettingsView(),
+              binding: SettingsBinding(),
+              children: [
+                GetPage(
+                  name: _Paths.ADMIN_PROFILE,
+                  page: () => const AdminProfileView(),
+                  binding: AdminProfileBinding(),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     ),
+
+    // ─── Dashboard-embedded pages ────────────────────────────
+    _dashboardPage(_Paths.DASHBOARD),
+    _dashboardPage(_Paths.MY_DEVICES, screenBinding: MyDevicesBinding()),
   ];
 }

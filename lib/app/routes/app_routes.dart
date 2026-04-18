@@ -16,6 +16,8 @@ abstract class Routes {
   static const SIGN_UP = _Paths.SIGN_UP;
   static const ADD_NEW_DEVICES = _Paths.ADD_NEW_DEVICES;
   static const VIEW_DEVICES = _Paths.VIEW_DEVICES;
+  static const POLICY_SETTINGS = _Paths.POLICY_SETTINGS;
+  static const ADMIN_PROFILE = _Paths.ADMIN_PROFILE;
 }
 
 abstract class _Paths {
@@ -33,4 +35,6 @@ abstract class _Paths {
   static const SIGN_UP = '/sign-up';
   static const ADD_NEW_DEVICES = '/add-new-devices';
   static const VIEW_DEVICES = '/view-devices';
+  static const POLICY_SETTINGS = '/policy-settings';
+  static const ADMIN_PROFILE = '/admin-profile';
 }

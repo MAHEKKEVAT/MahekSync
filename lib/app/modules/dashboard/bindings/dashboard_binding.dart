@@ -10,6 +10,5 @@ class DashboardBinding extends Bindings {
     if (!Get.isRegistered<AuthController>()) {
       Get.put(AuthController());
     }
-    Get.lazyPut<DashboardController>(() => DashboardController());
-  }
+    Get.put(DashboardController(), permanent: true);  }
 }
