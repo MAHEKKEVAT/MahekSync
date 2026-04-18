@@ -37,6 +37,10 @@ git push origin main
 flutter build web --base-href "/MahekSync/"
 ```
 
+```bash
+.\deploy.bat
+```
+
 ---
 
 ## 🌿 Branch Workflow (Recommended 🚀)

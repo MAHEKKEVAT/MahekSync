@@ -21,12 +21,10 @@ class AddNewDevicesController extends GetxController {
 
   final selectedCategory = 'Art & Decor'.obs;
   final selectedCondition = 'NEW'.obs;
-
   final purchaseDate = Rxn<DateTime>();
 
   final deviceImages = <XFile>[].obs;
-  final imageBytes = <Uint8List>[].obs; // For web preview
-
+  final imageBytes = <Uint8List>[].obs;
   final isLoading = false.obs;
 
   final categories = ['Art & Decor', 'Computing', 'Mobile', 'Tablet', 'Wearable', 'Audio', 'Accessories'];
@@ -45,12 +43,12 @@ class AddNewDevicesController extends GetxController {
 
   Future<void> pickImages() async {
     try {
-      final images = await ImageKitAPI.pickMultipleImages();
-      if (images != null && images.isNotEmpty) {
-        deviceImages.addAll(images);
+      final picker = ImagePicker();
+      final images = await picker.pickMultiImage(imageQuality: 85);
 
-        // Read bytes for web preview
+      if (images.isNotEmpty) {
         for (var img in images) {
+          deviceImages.add(img);
           final bytes = await img.readAsBytes();
           imageBytes.add(bytes);
         }
@@ -62,14 +60,10 @@ class AddNewDevicesController extends GetxController {
 
   void removeImage(int index) {
     deviceImages.removeAt(index);
-    if (imageBytes.length > index) {
-      imageBytes.removeAt(index);
-    }
+    imageBytes.removeAt(index);
   }
 
-  void setPurchaseDate(DateTime date) {
-    purchaseDate.value = date;
-  }
+  void setPurchaseDate(DateTime date) => purchaseDate.value = date;
 
   Future<void> registerDevice() async {
     if (deviceNameController.text.isEmpty) {
@@ -82,13 +76,15 @@ class AddNewDevicesController extends GetxController {
     try {
       List<String> uploadedUrls = [];
 
-      // Upload images if any
       if (deviceImages.isNotEmpty) {
         final ownerId = MahekConstant.ownerModel?.id ?? 'unknown';
-        uploadedUrls = await DeviceFirestoreUtils.storeMultipleDeviceImages(
-          imageFiles: deviceImages,
-          ownerId: ownerId,
-        );
+        for (var img in deviceImages) {
+          final url = await ImageKitAPI.uploadImage(
+            imageFile: img,
+            folderName: 'devices/$ownerId',
+          );
+          if (url != null) uploadedUrls.add(url);
+        }
       }
 
       final device = DeviceModel(
@@ -109,8 +105,8 @@ class AddNewDevicesController extends GetxController {
 
       if (success) {
         ShowToastDialog.showSuccess('Device registered successfully!');
-        Get.back(result: true); // This will trigger onDeviceAdded
-      }else {
+        Get.back(result: true);
+      } else {
         ShowToastDialog.showError('Failed to register device');
       }
     } catch (e) {
@@ -120,7 +116,5 @@ class AddNewDevicesController extends GetxController {
     }
   }
 
-  void discardChanges() {
-    Get.back();
-  }
+  void discardChanges() => Get.back();
 }
