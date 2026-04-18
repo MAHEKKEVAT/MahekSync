@@ -8,7 +8,8 @@ import 'package:maheksync/app/constant/constants.dart';
 
 class ImageKitAPI {
   static const String _privateKey = 'private_u6KRAwruwE6w8xR63Vl7enrhpzk=';
-  static const String _publicKey = 'public_AeErSlpNO37JZd9nLBeyqH1SPS8=';
+  // CORRECTED PUBLIC KEY from screenshot
+  static const String _publicKey = 'public_AeErS1pNO37JZd9nLBeqgH1SP58=';
   static const String _uploadEndpoint = 'https://upload.imagekit.io/api/v1/files/upload';
 
   static final ImagePicker _picker = ImagePicker();
@@ -50,20 +51,17 @@ class ImageKitAPI {
       final fileName = '${MahekConstant.getUuid()}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final fullPath = '/$folderName/$fileName';
 
-      // Create multipart request for proper authentication
       final uri = Uri.parse(_uploadEndpoint);
       final request = http.MultipartRequest('POST', uri);
 
-      // Add headers
-      request.headers['Authorization'] = 'Basic ${base64Encode(utf8.encode('$_privateKey:'))}';
+      // Correct authentication with private key
+      final authString = base64Encode(utf8.encode('$_privateKey:'));
+      request.headers['Authorization'] = 'Basic $authString';
 
-      // Add fields
-      request.fields['fileName'] = fullPath;
+      request.fields['fileName'] = fileName;
       request.fields['folder'] = '/$folderName';
-      request.fields['useUniqueFileName'] = 'false';
-      request.fields['publicKey'] = _publicKey;
+      request.fields['useUniqueFileName'] = 'true';
 
-      // Add file
       request.files.add(
         http.MultipartFile.fromBytes(
           'file',
@@ -75,11 +73,13 @@ class ImageKitAPI {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
-      if (response.statusCode == 200) {
+      print('ImageKit Response: $responseBody'); // Debug log
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(responseBody);
         return data['url'];
       } else {
-        print('ImageKit upload failed: $responseBody');
+        print('ImageKit upload failed with status ${response.statusCode}: $responseBody');
         return null;
       }
     } catch (e) {
@@ -113,16 +113,15 @@ class ImageKitAPI {
     required String fileName,
   }) async {
     try {
-      final base64Image = base64Encode(imageBytes);
-      final fullPath = '/$folderName/$fileName';
-
       final uri = Uri.parse(_uploadEndpoint);
       final request = http.MultipartRequest('POST', uri);
 
-      request.headers['Authorization'] = 'Basic ${base64Encode(utf8.encode('$_privateKey:'))}';
-      request.fields['fileName'] = fullPath;
+      final authString = base64Encode(utf8.encode('$_privateKey:'));
+      request.headers['Authorization'] = 'Basic $authString';
+
+      request.fields['fileName'] = fileName;
       request.fields['folder'] = '/$folderName';
-      request.fields['useUniqueFileName'] = 'false';
+      request.fields['useUniqueFileName'] = 'true';
 
       request.files.add(
         http.MultipartFile.fromBytes(
@@ -135,7 +134,7 @@ class ImageKitAPI {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(responseBody);
         return data['url'];
       }

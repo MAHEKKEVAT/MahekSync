@@ -1,15 +1,5 @@
 @echo off
-echo ================================
-echo Building Flutter Web...
-echo ================================
 
-flutter build web --base-href "/MahekSync/"
-
-echo ================================
-echo Copying files to docs...
-echo ================================
-
-xcopy build\web* docs\ /E /H /Y
 
 echo ================================
 echo Pushing to GitHub...
@@ -22,5 +12,16 @@ git push origin main
 echo ================================
 echo DONE 🚀 Your site is updating...
 echo ================================
+echo ================================
+echo Building Flutter Web...
+echo ================================
+
+flutter build web --base-href "/MahekSync/"
+
+echo ================================
+echo Copying files to docs...
+echo ================================
+
+xcopy build\web* docs\ /E /H /Y
 
 pause
