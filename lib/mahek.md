@@ -27,6 +27,7 @@ git pull origin main
 git add .
 git commit -m "Update changes"
 git push origin main
+flutter build web --base-href "/MahekSync/"
 ```
 
 ---

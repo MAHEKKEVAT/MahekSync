@@ -9,12 +9,10 @@ import 'package:maheksync/app/constant/constants.dart';
 class ImageKitAPI {
   static const String _privateKey = 'private_u6KRAwruwE6w8xR63Vl7enrhpzk=';
   static const String _publicKey = 'public_AeErSlpNO37JZd9nLBeyqH1SPS8=';
-  static const String _urlEndpoint = 'https://upload.imagekit.io/api/v1/files/upload';
-  static const String _baseUrl = 'https://ik.imagekit.io/fsp5dxfxe';
+  static const String _uploadEndpoint = 'https://upload.imagekit.io/api/v1/files/upload';
 
   static final ImagePicker _picker = ImagePicker();
 
-  // Pick single image
   static Future<XFile?> pickImage() async {
     try {
       return await _picker.pickImage(
@@ -28,60 +26,68 @@ class ImageKitAPI {
     }
   }
 
-  // Pick multiple images
-  static Future<List<XFile>?> pickMultipleImages() async {
+  static Future<List<XFile>> pickMultipleImages() async {
     try {
-      return await _picker.pickMultiImage(
+      final images = await _picker.pickMultiImage(
         imageQuality: 85,
         maxWidth: 1200,
       );
+      return images;
     } catch (e) {
       print('Error picking images: $e');
-      return null;
+      return [];
     }
   }
 
-  // Upload image to ImageKit
   static Future<String?> uploadImage({
     required XFile imageFile,
     required String folderName,
-    String? customFileName,
   }) async {
     try {
       final bytes = await imageFile.readAsBytes();
       final base64Image = base64Encode(bytes);
 
-      final fileName = customFileName ??
-          '${MahekConstant.getUuid()}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final fileName = '${MahekConstant.getUuid()}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final fullPath = '/$folderName/$fileName';
 
-      final fullPath = '$folderName/$fileName';
+      // Create multipart request for proper authentication
+      final uri = Uri.parse(_uploadEndpoint);
+      final request = http.MultipartRequest('POST', uri);
 
-      final response = await http.post(
-        Uri.parse(_urlEndpoint),
-        headers: {
-          'Authorization': 'Basic ${base64Encode(utf8.encode('$_privateKey:'))}',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'file': base64Image,
-          'fileName': fullPath,
-          'useUniqueFileName': false,
-        }),
+      // Add headers
+      request.headers['Authorization'] = 'Basic ${base64Encode(utf8.encode('$_privateKey:'))}';
+
+      // Add fields
+      request.fields['fileName'] = fullPath;
+      request.fields['folder'] = '/$folderName';
+      request.fields['useUniqueFileName'] = 'false';
+      request.fields['publicKey'] = _publicKey;
+
+      // Add file
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: fileName,
+        ),
       );
 
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(responseBody);
         return data['url'];
+      } else {
+        print('ImageKit upload failed: $responseBody');
+        return null;
       }
-      print('ImageKit upload failed: ${response.body}');
-      return null;
     } catch (e) {
       print('ImageKit upload error: $e');
       return null;
     }
   }
 
-  // Upload multiple images
   static Future<List<String>> uploadMultipleImages({
     required List<XFile> imageFiles,
     required String folderName,
@@ -101,7 +107,6 @@ class ImageKitAPI {
     return uploadedUrls;
   }
 
-  // Store image for web (bytes)
   static Future<String?> uploadImageBytes({
     required Uint8List imageBytes,
     required String folderName,
@@ -109,44 +114,35 @@ class ImageKitAPI {
   }) async {
     try {
       final base64Image = base64Encode(imageBytes);
-      final fullPath = '$folderName/$fileName';
+      final fullPath = '/$folderName/$fileName';
 
-      final response = await http.post(
-        Uri.parse(_urlEndpoint),
-        headers: {
-          'Authorization': 'Basic ${base64Encode(utf8.encode('$_privateKey:'))}',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'file': base64Image,
-          'fileName': fullPath,
-          'useUniqueFileName': false,
-        }),
+      final uri = Uri.parse(_uploadEndpoint);
+      final request = http.MultipartRequest('POST', uri);
+
+      request.headers['Authorization'] = 'Basic ${base64Encode(utf8.encode('$_privateKey:'))}';
+      request.fields['fileName'] = fullPath;
+      request.fields['folder'] = '/$folderName';
+      request.fields['useUniqueFileName'] = 'false';
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          imageBytes,
+          filename: fileName,
+        ),
       );
 
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(responseBody);
         return data['url'];
       }
       return null;
     } catch (e) {
       print('ImageKit bytes upload error: $e');
       return null;
-    }
-  }
-
-  // Delete image from ImageKit (optional)
-  static Future<bool> deleteImage(String fileId) async {
-    try {
-      final response = await http.delete(
-        Uri.parse('https://api.imagekit.io/v1/files/$fileId'),
-        headers: {
-          'Authorization': 'Basic ${base64Encode(utf8.encode('$_privateKey:'))}',
-        },
-      );
-      return response.statusCode == 200;
-    } catch (e) {
-      return false;
     }
   }
 }

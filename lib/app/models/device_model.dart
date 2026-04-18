@@ -11,11 +11,10 @@ class DeviceModel {
   double? price;
   String? storeName;
   String? description;
-  String? productSize;
   DateTime? purchaseDate;
   DateTime? warrantyEndDate;
   String? paymentMethod;
-  List<String>? deviceImageUrls; // Changed to array
+  List<String>? deviceImageUrls;
   String? notes;
   Timestamp? createdAt;
   Timestamp? updatedAt;
@@ -30,7 +29,6 @@ class DeviceModel {
     this.price,
     this.storeName,
     this.description,
-    this.productSize,
     this.purchaseDate,
     this.warrantyEndDate,
     this.paymentMethod,
@@ -50,7 +48,6 @@ class DeviceModel {
     price = json['price']?.toDouble();
     storeName = json['storeName'];
     description = json['description'];
-    productSize = json['productSize'];
     purchaseDate = json['purchaseDate']?.toDate();
     warrantyEndDate = json['warrantyEndDate']?.toDate();
     paymentMethod = json['paymentMethod'];
@@ -73,7 +70,6 @@ class DeviceModel {
     data['price'] = price;
     data['storeName'] = storeName;
     data['description'] = description;
-    data['productSize'] = productSize;
     data['purchaseDate'] = purchaseDate;
     data['warrantyEndDate'] = warrantyEndDate;
     data['paymentMethod'] = paymentMethod;
@@ -97,6 +93,10 @@ class DeviceModel {
   bool get isWarrantyExpired => warrantyEndDate != null
       ? warrantyEndDate!.isBefore(DateTime.now())
       : false;
+
+  int get daysUntilWarrantyExpires => warrantyEndDate != null
+      ? warrantyEndDate!.difference(DateTime.now()).inDays
+      : 0;
 
   String get primaryImageUrl => deviceImageUrls != null && deviceImageUrls!.isNotEmpty
       ? deviceImageUrls!.first

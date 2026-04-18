@@ -15,13 +15,15 @@ class AddNewDevicesController extends GetxController {
   final deviceNameController = TextEditingController();
   final brandNameController = TextEditingController();
   final descriptionController = TextEditingController();
-  final productSizeController = TextEditingController();
+  final warrantyEndDate = Rxn<DateTime>();
   final priceController = TextEditingController();
   final storeNameController = TextEditingController();
 
   final selectedCategory = 'Art & Decor'.obs;
   final selectedCondition = 'NEW'.obs;
   final purchaseDate = Rxn<DateTime>();
+
+  void setWarrantyEndDate(DateTime date) => warrantyEndDate.value = date;
 
   final deviceImages = <XFile>[].obs;
   final imageBytes = <Uint8List>[].obs;
@@ -35,7 +37,6 @@ class AddNewDevicesController extends GetxController {
     deviceNameController.dispose();
     brandNameController.dispose();
     descriptionController.dispose();
-    productSizeController.dispose();
     priceController.dispose();
     storeNameController.dispose();
     super.onClose();
@@ -96,8 +97,8 @@ class AddNewDevicesController extends GetxController {
         price: double.tryParse(priceController.text) ?? 0.0,
         storeName: storeNameController.text.trim(),
         description: descriptionController.text.trim(),
-        productSize: productSizeController.text.trim(),
         purchaseDate: purchaseDate.value,
+        warrantyEndDate: warrantyEndDate.value,
         deviceImageUrls: uploadedUrls,
       );
 

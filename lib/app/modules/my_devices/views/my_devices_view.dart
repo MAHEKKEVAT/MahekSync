@@ -215,7 +215,6 @@ class MyDevicesView extends GetView<MyDevicesController> {
                   ),
                   spaceH(height: 8),
                   _buildInfoRow('Brand', device.brandName ?? 'N/A', isDark),
-                  _buildInfoRow('Store', device.storeName ?? 'N/A', isDark),
                   _buildInfoRow('Price', device.formattedPrice, isDark),
                   const Spacer(),
                   Row(

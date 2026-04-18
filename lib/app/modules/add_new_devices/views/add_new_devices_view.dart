@@ -85,13 +85,15 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                     spaceH(height: 28),
                     _buildSectionTitle('SPECIFICATIONS & LOGISTICS', isDark),
                     spaceH(height: 16),
+                    spaceH(height: 14),
                     Row(
                       children: [
-                        Expanded(child: _buildTextField('PRODUCT SIZE', controller.productSizeController, '120 × 80 cm', isDark)),
+                        Expanded(child: _buildDatePicker(isDark)),
                         spaceW(width: 16),
-                        Expanded(child: _buildTextField('PRODUCT PRICE', controller.priceController, '\$ 0.00', isDark, keyboardType: TextInputType.number)),
+                        Expanded(child: _buildWarrantyDatePicker(isDark)),
                       ],
                     ),
+
                     spaceH(height: 14),
                     _buildDatePicker(isDark),
                   ],
@@ -131,6 +133,52 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
           ),
         ],
       ),
+    );
+  }
+
+  // Add this method:
+  Widget _buildWarrantyDatePicker(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextCustom(title: 'WARRANTY ENDS', fontSize: 11, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+        spaceH(height: 6),
+        Obx(() => GestureDetector(
+          onTap: () async {
+            final selected = await showDatePicker(
+              context: Get.context!,
+              initialDate: DateTime.now().add(const Duration(days: 365)),
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2030),
+            );
+            if (selected != null) controller.setWarrantyEndDate(selected);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            decoration: BoxDecoration(
+              color: isDark ? AppThemeData.grey9 : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: isDark ? AppThemeData.grey8 : AppThemeData.grey3, width: 0.5),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_today_outlined, size: 18, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                spaceW(width: 12),
+                TextCustom(
+                  title: controller.warrantyEndDate.value != null
+                      ? DateFormat('MM/dd/yyyy').format(controller.warrantyEndDate.value!)
+                      : 'dd---yyyy',
+                  fontSize: 14,
+                  fontFamily: FontFamily.regular,
+                  color: controller.warrantyEndDate.value != null
+                      ? (isDark ? AppThemeData.grey1 : AppThemeData.grey10)
+                      : (isDark ? AppThemeData.grey6 : AppThemeData.grey5),
+                ),
+              ],
+            ),
+          ),
+        )),
+      ],
     );
   }
 
