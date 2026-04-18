@@ -2,12 +2,16 @@
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/models/device_model.dart';
-import 'package:maheksync/app/services/device_service.dart';
+import 'package:maheksync/app/utils/device_firestore_utils.dart';
+
+import '../../add_new_devices/controllers/add_new_devices_controller.dart';
+import '../../add_new_devices/views/add_new_devices_view.dart';
 
 class MyDevicesController extends GetxController {
   final devices = <DeviceModel>[].obs;
   final isLoading = true.obs;
   final searchQuery = ''.obs;
+
 
   String? get ownerId => MahekConstant.ownerModel?.id;
 
@@ -20,7 +24,8 @@ class MyDevicesController extends GetxController {
   void loadDevices() {
     if (ownerId == null) return;
 
-    DeviceService.getUserDevices(ownerId!).listen((deviceList) {
+    // Use DeviceFirestoreUtils instead of DeviceService
+    DeviceFirestoreUtils.getUserDevices(ownerId!).listen((deviceList) {
       devices.value = deviceList;
       isLoading.value = false;
     });
@@ -29,9 +34,10 @@ class MyDevicesController extends GetxController {
   List<DeviceModel> get filteredDevices {
     if (searchQuery.isEmpty) return devices;
     return devices.where((device) {
-      return device.deviceName!.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          device.storeName!.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          device.category!.toLowerCase().contains(searchQuery.value.toLowerCase());
+      return (device.deviceName ?? '').toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          (device.brandName ?? '').toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          (device.storeName ?? '').toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          (device.category ?? '').toLowerCase().contains(searchQuery.value.toLowerCase());
     }).toList();
   }
 
@@ -45,10 +51,17 @@ class MyDevicesController extends GetxController {
     loadDevices();
   }
 
-  void navigateToAddDevice() async {
-    final result = await Get.toNamed('/add-new-devices');
+  void openAddDevicePanel() async {
+    Get.put(AddNewDevicesController());
+
+    final result = await Get.to(() => const AddNewDevicesView());
     if (result == true) {
       refreshDevices();
     }
+  }
+
+
+  void onDeviceAdded() {
+    refreshDevices();
   }
 }

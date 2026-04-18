@@ -57,7 +57,6 @@ class _LoginScreenViewState extends State<LoginScreenView> {
   Widget _buildMobileLayout(BuildContext context, bool isDark) {
     return _buildLoginPanel(context, isDark);
   }
-
   Widget _buildBrandPanel(bool isDark) {
     return Container(
       decoration: BoxDecoration(
@@ -208,6 +207,9 @@ class _LoginScreenViewState extends State<LoginScreenView> {
                     ),
                   ),
                   const Spacer(),
+                  // Demo Access Card - NEW
+                  _buildDemoAccessCard(isDark),
+                  spaceH(height: 16),
                   // Footer Info
                   Row(
                     children: [
@@ -585,6 +587,159 @@ class _LoginScreenViewState extends State<LoginScreenView> {
       ],
     );
   }
+
+  // Add this method for the demo access card
+  Widget _buildDemoAccessCard(bool isDark) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.person_outline_rounded,
+                color: Colors.white.withValues(alpha: 0.7),
+                size: 18,
+              ),
+              spaceW(width: 8),
+              Text(
+                'Quick Demo Access',
+                style: TextStyle(
+                  fontFamily: FontFamily.medium,
+                  fontSize: 13,
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+          spaceH(height: 12),
+          Text(
+            'Click on a profile to auto-fill credentials',
+            style: TextStyle(
+              fontFamily: FontFamily.regular,
+              fontSize: 11,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
+          ),
+          spaceH(height: 16),
+          Row(
+            children: [
+              _buildProfileChip(
+                initial: 'M',
+                name: 'Mahek Kevat',
+                email: 'mahekjkevat@gmail.com',
+                password: 'Mahek@6561',
+                color: const Color(0xFF5D54F2),
+                isDark: isDark,
+              ),
+              spaceW(width: 12),
+              _buildProfileChip(
+                initial: 'A',
+                name: 'Admin User',
+                email: 'admin@mahek.com',
+                password: 'Admin@123',
+                color: const Color(0xFF10B981),
+                isDark: isDark,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileChip({
+    required String initial,
+    required String name,
+    required String email,
+    required String password,
+    required Color color,
+    required bool isDark,
+  }) {
+    return Expanded(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () {
+            // Auto-fill credentials
+            controller.emailController.text = email;
+            controller.passwordController.text = password;
+
+            // Show success message
+            Get.snackbar(
+              'Credentials Filled',
+              'Ready to sign in as $name',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: color.withValues(alpha: 0.9),
+              colorText: Colors.white,
+              duration: const Duration(seconds: 2),
+              margin: const EdgeInsets.all(16),
+              borderRadius: 8,
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [color, color.withValues(alpha: 0.7)],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      initial,
+                      style: const TextStyle(
+                        fontFamily: FontFamily.semiBold,
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                spaceW(width: 8),
+                Expanded(
+                  child: Text(
+                    name,
+                    style: TextStyle(
+                      fontFamily: FontFamily.medium,
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
   Widget _buildSignInButton(BuildContext context, bool isDark) {
     return Obx(() => Container(
       width: double.infinity,

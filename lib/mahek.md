@@ -25,7 +25,7 @@ git pull origin main
 
 ```bash
 git add .
-git commit -m "feat: update changes"
+git commit -m "Update changes"
 git push origin main
 ```
 

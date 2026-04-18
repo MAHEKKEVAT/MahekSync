@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
-import 'package:maheksync/app/widgets/text_widget.dart';
 import '../../../models/device_model.dart';
+import '../../../widgets/text_widget.dart';
 import '../controllers/my_devices_controller.dart';
 
 class MyDevicesView extends GetView<MyDevicesController> {
@@ -13,6 +13,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(MyDevicesController());
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -25,6 +26,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
       }),
     );
   }
+
 
   Widget _buildContent(bool isDark) {
     return Padding(
@@ -58,18 +60,18 @@ class MyDevicesView extends GetView<MyDevicesController> {
               ),
             ),
             spaceH(height: 4),
-            Text(
+            Obx(() => Text(
               '${controller.filteredDevices.length} devices registered',
               style: TextStyle(
                 fontFamily: FontFamily.regular,
                 fontSize: 14,
                 color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
               ),
-            ),
+            )),
           ],
         ),
         ElevatedButton.icon(
-          onPressed: controller.navigateToAddDevice,
+          onPressed: controller.openAddDevicePanel,
           icon: const Icon(Icons.add, size: 18),
           label: Text(
             'Register New Device',
@@ -151,18 +153,17 @@ class MyDevicesView extends GetView<MyDevicesController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Device Image
           Container(
             height: 140,
             decoration: BoxDecoration(
               color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
-            child: device.deviceImageUrl != null
+            child: device.primaryImageUrl.isNotEmpty
                 ? ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: Image.network(
-                device.deviceImageUrl!,
+                device.primaryImageUrl,
                 width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => _buildPlaceholderImage(isDark),
@@ -170,7 +171,6 @@ class MyDevicesView extends GetView<MyDevicesController> {
             )
                 : _buildPlaceholderImage(isDark),
           ),
-          // Device Info
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -191,31 +191,32 @@ class MyDevicesView extends GetView<MyDevicesController> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: device.isWarrantyExpired
-                              ? const Color(0xFFEF4444).withValues(alpha: 0.1)
-                              : const Color(0xFF10B981).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          device.isWarrantyExpired ? 'Expired' : 'Active',
-                          style: TextStyle(
-                            fontFamily: FontFamily.medium,
-                            fontSize: 10,
+                      if (device.warrantyEndDate != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
                             color: device.isWarrantyExpired
-                                ? const Color(0xFFEF4444)
-                                : const Color(0xFF10B981),
+                                ? const Color(0xFFEF4444).withValues(alpha: 0.1)
+                                : const Color(0xFF10B981).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            device.isWarrantyExpired ? 'Expired' : 'Active',
+                            style: TextStyle(
+                              fontFamily: FontFamily.medium,
+                              fontSize: 10,
+                              color: device.isWarrantyExpired
+                                  ? const Color(0xFFEF4444)
+                                  : const Color(0xFF10B981),
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                   spaceH(height: 8),
+                  _buildInfoRow('Brand', device.brandName ?? 'N/A', isDark),
                   _buildInfoRow('Store', device.storeName ?? 'N/A', isDark),
                   _buildInfoRow('Price', device.formattedPrice, isDark),
-                  _buildInfoRow('Warranty Ends', device.formattedWarrantyEnd, isDark),
                   const Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -245,7 +246,6 @@ class MyDevicesView extends GetView<MyDevicesController> {
       ),
     );
   }
-
   Widget _buildPlaceholderImage(bool isDark) {
     return Container(
       color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
@@ -308,60 +308,23 @@ class MyDevicesView extends GetView<MyDevicesController> {
           Container(
             width: 120,
             height: 120,
-            decoration: BoxDecoration(
-              color: const Color(0xFF5D54F2).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              Icons.devices_outlined,
-              size: 60,
-              color: const Color(0xFF5D54F2),
-            ),
+            decoration: BoxDecoration(color: const Color(0xFF5D54F2).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+            child: Icon(Icons.inventory_2_outlined, size: 60, color: const Color(0xFF5D54F2)),
           ),
           spaceH(height: 24),
-          Text(
-            'No devices yet',
-            style: TextStyle(
-              fontFamily: FontFamily.bold,
-              fontSize: 20,
-              color: isDark ? Colors.white : AppThemeData.grey10,
-            ),
-          ),
+          TextCustom(title: 'No devices found', fontSize: 20, fontFamily: FontFamily.bold, color: isDark ? Colors.white : AppThemeData.grey10),
           spaceH(height: 8),
-          Text(
-            'Expanding your collection?',
-            style: TextStyle(
-              fontFamily: FontFamily.regular,
-              fontSize: 15,
-              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-            ),
-          ),
+          TextCustom(title: 'Start building your inventory', fontSize: 15, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
           spaceH(height: 4),
-          Text(
-            'Secure your latest investment instantly.',
-            style: TextStyle(
-              fontFamily: FontFamily.regular,
-              fontSize: 15,
-              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-            ),
-          ),
+          TextCustom(title: 'Add your first device to get started.', fontSize: 15, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
           spaceH(height: 24),
           ElevatedButton.icon(
-            onPressed: controller.navigateToAddDevice,
+            onPressed: controller.openAddDevicePanel,
             icon: const Icon(Icons.add),
-            label: Text(
-              'Register New Device',
-              style: TextStyle(fontFamily: FontFamily.semiBold, fontSize: 14),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF5D54F2),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
+            label: TextCustom(title: 'Add New Device', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5D54F2), padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14)),
           ),
         ],
       ),
     );
-  }
-}
+  }}

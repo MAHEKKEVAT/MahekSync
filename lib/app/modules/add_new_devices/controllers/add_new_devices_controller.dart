@@ -1,60 +1,74 @@
 // lib/app/modules/add_new_devices/controllers/add_new_devices_controller.dart
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/models/device_model.dart';
-import 'package:maheksync/app/services/device_service.dart';
-import 'package:maheksync/app/services/imagekit_service.dart';
+import 'package:maheksync/app/services/imagekit_api.dart';
+import 'package:maheksync/app/utils/device_firestore_utils.dart';
 import '../../../constant/show_toast.dart';
 
 class AddNewDevicesController extends GetxController {
   final deviceNameController = TextEditingController();
-  final storeNameController = TextEditingController();
+  final brandNameController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final productSizeController = TextEditingController();
   final priceController = TextEditingController();
-  final notesController = TextEditingController();
+  final storeNameController = TextEditingController();
 
-  final selectedCategory = 'Computing'.obs;
+  final selectedCategory = 'Art & Decor'.obs;
   final selectedCondition = 'NEW'.obs;
-  final selectedPaymentMethod = 'Credit Card'.obs;
 
   final purchaseDate = Rxn<DateTime>();
-  final warrantyEndDate = Rxn<DateTime>();
-  final deviceImage = Rxn<XFile>();
+
+  final deviceImages = <XFile>[].obs;
+  final imageBytes = <Uint8List>[].obs; // For web preview
 
   final isLoading = false.obs;
 
-  final categories = ['Computing', 'Mobile', 'Tablet', 'Wearable', 'Audio', 'Accessories'];
-  final conditions = ['NEW', 'USED', 'REFURB'];
-  final paymentMethods = ['Credit Card', 'PayPal', 'Cash', 'Other'];
+  final categories = ['Art & Decor', 'Computing', 'Mobile', 'Tablet', 'Wearable', 'Audio', 'Accessories'];
+  final conditions = ['NEW', 'USED', 'REFURB', 'MINT', 'FACTORY NEW'];
 
   @override
   void onClose() {
     deviceNameController.dispose();
-    storeNameController.dispose();
+    brandNameController.dispose();
+    descriptionController.dispose();
+    productSizeController.dispose();
     priceController.dispose();
-    notesController.dispose();
+    storeNameController.dispose();
     super.onClose();
   }
 
-  Future<void> pickImage() async {
-    final image = await ImageKitService.pickImage();
-    if (image != null) {
-      deviceImage.value = image;
+  Future<void> pickImages() async {
+    try {
+      final images = await ImageKitAPI.pickMultipleImages();
+      if (images != null && images.isNotEmpty) {
+        deviceImages.addAll(images);
+
+        // Read bytes for web preview
+        for (var img in images) {
+          final bytes = await img.readAsBytes();
+          imageBytes.add(bytes);
+        }
+      }
+    } catch (e) {
+      ShowToastDialog.showError('Failed to pick images');
     }
   }
 
-  void removeImage() {
-    deviceImage.value = null;
+  void removeImage(int index) {
+    deviceImages.removeAt(index);
+    if (imageBytes.length > index) {
+      imageBytes.removeAt(index);
+    }
   }
 
   void setPurchaseDate(DateTime date) {
     purchaseDate.value = date;
-  }
-
-  void setWarrantyEndDate(DateTime date) {
-    warrantyEndDate.value = date;
   }
 
   Future<void> registerDevice() async {
@@ -62,40 +76,41 @@ class AddNewDevicesController extends GetxController {
       ShowToastDialog.showError('Device name is required');
       return;
     }
-    if (purchaseDate.value == null) {
-      ShowToastDialog.showError('Purchase date is required');
-      return;
-    }
 
     isLoading.value = true;
 
     try {
-      String? imageUrl;
+      List<String> uploadedUrls = [];
 
-      if (deviceImage.value != null) {
-        imageUrl = await ImageKitService.uploadDeviceImage(deviceImage.value!);
+      // Upload images if any
+      if (deviceImages.isNotEmpty) {
+        final ownerId = MahekConstant.ownerModel?.id ?? 'unknown';
+        uploadedUrls = await DeviceFirestoreUtils.storeMultipleDeviceImages(
+          imageFiles: deviceImages,
+          ownerId: ownerId,
+        );
       }
 
       final device = DeviceModel(
         ownerId: MahekConstant.ownerModel?.id,
         deviceName: deviceNameController.text.trim(),
+        brandName: brandNameController.text.trim(),
         category: selectedCategory.value,
         condition: selectedCondition.value,
         price: double.tryParse(priceController.text) ?? 0.0,
         storeName: storeNameController.text.trim(),
+        description: descriptionController.text.trim(),
+        productSize: productSizeController.text.trim(),
         purchaseDate: purchaseDate.value,
-        warrantyEndDate: warrantyEndDate.value,
-        paymentMethod: selectedPaymentMethod.value,
-        deviceImageUrl: imageUrl,
-        notes: notesController.text.trim(),
+        deviceImageUrls: uploadedUrls,
       );
 
-      final success = await DeviceService.addDevice(device);
+      final success = await DeviceFirestoreUtils.addDevice(device);
 
       if (success) {
         ShowToastDialog.showSuccess('Device registered successfully!');
-        Get.back(result: true);
-      } else {
+        Get.back(result: true); // This will trigger onDeviceAdded
+      }else {
         ShowToastDialog.showError('Failed to register device');
       }
     } catch (e) {

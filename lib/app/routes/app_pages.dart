@@ -10,8 +10,6 @@ import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/login_screen/bindings/login_screen_binding.dart';
 import '../modules/login_screen/views/login_screen_view.dart';
-import '../modules/my_devices/bindings/my_devices_binding.dart';
-import '../modules/my_devices/views/my_devices_view.dart';
 import '../modules/sign_up/bindings/sign_up_binding.dart';
 import '../modules/sign_up/views/sign_up_view.dart';
 import '../modules/splash_screen/bindings/splash_screen_binding.dart';
@@ -51,14 +49,34 @@ class AppPages {
       binding: DashboardBinding(),
     ),
     GetPage(
+      name: _Paths.MY_DEVICES,
+      page: () => const DashboardView(),
+      binding: DashboardBinding(),
+    ),
+    GetPage(
+      name: _Paths.WARRANTY_TRACKER,
+      page: () => const DashboardView(),
+      binding: DashboardBinding(),
+    ),
+    GetPage(
+      name: _Paths.EXPENSES,
+      page: () => const DashboardView(),
+      binding: DashboardBinding(),
+    ),
+    GetPage(
+      name: _Paths.SETTINGS,
+      page: () => const DashboardView(),
+      binding: DashboardBinding(),
+    ),
+    GetPage(
+      name: _Paths.SUPPORT,
+      page: () => const DashboardView(),
+      binding: DashboardBinding(),
+    ),
+    GetPage(
       name: _Paths.SIGN_UP,
       page: () => const SignUpView(),
       binding: SignUpBinding(),
-    ),
-    GetPage(
-      name: _Paths.MY_DEVICES,
-      page: () => const MyDevicesView(),
-      binding: MyDevicesBinding(),
     ),
     GetPage(
       name: _Paths.ADD_NEW_DEVICES,

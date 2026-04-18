@@ -5,14 +5,17 @@ class DeviceModel {
   String? id;
   String? ownerId;
   String? deviceName;
+  String? brandName;
   String? category;
   String? condition;
   double? price;
   String? storeName;
+  String? description;
+  String? productSize;
   DateTime? purchaseDate;
   DateTime? warrantyEndDate;
   String? paymentMethod;
-  String? deviceImageUrl;
+  List<String>? deviceImageUrls; // Changed to array
   String? notes;
   Timestamp? createdAt;
   Timestamp? updatedAt;
@@ -21,14 +24,17 @@ class DeviceModel {
     this.id,
     this.ownerId,
     this.deviceName,
+    this.brandName,
     this.category,
     this.condition,
     this.price,
     this.storeName,
+    this.description,
+    this.productSize,
     this.purchaseDate,
     this.warrantyEndDate,
     this.paymentMethod,
-    this.deviceImageUrl,
+    this.deviceImageUrls,
     this.notes,
     this.createdAt,
     this.updatedAt,
@@ -38,14 +44,19 @@ class DeviceModel {
     id = json['id'];
     ownerId = json['ownerId'];
     deviceName = json['deviceName'];
+    brandName = json['brandName'];
     category = json['category'];
     condition = json['condition'];
     price = json['price']?.toDouble();
     storeName = json['storeName'];
+    description = json['description'];
+    productSize = json['productSize'];
     purchaseDate = json['purchaseDate']?.toDate();
     warrantyEndDate = json['warrantyEndDate']?.toDate();
     paymentMethod = json['paymentMethod'];
-    deviceImageUrl = json['deviceImageUrl'];
+    deviceImageUrls = json['deviceImageUrls'] != null
+        ? List<String>.from(json['deviceImageUrls'])
+        : [];
     notes = json['notes'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
@@ -56,21 +67,23 @@ class DeviceModel {
     data['id'] = id;
     data['ownerId'] = ownerId;
     data['deviceName'] = deviceName;
+    data['brandName'] = brandName;
     data['category'] = category;
     data['condition'] = condition;
     data['price'] = price;
     data['storeName'] = storeName;
+    data['description'] = description;
+    data['productSize'] = productSize;
     data['purchaseDate'] = purchaseDate;
     data['warrantyEndDate'] = warrantyEndDate;
     data['paymentMethod'] = paymentMethod;
-    data['deviceImageUrl'] = deviceImageUrl;
+    data['deviceImageUrls'] = deviceImageUrls ?? [];
     data['notes'] = notes;
     data['createdAt'] = createdAt ?? Timestamp.now();
     data['updatedAt'] = Timestamp.now();
     return data;
   }
 
-  // Helper getters
   String get formattedPrice => '\$${price?.toStringAsFixed(2) ?? '0.00'}';
 
   String get formattedPurchaseDate => purchaseDate != null
@@ -85,7 +98,7 @@ class DeviceModel {
       ? warrantyEndDate!.isBefore(DateTime.now())
       : false;
 
-  int get daysUntilWarrantyExpires => warrantyEndDate != null
-      ? warrantyEndDate!.difference(DateTime.now()).inDays
-      : 0;
+  String get primaryImageUrl => deviceImageUrls != null && deviceImageUrls!.isNotEmpty
+      ? deviceImageUrls!.first
+      : '';
 }
