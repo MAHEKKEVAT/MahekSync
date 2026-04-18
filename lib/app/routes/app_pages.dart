@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:maheksync/app/modules/dashboard/views/dashboard_view.dart';
 import 'package:maheksync/app/modules/my_devices/bindings/my_devices_binding.dart';
 
+import '../modules/add_new_devices/bindings/add_new_devices_binding.dart';
+import '../modules/add_new_devices/views/add_new_devices_view.dart';
 import '../modules/admin_profile/bindings/admin_profile_binding.dart';
 import '../modules/admin_profile/views/admin_profile_view.dart';
 import '../modules/auth/bindings/auth_binding.dart';
@@ -58,75 +60,49 @@ class AppPages {
       binding: AuthBinding(),
     ),
     GetPage(
-      name: _Paths.DASHBOARD,
-      page: () => const DashboardView(),
-      binding: DashboardBinding(),
-    ),
-
-    GetPage(
-      name: Routes.HOME,
-      page: () => const DashboardView(),
-      binding: DashboardBinding(),
-    ),
-    GetPage(
-      name: Routes.MY_DEVICES,
-      page: () => const DashboardView(),
-      binding: DashboardBinding(),
-    ),
-    GetPage(
-      name: Routes.WARRANTY_TRACKER,
-      page: () => const DashboardView(),
-      binding: DashboardBinding(),
-    ),
-    GetPage(
-      name: Routes.EXPENSES,
-      page: () => const DashboardView(),
-      binding: DashboardBinding(),
-    ),
-    GetPage(
-      name: Routes.SETTINGS,
-      page: () => const DashboardView(),
-      binding: DashboardBinding(),
-    ),
-    GetPage(
-      name: Routes.SUPPORT,
-      page: () => const DashboardView(),
-      binding: DashboardBinding(),
-    ),
-    GetPage(
       name: _Paths.SIGN_UP,
       page: () => const SignUpView(),
       binding: SignUpBinding(),
+    ),
+
+    // Standalone pages (NOT nested under dashboard)
+    GetPage(
+      name: _Paths.ADD_NEW_DEVICES,
+      page: () => const AddNewDevicesView(),
+      binding: AddNewDevicesBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: _Paths.VIEW_DEVICES,
       page: () => const ViewDevicesView(),
       binding: ViewDevicesBinding(),
-      children: [
-        GetPage(
-          name: _Paths.POLICY_SETTINGS,
-          page: () => const PolicySettingsView(),
-          binding: PolicySettingsBinding(),
-          children: [
-            GetPage(
-              name: _Paths.SETTINGS,
-              page: () => const SettingsView(),
-              binding: SettingsBinding(),
-              children: [
-                GetPage(
-                  name: _Paths.ADMIN_PROFILE,
-                  page: () => const AdminProfileView(),
-                  binding: AdminProfileBinding(),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: _Paths.ADMIN_PROFILE,
+      page: () => const AdminProfileView(),
+      binding: AdminProfileBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: _Paths.POLICY_SETTINGS,
+      page: () => const PolicySettingsView(),
+      binding: PolicySettingsBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: _Paths.SETTINGS,
+      page: () => const SettingsView(),
+      binding: SettingsBinding(),
+      middlewares: [AuthMiddleware()],
     ),
 
-    // ─── Dashboard-embedded pages ────────────────────────────
+    // Dashboard-embedded pages
     _dashboardPage(_Paths.DASHBOARD),
+    _dashboardPage(_Paths.HOME),
     _dashboardPage(_Paths.MY_DEVICES, screenBinding: MyDevicesBinding()),
+    _dashboardPage(_Paths.WARRANTY_TRACKER),
+    _dashboardPage(_Paths.EXPENSES),
+    _dashboardPage(_Paths.SUPPORT),
   ];
 }

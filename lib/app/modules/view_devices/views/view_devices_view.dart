@@ -9,6 +9,7 @@ import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../../../models/device_model.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/view_devices_controller.dart';
 
 class ViewDevicesView extends GetView<ViewDevicesController> {
@@ -20,12 +21,35 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
     final isDark = themeChange.isDarkTheme();
     final device = controller.device.value;
 
+    // If no device data, show error and navigate back
     if (device == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.snackbar(
+          'Error',
+          'Device not found',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppThemeData.danger300,
+          colorText: Colors.white,
+        );
+        Get.offNamed(Routes.MY_DEVICES);
+      });
+
       return Scaffold(
         backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey2,
         body: Center(
-          child: CircularProgressIndicator(
-            color: AppThemeData.primary50,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: AppThemeData.primary50,
+              ),
+              spaceH(height: 16),
+              TextCustom(
+                title: 'Redirecting...',
+                fontSize: 14,
+                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+              ),
+            ],
           ),
         ),
       );
@@ -137,6 +161,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
       ),
     );
   }
+
 
   Widget _buildVerticalImageGallery(DeviceModel device, bool isDark) {
     final images = device.deviceImageUrls;
@@ -446,7 +471,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
       ),
     );
   }
-  
+
   Widget _buildWarrantyRow(String label, String value, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

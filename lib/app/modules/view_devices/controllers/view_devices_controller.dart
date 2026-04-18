@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/models/device_model.dart';
+import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/device_firestore_utils.dart';
 import '../../../constant/show_toast.dart';
 
@@ -14,6 +15,14 @@ class ViewDevicesController extends GetxController {
   void onInit() {
     super.onInit();
     device.value = Get.arguments as DeviceModel?;
+
+    // If no device was passed, go back
+    if (device.value == null) {
+      Future.delayed(Duration.zero, () {
+        ShowToastDialog.showError('Device not found');
+        Get.offNamed(Routes.MY_DEVICES);
+      });
+    }
   }
 
   void changeImage(int index) {

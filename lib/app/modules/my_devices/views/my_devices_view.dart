@@ -127,7 +127,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
         maxCrossAxisExtent: 380,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
-        childAspectRatio:0.6,
+        childAspectRatio:0.8,
       ),
       itemCount: controller.filteredDevices.length,
       itemBuilder: (context, index) {
@@ -198,7 +198,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
           ),
           // Device Image
           Container(
-            height: 350,
+            height: 240,
             margin: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
