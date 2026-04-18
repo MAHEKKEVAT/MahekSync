@@ -290,8 +290,27 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
     final statusColor = controller.warrantyStatusColor;
     final statusText = controller.warrantyStatus;
     final days = controller.daysRemaining;
-    final progress = days / 365 > 1 ? 1.0 : days / 365;
-    final percent = (progress * 100).clamp(0, 100).toInt();
+
+    // Calculate progress - don't clamp to 1.0 if you want to show over 100%
+    // Or calculate based on total warranty period (purchase to expiry)
+    final totalWarrantyDays = device.warrantyEndDate != null && device.purchaseDate != null
+        ? device.warrantyEndDate!.difference(device.purchaseDate!).inDays
+        : 365;
+
+    // Calculate elapsed days
+    final elapsedDays = device.purchaseDate != null
+        ? DateTime.now().difference(device.purchaseDate!).inDays
+        : 0;
+
+    // Progress = elapsed / total (capped at 1.0 for progress bar)
+    final progress = totalWarrantyDays > 0
+        ? (elapsedDays / totalWarrantyDays).clamp(0.0, 1.0)
+        : 0.0;
+
+    // Percentage display - can show over 100% if warranty extended
+    final percentDisplay = totalWarrantyDays > 0
+        ? ((elapsedDays / totalWarrantyDays) * 100).clamp(0, 999).toInt()
+        : 0;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -381,7 +400,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
               ),
               spaceW(width: 12),
               TextCustom(
-                title: '$percent%',
+                title: '$percentDisplay%',
                 fontSize: 14,
                 fontFamily: FontFamily.semiBold,
                 color: statusColor,
@@ -427,7 +446,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
       ),
     );
   }
-
+  
   Widget _buildWarrantyRow(String label, String value, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

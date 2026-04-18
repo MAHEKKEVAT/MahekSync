@@ -85,10 +85,18 @@ class DashboardController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
+
+    // Debug: Print all available routes
+    print('📋 Available routes in navigation:');
+    for (int i = 0; i < allItems.length; i++) {
+      print('   [$i] ${allItems[i].route} - ${allItems[i].title}');
+    }
+
     syncIndexFromRoute();
 
     // Listen to browser popstate events (back/forward buttons)
     html.window.onPopState.listen((event) {
+      print('🔙 PopState event detected');
       syncIndexFromRoute();
     });
   }
@@ -138,19 +146,23 @@ class DashboardController extends GetxController {
   }
 
   void changePage(int index) {
+    print('🔄 changePage called with index: $index, current: ${selectedIndex.value}');
+
     if (selectedIndex.value != index) {
       selectedIndex.value = index;
       final items = allItems;
       if (index >= 0 && index < items.length) {
         String route = items[index].route;
-        // Ensure we push the full dashboard route
         html.window.history.pushState(null, '', route);
-        print('Navigated to: $route');
+        print('✅ Navigated to: $route');
       }
+    } else {
+      print('⚠️ Same index, no change needed');
     }
   }
 
   void navigateToRoute(String route) {
+    print('🧭 navigateToRoute: $route');
     final items = allItems;
     for (int i = 0; i < items.length; i++) {
       if (items[i].route == route) {
@@ -168,35 +180,67 @@ class DashboardController extends GetxController {
   /// Set selected index based on current browser URL
   void syncIndexFromRoute() {
     String currentPath = html.window.location.pathname ?? '';
-    print('🔄 Syncing from path: $currentPath');
+    print('🔄 Syncing from path: "$currentPath"');
 
     // Check for profile route
     if (currentPath.contains(profileRoute) || currentPath.endsWith(profileRoute)) {
       if (selectedIndex.value != -1) {
         selectedIndex.value = -1;
-        print('✅ Synced to profile');
+        print('✅ Synced to profile (index: -1)');
       }
       return;
     }
 
     final items = allItems;
-    for (int i = 0; i < items.length; i++) {
-      String route = items[i].route;
-      // Check multiple matching patterns
-      if (currentPath.endsWith(route) ||
-          currentPath.contains(route) ||
-          currentPath == route) {
-        if (selectedIndex.value != i) {
-          selectedIndex.value = i;
-          print('✅ Synced to index: $i, route: $route');
+
+    // Sort items by route length (longest first) to match most specific routes first
+    // This prevents /dashboard from matching before /dashboard/my-devices
+    final sortedItems = items.toList()
+      ..sort((a, b) => b.route.length.compareTo(a.route.length));
+
+    print('📋 Checking against routes (sorted by specificity):');
+    for (int i = 0; i < sortedItems.length; i++) {
+      print('   ${sortedItems[i].route}');
+    }
+
+    for (int i = 0; i < sortedItems.length; i++) {
+      String route = sortedItems[i].route;
+      int originalIndex = items.indexOf(sortedItems[i]);
+
+      // Check if current path EXACTLY matches or ENDS WITH the route
+      // IMPORTANT: We need to ensure it's a full path segment match, not just substring
+      bool isExactMatch = currentPath == route;
+      bool isPathSegmentMatch = currentPath.endsWith(route) &&
+          (currentPath.length == route.length ||
+              currentPath[currentPath.length - route.length - 1] == '/');
+
+      print('🔍 Checking route: "$route" (original index: $originalIndex)');
+      print('   Exact match? $isExactMatch');
+      print('   Path segment match? $isPathSegmentMatch');
+
+      if (isExactMatch || isPathSegmentMatch) {
+        if (selectedIndex.value != originalIndex) {
+          selectedIndex.value = originalIndex;
+          print('✅ Synced to index: $originalIndex, route: $route');
+        } else {
+          print('ℹ️ Already at correct index: $originalIndex');
         }
         return;
       }
     }
 
-    // If no match found, stay on current page or default to dashboard
-    print('⚠️ No route match found for: $currentPath');
-    // Don't force change to 0 - keep current selection
+    // If no match found, check if we should default to dashboard
+    print('⚠️ No route match found for: "$currentPath"');
+
+    // Only default to dashboard if we're at the root dashboard URL
+    if (currentPath == '/' || currentPath == '/dashboard' || currentPath.isEmpty) {
+      if (selectedIndex.value != 0) {
+        selectedIndex.value = 0;
+        print('✅ Defaulted to dashboard (index: 0)');
+      }
+    } else {
+      print('⚠️ Keeping current index: ${selectedIndex.value}');
+    }
   }
 
   void toggleNavigation() {
@@ -212,6 +256,7 @@ class DashboardController extends GetxController {
 
     final items = allItems;
     if (index < 0 || index >= items.length) {
+      print('⚠️ Index out of range, returning DashboardHomeView');
       return const DashboardHomeView();
     }
 
@@ -225,6 +270,7 @@ class DashboardController extends GetxController {
       // Ensure controller is registered before returning the view
         if (!Get.isRegistered<MyDevicesController>()) {
           Get.put(MyDevicesController());
+          print('📦 Registered MyDevicesController');
         }
         return const MyDevicesView();
       case Routes.SETTINGS:
@@ -232,6 +278,7 @@ class DashboardController extends GetxController {
       case Routes.POLICY_SETTINGS:
         return const PolicySettingsView();
       default:
+        print('⚠️ Unknown route: $route, returning DashboardHomeView');
         return const DashboardHomeView();
     }
   }
