@@ -1,14 +1,16 @@
 // lib/app/modules/add_new_devices/controllers/add_new_devices_controller.dart
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maheksync/app/constant/constants.dart';
+import 'package:maheksync/app/models/category_model.dart';
 import 'package:maheksync/app/models/device_model.dart';
+import 'package:maheksync/app/models/payment_method_model.dart';
 import 'package:maheksync/app/services/imagekit_api.dart';
+import 'package:maheksync/app/utils/category_firestore_utils.dart';
 import 'package:maheksync/app/utils/device_firestore_utils.dart';
+import 'package:maheksync/app/utils/payment_method_firestore_utils.dart';
 import '../../../constant/show_toast.dart';
 
 class AddNewDevicesController extends GetxController {
@@ -19,7 +21,12 @@ class AddNewDevicesController extends GetxController {
   final priceController = TextEditingController();
   final storeNameController = TextEditingController();
 
-  final selectedCategory = 'Art & Decor'.obs;
+  // Dynamic data from Firestore
+  final categories = <CategoryModel>[].obs;
+  final paymentMethods = <PaymentMethodModel>[].obs;
+
+  final selectedCategory = Rxn<CategoryModel>();
+  final selectedPaymentMethod = Rxn<PaymentMethodModel>();
   final selectedCondition = 'NEW'.obs;
   final purchaseDate = Rxn<DateTime>();
 
@@ -29,8 +36,26 @@ class AddNewDevicesController extends GetxController {
   final imageBytes = <Uint8List>[].obs;
   final isLoading = false.obs;
 
-  final categories = ['Art & Decor', 'Computing', 'Mobile', 'Tablet', 'Wearable', 'Audio', 'Accessories'];
   final conditions = ['NEW', 'USED', 'REFURB', 'MINT', 'FACTORY NEW'];
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadCategories();
+    loadPaymentMethods();
+  }
+
+  void loadCategories() {
+    CategoryFirestoreUtils.getCategories().listen((cats) {
+      categories.value = cats;
+    });
+  }
+
+  void loadPaymentMethods() {
+    PaymentMethodFirestoreUtils.getPaymentMethods().listen((methods) {
+      paymentMethods.value = methods;
+    });
+  }
 
   @override
   void onClose() {
@@ -92,13 +117,14 @@ class AddNewDevicesController extends GetxController {
         ownerId: MahekConstant.ownerModel?.id,
         deviceName: deviceNameController.text.trim(),
         brandName: brandNameController.text.trim(),
-        category: selectedCategory.value,
+        category: selectedCategory.value?.name ?? 'Uncategorized',
         condition: selectedCondition.value,
         price: double.tryParse(priceController.text) ?? 0.0,
         storeName: storeNameController.text.trim(),
         description: descriptionController.text.trim(),
         purchaseDate: purchaseDate.value,
         warrantyEndDate: warrantyEndDate.value,
+        paymentMethod: selectedPaymentMethod.value?.pName,
         deviceImageUrls: uploadedUrls,
       );
 

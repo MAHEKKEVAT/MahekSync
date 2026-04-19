@@ -240,7 +240,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
         ),
         Expanded(
           child: Obx(() => Container(
-            height: 400,
+            height: 900,
             decoration: BoxDecoration(
               color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
               borderRadius: BorderRadius.circular(20),
@@ -249,7 +249,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
               borderRadius: BorderRadius.circular(20),
               child: Image.network(
                 images[controller.currentImageIndex.value],
-                fit: BoxFit.contain,
+                fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Center(
                   child: Icon(
                     Icons.broken_image_outlined,

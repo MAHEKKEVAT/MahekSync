@@ -123,9 +123,17 @@ class DashboardView extends GetView<DashboardController> {
                   color: AppThemeData.primary50.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: AppLogoWidget(
-                  height: isMobile ? 34 : 38,
-                  width: isMobile ? 34 : 38,
+                child:
+                SizedBox(
+                  width: 38,
+                  height: 38,
+                  child: Lottie.asset(
+                    'assets/animation/diamond.json',
+                    width: 30,
+                    height: 30,
+                    fit: BoxFit.contain,
+                    repeat: true,
+                  ),
                 ),
               ),
               spaceW(width: 14),
@@ -444,35 +452,6 @@ class DashboardView extends GetView<DashboardController> {
           margin: const EdgeInsets.only(right: 12),
           child: Row(
             children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFFFFD700),
-                      const Color(0xFFFFA000),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFFD700).withValues(alpha: 0.4),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Lottie.asset(
-                  'assets/animation/diamond.json',
-                  width: 20,
-                  height: 20,
-                  fit: BoxFit.contain,
-                  repeat: true,
-                ),
-              ),
               if (!isMobile) ...[
                 spaceW(width: 8),
                 Column(
@@ -481,15 +460,9 @@ class DashboardView extends GetView<DashboardController> {
                   children: [
                     TextCustom(
                       title: 'PREMIUM',
-                      fontSize: 10,
+                      fontSize: 23,
                       fontFamily: FontFamily.bold,
                       color: const Color(0xFFFFD700),
-                    ),
-                    TextCustom(
-                      title: 'MahekAdmin',
-                      fontSize: 13,
-                      fontFamily: FontFamily.semiBold,
-                      color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                     ),
                   ],
                 ),
