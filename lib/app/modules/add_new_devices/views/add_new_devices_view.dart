@@ -84,7 +84,6 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                     _buildTextField('DESCRIPTION', controller.descriptionController, 'Describe the item\'s movement, material, and aesthetic impact...', isDark, maxLines: 2),
                     spaceH(height: 28),
                     _buildSectionTitle('SPECIFICATIONS & LOGISTICS', isDark),
-                    spaceH(height: 16),
                     spaceH(height: 14),
                     Row(
                       children: [
@@ -93,9 +92,6 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                         Expanded(child: _buildWarrantyDatePicker(isDark)),
                       ],
                     ),
-
-                    spaceH(height: 14),
-                    _buildDatePicker(isDark),
                   ],
                 ),
               ),

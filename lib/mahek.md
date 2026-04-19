@@ -27,7 +27,7 @@ git pull origin main
 flutter build web --base-href "/MahekSync/"
 xcopy build\web\* docs\ /E /H /Y
 git add .
-git commit -m "test"
+git commit -m "Add Payment Method"
 git push origin main
 ```
 

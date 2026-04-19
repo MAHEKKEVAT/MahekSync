@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:maheksync/app/modules/admin_profile/views/admin_profile_view.dart';
 import 'package:maheksync/app/modules/my_devices/controllers/my_devices_controller.dart';
 import 'package:maheksync/app/modules/my_devices/views/my_devices_view.dart';
+import 'package:maheksync/app/modules/payement_method/views/payement_method_view.dart' show PaymentMethodsView;
 import 'package:maheksync/app/modules/policy_settings/views/policy_settings_view.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/modules/settings/views/settings_view.dart';
@@ -12,6 +13,7 @@ import 'package:maheksync/app/modules/settings/views/settings_view.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/font_family.dart';
 import '../../../widgets/text_widget.dart';
+import '../../payement_method/controllers/payement_method_controller.dart';
 import '../views/dashboard_home_view.dart';
 
 class DashboardController extends GetxController {
@@ -44,9 +46,16 @@ class DashboardController extends GetxController {
         NavigationItem(
           title: 'My Devices'.tr,
           icon: Icons.devices_outlined,
-          selectedIcon: Icons.devices,
+          selectedIcon: Icons.devices_rounded,
           route: Routes.MY_DEVICES,
           svgIcon: 'assets/icons/ic_devices.svg',
+        ),
+        NavigationItem(
+          title: 'Payment Methods'.tr,
+          icon: Icons.payment_outlined,
+          selectedIcon: Icons.payment_rounded,
+          route: Routes.PAYEMENT_METHOD,
+          svgIcon: 'assets/icons/ic_payment.svg',
         ),
       ],
     ),
@@ -273,6 +282,12 @@ class DashboardController extends GetxController {
           print('📦 Registered MyDevicesController');
         }
         return const MyDevicesView();
+      case Routes.PAYEMENT_METHOD:
+        if (!Get.isRegistered<PaymentMethodsController>()) {
+          Get.put(PaymentMethodsController());
+          print('📦 Registered PaymentMethodsController');
+        }
+        return const PaymentMethodsView();
       case Routes.SETTINGS:
         return const SettingsView();
       case Routes.POLICY_SETTINGS:

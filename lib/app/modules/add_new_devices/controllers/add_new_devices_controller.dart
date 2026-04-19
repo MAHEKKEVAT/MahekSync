@@ -105,7 +105,7 @@ class AddNewDevicesController extends GetxController {
       final success = await DeviceFirestoreUtils.addDevice(device);
 
       if (success) {
-        ShowToastDialog.showSuccess('Device registered successfully!');
+        ShowToastDialog.showSuccess('Device Registered successfully!');
         Get.back(result: true);
       } else {
         ShowToastDialog.showError('Failed to register device');

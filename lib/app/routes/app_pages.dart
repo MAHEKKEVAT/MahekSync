@@ -1,6 +1,4 @@
 import 'package:get/get.dart';
-import 'package:maheksync/app/modules/dashboard/views/dashboard_view.dart';
-import 'package:maheksync/app/modules/my_devices/bindings/my_devices_binding.dart';
 
 import '../modules/add_new_devices/bindings/add_new_devices_binding.dart';
 import '../modules/add_new_devices/views/add_new_devices_view.dart';
@@ -9,8 +7,12 @@ import '../modules/admin_profile/views/admin_profile_view.dart';
 import '../modules/auth/bindings/auth_binding.dart';
 import '../modules/auth/views/auth_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
+import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/login_screen/bindings/login_screen_binding.dart';
 import '../modules/login_screen/views/login_screen_view.dart';
+import '../modules/my_devices/bindings/my_devices_binding.dart';
+import '../modules/payement_method/bindings/payement_method_binding.dart';
+import '../modules/payement_method/views/payement_method_view.dart';
 import '../modules/policy_settings/bindings/policy_settings_binding.dart';
 import '../modules/policy_settings/views/policy_settings_view.dart';
 import '../modules/settings/bindings/settings_binding.dart';
@@ -104,5 +106,8 @@ class AppPages {
     _dashboardPage(_Paths.WARRANTY_TRACKER),
     _dashboardPage(_Paths.EXPENSES),
     _dashboardPage(_Paths.SUPPORT),
+    _dashboardPage(_Paths.PAYMENT_METHODS, screenBinding: PaymentMethodsBinding()),
+
+
   ];
 }
