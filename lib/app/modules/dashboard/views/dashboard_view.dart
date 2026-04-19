@@ -21,6 +21,7 @@ import '../../../widgets/global_widgets.dart';
 import '../../../components/logout_dialog.dart';
 import '../../../widgets/text_widget.dart';
 import '../controllers/dashboard_controller.dart';
+import 'package:lottie/lottie.dart'; // Add this import at the top
 
 class DashboardView extends GetView<DashboardController> {
   const DashboardView({super.key});
@@ -437,7 +438,68 @@ class DashboardView extends GetView<DashboardController> {
               ),
             ),
           ),
+
+        // Premium Badge with Lottie
+        Container(
+          margin: const EdgeInsets.only(right: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFFFFD700),
+                      const Color(0xFFFFA000),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFFD700).withValues(alpha: 0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Lottie.asset(
+                  'assets/animation/diamond.json',
+                  width: 20,
+                  height: 20,
+                  fit: BoxFit.contain,
+                  repeat: true,
+                ),
+              ),
+              if (!isMobile) ...[
+                spaceW(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextCustom(
+                      title: 'PREMIUM',
+                      fontSize: 10,
+                      fontFamily: FontFamily.bold,
+                      color: const Color(0xFFFFD700),
+                    ),
+                    TextCustom(
+                      title: 'MahekAdmin',
+                      fontSize: 13,
+                      fontFamily: FontFamily.semiBold,
+                      color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+
         const Spacer(),
+
         Material(
           color: Colors.transparent,
           child: InkWell(

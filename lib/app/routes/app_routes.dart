@@ -19,6 +19,7 @@ abstract class Routes {
   static const POLICY_SETTINGS = _Paths.POLICY_SETTINGS;
   static const ADMIN_PROFILE = _Paths.ADMIN_PROFILE;
   static const PAYEMENT_METHOD = _Paths.PAYMENT_METHODS;
+  static const CATEGORIES = _Paths.CATEGORIES;
 }
 
 abstract class _Paths {
@@ -39,4 +40,5 @@ abstract class _Paths {
   static const POLICY_SETTINGS = '/policy-settings';
   static const ADMIN_PROFILE = '/admin-profile';
   static const PAYMENT_METHODS = '/dashboard/payment-methods'; // ADD THIS
+  static const CATEGORIES = '/dashboard/categories';
 }

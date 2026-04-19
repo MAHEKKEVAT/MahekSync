@@ -6,6 +6,8 @@ import '../modules/admin_profile/bindings/admin_profile_binding.dart';
 import '../modules/admin_profile/views/admin_profile_view.dart';
 import '../modules/auth/bindings/auth_binding.dart';
 import '../modules/auth/views/auth_view.dart';
+import '../modules/categories/bindings/categories_binding.dart';
+import '../modules/categories/views/categories_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/login_screen/bindings/login_screen_binding.dart';
@@ -106,8 +108,14 @@ class AppPages {
     _dashboardPage(_Paths.WARRANTY_TRACKER),
     _dashboardPage(_Paths.EXPENSES),
     _dashboardPage(_Paths.SUPPORT),
-    _dashboardPage(_Paths.PAYMENT_METHODS, screenBinding: PaymentMethodsBinding()),
+    _dashboardPage(_Paths.CATEGORIES, screenBinding: CategoriesBinding()),
 
-
+    _dashboardPage(_Paths.PAYMENT_METHODS,
+        screenBinding: PaymentMethodsBinding()),
+    GetPage(
+      name: _Paths.CATEGORIES,
+      page: () => const CategoriesView(),
+      binding: CategoriesBinding(),
+    ),
   ];
 }

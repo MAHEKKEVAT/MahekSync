@@ -3,6 +3,8 @@ import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/modules/admin_profile/views/admin_profile_view.dart';
+import 'package:maheksync/app/modules/categories/controllers/categories_controller.dart';
+import 'package:maheksync/app/modules/categories/views/categories_view.dart';
 import 'package:maheksync/app/modules/my_devices/controllers/my_devices_controller.dart';
 import 'package:maheksync/app/modules/my_devices/views/my_devices_view.dart';
 import 'package:maheksync/app/modules/payement_method/views/payement_method_view.dart' show PaymentMethodsView;
@@ -57,8 +59,17 @@ class DashboardController extends GetxController {
           route: Routes.PAYEMENT_METHOD,
           svgIcon: 'assets/icons/ic_payment.svg',
         ),
+        NavigationItem(
+          title: 'Categories'.tr,
+          icon: Icons.category_outlined,
+          selectedIcon: Icons.category_rounded,
+          route: Routes.CATEGORIES,
+          svgIcon: 'assets/icons/ic_categories.svg',
+        ),
+
       ],
     ),
+
 
     // ── Settings ──
     NavigationSection(
@@ -288,6 +299,11 @@ class DashboardController extends GetxController {
           print('📦 Registered PaymentMethodsController');
         }
         return const PaymentMethodsView();
+      case Routes.CATEGORIES:
+        if (!Get.isRegistered<CategoriesController>()) {
+          Get.put(CategoriesController());
+        }
+        return const CategoriesView();
       case Routes.SETTINGS:
         return const SettingsView();
       case Routes.POLICY_SETTINGS:

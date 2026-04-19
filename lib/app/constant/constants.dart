@@ -11,8 +11,6 @@ import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-
-import '../models/constant_model.dart';
 import '../utils/app_colors.dart';
 
 enum Status { active, inactive }
@@ -21,7 +19,7 @@ class MahekConstant {
   static bool isLogin = false;
   static bool isDemo = false;
   static String clientIdForGoogleLogin = "";
-  static RxString appName = "parkez".obs;
+  static RxString appName = "MahekAdmin".obs;
   static String? appIconLight;
   static String? appIconDark;
 
