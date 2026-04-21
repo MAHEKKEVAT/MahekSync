@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../modules/add_edit_purchase/bindings/add_edit_purchase_binding.dart';
+import '../modules/add_edit_purchase/views/add_edit_purchase_view.dart';
 import '../modules/add_new_devices/bindings/add_new_devices_binding.dart';
 import '../modules/add_new_devices/views/add_new_devices_view.dart';
 import '../modules/admin_profile/bindings/admin_profile_binding.dart';
@@ -13,6 +15,8 @@ import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/login_screen/bindings/login_screen_binding.dart';
 import '../modules/login_screen/views/login_screen_view.dart';
 import '../modules/my_devices/bindings/my_devices_binding.dart';
+import '../modules/my_purchases/bindings/my_purchases_binding.dart';
+import '../modules/my_purchases/views/my_purchases_view.dart';
 import '../modules/payement_method/bindings/payement_method_binding.dart';
 import '../modules/payement_method/views/payement_method_view.dart';
 import '../modules/policy_settings/bindings/policy_settings_binding.dart';
@@ -109,6 +113,8 @@ class AppPages {
     _dashboardPage(_Paths.EXPENSES),
     _dashboardPage(_Paths.SUPPORT),
     _dashboardPage(_Paths.CATEGORIES, screenBinding: CategoriesBinding()),
+    _dashboardPage(_Paths.MY_PURCHASES, screenBinding: MyPurchasesBinding()),
+
 
     _dashboardPage(_Paths.PAYMENT_METHODS,
         screenBinding: PaymentMethodsBinding()),
@@ -116,6 +122,11 @@ class AppPages {
       name: _Paths.CATEGORIES,
       page: () => const CategoriesView(),
       binding: CategoriesBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADD_EDIT_PURCHASE,
+      page: () => const AddEditPurchaseView(),
+      binding: AddEditPurchaseBinding(),
     ),
   ];
 }

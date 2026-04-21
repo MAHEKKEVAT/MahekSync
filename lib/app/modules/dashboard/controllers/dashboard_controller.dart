@@ -7,6 +7,8 @@ import 'package:maheksync/app/modules/categories/controllers/categories_controll
 import 'package:maheksync/app/modules/categories/views/categories_view.dart';
 import 'package:maheksync/app/modules/my_devices/controllers/my_devices_controller.dart';
 import 'package:maheksync/app/modules/my_devices/views/my_devices_view.dart';
+import 'package:maheksync/app/modules/my_purchases/controllers/my_purchases_controller.dart';
+import 'package:maheksync/app/modules/my_purchases/views/my_purchases_view.dart';
 import 'package:maheksync/app/modules/payement_method/views/payement_method_view.dart' show PaymentMethodsView;
 import 'package:maheksync/app/modules/policy_settings/views/policy_settings_view.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
@@ -65,6 +67,13 @@ class DashboardController extends GetxController {
           selectedIcon: Icons.category_rounded,
           route: Routes.CATEGORIES,
           svgIcon: 'assets/icons/ic_categories.svg',
+        ),
+        NavigationItem(
+          title: 'My Purchases'.tr,
+          icon: Icons.shopping_bag_outlined,
+          selectedIcon: Icons.shopping_bag_rounded,
+          route: Routes.MY_PURCHASES,
+          svgIcon: 'assets/icons/ic_purchases.svg',
         ),
 
       ],
@@ -304,6 +313,11 @@ class DashboardController extends GetxController {
           Get.put(CategoriesController());
         }
         return const CategoriesView();
+      case Routes.MY_PURCHASES:
+        if (!Get.isRegistered<MyPurchasesController>()) {
+          Get.put(MyPurchasesController());
+        }
+        return const MyPurchasesView();
       case Routes.SETTINGS:
         return const SettingsView();
       case Routes.POLICY_SETTINGS:

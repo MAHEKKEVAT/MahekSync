@@ -20,6 +20,8 @@ abstract class Routes {
   static const ADMIN_PROFILE = _Paths.ADMIN_PROFILE;
   static const PAYEMENT_METHOD = _Paths.PAYMENT_METHODS;
   static const CATEGORIES = _Paths.CATEGORIES;
+  static const MY_PURCHASES = _Paths.MY_PURCHASES;
+  static const ADD_EDIT_PURCHASE = _Paths.ADD_EDIT_PURCHASE;
 }
 
 abstract class _Paths {
@@ -41,4 +43,6 @@ abstract class _Paths {
   static const ADMIN_PROFILE = '/admin-profile';
   static const PAYMENT_METHODS = '/dashboard/payment-methods'; // ADD THIS
   static const CATEGORIES = '/dashboard/categories';
+  static const MY_PURCHASES = '/dashboard/my-purchases';
+  static const ADD_EDIT_PURCHASE = '/add-edit-purchase';
 }
