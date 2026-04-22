@@ -20,6 +20,7 @@ class MyPurchasesController extends GetxController {
   final isGridView = true.obs;
   final selectedDateRange = Rxn<DateTimeRange>();
 
+  final showFilterPanel = true.obs;
 
   // Filters
   final categories = <CategoryModel>[].obs;
@@ -196,6 +197,11 @@ class MyPurchasesController extends GetxController {
           colorText: Colors.white);
     }
   }
+
+  void toggleFilterPanel() {
+    showFilterPanel.value = !showFilterPanel.value;
+  }
+
   void filterByDateRange(DateTimeRange? range) {
     selectedDateRange.value = range;
     _applyFilters();
