@@ -22,6 +22,7 @@ abstract class Routes {
   static const CATEGORIES = _Paths.CATEGORIES;
   static const MY_PURCHASES = _Paths.MY_PURCHASES;
   static const ADD_EDIT_PURCHASE = _Paths.ADD_EDIT_PURCHASE;
+  static const MY_PURCHASES_DETAILS = _Paths.MY_PURCHASES_DETAILS;
 }
 
 abstract class _Paths {
@@ -45,4 +46,5 @@ abstract class _Paths {
   static const CATEGORIES = '/dashboard/categories';
   static const MY_PURCHASES = '/dashboard/my-purchases';
   static const ADD_EDIT_PURCHASE = '/add-edit-purchase';
+  static const MY_PURCHASES_DETAILS = '/my-purchases-details';
 }

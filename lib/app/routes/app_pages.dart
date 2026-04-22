@@ -17,6 +17,8 @@ import '../modules/login_screen/views/login_screen_view.dart';
 import '../modules/my_devices/bindings/my_devices_binding.dart';
 import '../modules/my_purchases/bindings/my_purchases_binding.dart';
 import '../modules/my_purchases/views/my_purchases_view.dart';
+import '../modules/my_purchases_details/bindings/my_purchases_details_binding.dart';
+import '../modules/my_purchases_details/views/my_purchases_details_view.dart';
 import '../modules/payement_method/bindings/payement_method_binding.dart';
 import '../modules/payement_method/views/payement_method_view.dart';
 import '../modules/policy_settings/bindings/policy_settings_binding.dart';
@@ -115,7 +117,6 @@ class AppPages {
     _dashboardPage(_Paths.CATEGORIES, screenBinding: CategoriesBinding()),
     _dashboardPage(_Paths.MY_PURCHASES, screenBinding: MyPurchasesBinding()),
 
-
     _dashboardPage(_Paths.PAYMENT_METHODS,
         screenBinding: PaymentMethodsBinding()),
     GetPage(
@@ -127,6 +128,11 @@ class AppPages {
       name: _Paths.ADD_EDIT_PURCHASE,
       page: () => const AddEditPurchaseView(),
       binding: AddEditPurchaseBinding(),
+    ),
+    GetPage(
+      name: _Paths.MY_PURCHASES_DETAILS,
+      page: () => const MyPurchasesDetailsView(),
+      binding: MyPurchasesDetailsBinding(),
     ),
   ];
 }

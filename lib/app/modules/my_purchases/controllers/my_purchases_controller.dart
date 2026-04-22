@@ -17,6 +17,10 @@ class MyPurchasesController extends GetxController {
   final isLoading = true.obs;
   final searchQuery = ''.obs;
 
+  final isGridView = true.obs;
+  final selectedDateRange = Rxn<DateTimeRange>();
+
+
   // Filters
   final categories = <CategoryModel>[].obs;
   final paymentMethods = <PaymentMethodModel>[].obs;
@@ -103,6 +107,14 @@ class MyPurchasesController extends GetxController {
       result = result.where((p) => p.status == selectedStatus.value).toList();
     }
 
+    if (selectedDateRange.value != null) {
+      result = result.where((p) {
+        if (p.purchaseDate == null) return false;
+        return p.purchaseDate!.isAfter(selectedDateRange.value!.start) &&
+            p.purchaseDate!.isBefore(selectedDateRange.value!.end.add(const Duration(days: 1)));
+      }).toList();
+    }
+
     filteredPurchases.value = result;
   }
 
@@ -131,6 +143,7 @@ class MyPurchasesController extends GetxController {
     selectedCategory.value = null;
     selectedPaymentMethod.value = null;
     selectedStatus.value = 'ALL';
+    selectedDateRange.value = null;
     _applyFilters();
   }
 
@@ -183,4 +196,9 @@ class MyPurchasesController extends GetxController {
           colorText: Colors.white);
     }
   }
+  void filterByDateRange(DateTimeRange? range) {
+    selectedDateRange.value = range;
+    _applyFilters();
+  }
+
 }
