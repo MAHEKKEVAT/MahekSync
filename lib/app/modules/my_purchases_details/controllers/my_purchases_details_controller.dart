@@ -47,6 +47,8 @@ class MyPurchasesDetailsController extends GetxController {
   final newImages = <XFile>[].obs;
   final newImageBytes = <Uint8List>[].obs;
   final removedImages = <String>[].obs;
+  final selectedImageIndex = 0.obs;
+
 
   @override
   void onInit() {
@@ -129,13 +131,29 @@ class MyPurchasesDetailsController extends GetxController {
   }
 
   void removeNewImage(int index) {
+    final wasSelected = selectedImageIndex.value == existingImages.length + index;
     newImages.removeAt(index);
     newImageBytes.removeAt(index);
+
+    if (wasSelected) {
+      final totalImages = existingImages.length + newImageBytes.length;
+      if (totalImages > 0) {
+        selectedImageIndex.value = selectedImageIndex.value.clamp(0, totalImages - 1);
+      }
+    }
   }
 
   void removeExistingImage(String imageUrl) {
+    final wasSelected = selectedImageIndex.value == existingImages.indexOf(imageUrl);
     existingImages.remove(imageUrl);
     removedImages.add(imageUrl);
+
+    if (wasSelected) {
+      final totalImages = existingImages.length + newImageBytes.length;
+      if (totalImages > 0) {
+        selectedImageIndex.value = selectedImageIndex.value.clamp(0, totalImages - 1);
+      }
+    }
   }
 
   void setPurchaseDate(DateTime date) => purchaseDate.value = date;
@@ -245,6 +263,19 @@ class MyPurchasesDetailsController extends GetxController {
     }
   }
 
+  void nextImage() {
+    final totalImages = existingImages.length + newImageBytes.length;
+    if (totalImages > 0) {
+      selectedImageIndex.value = (selectedImageIndex.value + 1) % totalImages;
+    }
+  }
+
+  void previousImage() {
+    final totalImages = existingImages.length + newImageBytes.length;
+    if (totalImages > 0) {
+      selectedImageIndex.value = (selectedImageIndex.value - 1 + totalImages) % totalImages;
+    }
+  }
   @override
   void onClose() {
     assetNameController.dispose();

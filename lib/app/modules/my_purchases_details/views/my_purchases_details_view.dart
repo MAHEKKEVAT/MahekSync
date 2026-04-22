@@ -24,6 +24,10 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     final isDark = themeChange.isDarkTheme();
 
+    final selectedImageIndex = 0.obs;
+
+
+
     return Scaffold(
       backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey2,
       appBar: AppBar(
@@ -138,240 +142,465 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
   }
 
   Widget _buildContent(bool isDark) {
-    return Row(
-      children: [
-        // Left Panel - Images Gallery
-        Container(
-          width: 450,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-            border: Border(
-              right: BorderSide(
-                color: isDark ? AppThemeData.grey9 : AppThemeData.grey3,
-                width: 1,
-              ),
-            ),
-          ),
-          child: Column(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image Gallery Section at Top
+          _buildMainImageGallery(isDark),
+          spaceH(height: 24),
+
+          // Status Card
+          _buildStatusCard(isDark),
+          spaceH(height: 24),
+
+          // Details Grid
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppThemeData.primary50.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.image_rounded,
-                      color: AppThemeData.primary50,
-                      size: 22,
-                    ),
-                  ),
-                  spaceW(width: 12),
-                  TextCustom(
-                    title: 'Gallery',
-                    fontSize: 18,
-                    fontFamily: FontFamily.bold,
-                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                  ),
-                  const Spacer(),
-                  if (controller.isEditMode.value)
-                    TextButton.icon(
-                      onPressed: controller.pickImages,
-                      icon: Icon(Icons.add_photo_alternate_rounded, color: AppThemeData.primary50, size: 18),
-                      label: TextCustom(
-                        title: 'Add Images',
-                        fontSize: 13,
-                        color: AppThemeData.primary50,
-                      ),
-                    ),
-                ],
-              ),
-              spaceH(height: 20),
               Expanded(
-                child: _buildImageGallery(isDark),
+                child: _buildIdentitySection(isDark),
+              ),
+              spaceW(width: 20),
+              Expanded(
+                child: _buildFinancialSection(isDark),
               ),
             ],
           ),
-        ),
-        // Right Panel - Details
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildStatusCard(isDark),
-                spaceH(height: 24),
-                _buildIdentitySection(isDark),
-                spaceH(height: 24),
-                _buildFinancialSection(isDark),
-                spaceH(height: 24),
-                _buildLogisticsSection(isDark),
-                spaceH(height: 24),
-                _buildDescriptionSection(isDark),
-              ],
-            ),
+          spaceH(height: 20),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildLogisticsSection(isDark),
+              ),
+              spaceW(width: 20),
+              Expanded(
+                child: _buildDescriptionSection(isDark),
+              ),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildImageGallery(bool isDark) {
+  Widget _buildMainImageGallery(bool isDark) {
     return Obx(() {
       final existingImages = controller.existingImages;
       final newImageBytes = controller.newImageBytes;
 
-      if (existingImages.isEmpty && newImageBytes.isEmpty) {
-        return _buildEmptyGallery(isDark);
+      // Combine all images for display
+      final allImages = <ImageItem>[];
+      for (var url in existingImages) {
+        allImages.add(ImageItem(networkUrl: url));
+      }
+      for (var bytes in newImageBytes) {
+        allImages.add(ImageItem(memoryImage: bytes));
       }
 
-      return GridView.builder(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 180,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1,
+      return Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
-        itemCount: existingImages.length + newImageBytes.length,
-        itemBuilder: (context, index) {
-          if (index < existingImages.length) {
-            return _buildImageTile(
-              isDark,
-              networkUrl: existingImages[index],
-              onRemove: controller.isEditMode.value
-                  ? () => controller.removeExistingImage(existingImages[index])
-                  : null,
-            );
-          } else {
-            final newIndex = index - existingImages.length;
-            return _buildImageTile(
-              isDark,
-              memoryImage: newImageBytes[newIndex],
-              onRemove: () => controller.removeNewImage(newIndex),
-            );
-          }
-        },
+        child: Column(
+          children: [
+            // Main Image Display
+            Container(
+              height: 400,
+              decoration: BoxDecoration(
+                color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Obx(() {
+                final selectedIndex = controller.selectedImageIndex.value;
+                if (allImages.isEmpty) {
+                  return _buildEmptyMainImage(isDark);
+                }
+
+                final selectedImage = allImages[selectedIndex.clamp(0, allImages.length - 1)];
+                return Stack(
+                  children: [
+                    // Main Image
+                    Center(
+                      child: Container(
+                        margin: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: selectedImage.networkUrl != null
+                              ? NetworkImageWidget(
+                            imageUrl: selectedImage.networkUrl!,
+                            fit: BoxFit.contain,
+                          )
+                              : selectedImage.memoryImage != null
+                              ? Image.memory(
+                            selectedImage.memoryImage!,
+                            fit: BoxFit.contain,
+                          )
+                              : const SizedBox(),
+                        ),
+                      ),
+                    ),
+
+                    // Navigation Arrows
+                    if (allImages.length > 1) ...[
+                      Positioned(
+                        left: 16,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: _buildNavButton(
+                            icon: Icons.chevron_left_rounded,
+                            onTap: () => controller.previousImage(),
+                            isDark: isDark,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 16,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: _buildNavButton(
+                            icon: Icons.chevron_right_rounded,
+                            onTap: () => controller.nextImage(),
+                            isDark: isDark,
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    // Image Counter
+                    if (allImages.length > 1)
+                      Positioned(
+                        bottom: 16,
+                        right: 16,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: TextCustom(
+                            title: '${selectedIndex + 1} / ${allImages.length}',
+                            fontSize: 13,
+                            fontFamily: FontFamily.medium,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+
+                    // Add Image Button (Edit Mode)
+                    if (controller.isEditMode.value)
+                      Positioned(
+                        top: 16,
+                        right: 16,
+                        child: GestureDetector(
+                          onTap: controller.pickImages,
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppThemeData.primary50,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppThemeData.primary50.withValues(alpha: 0.4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.add_photo_alternate_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              }),
+            ),
+
+            // Thumbnail Strip
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+                    width: 0.5,
+                  ),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: AppThemeData.primary50,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      spaceW(width: 10),
+                      TextCustom(
+                        title: 'Gallery (${allImages.length} images)',
+                        fontSize: 14,
+                        fontFamily: FontFamily.bold,
+                        color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
+                      ),
+                      const Spacer(),
+                      if (controller.isEditMode.value)
+                        TextButton.icon(
+                          onPressed: controller.pickImages,
+                          icon: Icon(Icons.add_rounded, color: AppThemeData.primary50, size: 16),
+                          label: TextCustom(
+                            title: 'Add More',
+                            fontSize: 12,
+                            color: AppThemeData.primary50,
+                          ),
+                        ),
+                    ],
+                  ),
+                  spaceH(height: 12),
+                  if (allImages.isEmpty)
+                    _buildEmptyThumbnails(isDark)
+                  else
+                    SizedBox(
+                      height: 80,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: allImages.length,
+                        separatorBuilder: (_, __) => spaceW(width: 10),
+                        itemBuilder: (context, index) {
+                          return _buildThumbnail(
+                            image: allImages[index],
+                            index: index,
+                            isSelected: controller.selectedImageIndex.value == index,
+                            isDark: isDark,
+                            onRemove: controller.isEditMode.value
+                                ? () {
+                              if (index < existingImages.length) {
+                                controller.removeExistingImage(existingImages[index]);
+                              } else {
+                                controller.removeNewImage(index - existingImages.length);
+                              }
+                              // Update selected index if needed
+                              if (controller.selectedImageIndex.value >= allImages.length - 1) {
+                                controller.selectedImageIndex.value = (allImages.length - 2).clamp(0, allImages.length - 1);
+                              }
+                            }
+                                : null,
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       );
     });
   }
 
-  Widget _buildEmptyGallery(bool isDark) {
-    return Center(
+  Widget _buildNavButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(40),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-            width: 1,
-            style: BorderStyle.solid,
-          ),
+          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(30),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.image_outlined,
-              size: 64,
-              color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
-            ),
-            spaceH(height: 16),
-            TextCustom(
-              title: 'No images',
-              fontSize: 16,
-              fontFamily: FontFamily.medium,
-              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-            ),
-            if (controller.isEditMode.value) ...[
-              spaceH(height: 8),
-              ElevatedButton.icon(
-                onPressed: controller.pickImages,
-                icon: const Icon(Icons.add_photo_alternate_rounded, size: 18),
-                label: TextCustom(
-                  title: 'Add Images',
-                  fontSize: 13,
-                  color: Colors.white,
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppThemeData.primary50,
-                ),
-              ),
-            ],
-          ],
+        child: Icon(
+          icon,
+          color: isDark ? Colors.white : Colors.black,
+          size: 28,
         ),
       ),
     );
   }
 
-  Widget _buildImageTile(
-      bool isDark, {
-        Uint8List? memoryImage,
-        String? networkUrl,
-        VoidCallback? onRemove,
-      }) {
-    return Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-              width: 1,
-            ),
+  Widget _buildEmptyMainImage(bool isDark) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.image_outlined,
+            size: 80,
+            color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: memoryImage != null
-                ? Image.memory(
-              memoryImage,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            )
-                : networkUrl != null
-                ? NetworkImageWidget(
-              imageUrl: networkUrl,
-              fit: BoxFit.cover,
-            )
-                : const SizedBox(),
+          spaceH(height: 16),
+          TextCustom(
+            title: 'No images available',
+            fontSize: 16,
+            fontFamily: FontFamily.medium,
+            color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
           ),
-        ),
-        if (onRemove != null)
-          Positioned(
-            top: 8,
-            right: 8,
-            child: GestureDetector(
-              onTap: onRemove,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppThemeData.danger300,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.close_rounded,
-                  color: Colors.white,
-                  size: 14,
+          if (controller.isEditMode.value) ...[
+            spaceH(height: 12),
+            ElevatedButton.icon(
+              onPressed: controller.pickImages,
+              icon: const Icon(Icons.add_photo_alternate_rounded),
+              label: TextCustom(
+                title: 'Add Images',
+                fontSize: 14,
+                color: Colors.white,
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppThemeData.primary50,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyThumbnails(bool isDark) {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+          width: 1,
+          style: BorderStyle.solid,
+        ),
+      ),
+      child: Center(
+        child: TextCustom(
+          title: 'No images uploaded yet',
+          fontSize: 13,
+          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnail({
+    required ImageItem image,
+    required int index,
+    required bool isSelected,
+    required bool isDark,
+    VoidCallback? onRemove,
+  }) {
+    return GestureDetector(
+      onTap: () => controller.selectedImageIndex.value = index,
+      child: Container(
+        width: 80,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? AppThemeData.primary50 : Colors.transparent,
+            width: 2.5,
           ),
-      ],
+          boxShadow: isSelected
+              ? [
+            BoxShadow(
+              color: AppThemeData.primary50.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ]
+              : null,
+        ),
+        child: Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppThemeData.grey8 : AppThemeData.grey2,
+                ),
+                child: image.networkUrl != null
+                    ? NetworkImageWidget(
+                  imageUrl: image.networkUrl!,
+                  fit: BoxFit.cover,
+                  height: 80,
+                  width: 80,
+                )
+                    : image.memoryImage != null
+                    ? Image.memory(
+                  image.memoryImage!,
+                  fit: BoxFit.cover,
+                  height: 80,
+                  width: 80,
+                )
+                    : const SizedBox(),
+              ),
+            ),
+            if (onRemove != null)
+              Positioned(
+                top: 4,
+                right: 4,
+                child: GestureDetector(
+                  onTap: onRemove,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppThemeData.danger300,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 12,
+                    ),
+                  ),
+                ),
+              ),
+            if (isSelected)
+              Positioned(
+                bottom: 4,
+                left: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: AppThemeData.primary50,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -392,20 +621,34 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
           color: (controller.purchase.value?.statusColor ?? Colors.grey).withValues(alpha: 0.3),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              color: (controller.purchase.value?.statusColor ?? Colors.grey).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(14),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  (controller.purchase.value?.statusColor ?? Colors.grey).withValues(alpha: 0.2),
+                  (controller.purchase.value?.statusColor ?? Colors.grey).withValues(alpha: 0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
               Icons.shopping_bag_rounded,
               color: controller.purchase.value?.statusColor,
-              size: 24,
+              size: 28,
             ),
           ),
           spaceW(width: 16),
@@ -423,7 +666,7 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                 _buildStatusDropdown(isDark)
               else
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
                     color: (controller.purchase.value?.statusColor ?? Colors.grey).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
@@ -450,7 +693,7 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
               spaceH(height: 4),
               TextCustom(
                 title: '₹${(controller.purchase.value?.price ?? 0).toStringAsFixed(2)}',
-                fontSize: 24,
+                fontSize: 28,
                 fontFamily: FontFamily.bold,
                 color: AppThemeData.primary50,
               ),
@@ -495,9 +738,10 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
   }
 
   Widget _buildIdentitySection(bool isDark) {
-    return _buildSection(
+    return _buildSectionCard(
       title: 'Identity & Origin',
       icon: Icons.inventory_2_outlined,
+      color: AppThemeData.primary50,
       isDark: isDark,
       child: Column(
         children: [
@@ -509,23 +753,15 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
             isEditMode: controller.isEditMode.value,
           ),
           spaceH(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailRow(
-                  label: 'Brand',
-                  value: controller.purchase.value?.brand ?? '—',
-                  textController: controller.brandController,
-                  isDark: isDark,
-                  isEditMode: controller.isEditMode.value,
-                ),
-              ),
-              spaceW(width: 16),
-              Expanded(
-                child: _buildCategoryField(isDark),
-              ),
-            ],
+          _buildDetailRow(
+            label: 'Brand',
+            value: controller.purchase.value?.brand ?? '—',
+            textController: controller.brandController,
+            isDark: isDark,
+            isEditMode: controller.isEditMode.value,
           ),
+          spaceH(height: 16),
+          _buildCategoryField(isDark),
         ],
       ),
     );
@@ -548,16 +784,23 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
           Obx(() => Row(
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: AppThemeData.primary50.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppThemeData.primary50.withValues(alpha: 0.15),
+                      AppThemeData.primary4.withValues(alpha: 0.08),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: controller.selectedCategory.value?.iconUrl != null &&
                     controller.selectedCategory.value!.iconUrl!.isNotEmpty
                     ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   child: NetworkImageWidget(
                     imageUrl: controller.selectedCategory.value!.iconUrl!,
                     fit: BoxFit.cover,
@@ -566,10 +809,10 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                     : Icon(
                   Icons.category_rounded,
                   color: AppThemeData.primary50,
-                  size: 18,
+                  size: 20,
                 ),
               ),
-              spaceW(width: 10),
+              spaceW(width: 12),
               TextCustom(
                 title: controller.selectedCategory.value?.name ?? controller.purchase.value?.category ?? '—',
                 fontSize: 15,
@@ -642,50 +885,35 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
   }
 
   Widget _buildFinancialSection(bool isDark) {
-    return _buildSection(
+    return _buildSectionCard(
       title: 'Financial Data',
       icon: Icons.attach_money_rounded,
+      color: AppThemeData.success400,
       isDark: isDark,
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailRow(
-                  label: 'Price',
-                  value: '₹${controller.purchase.value?.price?.toStringAsFixed(2) ?? '0.00'}',
-                  textController: controller.priceController,
-                  isDark: isDark,
-                  isEditMode: controller.isEditMode.value, // Add this
-                  isPrice: true,
-                ),
-              ),
-
-              spaceW(width: 16),
-              Expanded(
-                child: _buildPaymentMethodField(isDark),
-              ),
-            ],
+          _buildDetailRow(
+            label: 'Price',
+            value: '₹${controller.purchase.value?.price?.toStringAsFixed(2) ?? '0.00'}',
+            textController: controller.priceController,
+            isDark: isDark,
+            isEditMode: controller.isEditMode.value,
+            isPrice: true,
+            valueColor: AppThemeData.primary50,
           ),
           spaceH(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDateField(
-                  label: 'Purchase Date',
-                  date: controller.purchaseDate,
-                  isDark: isDark,
-                ),
-              ),
-              spaceW(width: 16),
-              Expanded(
-                child: _buildDateField(
-                  label: 'Warranty Date',
-                  date: controller.warrantyDate,
-                  isDark: isDark,
-                ),
-              ),
-            ],
+          _buildPaymentMethodField(isDark),
+          spaceH(height: 16),
+          _buildDateField(
+            label: 'Purchase Date',
+            date: controller.purchaseDate,
+            isDark: isDark,
+          ),
+          spaceH(height: 16),
+          _buildDateField(
+            label: 'Warranty Date',
+            date: controller.warrantyDate,
+            isDark: isDark,
           ),
         ],
       ),
@@ -709,16 +937,23 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
           Obx(() => Row(
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: AppThemeData.primary50.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppThemeData.primary50.withValues(alpha: 0.15),
+                      AppThemeData.primary4.withValues(alpha: 0.08),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: controller.selectedPaymentMethod.value?.pIcon != null &&
                     controller.selectedPaymentMethod.value!.pIcon!.isNotEmpty
                     ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   child: NetworkImageWidget(
                     imageUrl: controller.selectedPaymentMethod.value!.pIcon!,
                     fit: BoxFit.cover,
@@ -727,10 +962,10 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                     : Icon(
                   Icons.payment_rounded,
                   color: AppThemeData.primary50,
-                  size: 18,
+                  size: 20,
                 ),
               ),
-              spaceW(width: 10),
+              spaceW(width: 12),
               TextCustom(
                 title: controller.selectedPaymentMethod.value?.pName ??
                     controller.purchase.value?.paymentMethod ?? '—',
@@ -880,9 +1115,10 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
   }
 
   Widget _buildLogisticsSection(bool isDark) {
-    return _buildSection(
+    return _buildSectionCard(
       title: 'Logistics & State',
       icon: Icons.local_shipping_outlined,
+      color: AppThemeData.pending400,
       isDark: isDark,
       child: Column(
         children: [
@@ -894,26 +1130,8 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                   value: controller.purchase.value?.size ?? '—',
                   textController: controller.sizeController,
                   isDark: isDark,
-                  isEditMode: controller.isEditMode.value, // Add this
+                  isEditMode: controller.isEditMode.value,
                 ),
-              ),
-              spaceW(width: 16),
-              Expanded(
-                child: _buildDetailRow(
-                  label: 'Store / Location',
-                  value: controller.purchase.value?.storeLocation ?? '—',
-                  textController: controller.storeLocationController,
-                  isDark: isDark,
-                  isEditMode: controller.isEditMode.value, // Add this
-                ),
-              ),
-            ],
-          ),
-          spaceH(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildConditionField(isDark),
               ),
               spaceW(width: 16),
               Expanded(
@@ -922,11 +1140,21 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                   value: '${controller.purchase.value?.units ?? 1}',
                   textController: controller.unitsController,
                   isDark: isDark,
-                  isEditMode: controller.isEditMode.value, // Add this
+                  isEditMode: controller.isEditMode.value,
                 ),
               ),
             ],
           ),
+          spaceH(height: 16),
+          _buildDetailRow(
+            label: 'Store / Location',
+            value: controller.purchase.value?.storeLocation ?? '—',
+            textController: controller.storeLocationController,
+            isDark: isDark,
+            isEditMode: controller.isEditMode.value,
+          ),
+          spaceH(height: 16),
+          _buildConditionField(isDark),
         ],
       ),
     );
@@ -968,25 +1196,33 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
             ),
           )
         else
-          TextCustom(
-            title: controller.purchase.value?.condition ?? '—',
-            fontSize: 15,
-            fontFamily: FontFamily.semiBold,
-            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: (controller.purchase.value?.statusColor ?? Colors.grey).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: TextCustom(
+              title: controller.purchase.value?.condition ?? '—',
+              fontSize: 15,
+              fontFamily: FontFamily.semiBold,
+              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+            ),
           ),
       ],
     );
   }
 
   Widget _buildDescriptionSection(bool isDark) {
-    return _buildSection(
+    return _buildSectionCard(
       title: 'Description',
       icon: Icons.description_outlined,
+      color: const Color(0xFF8B5CF6),
       isDark: isDark,
       child: controller.isEditMode.value
           ? TextField(
         controller: controller.descriptionController,
-        maxLines: 4,
+        maxLines: 5,
         style: TextStyle(
           fontSize: 14,
           color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
@@ -1033,8 +1269,9 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
     required String value,
     required TextEditingController textController,
     required bool isDark,
-    required bool isEditMode, // Add this parameter
+    required bool isEditMode,
     bool isPrice = false,
+    Color? valueColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1046,7 +1283,7 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
           color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
         ),
         spaceH(height: 8),
-        if (isEditMode) // Use the parameter instead of controller.isEditMode
+        if (isEditMode)
           TextField(
             controller: textController,
             style: TextStyle(
@@ -1084,15 +1321,16 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
             title: value,
             fontSize: 15,
             fontFamily: FontFamily.semiBold,
-            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+            color: valueColor ?? (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
           ),
       ],
     );
   }
 
-  Widget _buildSection({
+  Widget _buildSectionCard({
     required String title,
     required IconData icon,
+    required Color color,
     required bool isDark,
     required Widget child,
   }) {
@@ -1108,6 +1346,10 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
             offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: isDark ? AppThemeData.grey8.withValues(alpha: 0.3) : AppThemeData.grey3.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1115,16 +1357,23 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
           Row(
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: AppThemeData.primary50.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      color.withValues(alpha: 0.15),
+                      color.withValues(alpha: 0.08),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
-                  color: AppThemeData.primary50,
-                  size: 18,
+                  color: color,
+                  size: 20,
                 ),
               ),
               spaceW(width: 12),
@@ -1142,4 +1391,14 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
       ),
     );
   }
+
+}
+
+
+// Helper class for image items
+class ImageItem {
+  final String? networkUrl;
+  final Uint8List? memoryImage;
+
+  ImageItem({this.networkUrl, this.memoryImage});
 }
