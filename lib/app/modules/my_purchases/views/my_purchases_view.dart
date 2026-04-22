@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:maheksync/app/models/category_model.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
+import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
@@ -1125,7 +1126,11 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: TextCustom(
-                        title: purchase.status == 'DELIVERED' ? '✓' : purchase.status == 'IN TRANSIT' ? '🚚' : '📦',
+                        title: purchase.status == 'DELIVERED'
+                            ? '✓'
+                            : purchase.status == 'IN TRANSIT'
+                            ? '🚚'
+                            : '📦',
                         fontSize: 12,
                         color: purchase.statusColor,
                       ),
@@ -1143,14 +1148,26 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    IconButton(
-                      onPressed: () => controller.goToEditPurchase(purchase),
-                      icon: Icon(
-                        Icons.edit_outlined,
-                        size: 18,
-                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                    // View Details Button
+                    OutlinedButton(
+                      onPressed: () => Get.toNamed(Routes.MY_PURCHASES_DETAILS, arguments: purchase),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        side: BorderSide(
+                          color: AppThemeData.primary50.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: TextCustom(
+                        title: 'View Details',
+                        fontSize: 12,
+                        fontFamily: FontFamily.semiBold,
+                        color: AppThemeData.primary50,
                       ),
                     ),
+                    spaceW(width: 8),
                     IconButton(
                       onPressed: () => controller.deletePurchase(purchase),
                       icon: Icon(
@@ -1168,155 +1185,137 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
       ),
     );
   }
-
   Widget _buildPurchaseListCard(PurchaseModel purchase, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Image
-          Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-              borderRadius: BorderRadius.circular(14),
+    return InkWell(
+      onTap: () => Get.toNamed(Routes.MY_PURCHASES_DETAILS, arguments: purchase),
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: purchase.primaryImageUrl.isNotEmpty
-                ? ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: NetworkImageWidget(
-                imageUrl: purchase.primaryImageUrl,
-                fit: BoxFit.cover,
+          ],
+        ),
+        child: Row(
+          children: [
+            // Image
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+                borderRadius: BorderRadius.circular(14),
               ),
-            )
-                : Icon(
-              Icons.shopping_bag_outlined,
-              size: 36,
-              color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
+              child: purchase.primaryImageUrl.isNotEmpty
+                  ? ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: NetworkImageWidget(
+                  imageUrl: purchase.primaryImageUrl,
+                  fit: BoxFit.cover,
+                ),
+              )
+                  : Icon(
+                Icons.shopping_bag_outlined,
+                size: 36,
+                color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
+              ),
             ),
-          ),
-          spaceW(width: 16),
-          // Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextCustom(
-                        title: purchase.assetName ?? 'Unknown',
-                        fontSize: 16,
-                        fontFamily: FontFamily.bold,
-                        color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+            spaceW(width: 16),
+            // Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextCustom(
+                          title: purchase.assetName ?? 'Unknown',
+                          fontSize: 16,
+                          fontFamily: FontFamily.bold,
+                          color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: purchase.statusColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: purchase.statusColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: TextCustom(
+                          title: purchase.status ?? 'DELIVERED',
+                          fontSize: 10,
+                          fontFamily: FontFamily.bold,
+                          color: purchase.statusColor,
+                        ),
                       ),
-                      child: TextCustom(
-                        title: purchase.status ?? 'DELIVERED',
-                        fontSize: 10,
-                        fontFamily: FontFamily.bold,
-                        color: purchase.statusColor,
-                      ),
-                    ),
-                  ],
-                ),
-                spaceH(height: 4),
-                TextCustom(
-                  title: '₹${purchase.formattedPrice.replaceAll('\$', '')}',
-                  fontSize: 18,
-                  fontFamily: FontFamily.bold,
-                  color: AppThemeData.primary50,
-                ),
-                spaceH(height: 6),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.category_rounded,
-                      size: 14,
-                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    ),
-                    spaceW(width: 4),
-                    TextCustom(
-                      title: purchase.category ?? 'Uncategorized',
-                      fontSize: 12,
-                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    ),
-                    spaceW(width: 12),
-                    Icon(
-                      Icons.inventory_2_outlined,
-                      size: 14,
-                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    ),
-                    spaceW(width: 4),
-                    TextCustom(
-                      title: '${purchase.units} units',
-                      fontSize: 12,
-                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Actions
-          Column(
-            children: [
-              IconButton(
-                onPressed: () => controller.goToEditPurchase(purchase),
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppThemeData.primary50.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    ],
                   ),
-                  child: Icon(
-                    Icons.edit_rounded,
+                  spaceH(height: 4),
+                  TextCustom(
+                    title: '₹${purchase.formattedPrice.replaceAll('\$', '')}',
+                    fontSize: 18,
+                    fontFamily: FontFamily.bold,
                     color: AppThemeData.primary50,
-                    size: 18,
                   ),
+                  spaceH(height: 6),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.category_rounded,
+                        size: 14,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      ),
+                      spaceW(width: 4),
+                      TextCustom(
+                        title: purchase.category ?? 'Uncategorized',
+                        fontSize: 12,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      ),
+                      spaceW(width: 12),
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 14,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      ),
+                      spaceW(width: 4),
+                      TextCustom(
+                        title: '${purchase.units} units',
+                        fontSize: 12,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Delete Button
+            IconButton(
+              onPressed: () => controller.deletePurchase(purchase),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppThemeData.danger300.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.delete_outline,
+                  color: AppThemeData.danger300,
+                  size: 18,
                 ),
               ),
-              spaceH(height: 4),
-              IconButton(
-                onPressed: () => controller.deletePurchase(purchase),
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppThemeData.danger300.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.delete_outline,
-                    color: AppThemeData.danger300,
-                    size: 18,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
-
   Widget _buildEmptyState(bool isDark) {
     return Center(
       child: Container(
