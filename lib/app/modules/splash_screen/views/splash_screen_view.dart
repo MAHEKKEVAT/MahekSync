@@ -1,6 +1,7 @@
 // lib/app/modules/splash_screen/views/splash_screen_view.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
@@ -24,7 +25,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
           // Animated Background Elements
           _buildAnimatedBackground(isDark),
 
-          // Main Content - Using LayoutBuilder to prevent overflow
+          // Main Content
           LayoutBuilder(
             builder: (context, constraints) {
               return SingleChildScrollView(
@@ -40,17 +41,21 @@ class SplashScreenView extends GetView<SplashScreenController> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Admin Badge
-                          _buildAdminBadge(isDark),
-                          spaceH(height: 16),
+                          // Animated Avatar with Lottie Ring
+                          _buildAnimatedAvatar(isDark),
+                          spaceH(height: 32),
 
                           // Brand Name
                           _buildBrandName(isDark),
+                          spaceH(height: 12),
+
+                          // Admin Badge
+                          _buildAdminBadge(isDark),
                           spaceH(height: 40),
 
                           // Status Message
                           _buildStatusMessage(isDark),
-                          spaceH(height: 12),
+                          spaceH(height: 8),
 
                           // Sub Status Message
                           _buildSubStatusMessage(isDark),
@@ -78,6 +83,133 @@ class SplashScreenView extends GetView<SplashScreenController> {
     );
   }
 
+  // ==================== ANIMATED AVATAR WITH LOTTIE RING ====================
+  Widget _buildAnimatedAvatar(bool isDark) {
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 1000),
+      curve: Curves.elasticOut,
+      builder: (context, double value, child) {
+        return Transform.scale(
+          scale: value,
+          child: Container(
+            width: 460,
+            height: 460,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF5D54F2).withValues(alpha: 0.3 * value),
+                  blurRadius: 40,
+                  spreadRadius: 8,
+                ),
+                BoxShadow(
+                  color: const Color(0xFF8B7EFF).withValues(alpha: 0.15 * value),
+                  blurRadius: 60,
+                  spreadRadius: 4,
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Lottie Animated Ring (Outer)
+                SizedBox(
+                  width: 470,
+                  height: 470,
+                  child: Lottie.asset(
+                    'assets/animation/anim_avatar.json',
+                    fit: BoxFit.contain,
+                    repeat: true,
+                    animate: true,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback: Gradient ring if Lottie fails
+                      return Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const SweepGradient(
+                            colors: [
+                              Color(0xFF5D54F2),
+                              Color(0xFF8B7EFF),
+                              Color(0xFFA78BFA),
+                              Color(0xFF5D54F2),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                // Profile Image (Center)
+                Container(
+                  width: 250,
+                  height: 250,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isDark ? AppThemeData.grey8 : Colors.white,
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(55),
+                    child: Image.asset(
+                      'assets/images/cropped_circle_image.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Fallback avatar
+                        return Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF5D54F2),
+                                Color(0xFF8B7EFF),
+                              ],
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.person_rounded,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                // Inner glow ring
+                Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF5D54F2).withValues(alpha: 0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ==================== ANIMATED BACKGROUND ====================
   Widget _buildAnimatedBackground(bool isDark) {
     return Positioned.fill(
       child: TweenAnimationBuilder(
@@ -96,6 +228,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
     );
   }
 
+  // ==================== ADMIN BADGE ====================
   Widget _buildAdminBadge(bool isDark) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
@@ -124,17 +257,17 @@ class SplashScreenView extends GetView<SplashScreenController> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.admin_panel_settings_rounded,
                     size: 16,
-                    color: const Color(0xFF5D54F2),
+                    color: Color(0xFF5D54F2),
                   ),
                   spaceW(width: 8),
-                  TextCustom(
+                  const TextCustom(
                     title: 'ADMIN',
                     fontSize: 13,
                     fontFamily: FontFamily.semiBold,
-                    color: const Color(0xFF5D54F2),
+                    color: Color(0xFF5D54F2),
                   ),
                 ],
               ),
@@ -145,6 +278,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
     );
   }
 
+  // ==================== BRAND NAME ====================
   Widget _buildBrandName(bool isDark) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0.8, end: 1),
@@ -184,8 +318,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
     );
   }
 
-// Replace these three methods in splash_screen_view.dart
-
+  // ==================== STATUS MESSAGE ====================
   Widget _buildStatusMessage(bool isDark) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
@@ -205,6 +338,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
     );
   }
 
+  // ==================== SUB STATUS MESSAGE ====================
   Widget _buildSubStatusMessage(bool isDark) {
     return Obx(() => TextCustom(
       title: controller.subStatusMessage.value,
@@ -215,6 +349,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
     ));
   }
 
+  // ==================== PROGRESS BAR ====================
   Widget _buildProgressBar(bool isDark) {
     return Column(
       children: [
@@ -247,6 +382,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
     );
   }
 
+  // ==================== LOADING INDICATOR ====================
   Widget _buildLoadingIndicator(bool isDark) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
@@ -269,6 +405,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
     );
   }
 
+  // ==================== SECURITY CARD ====================
   Widget _buildSecurityCard(bool isDark) {
     return Positioned(
       bottom: 24,
@@ -309,11 +446,11 @@ class SplashScreenView extends GetView<SplashScreenController> {
                     Container(
                       width: 32,
                       height: 32,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
                           colors: [Color(0xFF10B981), Color(0xFF34D399)],
                         ),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
                       child: const Icon(
                         Icons.shield_rounded,
@@ -351,7 +488,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
   }
 }
 
-// Custom Painter for animated background
+// ==================== CUSTOM PAINTER FOR BACKGROUND ====================
 class _BackgroundPainter extends CustomPainter {
   final double animationValue;
   final bool isDark;
