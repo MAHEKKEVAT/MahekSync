@@ -1,5 +1,4 @@
 // lib/app/modules/categories/views/categories_view.dart
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -27,11 +26,7 @@ class CategoriesView extends GetView<CategoriesController> {
       body: Obx(() {
         if (controller.isLoading.value) {
           return Center(
-            child: MahekLoader(
-              message: 'Loading Categories...',
-              size: 50,
-              textSize: 16,
-            ),
+            child: MahekLoader(showBackgroundOverlay: true, message: 'Loading Categories...')
           );
         }
         return MahekResponsive.isMobile(context) || MahekResponsive.isTablet(context)

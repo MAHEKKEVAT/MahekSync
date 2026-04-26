@@ -2,18 +2,14 @@
 
 import 'dart:developer' as developer;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'constants.dart';
 
 class GlobalController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
   }
-
-
 
 }
 

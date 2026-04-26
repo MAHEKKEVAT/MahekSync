@@ -1,5 +1,4 @@
 // lib/app/modules/categories/controllers/categories_controller.dart
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
