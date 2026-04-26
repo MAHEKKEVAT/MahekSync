@@ -1,7 +1,8 @@
 // lib/app/modules/categories/views/categories_view.dart
-import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:maheksync/app/utils/mahek_reminder.dart';
 import 'package:provider/provider.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
@@ -24,7 +25,7 @@ class CategoriesView extends GetView<CategoriesController> {
       backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey2,
       body: Row(
         children: [
-          // Left Panel - Add/Edit Form
+          // Add/Edit Form
           Container(
             width: 420,
             padding: const EdgeInsets.all(28),
@@ -65,7 +66,7 @@ class CategoriesView extends GetView<CategoriesController> {
             ),
           ),
 
-          // Right Panel - Categories List
+          // Categories List
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(28),
@@ -1244,7 +1245,10 @@ class CategoriesView extends GetView<CategoriesController> {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: IconButton(
-                  onPressed: () => controller.startEditing(category),
+                  onPressed: () {
+                    controller.startEditing(category);
+
+                  },
                   icon: Icon(
                     Icons.edit_outlined,
                     color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,

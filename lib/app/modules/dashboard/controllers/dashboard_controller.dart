@@ -11,6 +11,10 @@ import 'package:maheksync/app/modules/my_purchases/controllers/my_purchases_cont
 import 'package:maheksync/app/modules/my_purchases/views/my_purchases_view.dart';
 import 'package:maheksync/app/modules/payement_method/views/payement_method_view.dart' show PaymentMethodsView;
 import 'package:maheksync/app/modules/policy_settings/views/policy_settings_view.dart';
+import 'package:maheksync/app/modules/reminder/controllers/reminder_controller.dart';
+import 'package:maheksync/app/modules/reminder/views/reminder_view.dart';
+import 'package:maheksync/app/modules/subscription/controllers/subscription_controller.dart';
+import 'package:maheksync/app/modules/subscription/views/subscription_view.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/modules/settings/views/settings_view.dart';
 
@@ -66,7 +70,7 @@ class DashboardController extends GetxController {
           icon: Icons.category_outlined,
           selectedIcon: Icons.category_rounded,
           route: Routes.CATEGORIES,
-          svgIcon: 'assets/icons/ic_categories.svg',
+            svgIcon: 'assets/icons/ic_categories.svg',
         ),
         NavigationItem(
           title: 'My Purchases'.tr,
@@ -75,7 +79,20 @@ class DashboardController extends GetxController {
           route: Routes.MY_PURCHASES,
           svgIcon: 'assets/icons/ic_purchases.svg',
         ),
-
+        NavigationItem(
+          title: 'Subscriptions'.tr,
+          icon: Icons.subscriptions_outlined,
+          selectedIcon: Icons.subscriptions_rounded,
+          route: Routes.SUBSCRIPTION,
+          svgIcon: 'assets/icons/ic_subscriptions.svg',
+        ),
+        NavigationItem(
+          title: 'Reminders'.tr,
+          icon: Icons.alarm_outlined,
+          selectedIcon: Icons.alarm_rounded,
+          route: Routes.REMINDER,
+          svgIcon: 'assets/icons/ic_reminder.svg',
+        ),
       ],
     ),
 
@@ -115,7 +132,6 @@ class DashboardController extends GetxController {
   Future<void> onInit() async {
     super.onInit();
 
-    // Debug: Print all available routes
     print('📋 Available routes in navigation:');
     for (int i = 0; i < allItems.length; i++) {
       print('   [$i] ${allItems[i].route} - ${allItems[i].title}');
@@ -123,7 +139,6 @@ class DashboardController extends GetxController {
 
     syncIndexFromRoute();
 
-    // Listen to browser popstate events (back/forward buttons)
     html.window.onPopState.listen((event) {
       print('🔙 PopState event detected');
       syncIndexFromRoute();
@@ -222,8 +237,6 @@ class DashboardController extends GetxController {
 
     final items = allItems;
 
-    // Sort items by route length (longest first) to match most specific routes first
-    // This prevents /dashboard from matching before /dashboard/my-devices
     final sortedItems = items.toList()
       ..sort((a, b) => b.route.length.compareTo(a.route.length));
 
@@ -236,8 +249,6 @@ class DashboardController extends GetxController {
       String route = sortedItems[i].route;
       int originalIndex = items.indexOf(sortedItems[i]);
 
-      // Check if current path EXACTLY matches or ENDS WITH the route
-      // IMPORTANT: We need to ensure it's a full path segment match, not just substring
       bool isExactMatch = currentPath == route;
       bool isPathSegmentMatch = currentPath.endsWith(route) &&
           (currentPath.length == route.length ||
@@ -318,6 +329,18 @@ class DashboardController extends GetxController {
           Get.put(MyPurchasesController());
         }
         return const MyPurchasesView();
+      case Routes.SUBSCRIPTION:
+        if (!Get.isRegistered<SubscriptionController>()) {
+          Get.put(SubscriptionController());
+          print('📦 Registered SubscriptionController');
+        }
+        return const SubscriptionView();
+
+      case Routes.REMINDER:
+        if (!Get.isRegistered<ReminderController>()) {
+          Get.put(ReminderController());
+        }
+        return const ReminderView();
       case Routes.SETTINGS:
         return const SettingsView();
       case Routes.POLICY_SETTINGS:

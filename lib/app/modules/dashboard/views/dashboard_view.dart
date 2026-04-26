@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -21,7 +19,7 @@ import '../../../widgets/global_widgets.dart';
 import '../../../components/logout_dialog.dart';
 import '../../../widgets/text_widget.dart';
 import '../controllers/dashboard_controller.dart';
-import 'package:lottie/lottie.dart'; // Add this import at the top
+import 'package:lottie/lottie.dart';
 
 class DashboardView extends GetView<DashboardController> {
   const DashboardView({super.key});

@@ -23,6 +23,12 @@ abstract class Routes {
   static const MY_PURCHASES = _Paths.MY_PURCHASES;
   static const ADD_EDIT_PURCHASE = _Paths.ADD_EDIT_PURCHASE;
   static const MY_PURCHASES_DETAILS = _Paths.MY_PURCHASES_DETAILS;
+  static const SUBSCRIPTION = _Paths.SUBSCRIPTION;
+  static const CRUD_SUBSCRIPTION = _Paths.CRUD_SUBSCRIPTION;
+  static const SUBSCRIPTION_DETAILS = _Paths.SUBSCRIPTION_DETAILS;
+  static const SUBSCRIPTION_CRUD = _Paths.SUBSCRIPTION_CRUD;
+  static const REMINDER = _Paths.REMINDER;
+  static const REMINDER_CRUD = _Paths.REMINDER_CRUD;
 }
 
 abstract class _Paths {
@@ -42,9 +48,15 @@ abstract class _Paths {
   static const VIEW_DEVICES = '/view-devices';
   static const POLICY_SETTINGS = '/policy-settings';
   static const ADMIN_PROFILE = '/admin-profile';
-  static const PAYMENT_METHODS = '/dashboard/payment-methods'; // ADD THIS
+  static const PAYMENT_METHODS = '/dashboard/payment-methods';
   static const CATEGORIES = '/dashboard/categories';
   static const MY_PURCHASES = '/dashboard/my-purchases';
   static const ADD_EDIT_PURCHASE = '/add-edit-purchase';
   static const MY_PURCHASES_DETAILS = '/my-purchases-details';
+  static const SUBSCRIPTION = '/dashboard/subscriptions';
+  static const CRUD_SUBSCRIPTION = '/crud-subscription';
+  static const SUBSCRIPTION_DETAILS = '/dashboard/subscription-details';
+  static const SUBSCRIPTION_CRUD = '/subscription-crud';
+  static const REMINDER = '/dashboard/reminders';
+  static const REMINDER_CRUD = '/reminder-crud';
 }

@@ -23,12 +23,22 @@ import '../modules/payement_method/bindings/payement_method_binding.dart';
 import '../modules/payement_method/views/payement_method_view.dart';
 import '../modules/policy_settings/bindings/policy_settings_binding.dart';
 import '../modules/policy_settings/views/policy_settings_view.dart';
+import '../modules/reminder/bindings/reminder_binding.dart';
+import '../modules/reminder/views/reminder_view.dart';
+import '../modules/reminder_crud/bindings/reminder_crud_binding.dart';
+import '../modules/reminder_crud/views/reminder_crud_view.dart';
 import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/sign_up/bindings/sign_up_binding.dart';
 import '../modules/sign_up/views/sign_up_view.dart';
 import '../modules/splash_screen/bindings/splash_screen_binding.dart';
 import '../modules/splash_screen/views/splash_screen_view.dart';
+import '../modules/subscription/bindings/subscription_binding.dart';
+import '../modules/subscription/views/subscription_view.dart';
+import '../modules/subscription_crud/bindings/subscription_crud_binding.dart';
+import '../modules/subscription_crud/views/subscription_crud_view.dart';
+import '../modules/subscription_details/bindings/subscription_details_binding.dart';
+import '../modules/subscription_details/views/subscription_details_view.dart';
 import '../modules/view_devices/bindings/view_devices_binding.dart';
 import '../modules/view_devices/views/view_devices_view.dart';
 import '../utils/auth_middleware.dart';
@@ -116,9 +126,13 @@ class AppPages {
     _dashboardPage(_Paths.SUPPORT),
     _dashboardPage(_Paths.CATEGORIES, screenBinding: CategoriesBinding()),
     _dashboardPage(_Paths.MY_PURCHASES, screenBinding: MyPurchasesBinding()),
+    _dashboardPage(_Paths.SUBSCRIPTION, screenBinding: SubscriptionBinding()),
+
 
     _dashboardPage(_Paths.PAYMENT_METHODS,
         screenBinding: PaymentMethodsBinding()),
+    _dashboardPage(_Paths.REMINDER, screenBinding: ReminderBinding()),
+
     GetPage(
       name: _Paths.CATEGORIES,
       page: () => const CategoriesView(),
@@ -133,6 +147,21 @@ class AppPages {
       name: _Paths.MY_PURCHASES_DETAILS,
       page: () => const MyPurchasesDetailsView(),
       binding: MyPurchasesDetailsBinding(),
+    ),
+    GetPage(
+      name: _Paths.SUBSCRIPTION_DETAILS,
+      page: () => SubscriptionDetailsView(),
+      binding: SubscriptionDetailsBinding(),
+    ),
+    GetPage(
+      name: _Paths.SUBSCRIPTION_CRUD,
+      page: () => const SubscriptionCrudView(),
+      binding: SubscriptionCrudBinding(),
+    ),
+    GetPage(
+      name: _Paths.REMINDER_CRUD,
+      page: () => const ReminderCrudView(),
+      binding: ReminderCrudBinding(),
     ),
   ];
 }
