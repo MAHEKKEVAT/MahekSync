@@ -18,4 +18,5 @@ class CollectionName {
   static const String verificationDocuments = "verification_documents";
   static const String verificationRequests = "verification_requests";
   static const String reviews = "reviews";
+  static const String duesTracker = "dues_tracker";
 }

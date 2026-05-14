@@ -12,6 +12,8 @@ import '../modules/categories/bindings/categories_binding.dart';
 import '../modules/categories/views/categories_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
+import '../modules/dues_tracker/bindings/dues_tracker_binding.dart';
+import '../modules/dues_tracker/views/dues_tracker_view.dart';
 import '../modules/login_screen/bindings/login_screen_binding.dart';
 import '../modules/login_screen/views/login_screen_view.dart';
 import '../modules/my_devices/bindings/my_devices_binding.dart';
@@ -127,7 +129,7 @@ class AppPages {
     _dashboardPage(_Paths.CATEGORIES, screenBinding: CategoriesBinding()),
     _dashboardPage(_Paths.MY_PURCHASES, screenBinding: MyPurchasesBinding()),
     _dashboardPage(_Paths.SUBSCRIPTION, screenBinding: SubscriptionBinding()),
-
+    _dashboardPage(_Paths.DUES_TRACKER, screenBinding: DuesTrackerBinding()),
 
     _dashboardPage(_Paths.PAYMENT_METHODS,
         screenBinding: PaymentMethodsBinding()),
@@ -163,5 +165,6 @@ class AppPages {
       page: () => const ReminderCrudView(),
       binding: ReminderCrudBinding(),
     ),
+
   ];
 }

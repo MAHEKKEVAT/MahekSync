@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:maheksync/app/modules/admin_profile/views/admin_profile_view.dart';
 import 'package:maheksync/app/modules/categories/controllers/categories_controller.dart';
 import 'package:maheksync/app/modules/categories/views/categories_view.dart';
+import 'package:maheksync/app/modules/dues_tracker/controllers/dues_tracker_controller.dart';
+import 'package:maheksync/app/modules/dues_tracker/views/dues_tracker_view.dart';
 import 'package:maheksync/app/modules/my_devices/controllers/my_devices_controller.dart';
 import 'package:maheksync/app/modules/my_devices/views/my_devices_view.dart';
 import 'package:maheksync/app/modules/my_purchases/controllers/my_purchases_controller.dart';
@@ -92,6 +94,13 @@ class DashboardController extends GetxController {
           selectedIcon: Icons.alarm_rounded,
           route: Routes.REMINDER,
           svgIcon: 'assets/icons/ic_reminder.svg',
+        ),
+        NavigationItem(
+          title: 'Dues Tracker'.tr,
+          icon: Icons.account_balance_wallet_outlined,
+          selectedIcon: Icons.account_balance_wallet_rounded,
+          route: Routes.DUES_TRACKER,
+          svgIcon: 'assets/icons/ic_dues.svg',
         ),
       ],
     ),
@@ -341,6 +350,12 @@ class DashboardController extends GetxController {
           Get.put(ReminderController());
         }
         return const ReminderView();
+      case Routes.DUES_TRACKER:
+        if (!Get.isRegistered<DuesTrackerController>()) {
+          Get.put(DuesTrackerController());
+          print('📦 Registered DuesTrackerController');
+        }
+        return const DuesTrackerView();
       case Routes.SETTINGS:
         return const SettingsView();
       case Routes.POLICY_SETTINGS:

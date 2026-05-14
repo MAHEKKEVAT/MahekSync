@@ -29,6 +29,7 @@ abstract class Routes {
   static const SUBSCRIPTION_CRUD = _Paths.SUBSCRIPTION_CRUD;
   static const REMINDER = _Paths.REMINDER;
   static const REMINDER_CRUD = _Paths.REMINDER_CRUD;
+  static const DUES_TRACKER = _Paths.DUES_TRACKER;
 }
 
 abstract class _Paths {
@@ -59,4 +60,5 @@ abstract class _Paths {
   static const SUBSCRIPTION_CRUD = '/subscription-crud';
   static const REMINDER = '/dashboard/reminders';
   static const REMINDER_CRUD = '/reminder-crud';
+  static const DUES_TRACKER = '/dues-tracker';
 }
