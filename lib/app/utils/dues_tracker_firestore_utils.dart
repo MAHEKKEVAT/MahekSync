@@ -1,4 +1,3 @@
-// lib/app/utils/dues_tracker_firestore_utils.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/models/dues_tracker_model.dart';
@@ -20,7 +19,6 @@ class DuesTrackerFirestoreUtils {
           .set(due.toJson());
       return true;
     } catch (e) {
-      print('Error adding due: $e');
       return false;
     }
   }
@@ -34,7 +32,6 @@ class DuesTrackerFirestoreUtils {
           .update(due.toJson());
       return true;
     } catch (e) {
-      print('Error updating due: $e');
       return false;
     }
   }
@@ -44,7 +41,6 @@ class DuesTrackerFirestoreUtils {
       await _firestore.collection(_collectionName).doc(dueId).delete();
       return true;
     } catch (e) {
-      print('Error deleting due: $e');
       return false;
     }
   }
@@ -71,13 +67,52 @@ class DuesTrackerFirestoreUtils {
 
   static Future<DuesTrackerModel?> getDue(String dueId) async {
     try {
-      final doc = await _firestore.collection(_collectionName).doc(dueId).get();
+      final doc = await _firestore
+          .collection(_collectionName)
+          .doc(dueId)
+          .get();
       if (doc.exists) {
         return DuesTrackerModel.fromJson(doc.data()!);
       }
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  static Future<int> getDueCount(String ownerId, {String? status}) async {
+    try {
+      Query query = _firestore
+          .collection(_collectionName)
+          .where('ownerId', isEqualTo: ownerId);
+
+      if (status != null) {
+        query = query.where('status', isEqualTo: status);
+      }
+
+      final snapshot = await query.count().get();
+      return snapshot.count ?? 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  static Future<bool> batchSettle(List<String> dueIds) async {
+    try {
+      final batch = _firestore.batch();
+      for (final id in dueIds) {
+        batch.update(
+          _firestore.collection(_collectionName).doc(id),
+          {
+            'status': 'SETTLED',
+            'updatedAt': Timestamp.now(),
+          },
+        );
+      }
+      await batch.commit();
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 }

@@ -233,7 +233,6 @@ class DashboardController extends GetxController {
   /// Set selected index based on current browser URL
   void syncIndexFromRoute() {
     String currentPath = html.window.location.pathname ?? '';
-    print('🔄 Syncing from path: "$currentPath"');
 
     // Check for profile route
     if (currentPath.contains(profileRoute) || currentPath.endsWith(profileRoute)) {
@@ -249,7 +248,6 @@ class DashboardController extends GetxController {
     final sortedItems = items.toList()
       ..sort((a, b) => b.route.length.compareTo(a.route.length));
 
-    print('📋 Checking against routes (sorted by specificity):');
     for (int i = 0; i < sortedItems.length; i++) {
       print('   ${sortedItems[i].route}');
     }
@@ -262,10 +260,6 @@ class DashboardController extends GetxController {
       bool isPathSegmentMatch = currentPath.endsWith(route) &&
           (currentPath.length == route.length ||
               currentPath[currentPath.length - route.length - 1] == '/');
-
-      print('🔍 Checking route: "$route" (original index: $originalIndex)');
-      print('   Exact match? $isExactMatch');
-      print('   Path segment match? $isPathSegmentMatch');
 
       if (isExactMatch || isPathSegmentMatch) {
         if (selectedIndex.value != originalIndex) {

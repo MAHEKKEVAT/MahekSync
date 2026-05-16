@@ -1,4 +1,3 @@
-// lib/app/modules/add_new_devices/controllers/add_new_devices_controller.dart
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,7 +20,6 @@ class AddNewDevicesController extends GetxController {
   final priceController = TextEditingController();
   final storeNameController = TextEditingController();
 
-  // Dynamic data from Firestore
   final categories = <CategoryModel>[].obs;
   final paymentMethods = <PaymentMethodModel>[].obs;
 
@@ -30,11 +28,13 @@ class AddNewDevicesController extends GetxController {
   final selectedCondition = 'NEW'.obs;
   final purchaseDate = Rxn<DateTime>();
 
-  void setWarrantyEndDate(DateTime date) => warrantyEndDate.value = date;
-
   final deviceImages = <XFile>[].obs;
   final imageBytes = <Uint8List>[].obs;
   final isLoading = false.obs;
+
+  final totalDevices = 0.obs;
+  final totalCategories = 0.obs;
+  final totalValue = 0.0.obs;
 
   final conditions = ['NEW', 'USED', 'REFURB', 'MINT', 'FACTORY NEW'];
 
@@ -43,6 +43,19 @@ class AddNewDevicesController extends GetxController {
     super.onInit();
     loadCategories();
     loadPaymentMethods();
+    _loadStats();
+  }
+
+  void _loadStats() {
+    final ownerId = MahekConstant.ownerModel?.id;
+    if (ownerId == null) return;
+    DeviceFirestoreUtils.getUserDevices(ownerId).listen((devices) {
+      totalDevices.value = devices.length;
+      totalValue.value = devices.fold(0.0, (sum, d) => sum + (d.price ?? 0.0));
+    });
+    CategoryFirestoreUtils.getCategories().listen((cats) {
+      totalCategories.value = cats.length;
+    });
   }
 
   void loadCategories() {
@@ -90,6 +103,8 @@ class AddNewDevicesController extends GetxController {
   }
 
   void setPurchaseDate(DateTime date) => purchaseDate.value = date;
+
+  void setWarrantyEndDate(DateTime date) => warrantyEndDate.value = date;
 
   Future<void> registerDevice() async {
     if (deviceNameController.text.isEmpty) {
