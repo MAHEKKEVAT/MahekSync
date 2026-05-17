@@ -12,6 +12,8 @@ import 'package:maheksync/app/modules/my_devices/views/my_devices_view.dart';
 import 'package:maheksync/app/modules/my_purchases/controllers/my_purchases_controller.dart';
 import 'package:maheksync/app/modules/my_purchases/views/my_purchases_view.dart';
 import 'package:maheksync/app/modules/payement_method/views/payement_method_view.dart' show PaymentMethodsView;
+import 'package:maheksync/app/modules/personal_tasks/controllers/personal_tasks_controller.dart';
+import 'package:maheksync/app/modules/personal_tasks/views/personal_tasks_view.dart';
 import 'package:maheksync/app/modules/policy_settings/views/policy_settings_view.dart';
 import 'package:maheksync/app/modules/reminder/controllers/reminder_controller.dart';
 import 'package:maheksync/app/modules/reminder/views/reminder_view.dart';
@@ -35,7 +37,6 @@ class DashboardController extends GetxController {
   DateTime? currentBackPressTime;
 
   final List<NavigationSection> navigationSections = [
-    // ── Overview ──
     NavigationSection(
       title: "OVERVIEW".tr,
       items: [
@@ -49,7 +50,6 @@ class DashboardController extends GetxController {
       ],
     ),
 
-    // ── Management ──
     NavigationSection(
       title: 'MANAGEMENT'.tr,
       items: [
@@ -102,11 +102,23 @@ class DashboardController extends GetxController {
           route: Routes.DUES_TRACKER,
           svgIcon: 'assets/icons/ic_dues.svg',
         ),
+
+      ],
+    ),
+    NavigationSection(
+      title: 'PRODUCTIVITY'.tr,
+      items: [
+        NavigationItem(
+          title: 'Personal Tasks'.tr,
+          icon: Icons.task_alt_outlined,
+          selectedIcon: Icons.task_alt_rounded,
+          route: Routes.PERSONAL_TASKS,
+          svgIcon: 'assets/icons/ic_tasks.svg',
+        ),
       ],
     ),
 
 
-    // ── Settings ──
     NavigationSection(
       title: 'SETTINGS'.tr,
       items: [
@@ -350,6 +362,12 @@ class DashboardController extends GetxController {
           print('📦 Registered DuesTrackerController');
         }
         return const DuesTrackerView();
+
+      case Routes.PERSONAL_TASKS:
+        if (!Get.isRegistered<PersonalTasksController>()) {
+          Get.put(PersonalTasksController());
+        }
+        return const PersonalTasksView();
       case Routes.SETTINGS:
         return const SettingsView();
       case Routes.POLICY_SETTINGS:

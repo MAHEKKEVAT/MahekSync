@@ -23,6 +23,10 @@ import '../modules/my_purchases_details/bindings/my_purchases_details_binding.da
 import '../modules/my_purchases_details/views/my_purchases_details_view.dart';
 import '../modules/payement_method/bindings/payement_method_binding.dart';
 import '../modules/payement_method/views/payement_method_view.dart';
+import '../modules/personal_task_crud/bindings/personal_task_crud_binding.dart';
+import '../modules/personal_task_crud/views/personal_task_crud_view.dart';
+import '../modules/personal_tasks/bindings/personal_tasks_binding.dart';
+import '../modules/personal_tasks/views/personal_tasks_view.dart';
 import '../modules/policy_settings/bindings/policy_settings_binding.dart';
 import '../modules/policy_settings/views/policy_settings_view.dart';
 import '../modules/reminder/bindings/reminder_binding.dart';
@@ -130,10 +134,10 @@ class AppPages {
     _dashboardPage(_Paths.MY_PURCHASES, screenBinding: MyPurchasesBinding()),
     _dashboardPage(_Paths.SUBSCRIPTION, screenBinding: SubscriptionBinding()),
     _dashboardPage(_Paths.DUES_TRACKER, screenBinding: DuesTrackerBinding()),
-
     _dashboardPage(_Paths.PAYMENT_METHODS,
         screenBinding: PaymentMethodsBinding()),
     _dashboardPage(_Paths.REMINDER, screenBinding: ReminderBinding()),
+    _dashboardPage(_Paths.PERSONAL_TASKS, screenBinding: PersonalTasksBinding()),
 
     GetPage(
       name: _Paths.CATEGORIES,
@@ -165,6 +169,11 @@ class AppPages {
       page: () => const ReminderCrudView(),
       binding: ReminderCrudBinding(),
     ),
-
+    GetPage(
+      name: _Paths.PERSONAL_TASK_CRUD,
+      page: () => const PersonalTaskCrudView(),
+      binding: PersonalTaskCrudBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
   ];
 }
