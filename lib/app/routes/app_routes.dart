@@ -32,6 +32,9 @@ abstract class Routes {
   static const DUES_TRACKER = _Paths.DUES_TRACKER;
   static const PERSONAL_TASKS = _Paths.PERSONAL_TASKS;
   static const PERSONAL_TASK_CRUD = _Paths.PERSONAL_TASK_CRUD;
+  static const SENTINEL = _Paths.SENTINEL;
+  static const VAULT = _Paths.VAULT;
+  static const VAULT_CRUD = _Paths.VAULT_CRUD;
 }
 
 abstract class _Paths {
@@ -66,4 +69,7 @@ abstract class _Paths {
   static const DUES_TRACKER = '/dues-tracker';
   static const PERSONAL_TASKS = '/dashboard/personal-tasks';
   static const PERSONAL_TASK_CRUD = '/personal-task-crud';
+  static const SENTINEL = '/dashboard/sentinel';
+  static const VAULT = '/dashboard/vault';
+  static const VAULT_CRUD = '/vault-crud';
 }

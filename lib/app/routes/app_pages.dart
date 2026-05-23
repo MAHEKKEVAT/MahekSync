@@ -33,6 +33,8 @@ import '../modules/reminder/bindings/reminder_binding.dart';
 import '../modules/reminder/views/reminder_view.dart';
 import '../modules/reminder_crud/bindings/reminder_crud_binding.dart';
 import '../modules/reminder_crud/views/reminder_crud_view.dart';
+import '../modules/sentinel/bindings/sentinel_binding.dart';
+import '../modules/sentinel/views/sentinel_view.dart';
 import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/sign_up/bindings/sign_up_binding.dart';
@@ -45,6 +47,10 @@ import '../modules/subscription_crud/bindings/subscription_crud_binding.dart';
 import '../modules/subscription_crud/views/subscription_crud_view.dart';
 import '../modules/subscription_details/bindings/subscription_details_binding.dart';
 import '../modules/subscription_details/views/subscription_details_view.dart';
+import '../modules/vault/bindings/vault_binding.dart';
+import '../modules/vault/views/vault_view.dart';
+import '../modules/vault_crud/bindings/vault_crud_binding.dart';
+import '../modules/vault_crud/views/vault_crud_view.dart';
 import '../modules/view_devices/bindings/view_devices_binding.dart';
 import '../modules/view_devices/views/view_devices_view.dart';
 import '../utils/auth_middleware.dart';
@@ -137,7 +143,13 @@ class AppPages {
     _dashboardPage(_Paths.PAYMENT_METHODS,
         screenBinding: PaymentMethodsBinding()),
     _dashboardPage(_Paths.REMINDER, screenBinding: ReminderBinding()),
-    _dashboardPage(_Paths.PERSONAL_TASKS, screenBinding: PersonalTasksBinding()),
+    _dashboardPage(_Paths.PERSONAL_TASKS,
+        screenBinding: PersonalTasksBinding()),
+        _dashboardPage(_Paths.SENTINEL,
+        screenBinding: SentinelBinding()),
+        _dashboardPage(_Paths.VAULT,
+        screenBinding: VaultBinding()),
+
 
     GetPage(
       name: _Paths.CATEGORIES,
@@ -174,6 +186,11 @@ class AppPages {
       page: () => const PersonalTaskCrudView(),
       binding: PersonalTaskCrudBinding(),
       middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: _Paths.VAULT_CRUD,
+      page: () => const VaultCrudView(),
+      binding: VaultCrudBinding(),
     ),
   ];
 }

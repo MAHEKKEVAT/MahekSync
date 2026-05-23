@@ -116,7 +116,6 @@ class MahekReminderController extends GetxController {
 
     final reminder = activeReminders[_currentIndex % activeReminders.length];
     _currentIndex++;
-    print('📢 Showing: ${reminder.name}');
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
