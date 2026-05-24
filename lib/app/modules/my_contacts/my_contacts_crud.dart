@@ -21,41 +21,26 @@ class MyContactsCrud {
       _db.collection(_collection);
 
   static Future<MyContactsModel?> checkContactExists(String mobileNumber) async {
-    final clean = mobileNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    final clean = MyContactsModel.normalizeMobile(mobileNumber);
     final snapshot = await _ref
         .where('ownerId', isEqualTo: _uid)
         .where('mobileNumber', isEqualTo: clean)
         .limit(1)
         .get();
     if (snapshot.docs.isEmpty) return null;
-    return MyContactsModel.fromJson(snapshot.docs.first.data());
+    final doc = snapshot.docs.first;
+    return MyContactsModel.fromJson(doc.data(), docId: doc.id);
   }
 
   static Future<String> createOrUpdateContact(MyContactsModel model) async {
     final existing = await checkContactExists(model.mobileNumber);
     if (existing != null) {
-      final updated = model.copyWith(
-        id: existing.id,
-        searchKeywords: MyContactsModel.generateSearchKeywords(
-          model.firstName,
-          model.lastName,
-          model.mobileNumber,
-        ),
-      );
-      await _ref.doc(existing.id).update(updated.toUpdateJson());
-      return existing.id;
+      final updated = model.copyWith(docId: existing.docId);
+      await _ref.doc(existing.docId).update(updated.toJson());
+      return existing.docId;
     }
-    final keywords = MyContactsModel.generateSearchKeywords(
-      model.firstName,
-      model.lastName,
-      model.mobileNumber,
-    );
     final docRef = _ref.doc();
-    final newModel = model.copyWith(
-      id: docRef.id,
-      ownerId: _uid,
-      searchKeywords: keywords,
-    );
+    final newModel = model.copyWith(docId: docRef.id, ownerId: _uid);
     await docRef.set(newModel.toJson());
     return docRef.id;
   }
@@ -67,42 +52,28 @@ class MyContactsCrud {
         final updated = existing.copyWith(
           firstName: model.firstName,
           lastName: model.lastName,
-          searchKeywords: MyContactsModel.generateSearchKeywords(
-            model.firstName,
-            model.lastName,
-            model.mobileNumber,
-          ),
         );
-        await _ref.doc(existing.id).update(updated.toUpdateJson());
+        await _ref.doc(existing.docId).update(updated.toJson());
       }
-      return existing.id;
+      return existing.docId;
     }
-    final keywords = MyContactsModel.generateSearchKeywords(
-      model.firstName,
-      model.lastName,
-      model.mobileNumber,
-    );
     final docRef = _ref.doc();
-    final newModel = model.copyWith(
-      id: docRef.id,
-      ownerId: _uid,
-      searchKeywords: keywords,
-    );
+    final newModel = model.copyWith(docId: docRef.id, ownerId: _uid);
     await docRef.set(newModel.toJson());
     return docRef.id;
   }
 
-  static Future<void> deleteContact(String id) async {
-    await _ref.doc(id).delete();
+  static Future<void> deleteContact(String docId) async {
+    await _ref.doc(docId).delete();
   }
 
   static Stream<List<MyContactsModel>> streamContacts() {
     return _ref
         .where('ownerId', isEqualTo: _uid)
-        .orderBy('updatedAt', descending: true)
+        .orderBy('firstName', descending: false)
         .snapshots()
         .map((snapshot) => snapshot.docs
-        .map((doc) => MyContactsModel.fromJson(doc.data()))
+        .map((doc) => MyContactsModel.fromJson(doc.data(), docId: doc.id))
         .toList());
   }
 
@@ -111,12 +82,11 @@ class MyContactsCrud {
     if (q.isEmpty) return streamContacts();
     return _ref
         .where('ownerId', isEqualTo: _uid)
-        .where('searchKeywords', arrayContains: q)
-        .orderBy('updatedAt', descending: true)
+        .orderBy('firstName', descending: false)
         .limit(50)
         .snapshots()
         .map((snapshot) => snapshot.docs
-        .map((doc) => MyContactsModel.fromJson(doc.data()))
+        .map((doc) => MyContactsModel.fromJson(doc.data(), docId: doc.id))
         .toList());
   }
 
@@ -137,14 +107,14 @@ class MyContactsCrud {
   }) async {
     Query<Map<String, dynamic>> query = _ref
         .where('ownerId', isEqualTo: _uid)
-        .orderBy('updatedAt', descending: true)
+        .orderBy('firstName', descending: false)
         .limit(limit);
     if (lastDoc != null) {
       query = query.startAfterDocument(lastDoc);
     }
     final snapshot = await query.get();
     return snapshot.docs
-        .map((doc) => MyContactsModel.fromJson(doc.data()))
+        .map((doc) => MyContactsModel.fromJson(doc.data(), docId: doc.id))
         .toList();
   }
 
@@ -170,7 +140,8 @@ class MyContactsCrud {
         if (fnMatch != null) {
           final fnValue = fnMatch.group(1)!.trim();
           if (firstName.isEmpty && lastName.isEmpty && fnValue.isNotEmpty) {
-            final nameParts = fnValue.split(' ');
+            final nameParts =
+            fnValue.trim().split(RegExp(r'\s+'));
             if (nameParts.length > 1) {
               firstName = nameParts.first;
               lastName = nameParts.sublist(1).join(' ');
@@ -184,11 +155,30 @@ class MyContactsCrud {
           mobile = telMatch.group(1)!.trim();
         }
       }
-      mobile = mobile.replaceAll(RegExp(r'[^0-9+]'), '');
+      mobile = MyContactsModel.normalizeMobile(mobile);
       if (mobile.isNotEmpty) {
         contacts.add(VcfContact(firstName: firstName, lastName: lastName, mobileNumber: mobile));
       }
     }
     return contacts;
+  }
+
+  static Future<Map<String, MyContactsModel>> getAllContactsMap() async {
+    final snapshot = await _ref
+        .where('ownerId', isEqualTo: _uid)
+        .get();
+
+    final map = <String, MyContactsModel>{};
+
+    for (final doc in snapshot.docs) {
+      final model = MyContactsModel.fromJson(
+        doc.data(),
+        docId: doc.id,
+      );
+
+      map[model.mobileNumber] = model;
+    }
+
+    return map;
   }
 }

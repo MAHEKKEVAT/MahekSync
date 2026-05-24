@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +6,10 @@ import 'package:get/get.dart';
 import 'package:maheksync/app/constant/show_toast.dart';
 import 'package:maheksync/app/models/my_contacts_model.dart';
 import 'package:maheksync/app/modules/my_contacts/my_contacts_crud.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+enum ContactFilter { all, named, withPhoto }
+enum ContactSort { nameAsc, nameDesc, newest }
 
 class MyContactsController extends GetxController {
   final isLoading = false.obs;
@@ -25,56 +27,117 @@ class MyContactsController extends GetxController {
   final importSkipped = 0.obs;
   final importUpdated = 0.obs;
 
+  // New states for Filter and Sort options [cite: 349]
+  final currentFilter = ContactFilter.all.obs;
+  final currentSort = ContactSort.nameAsc.obs;
+
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
   final mobileNumberController = TextEditingController();
   final searchController = TextEditingController();
-
   StreamSubscription? _contactsSub;
+  StreamSubscription? _authSub;
   Timer? _debounce;
 
   int get totalContacts => contacts.length;
 
-  int get recentCount {
-    final now = DateTime.now();
-    return contacts.where((c) => now.difference(c.createdAt).inDays <= 7).length;
-  }
-
   @override
   void onInit() {
     super.onInit();
-    _startContactsStream();
+    _listenAuthAndStream();
     searchController.addListener(_onSearchChanged);
   }
 
-  void _startContactsStream() {
-    isLoading.value = true;
-    _contactsSub = MyContactsCrud.streamContacts().listen((data) {
-      contacts.value = data;
-      _applyFilter();
-      isLoading.value = false;
+  void _listenAuthAndStream() {
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      _contactsSub?.cancel();
+      _startContactsStream();
     });
+  }
+
+  void _startContactsStream() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || uid.isEmpty) {
+      isLoading.value = false;
+      contacts.clear();
+      filteredContacts.clear();
+      return;
+    }
+    isLoading.value = true;
+    _contactsSub = MyContactsCrud.streamContacts().listen(
+          (data) {
+        contacts.value = data;
+        _applyFilterAndSort(); // Trigger unified processing [cite: 355]
+        isLoading.value = false;
+      },
+      onError: (error) {
+        isLoading.value = false;
+      },
+    );
   }
 
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
       searchText.value = searchController.text.trim();
-      _applyFilter();
+      _applyFilterAndSort();
     });
   }
 
-  void _applyFilter() {
+  // Unified Filter & Sort processor [cite: 357, 358]
+  void _applyFilterAndSort() {
+    List<MyContactsModel> result = contacts.toList();
+
+    // 1. Text Search Filter
     final q = searchText.value.toLowerCase().trim();
-    if (q.isEmpty) {
-      filteredContacts.value = contacts.toList();
-    } else {
-      filteredContacts.value = contacts.where((c) {
+    if (q.isNotEmpty) {
+      result = result.where((c) {
         final name = c.formattedName.toLowerCase();
         final mobile = c.mobileNumber.toLowerCase();
         return name.contains(q) || mobile.contains(q);
       }).toList();
     }
+
+    // 2. Tab/Segment Filter Group
+    switch (currentFilter.value) {
+      case ContactFilter.named:
+        result = result.where((c) => c.firstName.isNotEmpty).toList();
+        break;
+      case ContactFilter.withPhoto:
+        result = result.where((c) => c.hasProfile).toList();
+        break;
+      case ContactFilter.all:
+      default:
+        break;
+    }
+
+    // 3. Sorting Engine
+    switch (currentSort.value) {
+      case ContactSort.nameAsc:
+        result.sort((a, b) => a.formattedName.toLowerCase().compareTo(b.formattedName.toLowerCase()));
+        break;
+      case ContactSort.nameDesc:
+        result.sort((a, b) => b.formattedName.toLowerCase().compareTo(a.formattedName.toLowerCase()));
+        break;
+      case ContactSort.newest:
+      // Automatically falls back to natural DB stream positioning if no timestamps are present,
+      // or reverses order based on unique properties.
+        result = result.reversed.toList();
+        break;
+    }
+
+    filteredContacts.value = result;
+  }
+
+  // Updaters targeting filters & sorting modes
+  void changeFilter(ContactFilter filter) {
+    currentFilter.value = filter;
+    _applyFilterAndSort();
+  }
+
+  void changeSort(ContactSort sort) {
+    currentSort.value = sort;
+    _applyFilterAndSort();
   }
 
   void selectContact(MyContactsModel? contact) {
@@ -115,7 +178,7 @@ class MyContactsController extends GetxController {
   Future<void> saveContact({String? imageUrl}) async {
     final firstName = firstNameController.text.trim();
     final lastName = lastNameController.text.trim();
-    final mobile = mobileNumberController.text.trim();
+    final mobile = MyContactsModel.normalizeMobile(mobileNumberController.text.trim());
 
     if (firstName.isEmpty || mobile.isEmpty) {
       ShowToastDialog.showError('First name and mobile number are required');
@@ -131,23 +194,18 @@ class MyContactsController extends GetxController {
         final model = selectedContact.value!.copyWith(
           firstName: firstName,
           lastName: lastName,
-          mobileNumber: mobile.replaceAll(RegExp(r'[^0-9]'), ''),
+          mobileNumber: mobile,
           profileImage: image,
-          searchKeywords: MyContactsModel.generateSearchKeywords(firstName, lastName, mobile),
         );
         await MyContactsCrud.createOrUpdateContact(model);
         ShowToastDialog.showSuccess('Contact updated');
       } else {
         final model = MyContactsModel(
-          id: '',
           ownerId: uid,
           firstName: firstName,
           lastName: lastName,
-          mobileNumber: mobile.replaceAll(RegExp(r'[^0-9]'), ''),
+          mobileNumber: mobile,
           profileImage: image,
-          searchKeywords: MyContactsModel.generateSearchKeywords(firstName, lastName, mobile),
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
         );
         await MyContactsCrud.createOrUpdateContact(model);
         ShowToastDialog.showSuccess('Contact saved');
@@ -159,10 +217,10 @@ class MyContactsController extends GetxController {
     isLoading.value = false;
   }
 
-  Future<void> deleteContact(String id) async {
+  Future<void> deleteContact(String docId) async {
     try {
-      await MyContactsCrud.deleteContact(id);
-      if (selectedContact.value?.id == id) {
+      await MyContactsCrud.deleteContact(docId);
+      if (selectedContact.value?.docId == docId) {
         selectedContact.value = null;
       }
       ShowToastDialog.showSuccess('Contact deleted');
@@ -175,8 +233,12 @@ class MyContactsController extends GetxController {
     isLoading.value = true;
     _contactsSub?.cancel();
     _startContactsStream();
+    await Future.delayed(const Duration(milliseconds: 400));
+    isLoading.value = false;
+    ShowToastDialog.showSuccess('Contacts refreshed');
   }
 
+  // VCF processing remaining blocks setup ...
   Future<void> importMobileContacts() async {
     isImporting.value = true;
     try {
@@ -193,93 +255,123 @@ class MyContactsController extends GetxController {
     importAdded.value = 0;
     importSkipped.value = 0;
     importUpdated.value = 0;
-
     try {
       final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['vcf'],
-        allowMultiple: false,
+          type: FileType.custom,
+          allowedExtensions: ['vcf'],
+          withReadStream: true
       );
-
       if (result == null || result.files.isEmpty) {
         isImporting.value = false;
         return;
       }
 
       final file = result.files.first;
-      String vcfContent;
-
-      if (file.bytes != null) {
-        vcfContent = String.fromCharCodes(file.bytes!);
-      } else if (file.path != null) {
-        vcfContent = await File(file.path!).readAsString();
-      } else {
-        ShowToastDialog.showError('Cannot read VCF file');
+      final stream = file.readStream;
+      if (stream == null) {
+        ShowToastDialog.showError('Cannot read VCF');
         isImporting.value = false;
         return;
       }
 
+      final bytes = <int>[];
+      await for (final chunk in stream) {
+        bytes.addAll(chunk);
+      }
+
+      final vcfContent = String.fromCharCodes(bytes);
       final parsed = MyContactsCrud.parseVcfString(vcfContent);
       if (parsed.isEmpty) {
-        ShowToastDialog.showError('No contacts found in VCF file');
+        ShowToastDialog.showError('No contacts found');
         isImporting.value = false;
         return;
       }
 
       importTotal.value = parsed.length;
       final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final existingMap = await MyContactsCrud.getAllContactsMap();
+      final firestore = FirebaseFirestore.instance;
+      WriteBatch batch = firestore.batch();
 
+      int operationCount = 0;
       for (int i = 0; i < parsed.length; i++) {
         final v = parsed[i];
-        final mobile = v.mobileNumber.replaceAll(RegExp(r'[^0-9]'), '');
+        final mobile = MyContactsModel.normalizeMobile(v.mobileNumber);
         if (mobile.isEmpty) {
           importSkipped.value++;
-          importProgress.value = (i + 1) / parsed.length;
           continue;
         }
 
-        final existing = await MyContactsCrud.checkContactExists(mobile);
+        final existing = existingMap[mobile];
         if (existing != null) {
-          if (existing.firstName != v.firstName || existing.lastName != v.lastName) {
+          final needsUpdate = existing.firstName != v.firstName || existing.lastName != v.lastName;
+          if (needsUpdate) {
             final updated = existing.copyWith(
               firstName: v.firstName,
               lastName: v.lastName,
-              searchKeywords: MyContactsModel.generateSearchKeywords(v.firstName, v.lastName, mobile),
             );
-            await FirebaseFirestore.instance.collection('my_contacts').doc(existing.id).update(updated.toUpdateJson());
+            batch.update(
+              firestore.collection('my_contacts').doc(existing.docId),
+              updated.toJson(),
+            );
             importUpdated.value++;
+            final index = contacts.indexWhere((e) => e.docId == existing.docId);
+            if (index != -1) {
+              contacts[index] = updated;
+              contacts.refresh();
+              _applyFilterAndSort();
+            }
+            operationCount++;
           } else {
             importSkipped.value++;
           }
         } else {
+          final doc = firestore.collection('my_contacts').doc();
           final model = MyContactsModel(
-            id: '',
+            docId: doc.id,
             ownerId: uid,
             firstName: v.firstName,
             lastName: v.lastName,
             mobileNumber: mobile,
             profileImage: '',
-            searchKeywords: MyContactsModel.generateSearchKeywords(v.firstName, v.lastName, mobile),
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
           );
-          await MyContactsCrud.createOnlyNewContact(model);
+          batch.set(doc, model.toJson());
+
           importAdded.value++;
+          operationCount++;
+          existingMap[mobile] = model;
+          contacts.insert(0, model);
+          _applyFilterAndSort();
         }
-        importProgress.value = (i + 1) / parsed.length;
+
+        if (operationCount >= 400) {
+          await batch.commit();
+          batch = firestore.batch();
+          operationCount = 0;
+        }
+
+        if (i % 20 == 0) {
+          importProgress.value = (i + 1) / parsed.length;
+          await Future.delayed(const Duration(milliseconds: 1));
+        }
       }
 
-      ShowToastDialog.showSuccess(
-        'Import done: ${importAdded.value} added, ${importUpdated.value} names updated, ${importSkipped.value} skipped',
-      );
+      if (operationCount > 0) {
+        await batch.commit();
+      }
+
+      await refreshContacts();
+      importProgress.value = 1;
+      ShowToastDialog.showSuccess('Imported ${importAdded.value} new contacts');
     } catch (e) {
-      ShowToastDialog.showError('VCF import failed: ${e.toString()}');
+      ShowToastDialog.showError('VCF import failed: $e');
     }
     isImporting.value = false;
   }
 
   @override
   void onClose() {
+    _authSub?.cancel();
     _contactsSub?.cancel();
     _debounce?.cancel();
     firstNameController.dispose();
