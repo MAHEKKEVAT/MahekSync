@@ -20,4 +20,5 @@ class CollectionName {
   static const String reviews = "reviews";
   static const String duesTracker = "dues_tracker";
   static const String sentinelAccess = 'sentinel_access';
+  static const String myContacts = "my_contacts";
 }

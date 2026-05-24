@@ -141,7 +141,6 @@ class SplashScreenView extends GetView<SplashScreenController> {
                   ),
                 ),
 
-                // Profile Image (Center)
                 Container(
                   width: 250,
                   height: 250,

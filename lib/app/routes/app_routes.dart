@@ -35,6 +35,8 @@ abstract class Routes {
   static const SENTINEL = _Paths.SENTINEL;
   static const VAULT = _Paths.VAULT;
   static const VAULT_CRUD = _Paths.VAULT_CRUD;
+  static const SMART_MAP_DASHBOARD = _Paths.SMART_MAP_DASHBOARD;
+  static const MY_CONTACTS = _Paths.MY_CONTACTS;
 }
 
 abstract class _Paths {
@@ -72,4 +74,6 @@ abstract class _Paths {
   static const SENTINEL = '/dashboard/sentinel';
   static const VAULT = '/dashboard/vault';
   static const VAULT_CRUD = '/vault-crud';
+  static const SMART_MAP_DASHBOARD = '/smart-map-dashboard';
+  static const MY_CONTACTS = '/my-contacts';
 }

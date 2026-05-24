@@ -52,7 +52,7 @@ class MahekConstant {
   static String? selectedMap;
 
   static String jsonFileURL = "";
-  static String googleMapKey = "";
+  static String googleMapKey = "AIzaSyBwI28ucDsERHEx5O6ybrmeKSoBY98tmmA";
   static String distanceType = "KM";
   static String webNotificationKey = "";
   static String? countryCode = '+91';

@@ -232,6 +232,7 @@ class AppThemeData {
       boxShadow: neonGlow(glowColor, opacity: glowOpacity),
     );
   }
+  static const Color textNeonTeal = Color(0xFF9DD8FF);  // Light pastel teal for dark-mode text
 
   /// Returns a gradient border decoration (like Gemini/Apple AI rings)
   static BoxDecoration gradientBorderBox({

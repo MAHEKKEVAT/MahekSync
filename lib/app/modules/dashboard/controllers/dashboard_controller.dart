@@ -7,6 +7,8 @@ import 'package:maheksync/app/modules/categories/controllers/categories_controll
 import 'package:maheksync/app/modules/categories/views/categories_view.dart';
 import 'package:maheksync/app/modules/dues_tracker/controllers/dues_tracker_controller.dart';
 import 'package:maheksync/app/modules/dues_tracker/views/dues_tracker_view.dart';
+import 'package:maheksync/app/modules/my_contacts/controllers/my_contacts_controller.dart';
+import 'package:maheksync/app/modules/my_contacts/views/my_contacts_view.dart';
 import 'package:maheksync/app/modules/my_devices/controllers/my_devices_controller.dart';
 import 'package:maheksync/app/modules/my_devices/views/my_devices_view.dart';
 import 'package:maheksync/app/modules/my_purchases/controllers/my_purchases_controller.dart';
@@ -17,6 +19,8 @@ import 'package:maheksync/app/modules/personal_tasks/views/personal_tasks_view.d
 import 'package:maheksync/app/modules/policy_settings/views/policy_settings_view.dart';
 import 'package:maheksync/app/modules/reminder/controllers/reminder_controller.dart';
 import 'package:maheksync/app/modules/reminder/views/reminder_view.dart';
+import 'package:maheksync/app/modules/smart_map_dashboard/controllers/smart_map_dashboard_controller.dart';
+import 'package:maheksync/app/modules/smart_map_dashboard/views/smart_map_dashboard_view.dart';
 import 'package:maheksync/app/modules/subscription/controllers/subscription_controller.dart';
 import 'package:maheksync/app/modules/subscription/views/subscription_view.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
@@ -119,6 +123,18 @@ class DashboardController extends GetxController {
           selectedIcon: Icons.task_alt_rounded,
           route: Routes.PERSONAL_TASKS,
           svgIcon: 'assets/icons/ic_tasks.svg',
+        ),
+        NavigationItem(
+          title: 'Smart Map'.tr,
+          icon: SolarIconsOutline.map,
+          selectedIcon: SolarIconsBold.map,
+          route: '/smart-map-dashboard',
+        ),
+        NavigationItem(
+          title: 'My Contacts'.tr,
+          icon: SolarIconsOutline.usersGroupRounded,
+          selectedIcon: SolarIconsBold.usersGroupRounded,
+          route: '/my-contacts',
         ),
       ],
     ),
@@ -377,7 +393,12 @@ class DashboardController extends GetxController {
           Get.put(PersonalTasksController());
         }
         return const PersonalTasksView();
-      case Routes.SENTINEL:                              // ← NEW
+      case '/smart-map-dashboard':
+        if (!Get.isRegistered<SmartMapDashboardController>()) {
+          Get.put(SmartMapDashboardController());
+        }
+        return const SmartMapDashboardView();
+      case Routes.SENTINEL:
         if (!Get.isRegistered<SentinelController>()) {
           Get.put(SentinelController());
           print('📦 Registered SentinelController');
@@ -389,6 +410,13 @@ class DashboardController extends GetxController {
           print('📦 Registered VaultController');
         }
         return const VaultView();
+
+      case '/my-contacts':
+        if (!Get.isRegistered<MyContactsController>()) {
+          Get.put(MyContactsController());
+        }
+        return const MyContactsView();
+
       case Routes.SETTINGS:
         return const SettingsView();
       case Routes.POLICY_SETTINGS:
