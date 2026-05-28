@@ -1,9 +1,9 @@
 // lib/app/modules/view_devices/controllers/view_devices_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:maheksync/app/firestore_utills/device_firestore_utils.dart';
 import 'package:maheksync/app/models/device_model.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
-import 'package:maheksync/app/utils/device_firestore_utils.dart';
 import '../../../constant/show_toast.dart';
 
 class ViewDevicesController extends GetxController {

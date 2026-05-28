@@ -7,7 +7,7 @@ import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/constant/show_toast.dart';
 import 'package:maheksync/app/models/personal_task_model.dart';
 import 'package:maheksync/app/services/imagekit_api.dart';
-import 'package:maheksync/app/utils/personal_task_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/personal_task_firestore_utils.dart';
 
 class PersonalTaskCrudController extends GetxController {
   final titleController = TextEditingController();

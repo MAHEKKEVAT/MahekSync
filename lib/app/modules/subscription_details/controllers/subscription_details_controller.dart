@@ -1,8 +1,8 @@
 // lib/app/modules/subscription_details/controllers/subscription_details_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:maheksync/app/firestore_utills/subscription_firestore_utils.dart';
 import 'package:maheksync/app/models/subscription_model.dart';
-import 'package:maheksync/app/utils/subscription_firestore_utils.dart';
 
 class SubscriptionDetailsController extends GetxController {
   final subscription = Rxn<SubscriptionModel>();

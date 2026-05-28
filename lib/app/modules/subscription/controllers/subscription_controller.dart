@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
+import 'package:maheksync/app/firestore_utills/subscription_firestore_utils.dart';
 import 'package:maheksync/app/models/subscription_model.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
-import 'package:maheksync/app/utils/subscription_firestore_utils.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import '../../../routes/app_pages.dart';
 

@@ -8,9 +8,9 @@ import 'package:maheksync/app/models/category_model.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
 import 'package:maheksync/app/models/purchase_model.dart';
 import 'package:maheksync/app/services/imagekit_api.dart';
-import 'package:maheksync/app/utils/category_firestore_utils.dart';
-import 'package:maheksync/app/utils/payment_method_firestore_utils.dart';
-import 'package:maheksync/app/utils/purchase_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/category_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/payment_method_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/purchase_firestore_utils.dart';
 import '../../../constant/show_toast.dart';
 
 class AddEditPurchaseController extends GetxController {

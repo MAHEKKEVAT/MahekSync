@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/models/dues_tracker_model.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
-import 'package:maheksync/app/utils/dues_tracker_firestore_utils.dart';
-import 'package:maheksync/app/utils/payment_method_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/dues_tracker_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/payment_method_firestore_utils.dart';
 import 'package:maheksync/app/constant/show_toast.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 

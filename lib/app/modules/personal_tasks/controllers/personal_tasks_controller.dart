@@ -4,7 +4,7 @@ import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/models/personal_task_model.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
-import 'package:maheksync/app/utils/personal_task_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/personal_task_firestore_utils.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:solar_icons/solar_icons.dart';
 

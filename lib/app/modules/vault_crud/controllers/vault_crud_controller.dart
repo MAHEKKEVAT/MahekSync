@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/constant/show_toast.dart';
+import 'package:maheksync/app/firestore_utills/vault_firestore_utils.dart';
 import 'package:maheksync/app/models/vault_model.dart';
 import 'package:maheksync/app/services/imagekit_api.dart';
-import 'package:maheksync/app/utils/vault_firestore_utils.dart';
 
 class VaultCrudController extends GetxController {
   final titleController = TextEditingController();

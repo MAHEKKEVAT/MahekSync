@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/models/category_model.dart';
 import 'package:maheksync/app/services/imagekit_api.dart';
-import 'package:maheksync/app/utils/category_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/category_firestore_utils.dart';
 import '../../../constant/show_toast.dart';
 
 class CategoriesController extends GetxController {

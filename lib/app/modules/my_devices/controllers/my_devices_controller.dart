@@ -1,12 +1,12 @@
 // lib/app/modules/my_devices/controllers/my_devices_controller.dart
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
+import 'package:maheksync/app/firestore_utills/device_firestore_utils.dart';
 import 'package:maheksync/app/models/category_model.dart';
 import 'package:maheksync/app/models/device_model.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
-import 'package:maheksync/app/utils/category_firestore_utils.dart';
-import 'package:maheksync/app/utils/device_firestore_utils.dart';
-import 'package:maheksync/app/utils/payment_method_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/category_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/payment_method_firestore_utils.dart';
 
 import '../../add_new_devices/controllers/add_new_devices_controller.dart';
 import '../../add_new_devices/views/add_new_devices_view.dart';

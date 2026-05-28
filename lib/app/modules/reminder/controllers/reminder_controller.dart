@@ -3,10 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
+import 'package:maheksync/app/firestore_utills/reminder_firestore_utils.dart';
 import 'package:maheksync/app/models/reminder_model.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
-import 'package:maheksync/app/utils/reminder_firestore_utils.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 
 class ReminderController extends GetxController {

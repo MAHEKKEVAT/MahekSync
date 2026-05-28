@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/constant/show_toast.dart';
+import 'package:maheksync/app/firestore_utills/vault_firestore_utils.dart' hide debugPrint;
 import 'package:maheksync/app/models/vault_model.dart';
 import 'package:maheksync/app/modules/sentinel/controllers/sentinel_controller.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
-import 'package:maheksync/app/utils/vault_firestore_utils.dart' hide debugPrint;
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:solar_icons/solar_icons.dart';
 
@@ -145,8 +145,6 @@ class VaultController extends GetxController {
       revealedFields.remove(fieldId);
       return;
     }
-    // Re-verify via Sentinel before revealing sensitive data
-    // Safe check: if SentinelController is registered, use it; otherwise skip verification
     if (Get.isRegistered<SentinelController>()) {
       try {
         final sentinelCtrl = Get.find<SentinelController>();

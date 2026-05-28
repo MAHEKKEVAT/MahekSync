@@ -7,9 +7,9 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/constant/show_toast.dart';
+import 'package:maheksync/app/firestore_utills/reminder_firestore_utils.dart';
 import 'package:maheksync/app/models/reminder_model.dart';
 import 'package:maheksync/app/services/imagekit_api.dart';
-import 'package:maheksync/app/utils/reminder_firestore_utils.dart';
 
 class ReminderCrudController extends GetxController {
   final nameController = TextEditingController();

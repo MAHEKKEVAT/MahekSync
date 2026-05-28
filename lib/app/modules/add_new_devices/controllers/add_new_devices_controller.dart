@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maheksync/app/constant/constants.dart';
+import 'package:maheksync/app/firestore_utills/device_firestore_utils.dart';
 import 'package:maheksync/app/models/category_model.dart';
 import 'package:maheksync/app/models/device_model.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
 import 'package:maheksync/app/services/imagekit_api.dart';
-import 'package:maheksync/app/utils/category_firestore_utils.dart';
-import 'package:maheksync/app/utils/device_firestore_utils.dart';
-import 'package:maheksync/app/utils/payment_method_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/category_firestore_utils.dart';
+import 'package:maheksync/app/firestore_utills/payment_method_firestore_utils.dart';
 import '../../../constant/show_toast.dart';
 
 class AddNewDevicesController extends GetxController {

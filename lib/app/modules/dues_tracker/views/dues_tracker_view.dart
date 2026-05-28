@@ -25,22 +25,60 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
   Widget build(BuildContext context) {
     final theme = Provider.of<DarkThemeProvider>(context);
     final isDark = theme.isDarkTheme();
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           _AnimatedMeshBackground(isDark: isDark),
           SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(child: _buildHeroSection(context, isDark)),
-                SliverToBoxAdapter(child: _buildToolbar(context, isDark)),
-                SliverToBoxAdapter(child: const SizedBox(height: 16)),
-                Obx(
-                  () => controller.filteredDues.isEmpty
-                      ? SliverFillRemaining(child: _buildEmptyState(isDark))
-                      : _buildContentSliver(context, isDark),
+            child: Column(
+              children: [
+                // --- FIXED HEADER PORTION (Stays static at the top) ---
+                _buildHeroSection(context, isDark),
+                _buildToolbar(context, isDark),
+                const SizedBox(height: 12),
+
+                // --- SCROLLABLE CONTENT PORTION (Only cards scroll) ---
+                Expanded(
+                  child: Obx(() {
+                    if (controller.filteredDues.isEmpty) {
+                      return _buildEmptyState(isDark);
+                    }
+
+                    return controller.isGridView.value
+                        ? GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: MahekResponsive.isMobile(context) ? 16 : 24,
+                        vertical: 8,
+                      ),
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 500,
+                        mainAxisSpacing: 20,
+                        crossAxisSpacing: 20,
+                        childAspectRatio: 1.99,
+                      ),
+                      itemCount: controller.filteredDues.length,
+                      itemBuilder: (context, index) =>
+                          _buildDueCard(controller.filteredDues[index], isDark),
+                    )
+                        : ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: MahekResponsive.isMobile(context) ? 16 : 24,
+                        vertical: 8,
+                      ),
+                      itemCount: controller.filteredDues.length,
+                      itemBuilder: (context, index) {
+                        final due = controller.filteredDues[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _buildDueListTile(due, isDark),
+                        );
+                      },
+                    );
+                  }),
                 ),
               ],
             ),
@@ -75,18 +113,26 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppThemeData.surfaceObsidian.withOpacity(0.65),
-                  AppThemeData.surfaceDeep.withOpacity(0.8),
+                  isDark
+                      ? AppThemeData.surfaceObsidian.withOpacity(0.65)
+                      : Colors.white.withOpacity(0.75),
+                  isDark
+                      ? AppThemeData.surfaceDeep.withOpacity(0.8)
+                      : Colors.white.withOpacity(0.55),
                 ],
               ),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
-                color: AppThemeData.primary50.withOpacity(0.25),
+                color: isDark
+                    ? AppThemeData.primary50.withOpacity(0.25)
+                    : AppThemeData.primary50.withOpacity(0.15),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppThemeData.primary50.withOpacity(0.1),
+                  color: AppThemeData.primary50.withOpacity(
+                    isDark ? 0.1 : 0.05,
+                  ),
                   blurRadius: 30,
                   spreadRadius: 2,
                 ),
@@ -117,7 +163,9 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                           title: 'Dues Intelligence',
                           fontSize: isMobile ? 18 : 22,
                           fontFamily: FontFamily.bold,
-                          color: AppThemeData.primaryWhite,
+                          color: isDark
+                              ? AppThemeData.primaryWhite
+                              : AppThemeData.primaryBlack,
                           maxLine: 1,
                         ),
                       ),
@@ -254,16 +302,15 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
     );
   }
 
-  Widget _buildStatItem(
-    bool isDark,
-    String label,
-    double value,
-    IconData icon,
-    Color color, {
-    int? count,
-    bool isNet = false,
-    bool isCount = false,
-  }) {
+  Widget _buildStatItem(bool isDark,
+      String label,
+      double value,
+      IconData icon,
+      Color color, {
+        int? count,
+        bool isNet = false,
+        bool isCount = false,
+      }) {
     final displayWidget = Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
@@ -294,7 +341,7 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
             title: isCount
                 ? '${value.toInt()}'
                 : (isNet && controller.netBalance.value < 0 ? '-' : '') +
-                      '\u20B9${value.toStringAsFixed(0)}',
+                '\u20B9${value.toStringAsFixed(0)}',
             fontSize: 26,
             fontFamily: FontFamily.bold,
             color: color,
@@ -336,56 +383,59 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Obx(
-              () => Row(
-                children: [
-                  _buildFilterChip(
-                    isDark,
-                    label: 'All',
-                    icon: SolarIconsOutline.filters,
-                    isActive: controller.activeFilter.value == 'ALL',
-                    onTap: () => controller.clearFilters(),
+                  () =>
+                  Row(
+                    children: [
+                      _buildFilterChip(
+                        isDark,
+                        label: 'All',
+                        icon: SolarIconsOutline.filters,
+                        isActive: controller.activeFilter.value == 'ALL',
+                        onTap: () => controller.clearFilters(),
+                      ),
+                      _buildFilterChip(
+                        isDark,
+                        label: 'I Owe',
+                        icon: SolarIconsBold.arrowUp,
+                        isActive: controller.activeFilter.value == 'OWE',
+                        onTap: () => controller.filterByDueType(DueType.owe),
+                      ),
+                      _buildFilterChip(
+                        isDark,
+                        label: 'They Owe Me',
+                        icon: SolarIconsBold.arrowDown,
+                        isActive: controller.activeFilter.value == 'TAKE',
+                        onTap: () => controller.filterByDueType(DueType.take),
+                      ),
+                      _buildFilterChip(
+                        isDark,
+                        label: 'Pending',
+                        icon: SolarIconsOutline.clockCircle,
+                        isActive: controller.activeFilter.value == 'PENDING',
+                        onTap: () =>
+                            controller.filterByStatus(DueStatus.pending),
+                      ),
+                      _buildFilterChip(
+                        isDark,
+                        label: 'Settled',
+                        icon: SolarIconsBold.checkCircle,
+                        isActive: controller.activeFilter.value == 'SETTLED',
+                        onTap: () =>
+                            controller.filterByStatus(DueStatus.settled),
+                      ),
+                      _buildFilterChip(
+                        isDark,
+                        label: 'Overdue',
+                        icon: SolarIconsBold.dangerTriangle,
+                        isActive: controller.activeFilter.value == 'OVERDUE',
+                        onTap: () => controller.filterByStatus('OVERDUE'),
+                      ),
+                      spaceW(width: 12),
+                      _buildViewToggle(isDark),
+                      if (isMobile) spaceW(width: 12),
+                      if (isMobile) _buildAddButton(isDark, compact: true),
+                    ],
                   ),
-                  _buildFilterChip(
-                    isDark,
-                    label: 'I Owe',
-                    icon: SolarIconsBold.arrowUp,
-                    isActive: controller.activeFilter.value == 'OWE',
-                    onTap: () => controller.filterByDueType(DueType.owe),
-                  ),
-                  _buildFilterChip(
-                    isDark,
-                    label: 'They Owe Me',
-                    icon: SolarIconsBold.arrowDown,
-                    isActive: controller.activeFilter.value == 'TAKE',
-                    onTap: () => controller.filterByDueType(DueType.take),
-                  ),
-                  _buildFilterChip(
-                    isDark,
-                    label: 'Pending',
-                    icon: SolarIconsOutline.clockCircle,
-                    isActive: controller.activeFilter.value == 'PENDING',
-                    onTap: () => controller.filterByStatus(DueStatus.pending),
-                  ),
-                  _buildFilterChip(
-                    isDark,
-                    label: 'Settled',
-                    icon: SolarIconsBold.checkCircle,
-                    isActive: controller.activeFilter.value == 'SETTLED',
-                    onTap: () => controller.filterByStatus(DueStatus.settled),
-                  ),
-                  _buildFilterChip(
-                    isDark,
-                    label: 'Overdue',
-                    icon: SolarIconsBold.dangerTriangle,
-                    isActive: controller.activeFilter.value == 'OVERDUE',
-                    onTap: () => controller.filterByStatus('OVERDUE'),
-                  ),
-                  spaceW(width: 12),
-                  _buildViewToggle(isDark),
-                  if (isMobile) spaceW(width: 12),
-                  if (isMobile) _buildAddButton(isDark, compact: true),
-                ],
-              ),
             ),
           ),
         ],
@@ -426,8 +476,7 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
     );
   }
 
-  Widget _buildFilterChip(
-    bool isDark, {
+  Widget _buildFilterChip(bool isDark, {
     required String label,
     required IconData icon,
     required bool isActive,
@@ -443,13 +492,13 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
           decoration: BoxDecoration(
             gradient: isActive
                 ? LinearGradient(
-                    colors: [
-                      AppThemeData.primary50.withOpacity(0.2),
-                      AppThemeData.neonPurple.withOpacity(0.15),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
+              colors: [
+                AppThemeData.primary50.withOpacity(0.2),
+                AppThemeData.neonPurple.withOpacity(0.15),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
                 : null,
             color: isActive
                 ? null
@@ -498,32 +547,32 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
         ),
       ),
       child: Obx(
-        () => Row(
-          children: [
-            _buildToggleButton(
-              isDark,
-              icon: SolarIconsOutline.list,
-              isSelected: !controller.isGridView.value,
-              onTap: () {
-                if (controller.isGridView.value) controller.toggleView();
-              },
+            () =>
+            Row(
+              children: [
+                _buildToggleButton(
+                  isDark,
+                  icon: SolarIconsOutline.list,
+                  isSelected: !controller.isGridView.value,
+                  onTap: () {
+                    if (controller.isGridView.value) controller.toggleView();
+                  },
+                ),
+                _buildToggleButton(
+                  isDark,
+                  icon: SolarIconsOutline.filters,
+                  isSelected: controller.isGridView.value,
+                  onTap: () {
+                    if (!controller.isGridView.value) controller.toggleView();
+                  },
+                ),
+              ],
             ),
-            _buildToggleButton(
-              isDark,
-              icon: SolarIconsOutline.filters,
-              isSelected: controller.isGridView.value,
-              onTap: () {
-                if (!controller.isGridView.value) controller.toggleView();
-              },
-            ),
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildToggleButton(
-    bool isDark, {
+  Widget _buildToggleButton(bool isDark, {
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
@@ -599,10 +648,10 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
         maxCrossAxisExtent: 500,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
-        childAspectRatio: 1.25,
+        childAspectRatio: 1.99,
       ),
       delegate: SliverChildBuilderDelegate(
-        (context, index) =>
+            (context, index) =>
             _buildDueCard(controller.filteredDues[index], isDark),
         childCount: controller.filteredDues.length,
       ),
@@ -807,11 +856,10 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
     );
   }
 
-  Widget _buildPaymentMethodIcon(
-    DuesTrackerModel due,
-    bool isDark, {
-    double size = 24,
-  }) {
+  Widget _buildPaymentMethodIcon(DuesTrackerModel due,
+      bool isDark, {
+        double size = 24,
+      }) {
     final hasIcon = due.hasPaymentIcon;
     final borderRadius = size > 30 ? 14.0 : 12.0;
     final innerRadius = borderRadius - 4;
@@ -896,7 +944,8 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
             break;
         }
       },
-      itemBuilder: (context) => [
+      itemBuilder: (context) =>
+      [
         PopupMenuItem(
           value: 'edit',
           child: Row(
@@ -962,11 +1011,10 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
     );
   }
 
-  void _showAddEditDialog(
-    BuildContext context,
-    bool isDark, {
-    DuesTrackerModel? due,
-  }) {
+  void _showAddEditDialog(BuildContext context,
+      bool isDark, {
+        DuesTrackerModel? due,
+      }) {
     final formKey = GlobalKey<FormState>();
 
     // 1. Properly set up state tracking parameters inside the Controller first
@@ -1006,7 +1054,10 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
             child: Container(
-              width: min(MediaQuery.of(context).size.width, 500),
+              width: min(MediaQuery
+                  .of(context)
+                  .size
+                  .width, 500),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -1078,87 +1129,97 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                       ),
                       const SizedBox(height: 10),
                       Obx(
-                        () => Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => selectedType.value = DueType.owe,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: selectedType.value == DueType.owe
-                                        ? AppThemeData.danger300.withOpacity(
-                                            0.2,
-                                          )
-                                        : (isDark
-                                              ? AppThemeData.surfaceElevated
-                                              : AppThemeData.grey2),
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: selectedType.value == DueType.owe
-                                          ? AppThemeData.danger300
-                                          : Colors.transparent,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: TextCustom(
-                                      title: 'I Owe Someone',
-                                      fontSize: 14,
-                                      fontFamily: FontFamily.bold,
-                                      color: selectedType.value == DueType.owe
-                                          ? AppThemeData.danger300
-                                          : (isDark
-                                                ? AppThemeData.grey4
-                                                : AppThemeData.grey7),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => selectedType.value = DueType.take,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: selectedType.value == DueType.take
-                                        ? AppThemeData.success300.withOpacity(
-                                            0.2,
-                                          )
-                                        : (isDark
-                                              ? AppThemeData.surfaceElevated
-                                              : AppThemeData.grey2),
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: selectedType.value == DueType.take
-                                          ? AppThemeData.success300
-                                          : Colors.transparent,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: TextCustom(
-                                      title: 'They Owe Me',
-                                      fontSize: 14,
-                                      fontFamily: FontFamily.bold,
-                                      color: selectedType.value == DueType.take
-                                          ? AppThemeData.success300
-                                          : (isDark
-                                                ? AppThemeData.grey4
-                                                : AppThemeData.grey7),
+                            () =>
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () =>
+                                    selectedType.value = DueType.owe,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: selectedType.value == DueType.owe
+                                            ? AppThemeData.danger300
+                                            .withOpacity(
+                                          0.2,
+                                        )
+                                            : (isDark
+                                            ? AppThemeData.surfaceElevated
+                                            : AppThemeData.grey2),
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                          color: selectedType.value ==
+                                              DueType.owe
+                                              ? AppThemeData.danger300
+                                              : Colors.transparent,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: TextCustom(
+                                          title: 'I Owe Someone',
+                                          fontSize: 14,
+                                          fontFamily: FontFamily.bold,
+                                          color: selectedType.value ==
+                                              DueType.owe
+                                              ? AppThemeData.danger300
+                                              : (isDark
+                                              ? AppThemeData.grey4
+                                              : AppThemeData.grey7),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () =>
+                                    selectedType.value = DueType.take,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: selectedType.value ==
+                                            DueType.take
+                                            ? AppThemeData.success300
+                                            .withOpacity(
+                                          0.2,
+                                        )
+                                            : (isDark
+                                            ? AppThemeData.surfaceElevated
+                                            : AppThemeData.grey2),
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                          color: selectedType.value ==
+                                              DueType.take
+                                              ? AppThemeData.success300
+                                              : Colors.transparent,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: TextCustom(
+                                          title: 'They Owe Me',
+                                          fontSize: 14,
+                                          fontFamily: FontFamily.bold,
+                                          color: selectedType.value ==
+                                              DueType.take
+                                              ? AppThemeData.success300
+                                              : (isDark
+                                              ? AppThemeData.grey4
+                                              : AppThemeData.grey7),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
                       ),
                       const SizedBox(height: 20),
 
@@ -1171,7 +1232,9 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                         onPress: () {},
                         prefix: const Icon(SolarIconsOutline.user, size: 18),
                         validator: (value) =>
-                            (value == null || value.trim().isEmpty)
+                        (value == null || value
+                            .trim()
+                            .isEmpty)
                             ? 'Please enter a name'
                             : null,
                       ),
@@ -1190,7 +1253,9 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                           FilteringTextInputFormatter.digitsOnly,
                         ],
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty)
+                          if (value == null || value
+                              .trim()
+                              .isEmpty)
                             return 'Please enter an amount';
                           if (double.tryParse(value) == null ||
                               double.parse(value) <= 0)
@@ -1217,52 +1282,54 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                                 ),
                                 const SizedBox(height: 6),
                                 Obx(
-                                  () => InkWell(
-                                    onTap: () =>
-                                        controller.pickGiveDate(context),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 14,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isDark
-                                            ? AppThemeData.surfaceElevated
-                                            : AppThemeData.grey2,
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            SolarIconsOutline.calendar,
-                                            size: 16,
-                                            color: AppThemeData.primary50,
+                                      () =>
+                                      InkWell(
+                                        onTap: () =>
+                                            controller.pickGiveDate(context),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 14,
                                           ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: TextCustom(
-                                              title:
+                                          decoration: BoxDecoration(
+                                            color: isDark
+                                                ? AppThemeData.surfaceElevated
+                                                : AppThemeData.grey2,
+                                            borderRadius: BorderRadius.circular(
+                                                14),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                SolarIconsOutline.calendar,
+                                                size: 16,
+                                                color: AppThemeData.primary50,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: TextCustom(
+                                                  title:
                                                   controller
-                                                          .selectedGiveDate
-                                                          .value !=
+                                                      .selectedGiveDate
+                                                      .value !=
                                                       null
-                                                  ? DateFormat(
-                                                      'dd MMM yyyy',
-                                                    ).format(
-                                                      controller
-                                                          .selectedGiveDate
-                                                          .value!,
-                                                    )
-                                                  : DateFormat(
-                                                      'dd MMM yyyy',
-                                                    ).format(DateTime.now()),
-                                              fontSize: 13,
-                                            ),
+                                                      ? DateFormat(
+                                                    'dd MMM yyyy',
+                                                  ).format(
+                                                    controller
+                                                        .selectedGiveDate
+                                                        .value!,
+                                                  )
+                                                      : DateFormat(
+                                                    'dd MMM yyyy',
+                                                  ).format(DateTime.now()),
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
                                 ),
                               ],
                             ),
@@ -1282,56 +1349,58 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                                 ),
                                 const SizedBox(height: 6),
                                 Obx(
-                                  () => InkWell(
-                                    onTap: () =>
-                                        controller.pickOweDate(context),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 14,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isDark
-                                            ? AppThemeData.surfaceElevated
-                                            : AppThemeData.grey2,
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            SolarIconsOutline.calendar,
-                                            size: 16,
-                                            color: AppThemeData.primary50,
+                                      () =>
+                                      InkWell(
+                                        onTap: () =>
+                                            controller.pickOweDate(context),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 14,
                                           ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: TextCustom(
-                                              title:
+                                          decoration: BoxDecoration(
+                                            color: isDark
+                                                ? AppThemeData.surfaceElevated
+                                                : AppThemeData.grey2,
+                                            borderRadius: BorderRadius.circular(
+                                                14),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                SolarIconsOutline.calendar,
+                                                size: 16,
+                                                color: AppThemeData.primary50,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: TextCustom(
+                                                  title:
                                                   controller
-                                                          .selectedOweDate
-                                                          .value !=
+                                                      .selectedOweDate
+                                                      .value !=
                                                       null
-                                                  ? DateFormat(
-                                                      'dd MMM yyyy',
-                                                    ).format(
-                                                      controller
-                                                          .selectedOweDate
-                                                          .value!,
-                                                    )
-                                                  : DateFormat(
-                                                      'dd MMM yyyy',
-                                                    ).format(
-                                                      DateTime.now().add(
-                                                        const Duration(days: 7),
-                                                      ),
+                                                      ? DateFormat(
+                                                    'dd MMM yyyy',
+                                                  ).format(
+                                                    controller
+                                                        .selectedOweDate
+                                                        .value!,
+                                                  )
+                                                      : DateFormat(
+                                                    'dd MMM yyyy',
+                                                  ).format(
+                                                    DateTime.now().add(
+                                                      const Duration(days: 7),
                                                     ),
-                                              fontSize: 13,
-                                            ),
+                                                  ),
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
                                 ),
                               ],
                             ),
@@ -1438,7 +1507,8 @@ class _AnimatedMeshBackgroundState extends State<_AnimatedMeshBackground>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 20),
-    )..repeat(reverse: true);
+    )
+      ..repeat(reverse: true);
   }
 
   @override
@@ -1462,9 +1532,9 @@ class _AnimatedMeshBackgroundState extends State<_AnimatedMeshBackground>
               radius: 0.8,
               colors: widget.isDark
                   ? [
-                      AppThemeData.neonPurpleDim.withOpacity(0.3),
-                      AppThemeData.surfaceVoid,
-                    ]
+                AppThemeData.neonPurpleDim.withOpacity(0.3),
+                AppThemeData.surfaceVoid,
+              ]
                   : [AppThemeData.primary50.withOpacity(0.1), Colors.white],
             ),
           ),
