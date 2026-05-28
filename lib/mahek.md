@@ -23,12 +23,12 @@ git pull origin main
 
 ### 👉 Verify manually (very important)
 
-```bash
-flutter build web --base-href "/MahekSync/"
-xcopy build\web\* docs\ /E /H /Y
-git add .
-git commit -m "Add"
-git push origin main
+  ```bash
+  flutter build web --base-href "/MahekSync/"
+  xcopy build\web\* docs\ /E /H /Y
+  git add .
+  git commit -m "Add"
+  git push origin main
 
 ```
 

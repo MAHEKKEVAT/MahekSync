@@ -7,6 +7,7 @@ import 'package:maheksync/app/models/payment_method_model.dart';
 import 'package:maheksync/app/utils/dues_tracker_firestore_utils.dart';
 import 'package:maheksync/app/utils/payment_method_firestore_utils.dart';
 import 'package:maheksync/app/constant/show_toast.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 
 class DuesTrackerController extends GetxController {
   final dues = <DuesTrackerModel>[].obs;
@@ -20,14 +21,20 @@ class DuesTrackerController extends GetxController {
   final selectedStatus = 'ALL'.obs;
   final selectedPaymentMethod = Rxn<PaymentMethodModel>();
 
+  // Explicit filter state tracking variable to fix UI update issues
+  final activeFilter = 'ALL'.obs;
+
   final sortField = 'createdAt'.obs;
   final sortAscending = false.obs;
-
   final dueTypeOptions = ['ALL', DueType.owe, DueType.take];
-  final statusOptions = ['ALL', DueStatus.pending, DueStatus.partial, DueStatus.settled];
+  final statusOptions = [
+    'ALL',
+    DueStatus.pending,
+    DueStatus.partial,
+    DueStatus.settled
+  ];
 
   final paymentMethods = <PaymentMethodModel>[].obs;
-
   final customerNameController = TextEditingController();
   final amountController = TextEditingController();
   final noteController = TextEditingController();
@@ -46,37 +53,21 @@ class DuesTrackerController extends GetxController {
 
   String? get ownerId => MahekConstant.ownerModel?.id;
 
-  double get totalOweAmount => dues
-      .where((d) => DueType.isOwe(d.dueType) && !DueStatus.isSettled(d.status))
-      .fold(0.0, (sum, d) => sum + (d.amount ?? 0.0));
-
-  double get totalTakeAmount => dues
-      .where((d) => DueType.isTake(d.dueType) && !DueStatus.isSettled(d.status))
-      .fold(0.0, (sum, d) => sum + (d.amount ?? 0.0));
-
-  double get netBalance => totalTakeAmount - totalOweAmount;
-
-  int get oweCount => dues
-      .where((d) => DueType.isOwe(d.dueType) && !DueStatus.isSettled(d.status))
-      .length;
-
-  int get takeCount => dues
-      .where((d) => DueType.isTake(d.dueType) && !DueStatus.isSettled(d.status))
-      .length;
-
-  int get overdueCount => dues.where((d) => d.isOverdue).length;
-
-  int get pendingCount => dues.where((d) => DueStatus.isPending(d.status)).length;
-
-  int get settledCount => dues.where((d) => DueStatus.isSettled(d.status)).length;
-
-  int get totalActiveCount => dues.where((d) => !DueStatus.isSettled(d.status)).length;
+  // Cached summary fields to improve dashboard performance
+  final totalOweAmount = 0.0.obs;
+  final totalTakeAmount = 0.0.obs;
+  final netBalance = 0.0.obs;
+  final oweCount = 0.obs;
+  final takeCount = 0.obs;
+  final overdueCount = 0.obs;
+  final pendingCount = 0.obs;
+  final settledCount = 0.obs;
+  final totalActiveCount = 0.obs;
 
   bool get hasActiveFilters =>
       searchQuery.isNotEmpty ||
-      selectedDueType.value != 'ALL' ||
-      selectedStatus.value != 'ALL' ||
-      selectedPaymentMethod.value != null;
+          activeFilter.value != 'ALL' ||
+          selectedPaymentMethod.value != null;
 
   @override
   void onInit() {
@@ -100,7 +91,7 @@ class DuesTrackerController extends GetxController {
     _searchDebounce?.cancel();
     _searchDebounce = Timer(
       const Duration(milliseconds: _searchDebounceMs),
-      () {
+          () {
         searchQuery.value = searchController.text;
         _applyFilters();
       },
@@ -121,18 +112,69 @@ class DuesTrackerController extends GetxController {
     DuesTrackerFirestoreUtils.getUserDues(ownerId!).listen((dueList) {
       for (var due in dueList) {
         final matchedMethod = paymentMethods.firstWhereOrNull(
-          (m) => m.pName == due.paymentMethod,
+              (m) => m.pName == due.paymentMethod,
         );
         if (matchedMethod != null && matchedMethod.pIcon != null) {
           due.paymentMethodIcon = matchedMethod.pIcon;
         }
       }
       dues.value = dueList;
+      _recomputeSummary();
       _applyFilters();
       isLoading.value = false;
     }, onError: (error) {
       isLoading.value = false;
     });
+  }
+
+  // Pre-computes dashboard figures exactly once when the stream refreshes
+  void _recomputeSummary() {
+    double tempOwe = 0.0;
+    double tempTake = 0.0;
+    int tempOweCount = 0;
+    int tempTakeCount = 0;
+    int tempOverdueCount = 0;
+    int tempPendingCount = 0;
+    int tempSettledCount = 0;
+    int tempActiveCount = 0;
+
+    for (var d in dues) {
+      final isOweType = DueType.isOwe(d.dueType);
+      final isTakeType = DueType.isTake(d.dueType);
+      final isSettledState = DueStatus.isSettled(d.status);
+      final isPendingState = DueStatus.isPending(d.status);
+
+      if (isOweType && !isSettledState) {
+        tempOwe += (d.amount ?? 0.0);
+        tempOweCount++;
+      }
+      if (isTakeType && !isSettledState) {
+        tempTake += (d.amount ?? 0.0);
+        tempTakeCount++;
+      }
+      if (d.isOverdue) {
+        tempOverdueCount++;
+      }
+      if (isPendingState) {
+        tempPendingCount++;
+      }
+      if (isSettledState) {
+        tempSettledCount++;
+      }
+      if (!isSettledState) {
+        tempActiveCount++;
+      }
+    }
+
+    totalOweAmount.value = tempOwe;
+    totalTakeAmount.value = tempTake;
+    netBalance.value = tempTake - tempOwe;
+    oweCount.value = tempOweCount;
+    takeCount.value = tempTakeCount;
+    overdueCount.value = tempOverdueCount;
+    pendingCount.value = tempPendingCount;
+    settledCount.value = tempSettledCount;
+    totalActiveCount.value = tempActiveCount;
   }
 
   void _applyFilters() {
@@ -147,37 +189,51 @@ class DuesTrackerController extends GetxController {
       }).toList();
     }
 
-    if (selectedDueType.value != 'ALL') {
-      result = result.where((d) => d.dueType == selectedDueType.value).toList();
+    // Comprehensive functional updates filtering logic
+    switch (activeFilter.value) {
+      case 'OWE':
+        result = result.where((d) => d.dueType == DueType.owe).toList();
+        break;
+      case 'TAKE':
+        result = result.where((d) => d.dueType == DueType.take).toList();
+        break;
+      case 'PENDING':
+        result = result.where((d) => d.status == DueStatus.pending).toList();
+        break;
+      case 'SETTLED':
+        result = result.where((d) => d.status == DueStatus.settled).toList();
+        break;
+      case 'OVERDUE':
+        result = result.where((d) => d.isOverdue).toList();
+        break;
+      case 'ALL':
+      default:
+        break;
     }
 
     if (selectedPaymentMethod.value != null) {
       result = result.where(
-        (d) => d.paymentMethod == selectedPaymentMethod.value!.pName,
+            (d) => d.paymentMethod == selectedPaymentMethod.value!.pName,
       ).toList();
     }
 
-    if (selectedStatus.value != 'ALL') {
-      result = result.where((d) => d.status == selectedStatus.value).toList();
-    }
-
     result = _applySorting(result);
-
     filteredDues.value = result;
   }
 
   List<DuesTrackerModel> _applySorting(List<DuesTrackerModel> items) {
     final sorted = items.toList();
     final ascending = sortAscending.value;
-
     switch (sortField.value) {
       case 'amount':
-        sorted.sort((a, b) => ascending
+        sorted.sort((a, b) =>
+        ascending
             ? (a.amount ?? 0).compareTo(b.amount ?? 0)
             : (b.amount ?? 0).compareTo(a.amount ?? 0));
         break;
       case 'customerName':
-        sorted.sort((a, b) => ascending
+        sorted.sort((a, b) =>
+        ascending
             ? (a.customerName ?? '').compareTo(b.customerName ?? '')
             : (b.customerName ?? '').compareTo(a.customerName ?? ''));
         break;
@@ -185,9 +241,7 @@ class DuesTrackerController extends GetxController {
         sorted.sort((a, b) {
           final aDate = a.oweDate ?? DateTime(2000);
           final bDate = b.oweDate ?? DateTime(2000);
-          return ascending
-              ? aDate.compareTo(bDate)
-              : bDate.compareTo(aDate);
+          return ascending ? aDate.compareTo(bDate) : bDate.compareTo(aDate);
         });
         break;
       case 'createdAt':
@@ -195,9 +249,7 @@ class DuesTrackerController extends GetxController {
         sorted.sort((a, b) {
           final aTime = a.createdAt?.toDate() ?? DateTime(2000);
           final bTime = b.createdAt?.toDate() ?? DateTime(2000);
-          return ascending
-              ? aTime.compareTo(bTime)
-              : bTime.compareTo(aTime);
+          return ascending ? aTime.compareTo(bTime) : bTime.compareTo(aTime);
         });
         break;
     }
@@ -210,7 +262,13 @@ class DuesTrackerController extends GetxController {
   }
 
   void filterByDueType(String type) {
-    selectedDueType.value = type;
+    if (type == DueType.owe) {
+      activeFilter.value = 'OWE';
+    } else if (type == DueType.take) {
+      activeFilter.value = 'TAKE';
+    } else {
+      activeFilter.value = 'ALL';
+    }
     _applyFilters();
   }
 
@@ -220,7 +278,15 @@ class DuesTrackerController extends GetxController {
   }
 
   void filterByStatus(String status) {
-    selectedStatus.value = status;
+    if (status == DueStatus.pending) {
+      activeFilter.value = 'PENDING';
+    } else if (status == DueStatus.settled) {
+      activeFilter.value = 'SETTLED';
+    } else if (status == 'OVERDUE') {
+      activeFilter.value = 'OVERDUE';
+    } else {
+      activeFilter.value = 'ALL';
+    }
     _applyFilters();
   }
 
@@ -240,6 +306,7 @@ class DuesTrackerController extends GetxController {
     selectedDueType.value = 'ALL';
     selectedPaymentMethod.value = null;
     selectedStatus.value = 'ALL';
+    activeFilter.value = 'ALL';
     _applyFilters();
   }
 
@@ -285,7 +352,8 @@ class DuesTrackerController extends GetxController {
   void onPaymentMethodSelected(String? methodName) {
     selectedPaymentMethodForm.value = methodName;
     if (methodName != null) {
-      final method = paymentMethods.firstWhereOrNull((m) => m.pName == methodName);
+      final method = paymentMethods.firstWhereOrNull((m) =>
+      m.pName == methodName);
       selectedPaymentMethodIconForm.value = method?.pIcon;
     } else {
       selectedPaymentMethodIconForm.value = null;
@@ -293,22 +361,23 @@ class DuesTrackerController extends GetxController {
   }
 
   Future<void> saveDue() async {
-    if (customerNameController.text.trim().isEmpty) {
+    if (customerNameController.text
+        .trim()
+        .isEmpty) {
       ShowToastDialog.showError('Customer name is required');
       return;
     }
-
-    if (amountController.text.trim().isEmpty) {
+    if (amountController.text
+        .trim()
+        .isEmpty) {
       ShowToastDialog.showError('Amount is required');
       return;
     }
-
     final amount = double.tryParse(amountController.text.trim());
     if (amount == null || amount <= 0) {
       ShowToastDialog.showError('Please enter a valid amount');
       return;
     }
-
     if (selectedPaymentMethodForm.value == null ||
         selectedPaymentMethodForm.value!.isEmpty) {
       ShowToastDialog.showError('Please select a payment method');
@@ -316,7 +385,6 @@ class DuesTrackerController extends GetxController {
     }
 
     isSaving.value = true;
-
     try {
       final due = DuesTrackerModel(
         id: editingDue.value?.id ?? MahekConstant.getUuid(),
@@ -332,7 +400,6 @@ class DuesTrackerController extends GetxController {
         status: selectedStatusForm.value,
         createdAt: editingDue.value?.createdAt,
       );
-
       bool success;
       if (editingDue.value == null) {
         success = await DuesTrackerFirestoreUtils.addDue(due);
@@ -353,7 +420,8 @@ class DuesTrackerController extends GetxController {
       }
     } catch (e) {
       ShowToastDialog.showError('Error: ${e.toString()}');
-    } finally {
+    }
+    finally {
       isSaving.value = false;
     }
   }
@@ -367,12 +435,13 @@ class DuesTrackerController extends GetxController {
         title: Row(
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red.shade400),
-            const SizedBox(width: 10),
+            spaceW(width: 10),
             const Text('Delete Due'),
           ],
         ),
         content: Text(
-          'Are you sure you want to delete the due for "${due.customerName}"? This action cannot be undone.',
+          'Are you sure you want to delete the due for "${due
+              .customerName}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
@@ -393,7 +462,6 @@ class DuesTrackerController extends GetxController {
         ],
       ),
     );
-
     if (confirmed != true) return;
     if (due.id == null) return;
 
@@ -445,8 +513,13 @@ class DuesTrackerController extends GetxController {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).primaryColor,
+            colorScheme: Theme
+                .of(context)
+                .colorScheme
+                .copyWith(
+              primary: Theme
+                  .of(context)
+                  .primaryColor,
             ),
           ),
           child: child!,
@@ -467,8 +540,13 @@ class DuesTrackerController extends GetxController {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).primaryColor,
+            colorScheme: Theme
+                .of(context)
+                .colorScheme
+                .copyWith(
+              primary: Theme
+                  .of(context)
+                  .primaryColor,
             ),
           ),
           child: child!,

@@ -67,11 +67,12 @@ class MyContactsController extends GetxController {
     _contactsSub = MyContactsCrud.streamContacts().listen(
           (data) {
         contacts.value = data;
-        _applyFilterAndSort(); // Trigger unified processing [cite: 355]
+        _applyFilterAndSort();
         isLoading.value = false;
       },
       onError: (error) {
         isLoading.value = false;
+        print("FIRESTORE ERROR: $error"); // <-- ADD THIS TO SEE THE LINK!
       },
     );
   }

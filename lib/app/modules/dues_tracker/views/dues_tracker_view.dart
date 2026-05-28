@@ -1,18 +1,22 @@
+// lib/app/modules/dues_tracker/views/dues_tracker_view.dart
+import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:solar_icons/solar_icons.dart';
-import 'package:maheksync/app/utils/app_colors.dart';
-import 'package:maheksync/app/utils/dark_theme_provider.dart';
-import 'package:maheksync/app/utils/font_family.dart';
-import 'package:maheksync/app/utils/mahek_responsive.dart';
-import 'package:maheksync/app/widgets/global_widgets.dart';
-import 'package:maheksync/app/widgets/network_image_widget.dart';
-import 'package:maheksync/app/widgets/text_field_widget.dart';
-import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import '../controllers/dues_tracker_controller.dart';
-import 'package:maheksync/app/models/dues_tracker_model.dart';
+import '../../../utils/app_colors.dart';
+import '../../../utils/dark_theme_provider.dart';
+import '../../../utils/font_family.dart';
+import '../../../utils/mahek_responsive.dart';
+import '../../../widgets/global_widgets.dart';
+import '../../../widgets/network_image_widget.dart';
+import '../../../widgets/text_widget.dart';
+import '../../../widgets/text_field_widget.dart';
+import '../../../models/dues_tracker_model.dart';
 
 class DuesTrackerView extends GetView<DuesTrackerController> {
   const DuesTrackerView({super.key});
@@ -21,129 +25,390 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
   Widget build(BuildContext context) {
     final theme = Provider.of<DarkThemeProvider>(context);
     final isDark = theme.isDarkTheme();
-
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return Center(
-          child: CircularProgressIndicator(
-            color: AppThemeData.primary50,
-            strokeWidth: 3,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          _AnimatedMeshBackground(isDark: isDark),
+          SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(child: _buildHeroSection(context, isDark)),
+                SliverToBoxAdapter(child: _buildToolbar(context, isDark)),
+                SliverToBoxAdapter(child: const SizedBox(height: 16)),
+                Obx(
+                  () => controller.filteredDues.isEmpty
+                      ? SliverFillRemaining(child: _buildEmptyState(isDark))
+                      : _buildContentSliver(context, isDark),
+                ),
+              ],
+            ),
           ),
-        );
-      }
+          if (MahekResponsive.isMobile(context))
+            Positioned(
+              bottom: 24,
+              right: 24,
+              child: _buildFloatingAddButton(isDark),
+            ),
+        ],
+      ),
+    );
+  }
 
-      return Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: MahekResponsive.isMobile(context) ? 12 : 24,
-          vertical: 12,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildToolbar(context, isDark),
-            spaceH(height: 20),
-            _buildStatsRow(context, isDark),
-            spaceH(height: 20),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: controller.isGridView.value
-                    ? _buildGridView(context, isDark)
-                    : _buildListView(context, isDark),
+  Widget _buildHeroSection(BuildContext context, bool isDark) {
+    final isMobile = MahekResponsive.isMobile(context);
+    final padding = EdgeInsets.symmetric(
+      horizontal: isMobile ? 16 : 24,
+      vertical: 20,
+    );
+    return Container(
+      margin: EdgeInsets.only(top: isMobile ? 12 : 20),
+      padding: padding,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppThemeData.surfaceObsidian.withOpacity(0.65),
+                  AppThemeData.surfaceDeep.withOpacity(0.8),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(
+                color: AppThemeData.primary50.withOpacity(0.25),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppThemeData.primary50.withOpacity(0.1),
+                  blurRadius: 30,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: AppThemeData.geminiGradient,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          SolarIconsBold.wallet,
+                          size: 24,
+                          color: Colors.white,
+                        ),
+                      ),
+                      spaceW(width: 12),
+                      Flexible(
+                        child: TextCustom(
+                          title: 'Dues Intelligence',
+                          fontSize: isMobile ? 18 : 22,
+                          fontFamily: FontFamily.bold,
+                          color: AppThemeData.primaryWhite,
+                          maxLine: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Obx(() {
+                    if (!isMobile) {
+                      return Row(
+                        children: [
+                          _buildStatItem(
+                            isDark,
+                            'I Owe',
+                            controller.totalOweAmount.value,
+                            SolarIconsBold.arrowUp,
+                            AppThemeData.danger300,
+                            count: controller.oweCount.value,
+                          ),
+                          const SizedBox(width: 12),
+                          _buildStatItem(
+                            isDark,
+                            'They Owe Me',
+                            controller.totalTakeAmount.value,
+                            SolarIconsBold.arrowDown,
+                            AppThemeData.success300,
+                            count: controller.takeCount.value,
+                          ),
+                          const SizedBox(width: 12),
+                          _buildStatItem(
+                            isDark,
+                            'Net Balance',
+                            controller.netBalance.value.abs(),
+                            controller.netBalance.value >= 0
+                                ? SolarIconsBold.graphUp
+                                : SolarIconsBold.graphDown,
+                            controller.netBalance.value >= 0
+                                ? AppThemeData.neonMint
+                                : AppThemeData.danger300,
+                            isNet: true,
+                          ),
+                          const SizedBox(width: 12),
+                          _buildStatItem(
+                            isDark,
+                            'Pending',
+                            controller.pendingCount.value.toDouble(),
+                            SolarIconsBold.clockCircle,
+                            AppThemeData.pending300,
+                            isCount: true,
+                          ),
+                          const SizedBox(width: 12),
+                          _buildStatItem(
+                            isDark,
+                            'Overdue',
+                            controller.overdueCount.value.toDouble(),
+                            SolarIconsBold.dangerTriangle,
+                            AppThemeData.neonRed,
+                            isCount: true,
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          Row(
+                            children: [
+                              _buildStatItem(
+                                isDark,
+                                'I Owe',
+                                controller.totalOweAmount.value,
+                                SolarIconsBold.arrowUp,
+                                AppThemeData.danger300,
+                                count: controller.oweCount.value,
+                              ),
+                              const SizedBox(width: 12),
+                              _buildStatItem(
+                                isDark,
+                                'They Owe Me',
+                                controller.totalTakeAmount.value,
+                                SolarIconsBold.arrowDown,
+                                AppThemeData.success300,
+                                count: controller.takeCount.value,
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              _buildStatItem(
+                                isDark,
+                                'Net Balance',
+                                controller.netBalance.value.abs(),
+                                controller.netBalance.value >= 0
+                                    ? SolarIconsBold.graphUp
+                                    : SolarIconsBold.graphDown,
+                                controller.netBalance.value >= 0
+                                    ? AppThemeData.neonMint
+                                    : AppThemeData.danger300,
+                                isNet: true,
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              _buildStatItem(
+                                isDark,
+                                'Pending',
+                                controller.pendingCount.value.toDouble(),
+                                SolarIconsBold.clockCircle,
+                                AppThemeData.pending300,
+                                isCount: true,
+                              ),
+                              const SizedBox(width: 12),
+                              _buildStatItem(
+                                isDark,
+                                'Overdue',
+                                controller.overdueCount.value.toDouble(),
+                                SolarIconsBold.dangerTriangle,
+                                AppThemeData.neonRed,
+                                isCount: true,
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                  }),
+                ],
               ),
             ),
-          ],
+          ),
         ),
-      );
-    });
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+    bool isDark,
+    String label,
+    double value,
+    IconData icon,
+    Color color, {
+    int? count,
+    bool isNet = false,
+    bool isCount = false,
+  }) {
+    final displayWidget = Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppThemeData.surfaceElevated.withOpacity(0.4)
+            : Colors.white.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: color),
+              spaceW(width: 6),
+              TextCustom(
+                title: label,
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          TextCustom(
+            title: isCount
+                ? '${value.toInt()}'
+                : (isNet && controller.netBalance.value < 0 ? '-' : '') +
+                      '\u20B9${value.toStringAsFixed(0)}',
+            fontSize: 26,
+            fontFamily: FontFamily.bold,
+            color: color,
+          ),
+          if (count != null && !isCount)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: TextCustom(
+                title: '$count active',
+                fontSize: 11,
+                fontFamily: FontFamily.regular,
+                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+              ),
+            ),
+        ],
+      ),
+    );
+
+    return Expanded(child: displayWidget);
   }
 
   Widget _buildToolbar(BuildContext context, bool isDark) {
     final isMobile = MahekResponsive.isMobile(context);
-
-    if (isMobile) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 24,
+        vertical: 12,
+      ),
+      child: Column(
         children: [
           Row(
             children: [
               Expanded(child: _buildSearchField(isDark)),
-              spaceW(width: 10),
-              _buildAddButton(isDark, compact: true),
+              if (!isMobile) spaceW(width: 16),
+              if (!isMobile) _buildAddButton(isDark),
             ],
           ),
-          spaceH(height: 12),
-          Row(
-            children: [
-              Obx(() => _buildFilterChip(
-                isDark,
-                label: controller.selectedDueType.value == 'ALL'
-                    ? 'All Type'
-                    : controller.selectedDueType.value == DueType.owe
-                        ? 'I Owe'
-                        : 'They Owe Me',
-                isActive: controller.selectedDueType.value != 'ALL',
-                onTap: () => _showDueTypeFilter(context, isDark),
-              )),
-              spaceW(width: 8),
-              Obx(() => _buildFilterChip(
-                isDark,
-                label: controller.selectedStatus.value == 'ALL'
-                    ? 'All Status'
-                    : DueStatus.label(controller.selectedStatus.value),
-                isActive: controller.selectedStatus.value != 'ALL',
-                onTap: () => _showStatusFilter(context, isDark),
-              )),
-              if (controller.hasActiveFilters) ...[
-                spaceW(width: 6),
-                _buildClearFilterButton(isDark),
-              ],
-              const Spacer(),
-              _buildViewToggle(isDark),
-            ],
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Obx(
+              () => Row(
+                children: [
+                  _buildFilterChip(
+                    isDark,
+                    label: 'All',
+                    icon: SolarIconsOutline.filters,
+                    isActive: controller.activeFilter.value == 'ALL',
+                    onTap: () => controller.clearFilters(),
+                  ),
+                  _buildFilterChip(
+                    isDark,
+                    label: 'I Owe',
+                    icon: SolarIconsBold.arrowUp,
+                    isActive: controller.activeFilter.value == 'OWE',
+                    onTap: () => controller.filterByDueType(DueType.owe),
+                  ),
+                  _buildFilterChip(
+                    isDark,
+                    label: 'They Owe Me',
+                    icon: SolarIconsBold.arrowDown,
+                    isActive: controller.activeFilter.value == 'TAKE',
+                    onTap: () => controller.filterByDueType(DueType.take),
+                  ),
+                  _buildFilterChip(
+                    isDark,
+                    label: 'Pending',
+                    icon: SolarIconsOutline.clockCircle,
+                    isActive: controller.activeFilter.value == 'PENDING',
+                    onTap: () => controller.filterByStatus(DueStatus.pending),
+                  ),
+                  _buildFilterChip(
+                    isDark,
+                    label: 'Settled',
+                    icon: SolarIconsBold.checkCircle,
+                    isActive: controller.activeFilter.value == 'SETTLED',
+                    onTap: () => controller.filterByStatus(DueStatus.settled),
+                  ),
+                  _buildFilterChip(
+                    isDark,
+                    label: 'Overdue',
+                    icon: SolarIconsBold.dangerTriangle,
+                    isActive: controller.activeFilter.value == 'OVERDUE',
+                    onTap: () => controller.filterByStatus('OVERDUE'),
+                  ),
+                  spaceW(width: 12),
+                  _buildViewToggle(isDark),
+                  if (isMobile) spaceW(width: 12),
+                  if (isMobile) _buildAddButton(isDark, compact: true),
+                ],
+              ),
+            ),
           ),
         ],
-      );
-    }
-
-    return Row(
-      children: [
-        Flexible(child: _buildSearchField(isDark)),
-        spaceW(width: 12),
-        Obx(() => _buildFilterChip(
-          isDark,
-          label: controller.selectedDueType.value == 'ALL'
-              ? 'All Type'
-              : controller.selectedDueType.value == DueType.owe
-                  ? 'I Owe'
-                  : 'They Owe Me',
-          isActive: controller.selectedDueType.value != 'ALL',
-          onTap: () => _showDueTypeFilter(context, isDark),
-        )),
-        spaceW(width: 8),
-        Obx(() => _buildFilterChip(
-          isDark,
-          label: controller.selectedStatus.value == 'ALL'
-              ? 'All Status'
-              : DueStatus.label(controller.selectedStatus.value),
-          isActive: controller.selectedStatus.value != 'ALL',
-          onTap: () => _showStatusFilter(context, isDark),
-        )),
-        if (controller.hasActiveFilters) ...[
-          spaceW(width: 6),
-          _buildClearFilterButton(isDark),
-        ],
-        spaceW(width: 12),
-        _buildViewToggle(isDark),
-        spaceW(width: 16),
-        _buildAddButton(isDark),
-      ],
+      ),
     );
   }
 
   Widget _buildSearchField(bool isDark) {
-    return SizedBox(
-      width: 260,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: AppThemeData.primary50.withOpacity(0.3),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppThemeData.primary50.withOpacity(0.1),
+            blurRadius: 12,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
       child: TextFieldWidget(
         title: '',
         hintText: 'Search dues...',
@@ -156,6 +421,129 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
         ),
         enabled: true,
         validator: (_) => null,
+        fillColor: isDark ? AppThemeData.surfaceElevated : AppThemeData.grey2,
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(
+    bool isDark, {
+    required String label,
+    required IconData icon,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: isActive
+                ? LinearGradient(
+                    colors: [
+                      AppThemeData.primary50.withOpacity(0.2),
+                      AppThemeData.neonPurple.withOpacity(0.15),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            color: isActive
+                ? null
+                : (isDark ? AppThemeData.surfaceElevated : AppThemeData.grey2),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isActive
+                  ? AppThemeData.primary50
+                  : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
+              width: 1.2,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isActive
+                    ? AppThemeData.primary50
+                    : (isDark ? AppThemeData.grey4 : AppThemeData.grey7),
+              ),
+              spaceW(width: 6),
+              TextCustom(
+                title: label,
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: isActive
+                    ? AppThemeData.primary50
+                    : (isDark ? AppThemeData.grey4 : AppThemeData.grey7),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildViewToggle(bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.surfaceElevated : AppThemeData.grey2,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+        ),
+      ),
+      child: Obx(
+        () => Row(
+          children: [
+            _buildToggleButton(
+              isDark,
+              icon: SolarIconsOutline.list,
+              isSelected: !controller.isGridView.value,
+              onTap: () {
+                if (controller.isGridView.value) controller.toggleView();
+              },
+            ),
+            _buildToggleButton(
+              isDark,
+              icon: SolarIconsOutline.filters,
+              isSelected: controller.isGridView.value,
+              onTap: () {
+                if (!controller.isGridView.value) controller.toggleView();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleButton(
+    bool isDark, {
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppThemeData.primary50 : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Icon(
+          icon,
+          size: 18,
+          color: isSelected
+              ? Colors.white
+              : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+        ),
       ),
     );
   }
@@ -173,476 +561,165 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppThemeData.primary50,
         foregroundColor: AppThemeData.primaryWhite,
-        padding: paddingEdgeInsets(
+        padding: EdgeInsets.symmetric(
           horizontal: compact ? 16 : 24,
           vertical: compact ? 12 : 14,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         elevation: 0,
       ),
     );
   }
 
-  Widget _buildViewToggle(bool isDark) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-          width: 0.5,
-        ),
-      ),
-      child: Obx(() => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildToggleItem(
-            isDark,
-            icon: SolarIconsOutline.list,
-            isSelected: !controller.isGridView.value,
-            tooltip: 'List View',
-            onTap: () {
-              if (controller.isGridView.value) controller.toggleView();
-            },
-          ),
-          _buildToggleItem(
-            isDark,
-            icon: SolarIconsOutline.filters,
-            isSelected: controller.isGridView.value,
-            tooltip: 'Grid View',
-            onTap: () {
-              if (!controller.isGridView.value) controller.toggleView();
-            },
-          ),
-        ],
-      )),
+  Widget _buildFloatingAddButton(bool isDark) {
+    return FloatingActionButton(
+      onPressed: () => _showAddEditDialog(Get.context!, isDark),
+      backgroundColor: AppThemeData.primary50,
+      elevation: 4,
+      child: const Icon(SolarIconsOutline.addCircle, color: Colors.white),
     );
   }
 
-  Widget _buildToggleItem(
-    bool isDark, {
-    required IconData icon,
-    required bool isSelected,
-    required String tooltip,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppThemeData.primary50
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: isSelected
-              ? AppThemeData.primaryWhite
-              : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-        ),
+  Widget _buildContentSliver(BuildContext context, bool isDark) {
+    return SliverPadding(
+      padding: EdgeInsets.symmetric(
+        horizontal: MahekResponsive.isMobile(context) ? 16 : 24,
+      ),
+      sliver: Obx(() {
+        return controller.isGridView.value
+            ? _buildGridSliver(context, isDark)
+            : _buildListSliver(context, isDark);
+      }),
+    );
+  }
+
+  Widget _buildGridSliver(BuildContext context, bool isDark) {
+    return SliverGrid(
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 500,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        childAspectRatio: 1.25,
+      ),
+      delegate: SliverChildBuilderDelegate(
+        (context, index) =>
+            _buildDueCard(controller.filteredDues[index], isDark),
+        childCount: controller.filteredDues.length,
       ),
     );
   }
 
-  Widget _buildFilterChip(
-    bool isDark, {
-    required String label,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: paddingEdgeInsets(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppThemeData.primary50.withValues(alpha: 0.08)
-              : (isDark ? AppThemeData.grey9 : AppThemeData.grey2),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isActive
-                ? AppThemeData.primary50.withValues(alpha: 0.3)
-                : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
-            width: 0.5,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              SolarIconsOutline.filter,
-              size: 14,
-              color: isActive
-                  ? AppThemeData.primary50
-                  : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-            ),
-            spaceW(width: 6),
-            TextCustom(
-              title: label,
-              fontSize: 12,
-              fontFamily: FontFamily.medium,
-              color: isActive
-                  ? AppThemeData.primary50
-                  : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-            ),
-            spaceW(width: 4),
-            Icon(
-              SolarIconsOutline.altArrowDown,
-              size: 14,
-              color: isActive
-                  ? AppThemeData.primary50
-                  : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-            ),
-          ],
-        ),
-      ),
+  Widget _buildListSliver(BuildContext context, bool isDark) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final due = controller.filteredDues[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _buildDueListTile(due, isDark),
+        );
+      }, childCount: controller.filteredDues.length),
     );
-  }
-
-  Widget _buildClearFilterButton(bool isDark) {
-    return GestureDetector(
-      onTap: controller.clearFilters,
-      child: Container(
-        padding: paddingEdgeInsets(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppThemeData.danger300.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(
-          SolarIconsOutline.closeCircle,
-          size: 16,
-          color: AppThemeData.danger300,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsRow(BuildContext context, bool isDark) {
-    return Row(
-      children: [
-        _buildStatCard(
-          isDark,
-          title: 'I Owe',
-          amount: controller.totalOweAmount,
-          count: controller.oweCount,
-          icon: SolarIconsBold.arrowUp,
-          color: AppThemeData.danger300,
-        ),
-        spaceW(width: 12),
-        _buildStatCard(
-          isDark,
-          title: 'They Owe Me',
-          amount: controller.totalTakeAmount,
-          count: controller.takeCount,
-          icon: SolarIconsBold.arrowDown,
-          color: AppThemeData.success300,
-        ),
-        spaceW(width: 12),
-        _buildStatCard(
-          isDark,
-          title: 'Net Balance',
-          amount: controller.netBalance.abs(),
-          count: controller.totalActiveCount,
-          icon: controller.netBalance >= 0
-              ? SolarIconsBold.graphUp
-              : SolarIconsBold.graphDown,
-          color: controller.netBalance >= 0
-              ? AppThemeData.success300
-              : AppThemeData.danger300,
-          isNet: true,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(
-    bool isDark, {
-    required String title,
-    required double amount,
-    required int count,
-    required IconData icon,
-    required Color color,
-    bool isNet = false,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: paddingEdgeInsets(horizontal: 20, vertical: 20),
-        decoration: BoxDecoration(
-          color: isDark
-              ? color.withValues(alpha: 0.06)
-              : color.withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withValues(alpha: isDark ? 0.15 : 0.10),
-            width: 0.5,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            spaceH(height: 14),
-            TextCustom(
-              title: (isNet && controller.netBalance < 0 ? '-' : '') +
-                  '\u20B9${amount.toStringAsFixed(2)}',
-              fontSize: 22,
-              fontFamily: FontFamily.bold,
-              color: color,
-            ),
-            spaceH(height: 4),
-            Row(
-              children: [
-                TextCustom(
-                  title: title,
-                  fontSize: 11,
-                  fontFamily: FontFamily.medium,
-                  color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                ),
-                if (!isNet && count > 0) ...[
-                  spaceW(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: TextCustom(
-                      title: '$count',
-                      fontSize: 10,
-                      fontFamily: FontFamily.bold,
-                      color: color,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGridView(BuildContext context, bool isDark) {
-    return Obx(() {
-      if (controller.filteredDues.isEmpty) {
-        return _buildEmptyState(isDark);
-      }
-
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final screenWidth = constraints.maxWidth;
-          int crossAxisCount;
-          if (screenWidth >= 1400) {
-            crossAxisCount = 4;
-          } else if (screenWidth >= 1000) {
-            crossAxisCount = 3;
-          } else if (screenWidth >= 600) {
-            crossAxisCount = 2;
-          } else {
-            crossAxisCount = 1;
-          }
-
-          final cardWidth =
-              (screenWidth - (crossAxisCount - 1) * 14) / crossAxisCount;
-          final cardHeight = 210.0;
-
-          return GridView.builder(
-            key: const ValueKey('grid'),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: 14,
-              mainAxisSpacing: 14,
-              childAspectRatio: cardWidth / cardHeight,
-            ),
-            itemCount: controller.filteredDues.length,
-            padding: const EdgeInsets.only(bottom: 24),
-            itemBuilder: (context, index) {
-              final due = controller.filteredDues[index];
-              return _buildDueCard(due, isDark);
-            },
-          );
-        },
-      );
-    });
-  }
-
-  Widget _buildListView(BuildContext context, bool isDark) {
-    return Obx(() {
-      if (controller.filteredDues.isEmpty) {
-        return _buildEmptyState(isDark);
-      }
-
-      return ListView.separated(
-        key: const ValueKey('list'),
-        itemCount: controller.filteredDues.length,
-        padding: const EdgeInsets.only(bottom: 24),
-        separatorBuilder: (_, __) => spaceH(height: 10),
-        itemBuilder: (context, index) {
-          final due = controller.filteredDues[index];
-          return _buildDueListTile(due, isDark);
-        },
-      );
-    });
   }
 
   Widget _buildDueCard(DuesTrackerModel due, bool isDark) {
     final typeColor = due.dueTypeColor;
+    final glowColor = due.isOverdue
+        ? AppThemeData.neonRed
+        : DueStatus.isSettled(due.status)
+        ? AppThemeData.neonMint
+        : AppThemeData.pending300;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.grey9 : AppThemeData.primaryWhite,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.10 : 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+    return RepaintBoundary(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: LinearGradient(
+            colors: [
+              isDark ? AppThemeData.surfaceElevated : Colors.white,
+              isDark ? AppThemeData.surfaceDeep : Colors.white,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Row(
-          children: [
-            Container(
-              width: 4,
-              color: typeColor,
+          border: Border.all(color: glowColor.withOpacity(0.5), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: glowColor.withOpacity(0.15),
+              blurRadius: 24,
+              spreadRadius: 0,
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 14, 16),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  _buildPaymentMethodIcon(due, isDark, size: 32),
+                  const Spacer(),
+                  _buildStatusBadge(due, isDark),
+                  spaceW(width: 8),
+                  _buildPopupMenu(due, isDark),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: typeColor.withValues(alpha: 0.10),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: TextCustom(
-                            title: due.dueTypeShortLabel,
-                            fontSize: 10,
-                            fontFamily: FontFamily.bold,
-                            color: typeColor,
-                          ),
-                        ),
-                        const Spacer(),
-                        if (due.isOverdue)
-                          Container(
-                            margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  SolarIconsBold.dangerTriangle,
-                                  size: 10,
-                                  color: const Color(0xFFF59E0B),
-                                ),
-                                spaceW(width: 3),
-                                TextCustom(
-                                  title: 'OVERDUE',
-                                  fontSize: 9,
-                                  fontFamily: FontFamily.bold,
-                                  color: const Color(0xFFF59E0B),
-                                ),
-                              ],
-                            ),
-                          ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: due.statusBgColor,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: TextCustom(
-                            title: due.statusLabel.toUpperCase(),
-                            fontSize: 9,
-                            fontFamily: FontFamily.bold,
-                            color: due.statusColor,
-                          ),
-                        ),
-                        spaceW(width: 2),
-                        _buildPopupMenu(due, isDark),
-                      ],
-                    ),
-                    spaceH(height: 12),
                     TextCustom(
                       title: due.customerName ?? 'Unknown',
-                      fontSize: 15,
-                      fontFamily: FontFamily.semiBold,
+                      fontSize: 20,
+                      fontFamily: FontFamily.bold,
                       color: isDark
                           ? AppThemeData.primaryWhite
                           : AppThemeData.primaryBlack,
                       maxLine: 1,
                     ),
-                    spaceH(height: 6),
-                    TextCustom(
-                      title: due.formattedAmount,
-                      fontSize: 22,
-                      fontFamily: FontFamily.bold,
-                      color: typeColor,
-                    ),
-                    spaceH(height: 12),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
-                        _buildPaymentMethodBadge(due, isDark),
+                        TextCustom(
+                          title: due.formattedAmount,
+                          fontSize: 26,
+                          fontFamily: FontFamily.bold,
+                          color: typeColor,
+                        ),
                         const Spacer(),
                         Icon(
                           SolarIconsOutline.calendar,
-                          size: 12,
-                          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+                          size: 14,
+                          color: AppThemeData.grey5,
                         ),
                         spaceW(width: 4),
                         TextCustom(
-                          title: '${due.shortGiveDate} — ${due.shortOweDate}',
-                          fontSize: 11,
-                          fontFamily: FontFamily.regular,
-                          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+                          title: '${due.shortGiveDate} → ${due.shortOweDate}',
+                          fontSize: 12,
+                          fontFamily: FontFamily.medium,
+                          color: AppThemeData.grey5,
                         ),
                       ],
                     ),
+                    if (due.note != null && due.note!.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      TextCustom(
+                        title: due.note!,
+                        fontSize: 13,
+                        fontFamily: FontFamily.regular,
+                        color: AppThemeData.grey5,
+                        maxLine: 2,
+                      ),
+                    ],
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -650,142 +727,81 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
 
   Widget _buildDueListTile(DuesTrackerModel due, bool isDark) {
     final typeColor = due.dueTypeColor;
-
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.grey9 : AppThemeData.primaryWhite,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.08 : 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(24),
+        color: isDark ? AppThemeData.surfaceElevated : Colors.white,
+        border: Border.all(
+          color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+        ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: Row(
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: _buildPaymentMethodIcon(due, isDark, size: 40),
+        title: Row(
           children: [
-            Container(
-              width: 4,
-              height: 80,
-              color: typeColor,
-            ),
             Expanded(
-              child: Padding(
-                padding: paddingEdgeInsets(horizontal: 16, vertical: 14),
-                child: Row(
-                  children: [
-                    _buildPaymentMethodIcon(due, isDark, size: 32),
-                    spaceW(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextCustom(
-                                  title: due.customerName ?? 'Unknown',
-                                  fontSize: 14,
-                                  fontFamily: FontFamily.semiBold,
-                                  color: isDark
-                                      ? AppThemeData.primaryWhite
-                                      : AppThemeData.primaryBlack,
-                                  maxLine: 1,
-                                ),
-                              ),
-                              if (due.isOverdue)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 5,
-                                    vertical: 1,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF59E0B)
-                                        .withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: TextCustom(
-                                    title: 'OVERDUE',
-                                    fontSize: 8,
-                                    fontFamily: FontFamily.bold,
-                                    color: const Color(0xFFF59E0B),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          spaceH(height: 4),
-                          Row(
-                            children: [
-                              TextCustom(
-                                title: due.paymentMethod ?? 'N/A',
-                                fontSize: 12,
-                                fontFamily: FontFamily.medium,
-                                color: isDark
-                                    ? AppThemeData.grey5
-                                    : AppThemeData.grey6,
-                              ),
-                              TextCustom(
-                                title: '  \u2022  ',
-                                fontSize: 12,
-                                color: isDark
-                                    ? AppThemeData.grey7
-                                    : AppThemeData.grey4,
-                              ),
-                              Flexible(
-                                child: TextCustom(
-                                  title: '${due.shortGiveDate} — ${due.shortOweDate}',
-                                  fontSize: 12,
-                                  fontFamily: FontFamily.regular,
-                                  color: isDark
-                                      ? AppThemeData.grey5
-                                      : AppThemeData.grey6,
-                                  maxLine: 1,
-                                ),
-                              ),
-                            ],
-                          ),
-                          spaceH(height: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: due.statusBgColor,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: TextCustom(
-                              title: due.statusLabel.toUpperCase(),
-                              fontSize: 9,
-                              fontFamily: FontFamily.bold,
-                              color: due.statusColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    spaceW(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        TextCustom(
-                          title: due.formattedAmount,
-                          fontSize: 17,
-                          fontFamily: FontFamily.bold,
-                          color: typeColor,
-                        ),
-                        spaceH(height: 2),
-                        _buildPopupMenu(due, isDark),
-                      ],
-                    ),
-                  ],
-                ),
+              child: TextCustom(
+                title: due.customerName ?? 'Unknown',
+                fontSize: 16,
+                fontFamily: FontFamily.semiBold,
+                maxLine: 1,
               ),
             ),
+            _buildStatusBadge(due, isDark),
+            spaceW(width: 8),
+            _buildPopupMenu(due, isDark),
           ],
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Icon(
+                  SolarIconsOutline.calendar,
+                  size: 12,
+                  color: AppThemeData.grey5,
+                ),
+                spaceW(width: 4),
+                TextCustom(
+                  title: '${due.shortGiveDate} — ${due.shortOweDate}',
+                  fontSize: 12,
+                  color: AppThemeData.grey5,
+                ),
+                spaceW(width: 12),
+                Icon(
+                  SolarIconsOutline.card,
+                  size: 12,
+                  color: AppThemeData.grey5,
+                ),
+                spaceW(width: 4),
+                TextCustom(
+                  title: due.paymentMethod ?? 'N/A',
+                  fontSize: 12,
+                  color: AppThemeData.grey5,
+                ),
+              ],
+            ),
+            if (due.note != null && due.note!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: TextCustom(
+                  title: due.note!,
+                  fontSize: 12,
+                  fontFamily: FontFamily.regular,
+                  color: AppThemeData.grey5,
+                  maxLine: 1,
+                ),
+              ),
+          ],
+        ),
+        trailing: TextCustom(
+          title: due.formattedAmount,
+          fontSize: 18,
+          fontFamily: FontFamily.bold,
+          color: typeColor,
         ),
       ),
     );
@@ -794,22 +810,18 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
   Widget _buildPaymentMethodIcon(
     DuesTrackerModel due,
     bool isDark, {
-    double size = 20,
+    double size = 24,
   }) {
     final hasIcon = due.hasPaymentIcon;
-    final borderRadius = size > 24 ? 12.0 : 8.0;
-    final innerRadius = size > 24 ? 8.0 : 5.0;
-    final padding = size > 24 ? 6.0 : 4.0;
-
+    final borderRadius = size > 30 ? 14.0 : 12.0;
+    final innerRadius = borderRadius - 4;
     if (hasIcon) {
       return Container(
         width: size + 12,
         height: size + 12,
-        padding: EdgeInsets.all(padding),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-          color: isDark
-              ? AppThemeData.grey8.withValues(alpha: 0.4)
-              : AppThemeData.grey2,
+          color: isDark ? AppThemeData.surfaceLight : AppThemeData.grey2,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
         child: ClipRRect(
@@ -823,53 +835,43 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
         ),
       );
     }
-
     return Container(
       width: size + 12,
       height: size + 12,
-      padding: EdgeInsets.all(padding),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppThemeData.grey8.withValues(alpha: 0.4)
-            : AppThemeData.grey2,
+        color: isDark ? AppThemeData.surfaceLight : AppThemeData.grey2,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: Icon(
         SolarIconsOutline.card,
-        size: size - 2,
-        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+        size: size,
+        color: AppThemeData.grey5,
       ),
     );
   }
 
-  Widget _buildPaymentMethodBadge(DuesTrackerModel due, bool isDark) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (due.hasPaymentIcon)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: NetworkImageWidget(
-              imageUrl: due.paymentMethodIcon!,
-              height: 14,
-              width: 14,
-              fit: BoxFit.cover,
-            ),
-          )
-        else
-          Icon(
-            SolarIconsOutline.card,
-            size: 12,
-            color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-          ),
-        spaceW(width: 4),
-        TextCustom(
-          title: due.paymentMethod ?? 'N/A',
-          fontSize: 11,
-          fontFamily: FontFamily.medium,
-          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+  Widget _buildStatusBadge(DuesTrackerModel due, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            due.statusBgColor.withOpacity(0.2),
+            due.statusBgColor.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-      ],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: due.statusColor.withOpacity(0.4)),
+      ),
+      child: TextCustom(
+        title: due.statusLabel.toUpperCase(),
+        fontSize: 11,
+        fontFamily: FontFamily.bold,
+        color: due.statusColor,
+      ),
     );
   }
 
@@ -877,11 +879,10 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
     return PopupMenuButton<String>(
       icon: Icon(
         SolarIconsOutline.menuDots,
-        size: 18,
-        color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+        size: 20,
+        color: AppThemeData.grey5,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      offset: const Offset(0, 4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onSelected: (value) {
         switch (value) {
           case 'edit':
@@ -900,11 +901,7 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
           value: 'edit',
           child: Row(
             children: [
-              Icon(
-                SolarIconsOutline.pen,
-                size: 16,
-                color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-              ),
+              const Icon(SolarIconsOutline.pen, size: 16),
               spaceW(width: 10),
               const Text('Edit'),
             ],
@@ -945,39 +942,22 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
 
   Widget _buildEmptyState(bool isDark) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(48),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppThemeData.primary50.withValues(alpha: 0.06),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                SolarIconsOutline.wallet,
-                size: 48,
-                color: AppThemeData.primary50.withValues(alpha: 0.5),
-              ),
-            ),
-            spaceH(height: 24),
-            TextCustom(
-              title: 'No dues found',
-              fontSize: 18,
-              fontFamily: FontFamily.semiBold,
-              color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-            ),
-            spaceH(height: 8),
-            TextCustom(
-              title: 'Tap "Add Due" to start tracking your dues',
-              fontSize: 13,
-              fontFamily: FontFamily.regular,
-              color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            SolarIconsOutline.notes,
+            size: 64,
+            color: isDark ? AppThemeData.grey6 : AppThemeData.grey4,
+          ),
+          const SizedBox(height: 16),
+          TextCustom(
+            title: 'No dues found',
+            fontSize: 16,
+            fontFamily: FontFamily.medium,
+            color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+          ),
+        ],
       ),
     );
   }
@@ -987,149 +967,441 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
     bool isDark, {
     DuesTrackerModel? due,
   }) {
-    if (due != null) {
-      controller.startEditing(due);
-    } else {
+    final formKey = GlobalKey<FormState>();
+
+    // 1. Properly set up state tracking parameters inside the Controller first
+    if (due == null) {
       controller.startAdding();
+    } else {
+      controller.startEditing(due);
     }
+
+    // 2. Safely parse and fall back for amount values to prevent null-safety errors
+    String initialAmount = '';
+    if (due != null && due.amount != null) {
+      initialAmount = due.amount!.toStringAsFixed(0);
+    }
+
+    // Local explicit text controllers synced to initial values
+    final nameController = TextEditingController(text: due?.customerName ?? '');
+    final amountController = TextEditingController(text: initialAmount);
+    final noteController = TextEditingController(text: due?.note ?? '');
+    final paymentMethodController = TextEditingController(
+      text: due?.paymentMethod ?? 'Cash',
+    );
+
+    // Sync dialog states with global controller streams
+    controller.selectedGiveDate.value = due?.giveDate ?? DateTime.now();
+    controller.selectedOweDate.value =
+        due?.oweDate ?? DateTime.now().add(const Duration(days: 7));
+
+    final RxString selectedType = (due?.dueType ?? DueType.owe).obs;
 
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.primaryWhite,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MahekResponsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.92
-                : 520,
-            maxHeight: MediaQuery.of(context).size.height * 0.88,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildDialogHeader(isDark, isEditing: due != null),
-              Flexible(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: Container(
+              width: min(MediaQuery.of(context).size.width, 500),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    isDark
+                        ? AppThemeData.surfaceObsidian.withOpacity(0.85)
+                        : Colors.white.withOpacity(0.9),
+                    isDark
+                        ? AppThemeData.surfaceDeep.withOpacity(0.9)
+                        : Colors.white.withOpacity(0.8),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: AppThemeData.primary50.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Form(
+                key: formKey,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Obx(() => _buildTypeSegmentedControl(isDark)),
-                      spaceH(height: 20),
-                      TextFieldWidget(
-                        title: 'Customer Name',
-                        hintText: 'Enter customer name',
-                        controller: controller.customerNameController,
-                        onPress: () {},
-                        prefix: Icon(
-                          SolarIconsOutline.userCheckRounded,
-                          size: 18,
-                          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                        ),
-                        enabled: true,
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                      spaceH(height: 16),
-                      TextFieldWidget(
-                        title: 'Amount',
-                        hintText: 'Enter amount',
-                        controller: controller.amountController,
-                        onPress: () {},
-                        prefix: Icon(
-                          SolarIconsBold.banknote,
-                          size: 18,
-                          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                        ),
-                        enabled: true,
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                      spaceH(height: 16),
-                      Obx(() => _buildPaymentMethodDropdown(isDark)),
-                      spaceH(height: 16),
+                      // Header Row
                       Row(
                         children: [
-                          Expanded(
-                            child: Obx(
-                              () => _buildDatePicker(
-                                isDark,
-                                label: 'Give Date',
-                                date: controller.selectedGiveDate.value,
-                                onTap: () => controller.pickGiveDate(context),
-                              ),
-                            ),
+                          Icon(
+                            due == null
+                                ? SolarIconsOutline.addCircle
+                                : SolarIconsOutline.pen,
+                            color: AppThemeData.primary50,
+                            size: 24,
                           ),
-                          spaceW(width: 12),
-                          Expanded(
-                            child: Obx(
-                              () => _buildDatePicker(
-                                isDark,
-                                label: 'Due Date',
-                                date: controller.selectedOweDate.value,
-                                onTap: () => controller.pickOweDate(context),
-                              ),
+                          const SizedBox(width: 10),
+                          TextCustom(
+                            title: due == null
+                                ? 'Add New Due'
+                                : 'Edit Due Entry',
+                            fontSize: 20,
+                            fontFamily: FontFamily.bold,
+                            color: isDark
+                                ? AppThemeData.primaryWhite
+                                : AppThemeData.primaryBlack,
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () => Get.back(),
+                            icon: Icon(
+                              Icons.close,
+                              color: isDark
+                                  ? AppThemeData.grey4
+                                  : AppThemeData.grey6,
                             ),
                           ),
                         ],
                       ),
-                      spaceH(height: 16),
-                      Obx(() => _buildStatusDropdown(isDark)),
-                      spaceH(height: 16),
-                      TextFieldWidget(
-                        title: 'Note (Optional)',
-                        hintText: 'Add a note...',
-                        controller: controller.noteController,
-                        onPress: () {},
-                        prefix: Icon(
-                          SolarIconsOutline.notes,
-                          size: 18,
-                          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                        ),
-                        enabled: true,
-                        validator: (_) => null,
+                      const Divider(height: 24, thickness: 0.5),
+
+                      // Due Type Toggle Button Row
+                      TextCustom(
+                        title: 'Transaction Type',
+                        fontSize: 13,
+                        fontFamily: FontFamily.semiBold,
+                        color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
                       ),
-                      spaceH(height: 24),
+                      const SizedBox(height: 10),
                       Obx(
-                        () => SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton.icon(
-                            onPressed: controller.isSaving.value
-                                ? null
-                                : controller.saveDue,
-                            icon: controller.isSaving.value
-                                ? SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: AppThemeData.primaryWhite,
-                                    ),
-                                  )
-                                : const Icon(
-                                    SolarIconsBold.checkCircle,
-                                    size: 20,
+                        () => Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => selectedType.value = DueType.owe,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
                                   ),
-                            label: TextCustom(
-                              title: controller.isSaving.value
-                                  ? 'Saving...'
-                                  : 'Save Due',
-                              fontSize: 15,
-                              fontFamily: FontFamily.semiBold,
-                              color: AppThemeData.primaryWhite,
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppThemeData.primary50,
-                              foregroundColor: AppThemeData.primaryWhite,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                  decoration: BoxDecoration(
+                                    color: selectedType.value == DueType.owe
+                                        ? AppThemeData.danger300.withOpacity(
+                                            0.2,
+                                          )
+                                        : (isDark
+                                              ? AppThemeData.surfaceElevated
+                                              : AppThemeData.grey2),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: selectedType.value == DueType.owe
+                                          ? AppThemeData.danger300
+                                          : Colors.transparent,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: TextCustom(
+                                      title: 'I Owe Someone',
+                                      fontSize: 14,
+                                      fontFamily: FontFamily.bold,
+                                      color: selectedType.value == DueType.owe
+                                          ? AppThemeData.danger300
+                                          : (isDark
+                                                ? AppThemeData.grey4
+                                                : AppThemeData.grey7),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              elevation: 0,
                             ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => selectedType.value = DueType.take,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: selectedType.value == DueType.take
+                                        ? AppThemeData.success300.withOpacity(
+                                            0.2,
+                                          )
+                                        : (isDark
+                                              ? AppThemeData.surfaceElevated
+                                              : AppThemeData.grey2),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: selectedType.value == DueType.take
+                                          ? AppThemeData.success300
+                                          : Colors.transparent,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: TextCustom(
+                                      title: 'They Owe Me',
+                                      fontSize: 14,
+                                      fontFamily: FontFamily.bold,
+                                      color: selectedType.value == DueType.take
+                                          ? AppThemeData.success300
+                                          : (isDark
+                                                ? AppThemeData.grey4
+                                                : AppThemeData.grey7),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Name Field
+                      TextFieldWidget(
+                        title: 'Contact Name',
+                        hintText: 'Enter name',
+                        controller: nameController,
+                        enabled: true,
+                        onPress: () {},
+                        prefix: const Icon(SolarIconsOutline.user, size: 18),
+                        validator: (value) =>
+                            (value == null || value.trim().isEmpty)
+                            ? 'Please enter a name'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Amount Field
+                      TextFieldWidget(
+                        title: 'Amount (₹)',
+                        hintText: '0',
+                        controller: amountController,
+                        enabled: true,
+                        onPress: () {},
+                        prefix: const Icon(SolarIconsOutline.wallet, size: 18),
+                        textInputType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty)
+                            return 'Please enter an amount';
+                          if (double.tryParse(value) == null ||
+                              double.parse(value) <= 0)
+                            return 'Enter a valid amount';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Dates Pickers
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextCustom(
+                                  title: 'Given Date',
+                                  fontSize: 13,
+                                  fontFamily: FontFamily.medium,
+                                  color: isDark
+                                      ? AppThemeData.grey4
+                                      : AppThemeData.grey7,
+                                ),
+                                const SizedBox(height: 6),
+                                Obx(
+                                  () => InkWell(
+                                    onTap: () =>
+                                        controller.pickGiveDate(context),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 14,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? AppThemeData.surfaceElevated
+                                            : AppThemeData.grey2,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            SolarIconsOutline.calendar,
+                                            size: 16,
+                                            color: AppThemeData.primary50,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: TextCustom(
+                                              title:
+                                                  controller
+                                                          .selectedGiveDate
+                                                          .value !=
+                                                      null
+                                                  ? DateFormat(
+                                                      'dd MMM yyyy',
+                                                    ).format(
+                                                      controller
+                                                          .selectedGiveDate
+                                                          .value!,
+                                                    )
+                                                  : DateFormat(
+                                                      'dd MMM yyyy',
+                                                    ).format(DateTime.now()),
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextCustom(
+                                  title: 'Due Date',
+                                  fontSize: 13,
+                                  fontFamily: FontFamily.medium,
+                                  color: isDark
+                                      ? AppThemeData.grey4
+                                      : AppThemeData.grey7,
+                                ),
+                                const SizedBox(height: 6),
+                                Obx(
+                                  () => InkWell(
+                                    onTap: () =>
+                                        controller.pickOweDate(context),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 14,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? AppThemeData.surfaceElevated
+                                            : AppThemeData.grey2,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            SolarIconsOutline.calendar,
+                                            size: 16,
+                                            color: AppThemeData.primary50,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: TextCustom(
+                                              title:
+                                                  controller
+                                                          .selectedOweDate
+                                                          .value !=
+                                                      null
+                                                  ? DateFormat(
+                                                      'dd MMM yyyy',
+                                                    ).format(
+                                                      controller
+                                                          .selectedOweDate
+                                                          .value!,
+                                                    )
+                                                  : DateFormat(
+                                                      'dd MMM yyyy',
+                                                    ).format(
+                                                      DateTime.now().add(
+                                                        const Duration(days: 7),
+                                                      ),
+                                                    ),
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Payment Method
+                      TextFieldWidget(
+                        title: 'Payment Mode',
+                        hintText: 'e.g., Cash, Bank, UPI',
+                        controller: paymentMethodController,
+                        enabled: true,
+                        onPress: () {},
+                        prefix: const Icon(SolarIconsOutline.card, size: 18),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Notes Field
+                      TextFieldWidget(
+                        title: 'Remarks / Notes',
+                        hintText: 'Optional context details...',
+                        controller: noteController,
+                        enabled: true,
+                        onPress: () {},
+                        prefix: const Icon(SolarIconsOutline.notes, size: 18),
+                      ),
+                      const SizedBox(height: 28),
+
+                      // Save Trigger Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              // Sync text field parameters back to the global controller's forms
+                              controller.customerNameController.text =
+                                  nameController.text.trim();
+                              controller.amountController.text =
+                                  amountController.text.trim();
+                              controller.noteController.text = noteController
+                                  .text
+                                  .trim();
+                              controller.selectedDueTypeForm.value =
+                                  selectedType.value;
+
+                              // Handle explicit payment validation field assignments
+                              controller.selectedPaymentMethodForm.value =
+                                  paymentMethodController.text.trim();
+
+                              // Trigger parameterless controller save action directly
+                              controller.saveDue();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppThemeData.primary50,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: TextCustom(
+                            title: due == null
+                                ? 'Create Due Entry'
+                                : 'Save Changes',
+                            fontSize: 16,
+                            fontFamily: FontFamily.bold,
+                            color: AppThemeData.primaryWhite,
                           ),
                         ),
                       ),
@@ -1137,576 +1409,67 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
+      barrierDismissible: true,
     );
   }
+}
 
-  Widget _buildDialogHeader(bool isDark, {required bool isEditing}) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 12, 16),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppThemeData.grey9
-            : AppThemeData.grey2.withValues(alpha: 0.5),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppThemeData.primary50.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              isEditing
-                  ? SolarIconsOutline.penNewRound
-                  : SolarIconsOutline.addCircle,
-              size: 20,
-              color: AppThemeData.primary50,
-            ),
-          ),
-          spaceW(width: 12),
-          TextCustom(
-            title: isEditing ? 'Edit Due' : 'Add Due',
-            fontSize: 18,
-            fontFamily: FontFamily.bold,
-            color: isDark
-                ? AppThemeData.primaryWhite
-                : AppThemeData.primaryBlack,
-          ),
-          const Spacer(),
-          IconButton(
-            onPressed: () => Get.back(),
-            icon: Icon(
-              SolarIconsOutline.closeCircle,
-              size: 22,
-              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-            ),
-            splashRadius: 18,
-          ),
-        ],
-      ),
-    );
+class _AnimatedMeshBackground extends StatefulWidget {
+  final bool isDark;
+
+  const _AnimatedMeshBackground({required this.isDark});
+
+  @override
+  State<_AnimatedMeshBackground> createState() =>
+      _AnimatedMeshBackgroundState();
+}
+
+class _AnimatedMeshBackgroundState extends State<_AnimatedMeshBackground>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat(reverse: true);
   }
 
-  Widget _buildTypeSegmentedControl(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-          width: 0.5,
-        ),
-      ),
-      child: Row(
-        children: [
-          _buildSegmentItem(
-            isDark,
-            label: 'I Owe',
-            icon: SolarIconsBold.arrowUp,
-            isSelected: controller.selectedDueTypeForm.value == DueType.owe,
-            color: AppThemeData.danger300,
-            onTap: () => controller.selectedDueTypeForm.value = DueType.owe,
-          ),
-          _buildSegmentItem(
-            isDark,
-            label: 'They Owe Me',
-            icon: SolarIconsBold.arrowDown,
-            isSelected: controller.selectedDueTypeForm.value == DueType.take,
-            color: AppThemeData.success300,
-            onTap: () => controller.selectedDueTypeForm.value = DueType.take,
-          ),
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
-  Widget _buildSegmentItem(
-    bool isDark, {
-    required String label,
-    required IconData icon,
-    required bool isSelected,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          padding: paddingEdgeInsets(vertical: 10, horizontal: 12),
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Container(
           decoration: BoxDecoration(
-            color: isSelected ? color.withValues(alpha: 0.12) : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: isSelected
-                    ? color
-                    : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+            gradient: RadialGradient(
+              center: Alignment(
+                -0.2 + (_controller.value * 0.4),
+                -0.3 + (_controller.value * 0.6),
               ),
-              spaceW(width: 6),
-              TextCustom(
-                title: label,
-                fontSize: 12,
-                fontFamily: isSelected ? FontFamily.bold : FontFamily.medium,
-                color: isSelected
-                    ? color
-                    : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethodDropdown(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(
-          title: 'Payment Method',
-          fontSize: 12,
-          fontFamily: FontFamily.medium,
-          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-        ),
-        spaceH(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-              width: 0.5,
+              radius: 0.8,
+              colors: widget.isDark
+                  ? [
+                      AppThemeData.neonPurpleDim.withOpacity(0.3),
+                      AppThemeData.surfaceVoid,
+                    ]
+                  : [AppThemeData.primary50.withOpacity(0.1), Colors.white],
             ),
           ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: controller.selectedPaymentMethodForm.value,
-              hint: Row(
-                children: [
-                  Icon(
-                    SolarIconsOutline.card,
-                    size: 18,
-                    color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                  ),
-                  spaceW(width: 8),
-                  TextCustom(
-                    title: 'Select payment method',
-                    fontSize: 14,
-                    fontFamily: FontFamily.regular,
-                    color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                  ),
-                ],
-              ),
-              isExpanded: true,
-              icon: Icon(
-                SolarIconsOutline.altArrowDown,
-                size: 18,
-                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-              ),
-              items: controller.paymentMethods.map((method) {
-                return DropdownMenuItem<String>(
-                  value: method.pName,
-                  child: Row(
-                    children: [
-                      if (method.pIcon != null && method.pIcon!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: NetworkImageWidget(
-                              imageUrl: method.pIcon!,
-                              height: 18,
-                              width: 18,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        )
-                      else
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Icon(
-                            SolarIconsOutline.card,
-                            size: 16,
-                            color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                          ),
-                        ),
-                      Text(method.pName ?? ''),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: controller.onPaymentMethodSelected,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusDropdown(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(
-          title: 'Status',
-          fontSize: 12,
-          fontFamily: FontFamily.medium,
-          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-        ),
-        spaceH(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-              width: 0.5,
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: controller.selectedStatusForm.value,
-              isExpanded: true,
-              icon: Icon(
-                SolarIconsOutline.altArrowDown,
-                size: 18,
-                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-              ),
-              items: DueStatus.values.map((status) {
-                return DropdownMenuItem<String>(
-                  value: status,
-                  child: Text(DueStatus.label(status)),
-                );
-              }).toList(),
-              onChanged: (val) {
-                if (val != null) controller.selectedStatusForm.value = val;
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDatePicker(
-    bool isDark, {
-    required String label,
-    required DateTime? date,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextCustom(
-            title: label,
-            fontSize: 12,
-            fontFamily: FontFamily.medium,
-            color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-          ),
-          spaceH(height: 6),
-          Container(
-            padding: paddingEdgeInsets(horizontal: 14, vertical: 14),
-            decoration: BoxDecoration(
-              color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-                width: 0.5,
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  SolarIconsOutline.calendar,
-                  size: 18,
-                  color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                ),
-                spaceW(width: 10),
-                Expanded(
-                  child: TextCustom(
-                    title: date != null
-                        ? DateFormat('dd MMM yyyy').format(date)
-                        : 'Select date',
-                    fontSize: 14,
-                    fontFamily:
-                        date != null ? FontFamily.medium : FontFamily.regular,
-                    color: date != null
-                        ? (isDark
-                            ? AppThemeData.primaryWhite
-                            : AppThemeData.primaryBlack)
-                        : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                  ),
-                ),
-                Icon(
-                  SolarIconsOutline.altArrowDown,
-                  size: 16,
-                  color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDueTypeFilter(BuildContext context, bool isDark) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        decoration: BoxDecoration(
-          color: isDark ? AppThemeData.grey10 : AppThemeData.primaryWhite,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppThemeData.primary50.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    SolarIconsOutline.filter,
-                    size: 18,
-                    color: AppThemeData.primary50,
-                  ),
-                ),
-                spaceW(width: 10),
-                TextCustom(
-                  title: 'Filter by Type',
-                  fontSize: 16,
-                  fontFamily: FontFamily.bold,
-                  color: isDark
-                      ? AppThemeData.primaryWhite
-                      : AppThemeData.primaryBlack,
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => Get.back(),
-                  child: Icon(
-                    SolarIconsOutline.closeCircle,
-                    size: 22,
-                    color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                  ),
-                ),
-              ],
-            ),
-            spaceH(height: 16),
-            ...controller.dueTypeOptions.map(
-              (type) => Obx(() => _buildFilterOption(
-                isDark,
-                label: type == 'ALL'
-                    ? 'All Types'
-                    : type == DueType.owe
-                        ? 'I Owe'
-                        : 'They Owe Me',
-                icon: type == 'ALL'
-                    ? SolarIconsOutline.filters
-                    : type == DueType.owe
-                        ? SolarIconsBold.arrowUp
-                        : SolarIconsBold.arrowDown,
-                iconColor: type == DueType.owe
-                    ? AppThemeData.danger300
-                    : type == DueType.take
-                        ? AppThemeData.success300
-                        : AppThemeData.primary50,
-                isSelected: controller.selectedDueType.value == type,
-                onTap: () {
-                  controller.filterByDueType(type);
-                  Get.back();
-                },
-              )),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showStatusFilter(BuildContext context, bool isDark) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        decoration: BoxDecoration(
-          color: isDark ? AppThemeData.grey10 : AppThemeData.primaryWhite,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppThemeData.primary50.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    SolarIconsOutline.filter,
-                    size: 18,
-                    color: AppThemeData.primary50,
-                  ),
-                ),
-                spaceW(width: 10),
-                TextCustom(
-                  title: 'Filter by Status',
-                  fontSize: 16,
-                  fontFamily: FontFamily.bold,
-                  color: isDark
-                      ? AppThemeData.primaryWhite
-                      : AppThemeData.primaryBlack,
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => Get.back(),
-                  child: Icon(
-                    SolarIconsOutline.closeCircle,
-                    size: 22,
-                    color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                  ),
-                ),
-              ],
-            ),
-            spaceH(height: 16),
-            ...controller.statusOptions.map(
-              (status) => Obx(() => _buildFilterOption(
-                isDark,
-                label: status == 'ALL' ? 'All Statuses' : DueStatus.label(status),
-                icon: status == 'ALL'
-                    ? SolarIconsOutline.filters
-                    : status == DueStatus.pending
-                        ? SolarIconsOutline.clockCircle
-                        : status == DueStatus.partial
-                            ? SolarIconsOutline.notes
-                            : SolarIconsBold.checkCircle,
-                iconColor: status == DueStatus.pending
-                    ? AppThemeData.danger300
-                    : status == DueStatus.partial
-                        ? const Color(0xFFF59E0B)
-                        : status == DueStatus.settled
-                            ? AppThemeData.success300
-                            : AppThemeData.primary50,
-                isSelected: controller.selectedStatus.value == status,
-                onTap: () {
-                  controller.filterByStatus(status);
-                  Get.back();
-                },
-              )),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterOption(
-    bool isDark, {
-    required String label,
-    required IconData icon,
-    required Color iconColor,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: paddingEdgeInsets(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppThemeData.primary50.withValues(alpha: 0.06)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: isSelected
-              ? Border.all(
-                  color: AppThemeData.primary50.withValues(alpha: 0.2),
-                  width: 0.5,
-                )
-              : null,
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, size: 16, color: iconColor),
-            ),
-            spaceW(width: 12),
-            Expanded(
-              child: TextCustom(
-                title: label,
-                fontSize: 14,
-                fontFamily:
-                    isSelected ? FontFamily.semiBold : FontFamily.regular,
-                color: isSelected
-                    ? AppThemeData.primary50
-                    : (isDark
-                        ? AppThemeData.primaryWhite
-                        : AppThemeData.primaryBlack),
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                SolarIconsBold.checkCircle,
-                size: 20,
-                color: AppThemeData.primary50,
-              ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

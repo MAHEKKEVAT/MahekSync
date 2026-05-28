@@ -376,7 +376,7 @@ class CategoriesView extends GetView<CategoriesController> {
                 onPressed: controller.isSaving.value ? null : controller.saveCategory,
                 style: ElevatedButton.styleFrom(backgroundColor: AppThemeData.primary50, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), elevation: 3, shadowColor: AppThemeData.primary50.withValues(alpha: 0.5)),
                 child: controller.isSaving.value
-                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                    ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
                     : Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(isEditing ? Icons.save_rounded : Icons.add_rounded, color: Colors.white, size: 20), spaceW(width: 8), TextCustom(title: isEditing ? 'Update Category' : 'Create Category', fontSize: 15, fontFamily: FontFamily.bold, color: Colors.white)]),
               ),
             ),

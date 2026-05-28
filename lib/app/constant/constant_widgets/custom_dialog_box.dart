@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 
 class CustomDialogBox extends StatelessWidget {
@@ -98,7 +99,7 @@ class CustomDialogBox extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              spaceW(width: 10),
               Expanded(
                 child: InkWell(
                   onTap: () {

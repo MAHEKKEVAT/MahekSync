@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class MyContactsModel {
   final String docId;
   final String ownerId;

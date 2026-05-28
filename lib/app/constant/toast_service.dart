@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -42,7 +43,7 @@ class ToastService {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(width: 50, height: 50, child: CircularProgressIndicator(strokeWidth: 7, strokeCap: StrokeCap.round)),
+                  SizedBox(width: 50, height: 50, child: CircularProgressIndicator(strokeWidth: 7, strokeCap: StrokeCap.round)),
                   const SizedBox(height: 24),
                   Text(message, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: isDark ? Colors.white : Colors.black87, decoration: TextDecoration.none), textAlign: TextAlign.center),
                 ],
@@ -178,7 +179,7 @@ class _TopToastState extends State<_TopToast> with SingleTickerProviderStateMixi
                 child: Row(
                   children: [
                     Icon(widget.icon, color: Colors.white, size: 22),
-                    const SizedBox(width: 12),
+                    spaceW(width: 12),
                     Expanded(
                       child: Text(
                         widget.message,
@@ -187,7 +188,7 @@ class _TopToastState extends State<_TopToast> with SingleTickerProviderStateMixi
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    spaceW(width: 8),
                     Icon(Icons.close, color: Colors.white.withValues(alpha: 0.7), size: 18),
                   ],
                 ),

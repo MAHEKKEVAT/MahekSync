@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 
 /// ===============================
 /// REMINDER DATA MODEL
@@ -224,7 +225,7 @@ class _ReminderToastState extends State<_ReminderToast> with SingleTickerProvide
                                   : Icon(Icons.alarm_rounded, color: accent, size: 24),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          spaceW(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,10 +236,10 @@ class _ReminderToastState extends State<_ReminderToast> with SingleTickerProvide
                                   Row(
                                     children: [
                                       Icon(Icons.calendar_today_rounded, size: 12, color: r.isExpiringSoon ? AppThemeData.danger300 : AppThemeData.grey5),
-                                      const SizedBox(width: 4),
+                                      spaceW(width: 4),
                                       Text('Due: ${r.formattedExpiryDate}', style: TextStyle(fontFamily: FontFamily.medium, fontSize: 12, color: r.isExpiringSoon ? AppThemeData.danger300 : AppThemeData.grey5)),
                                       if (r.daysRemaining > 0) ...[
-                                        const SizedBox(width: 6),
+                                        spaceW(width: 6),
                                         Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: r.isExpiringSoon ? AppThemeData.danger300.withValues(alpha: 0.15) : AppThemeData.success400.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)), child: Text('${r.daysRemaining}d left', style: TextStyle(fontFamily: FontFamily.bold, fontSize: 10, color: r.isExpiringSoon ? AppThemeData.danger300 : AppThemeData.success400))),
                                       ],
                                     ],

@@ -198,7 +198,6 @@ class SmartMapDashboardController extends GetxController {
 
       final data = json.decode(response.body);
 
-      print("GEOCODE RESPONSE => $data");
 
       final status = data['status'];
 

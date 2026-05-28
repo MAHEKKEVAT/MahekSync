@@ -52,7 +52,7 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     child: controller.isSaving.value
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                         : const TextCustom(title: 'Save', fontSize: 13, color: Colors.white),
                   ),
                   spaceW(width: 8),

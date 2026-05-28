@@ -435,7 +435,7 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
           disabledBackgroundColor: AppThemeData.primary50.withValues(alpha: 0.5),
         ),
         child: controller.isLoading.value
-            ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+            ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
             : Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

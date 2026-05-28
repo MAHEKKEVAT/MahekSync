@@ -61,7 +61,7 @@ class PermissionDialog extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
-              const SizedBox(width: 10),
+              spaceW(width: 10),
               Expanded(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(minWidth: double.infinity),
