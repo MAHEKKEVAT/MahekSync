@@ -1,25 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base href="/MahekSync/">
+    <base href="/MahekSync/">
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+    <meta charset="UTF-8">
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+    <meta name="description" content="MaekSync">
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="maheksync">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="maeksync">
+    <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    <title>maeksync</title>
+    <link rel="manifest" href="manifest.json">
 
-  <title>maheksync</title>
-  <link rel="manifest" href="manifest.json">
-
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwI28ucDsERHEx5O6ybrmeKSoBY98tmmA"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwI28ucDsERHEx5O6ybrmeKSoBY98tmmA&libraries=places"></script>
 </head>
 <body>
 <script src="flutter_bootstrap.js" async></script>
+
+<script>
+    function initMapFallback() {
+      if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        var script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBwI28ucDsERHEx5O6ybrmeKSoBY98tmmA&libraries=places&callback=Function.prototype';
+        document.head.appendChild(script);
+      }
+    }
+    setTimeout(initMapFallback, 2000);
+</script>
 </body>
 </html>

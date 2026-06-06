@@ -20,6 +20,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isMobile = ResponsiveWidget.isMobile(context);
+    controller.isDarkMode.value = isDark;
 
     return Scaffold(
       backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey1,
@@ -48,20 +49,22 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
   }
 
   Widget _mapLayer(bool isDark) {
-    return Obx(
-      () => GoogleMap(
+    return Obx(() {
+      final dark = controller.isDarkMode.value;
+      return GoogleMap(
+        key: ValueKey('map_${dark}_${controller.mapKeyCounter.value}'),
         mapType: controller.currentMapType.value,
         initialCameraPosition: controller.initialCamera,
-        onMapCreated: controller.onMapCreated,
+        onMapCreated: (mapCtrl) => controller.onMapCreated(mapCtrl, dark),
         myLocationEnabled: true,
         myLocationButtonEnabled: false,
         zoomControlsEnabled: false,
         compassEnabled: true,
         mapToolbarEnabled: false,
         markers: controller.allMarkers,
-        style: isDark ? _darkMapStyle : null,
-      ),
-    );
+        style: dark ? SmartMapDashboardController.darkMapStyle : null,
+      );
+    });
   }
 
   Widget _floatingControls(bool isDark, bool isMobile) {

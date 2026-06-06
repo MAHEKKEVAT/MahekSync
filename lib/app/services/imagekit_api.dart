@@ -46,15 +46,12 @@ class ImageKitAPI {
   }) async {
     try {
       final bytes = await imageFile.readAsBytes();
-      final base64Image = base64Encode(bytes);
 
       final fileName = '${MahekConstant.getUuid()}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final fullPath = '/$folderName/$fileName';
 
       final uri = Uri.parse(_uploadEndpoint);
       final request = http.MultipartRequest('POST', uri);
 
-      // Correct authentication with private key
       final authString = base64Encode(utf8.encode('$_privateKey:'));
       request.headers['Authorization'] = 'Basic $authString';
 
@@ -73,11 +70,13 @@ class ImageKitAPI {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
-      print('ImageKit Response: $responseBody'); // Debug log
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(responseBody);
-        return data['url'];
+        final url = data['url'] as String?;
+        if (url != null && url.isNotEmpty) {
+          return url;
+        }
+        return null;
       } else {
         print('ImageKit upload failed with status ${response.statusCode}: $responseBody');
         return null;
@@ -86,6 +85,15 @@ class ImageKitAPI {
       print('ImageKit upload error: $e');
       return null;
     }
+  }
+
+  static Future<String?> uploadProfileImage({
+    required XFile imageFile,
+  }) async {
+    return await uploadImage(
+      imageFile: imageFile,
+      folderName: MahekConstant.profileImageFolder,
+    );
   }
 
   static Future<List<String>> uploadMultipleImages({

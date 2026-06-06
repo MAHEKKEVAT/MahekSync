@@ -103,8 +103,6 @@ class SignUpController extends GetxController {
           fullName: fullName,
           loginType: MahekConstant.emailLoginType,
           userType: 'owner',
-          isActive: true,
-          isVerified: false,
           createdAt: Timestamp.now(),
         );
 

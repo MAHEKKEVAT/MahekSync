@@ -60,6 +60,12 @@ class MahekConstant {
   static String privacyPolicy = "";
   static String aboutApp = "";
 
+  static const String profileImageFolder = 'profile_images';
+  static const String profileImageFieldKey = 'profilePic';
+  static const String loaderMsgUploadingImage = 'Uploading profile image...';
+  static const String loaderMsgSavingProfile = 'Saving profile...';
+  static const Duration profileSaveAnimDuration = Duration(milliseconds: 300);
+
   static const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   static final Random _rnd = Random();
 
@@ -217,32 +223,45 @@ class MahekConstant {
     }
   }
 
-  static List<String> generateKeywords(String text) {
-    if (text.isEmpty) return [];
 
-    final lower = text.toLowerCase().trim();
-    final List<String> keywords = [];
+  static const String loginBackgroundAsset = 'assets/images/login_bg.png';
 
-    final words = lower.split(' ').where((w) => w.isNotEmpty).toList();
+  // ── Animation Duration Constants (for glassmorphic effects) ──────────
+  /// Duration for the floating orb animation cycle in the sidebar
+  static const Duration navOrbAnimDuration = Duration(milliseconds: 6000);
 
-    for (int i = 0; i < words.length; i++) {
-      for (int j = i + 1; j <= words.length; j++) {
-        keywords.add(words.sublist(i, j).join(' '));
-      }
-    }
+  /// Duration for the floating orb animation cycle in the header
+  static const Duration headerOrbAnimDuration = Duration(milliseconds: 7000);
 
-    for (var word in words) {
-      for (int i = 1; i <= word.length; i++) {
-        keywords.add(word.substring(0, i));
-      }
-    }
+  /// Blur sigma values for glassmorphic BackdropFilter
+  static const double navBlurSigma = 22.0;
+  static const double headerBlurSigma = 18.0;
 
-    for (int i = 1; i <= lower.length; i++) {
-      keywords.add(lower.substring(0, i));
-    }
+  // ── Glassmorphic Overlay Opacity ──────────────────────────────────────
+  /// Dark mode overlay opacity applied over the blurred background
+  static const double glassOverlayDarkOpacity = 0.55;
 
-    return keywords.toSet().toList();
-  }
+  /// Light mode overlay opacity applied over the blurred background
+  static const double glassOverlayLightOpacity = 0.65;
+
+  /// Border opacity for glass panels
+  static const double glassBorderDarkOpacity = 0.3;
+  static const double glassBorderLightOpacity = 0.5;
+
+  // ── Nav Item Colors on Glass ──────────────────────────────────────────
+  /// Selected nav item background opacity on glass (dark)
+  static const double navItemSelectedDarkOpacity = 0.22;
+
+  /// Selected nav item background opacity on glass (light)
+  static const double navItemSelectedLightOpacity = 0.14;
+
+  /// Selected nav item border opacity on glass
+  static const double navItemBorderSelectedOpacity = 0.3;
+
+  /// Section divider opacity on glass
+  static const double navDividerDarkOpacity = 0.12;
+  static const double navDividerLightOpacity = 0.2;
+
 
   static List<String> generateSearchKeywords(String text) {
     if (text.isEmpty) return [];

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -33,6 +34,27 @@ class SmartMapDashboardController extends GetxController {
   final selectedTabIndex = 0.obs;
 
   GoogleMapController? _mapController;
+  final mapKeyCounter = 0.obs;
+  final isDarkMode = false.obs;
+
+  static const String darkMapStyle = r'''
+  [
+    {"elementType": "geometry", "stylers": [{"color": "#1a1a2e"}]},
+    {"elementType": "labels.text.fill", "stylers": [{"color": "#8a8a9a"}]},
+    {"elementType": "labels.text.stroke", "stylers": [{"color": "#1a1a2e"}]},
+    {"featureType": "administrative", "elementType": "geometry", "stylers": [{"color": "#2a2a3e"}]},
+    {"featureType": "landscape", "elementType": "geometry", "stylers": [{"color": "#1e1e30"}]},
+    {"featureType": "poi", "elementType": "geometry", "stylers": [{"color": "#252538"}]},
+    {"featureType": "poi.park", "elementType": "geometry", "stylers": [{"color": "#1e3020"}]},
+    {"featureType": "road", "elementType": "geometry", "stylers": [{"color": "#2a2a40"}]},
+    {"featureType": "road.highway", "elementType": "geometry", "stylers": [{"color": "#3a3a55"}]},
+    {"featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [{"color": "#1a1a2e"}]},
+    {"featureType": "transit", "elementType": "geometry", "stylers": [{"color": "#2a2a40"}]},
+    {"featureType": "water", "elementType": "geometry", "stylers": [{"color": "#0e1a2e"}]}
+  ]
+  ''';
+
+
   final currentPosition = Rxn<Position>();
   Stream<Position>? _positionStream;
 
@@ -85,13 +107,11 @@ class SmartMapDashboardController extends GetxController {
   Future<void> requestPermission() async {
     isLoading.value = true;
     try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.deniedForever || permission == LocationPermission.denied) {
-        permissionGranted.value = false;
+      if (kIsWeb) {
+        permissionGranted.value = true;
         isLoading.value = false;
+        await Future.delayed(const Duration(milliseconds: 600));
+        mapKeyCounter.value++;
         return;
       }
       permissionGranted.value = true;
@@ -275,11 +295,19 @@ class SmartMapDashboardController extends GetxController {
     _mapController?.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), currentZoom.value));
   }
 
-  void onMapCreated(GoogleMapController controller) {
+  void onMapCreated(GoogleMapController controller, bool isDark) {
     _mapController = controller;
+    isDarkMode.value = isDark;
+    applyMapStyle(isDark);
     if (latitude.value != 0.0 && longitude.value != 0.0) {
       _animateCamera(latitude.value, longitude.value);
     }
+  }
+
+  void applyMapStyle(bool isDark) {
+    isDarkMode.value = isDark;
+    if (_mapController == null) return;
+    _mapController!.setMapStyle(isDark ? darkMapStyle : null);
   }
 
   void togglePanel() => panelExpanded.value = !panelExpanded.value;

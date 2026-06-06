@@ -78,8 +78,6 @@ class AuthController extends GetxController {
             fullName: email.split('@')[0],
             loginType: MahekConstant.emailLoginType,
             userType: 'editor',
-            isActive: true,
-            isVerified: false,
             createdAt: Timestamp.now(),
           );
 
@@ -126,8 +124,6 @@ class AuthController extends GetxController {
             profilePic: user.photoURL,
             loginType: MahekConstant.emailLoginType,
             userType: 'editor',
-            isActive: true,
-            isVerified: user.emailVerified,
             createdAt: Timestamp.now(),
           );
 

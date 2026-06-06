@@ -247,4 +247,27 @@ class AppThemeData {
     );
     // Usage: Stack with gradient container behind + inner container with fillColor
   }
+
+
+  static const LinearGradient glassShimmerDark = LinearGradient(
+    colors: [
+      Color(0x10FFFFFF), // Near-transparent white
+      Color(0x05FFFFFF),
+      Color(0x10FFFFFF),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  /// Subtle shimmer gradient for glass surfaces in light mode
+  static const LinearGradient glassShimmerLight = LinearGradient(
+    colors: [
+      Color(0x18FFFFFF),
+      Color(0x08FFFFFF),
+      Color(0x18FFFFFF),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
 }

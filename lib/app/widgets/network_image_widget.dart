@@ -29,7 +29,7 @@ class NetworkImageWidget extends StatelessWidget {
           height: height ?? ScreenSize.height(8, context),
           width: width ?? ScreenSize.width(15, context),
           color: themeChange.isDarkTheme() ? AppThemeData.grey8 : AppThemeData.grey3,
-          child: errorWidget ?? Image.asset(MahekConstant.userPlaceHolder, height: height ?? ScreenSize.height(8, context), width: width ?? ScreenSize.width(15, context), fit: fit ?? BoxFit.fill),
+          child: errorWidget ?? Image.asset(MahekConstant.userPlaceHolder, height: height, width: width, fit: fit ?? BoxFit.cover),
         ),
       );
     }

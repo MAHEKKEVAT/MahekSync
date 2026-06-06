@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -42,7 +43,8 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  Widget _buildDesktopLayout(BuildContext context, DarkThemeProvider theme, bool isDesktop, bool isTablet, bool isDark) {
+  Widget _buildDesktopLayout(BuildContext context, DarkThemeProvider theme,
+      bool isDesktop, bool isTablet, bool isDark) {
     return WillPopScope(
       onWillPop: () => controller.onWillPop(context, isDark),
       child: Row(
@@ -52,16 +54,24 @@ class DashboardView extends GetView<DashboardController> {
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOutCubic,
               width: controller.isNavExpanded.value
-                  ? (isDesktop ? (MediaQuery.of(context).size.width > 1600 ? 280 : 260) : (isTablet ? 240 : 72))
+                  ? (isDesktop
+                  ? (MediaQuery.of(context).size.width > 1600 ? 280 : 260)
+                  : (isTablet ? 240 : 72))
                   : 72,
               color: Colors.transparent,
-              child: _buildSideNavigation(context, theme, controller.isNavExpanded.value),
+              child: _GlassmorphicNavShell(
+                isDark: isDark,
+                child: _buildSideNavigation(
+                    context, theme, controller.isNavExpanded.value),
+              ),
             ),
           ),
           Container(
             width: 1,
             height: double.infinity,
-            color: isDark ? AppThemeData.grey8.withValues(alpha: 0.25) : AppThemeData.grey3.withValues(alpha: 0.4),
+            color: isDark
+                ? AppThemeData.grey8.withValues(alpha: 0.25)
+                : AppThemeData.grey3.withValues(alpha: 0.4),
           ),
           Expanded(child: _buildMainContent(context, theme)),
         ],
@@ -69,7 +79,8 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  Widget _buildMobileLayout(BuildContext context, DarkThemeProvider theme, bool isDark) {
+  Widget _buildMobileLayout(
+      BuildContext context, DarkThemeProvider theme, bool isDark) {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     return WillPopScope(
@@ -78,19 +89,28 @@ class DashboardView extends GetView<DashboardController> {
         key: scaffoldKey,
         backgroundColor: isDark ? AppThemeData.primaryBlack : AppThemeData.grey1,
         drawer: Drawer(
-          backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.primaryWhite,
+          backgroundColor: Colors.transparent,
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(topRight: Radius.circular(24), bottomRight: Radius.circular(24)),
+            borderRadius: BorderRadius.only(
+                topRight: Radius.circular(24),
+                bottomRight: Radius.circular(24)),
           ),
           width: ScreenSize.width(78, context),
-          child: _buildSideNavigation(context, theme, true),
+          child: _GlassmorphicNavShell(
+            isDark: isDark,
+            borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(24),
+                bottomRight: Radius.circular(24)),
+            child: _buildSideNavigation(context, theme, true),
+          ),
         ),
         body: _buildMainContent(context, theme, scaffoldKey: scaffoldKey),
       ),
     );
   }
 
-  Widget _buildSideNavigation(BuildContext context, DarkThemeProvider theme, bool isExpanded) {
+  Widget _buildSideNavigation(
+      BuildContext context, DarkThemeProvider theme, bool isExpanded) {
     final isDark = theme.isDarkTheme();
     final isMobile = ResponsiveWidget.isMobile(context);
     final isDesktop = ResponsiveWidget.isDesktop(context);
@@ -99,15 +119,17 @@ class DashboardView extends GetView<DashboardController> {
 
     return Column(
       children: [
-        // App Logo Header
         Container(
           height: isMobile ? 72 : 84,
-          padding: EdgeInsets.symmetric(horizontal: isExpanded ? 18 : 8, vertical: 14),
+          padding: EdgeInsets.symmetric(
+              horizontal: isExpanded ? 18 : 8, vertical: 14),
           width: double.infinity,
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: isDark ? AppThemeData.grey8.withValues(alpha: 0.25) : AppThemeData.grey3.withValues(alpha: 0.3),
+                color: isDark
+                    ? AppThemeData.grey8.withValues(alpha: 0.15)
+                    : AppThemeData.grey3.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -118,11 +140,14 @@ class DashboardView extends GetView<DashboardController> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppThemeData.primary50.withValues(alpha: 0.12),
+                  color: AppThemeData.primary50.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color:
+                    AppThemeData.primary50.withValues(alpha: 0.25),
+                  ),
                 ),
-                child:
-                SizedBox(
+                child: SizedBox(
                   width: 38,
                   height: 38,
                   child: Lottie.asset(
@@ -140,7 +165,9 @@ class DashboardView extends GetView<DashboardController> {
                   title: MahekConstant.appName.toString(),
                   fontSize: isDesktop ? 22 : 20,
                   fontFamily: FontFamily.bold,
-                  color: AppThemeData.primary50,
+                  color: isDark
+                      ? AppThemeData.textNeonPurple
+                      : AppThemeData.primary50,
                   maxLine: 1,
                 ),
               ),
@@ -151,19 +178,22 @@ class DashboardView extends GetView<DashboardController> {
               height: 42,
               width: 42,
               decoration: BoxDecoration(
-                color: AppThemeData.primary50.withValues(alpha: 0.12),
+                color: AppThemeData.primary50.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color:
+                  AppThemeData.primary50.withValues(alpha: 0.25),
+                ),
               ),
               child: const AppLogoWidget(),
             ),
           ),
         ),
-
-        // Navigation Items
         Expanded(
           child: ListView.builder(
             itemCount: sections.length,
-            padding: EdgeInsets.symmetric(horizontal: isExpanded ? 14 : 6, vertical: 12),
+            padding:
+            EdgeInsets.symmetric(horizontal: isExpanded ? 14 : 6, vertical: 12),
             itemBuilder: (context, sectionIndex) {
               final section = sections[sectionIndex];
               return Column(
@@ -171,18 +201,22 @@ class DashboardView extends GetView<DashboardController> {
                 children: [
                   if (isExpanded)
                     Padding(
-                      padding: const EdgeInsets.only(left: 14, top: 8, bottom: 8),
+                      padding:
+                      const EdgeInsets.only(left: 14, top: 8, bottom: 8),
                       child: TextCustom(
                         title: section.title.toUpperCase(),
                         fontSize: 10,
                         fontFamily: FontFamily.bold,
-                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                        color: isDark
+                            ? AppThemeData.grey5.withValues(alpha: 0.7)
+                            : AppThemeData.grey6.withValues(alpha: 0.8),
                       ),
                     ),
                   ...section.items.map((item) {
                     final itemIndex = allItems.indexOf(item);
                     return Obx(() {
-                      final isSelected = controller.selectedIndex.value == itemIndex;
+                      final isSelected =
+                          controller.selectedIndex.value == itemIndex;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Material(
@@ -203,10 +237,16 @@ class DashboardView extends GetView<DashboardController> {
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? (isDark
-                                    ? AppThemeData.primary50.withValues(alpha: 0.18)
-                                    : AppThemeData.primary50.withValues(alpha: 0.1))
+                                    ? AppThemeData.primary50.withValues(alpha: 0.22)
+                                    : AppThemeData.primary50.withValues(alpha: 0.14))
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(12),
+                                border: isSelected
+                                    ? Border.all(
+                                  color: AppThemeData.primary50.withValues(alpha: 0.3),
+                                  width: 1,
+                                )
+                                    : null,
                               ),
                               child: Row(
                                 children: [
@@ -220,16 +260,26 @@ class DashboardView extends GetView<DashboardController> {
                                       height: 22,
                                       colorFilter: ColorFilter.mode(
                                         isSelected
-                                            ? AppThemeData.primary50
-                                            : (isDark ? AppThemeData.grey4 : AppThemeData.grey7),
+                                            ? (isDark
+                                            ? AppThemeData.textNeonPurple
+                                            : AppThemeData.primary50)
+                                            : (isDark
+                                            ? AppThemeData.grey4
+                                            : AppThemeData.grey7),
                                         BlendMode.srcIn,
                                       ),
                                     )
                                         : Icon(
-                                      isSelected ? item.selectedIcon : item.icon,
+                                      isSelected
+                                          ? item.selectedIcon
+                                          : item.icon,
                                       color: isSelected
-                                          ? AppThemeData.primary50
-                                          : (isDark ? AppThemeData.grey4 : AppThemeData.grey7),
+                                          ? (isDark
+                                          ? AppThemeData.textNeonPurple
+                                          : AppThemeData.primary50)
+                                          : (isDark
+                                          ? AppThemeData.grey4
+                                          : AppThemeData.grey7),
                                       size: 22,
                                     ),
                                   ),
@@ -239,10 +289,16 @@ class DashboardView extends GetView<DashboardController> {
                                       child: TextCustom(
                                         title: item.title,
                                         fontSize: 14,
-                                        fontFamily: isSelected ? FontFamily.bold : FontFamily.medium,
+                                        fontFamily: isSelected
+                                            ? FontFamily.bold
+                                            : FontFamily.medium,
                                         color: isSelected
-                                            ? AppThemeData.primary50
-                                            : (isDark ? AppThemeData.grey2 : AppThemeData.grey9),
+                                            ? (isDark
+                                            ? AppThemeData.textNeonPurple
+                                            : AppThemeData.primary50)
+                                            : (isDark
+                                            ? AppThemeData.grey2
+                                            : AppThemeData.grey9),
                                         maxLine: 2,
                                       ),
                                     ),
@@ -257,11 +313,12 @@ class DashboardView extends GetView<DashboardController> {
                   }),
                   if (sectionIndex < sections.length - 1 && isExpanded)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
                       child: Divider(
                         color: isDark
-                            ? AppThemeData.grey8.withValues(alpha: 0.2)
-                            : AppThemeData.grey3.withValues(alpha: 0.3),
+                            ? AppThemeData.grey8.withValues(alpha: 0.12)
+                            : AppThemeData.grey3.withValues(alpha: 0.2),
                         height: 1,
                       ),
                     ),
@@ -270,10 +327,9 @@ class DashboardView extends GetView<DashboardController> {
             },
           ),
         ),
-
-        // Logout Button
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: isExpanded ? 16 : 8, vertical: 16),
+          padding:
+          EdgeInsets.symmetric(horizontal: isExpanded ? 16 : 8, vertical: 16),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -283,7 +339,8 @@ class DashboardView extends GetView<DashboardController> {
                     onLogout: () async {
                       await FirebaseAuth.instance.signOut();
                       Get.offAllNamed(Routes.LOGIN_SCREEN);
-                      ShowToastDialog.showSuccess("Logged out successfully.".tr);
+                      ShowToastDialog.showSuccess(
+                          "Logged out successfully.".tr);
                     },
                   ),
                 );
@@ -296,10 +353,12 @@ class DashboardView extends GetView<DashboardController> {
                   vertical: isMobile ? 14 : 12,
                 ),
                 decoration: BoxDecoration(
-                  color: isDark ? AppThemeData.danger600.withValues(alpha: 0.15) : AppThemeData.danger50,
+                  color: isDark
+                      ? AppThemeData.danger600.withValues(alpha: 0.2)
+                      : AppThemeData.danger50,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: AppThemeData.danger300.withValues(alpha: 0.15),
+                    color: AppThemeData.danger300.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -311,7 +370,8 @@ class DashboardView extends GetView<DashboardController> {
                       'assets/icons/ic_logout.svg',
                       width: 22,
                       height: 22,
-                      colorFilter: const ColorFilter.mode(AppThemeData.danger400, BlendMode.srcIn),
+                      colorFilter: const ColorFilter.mode(
+                          AppThemeData.danger400, BlendMode.srcIn),
                     ),
                     spaceW(width: 14),
                     Flexible(
@@ -330,7 +390,8 @@ class DashboardView extends GetView<DashboardController> {
                     'assets/icons/ic_logout.svg',
                     width: 24,
                     height: 24,
-                    colorFilter: const ColorFilter.mode(AppThemeData.danger400, BlendMode.srcIn),
+                    colorFilter: const ColorFilter.mode(
+                        AppThemeData.danger400, BlendMode.srcIn),
                   ),
                 ),
               ),
@@ -342,7 +403,8 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  Widget _buildMainContent(BuildContext context, DarkThemeProvider theme, {GlobalKey<ScaffoldState>? scaffoldKey}) {
+  Widget _buildMainContent(BuildContext context, DarkThemeProvider theme,
+      {GlobalKey<ScaffoldState>? scaffoldKey}) {
     final isMobile = ResponsiveWidget.isMobile(context);
     final isDark = theme.isDarkTheme();
 
@@ -354,8 +416,12 @@ class DashboardView extends GetView<DashboardController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(isMobile ? 16 : 20, isMobile ? 14 : 18, isMobile ? 16 : 20, 0),
-            child: _buildHeader(context, theme, scaffoldKey: scaffoldKey),
+            padding: EdgeInsets.fromLTRB(
+                isMobile ? 16 : 20, isMobile ? 14 : 18, isMobile ? 16 : 20, 0),
+            child: _GlassmorphicHeaderShell(
+              isDark: isDark,
+              child: _buildHeader(context, theme, scaffoldKey: scaffoldKey),
+            ),
           ),
           spaceH(height: 12),
           Expanded(
@@ -373,7 +439,8 @@ class DashboardView extends GetView<DashboardController> {
                     borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                        color:
+                        Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
                         blurRadius: 12,
                         offset: const Offset(0, 2),
                       ),
@@ -389,7 +456,8 @@ class DashboardView extends GetView<DashboardController> {
                       },
                       child: KeyedSubtree(
                         key: ValueKey(controller.selectedIndex.value),
-                        child: controller.getPageWidget(controller.selectedIndex.value),
+                        child:
+                        controller.getPageWidget(controller.selectedIndex.value),
                       ),
                     ),
                   ),
@@ -402,7 +470,8 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, DarkThemeProvider theme, {GlobalKey<ScaffoldState>? scaffoldKey}) {
+  Widget _buildHeader(BuildContext context, DarkThemeProvider theme,
+      {GlobalKey<ScaffoldState>? scaffoldKey}) {
     final isDark = theme.isDarkTheme();
     final isMobile = ResponsiveWidget.isMobile(context);
     final isDesktop = ResponsiveWidget.isDesktop(context);
@@ -426,12 +495,20 @@ class DashboardView extends GetView<DashboardController> {
                 padding: const EdgeInsets.all(10),
                 margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
-                  color: isDark ? AppThemeData.grey9 : AppThemeData.primaryWhite,
+                  color: isDark
+                      ? AppThemeData.surfaceElevated.withValues(alpha: 0.6)
+                      : Colors.white.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isDark
+                        ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                        : Colors.white.withValues(alpha: 0.6),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.03),
-                      blurRadius: 6,
+                      color:
+                      Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                      blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
@@ -444,8 +521,6 @@ class DashboardView extends GetView<DashboardController> {
               ),
             ),
           ),
-
-        // Premium Badge with Lottie
         Container(
           margin: const EdgeInsets.only(right: 12),
           child: Row(
@@ -468,9 +543,7 @@ class DashboardView extends GetView<DashboardController> {
             ],
           ),
         ),
-
         const Spacer(),
-
         Material(
           color: Colors.transparent,
           child: InkWell(
@@ -480,12 +553,20 @@ class DashboardView extends GetView<DashboardController> {
               padding: const EdgeInsets.all(10),
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
-                color: isDark ? AppThemeData.grey9 : AppThemeData.primaryWhite,
+                color: isDark
+                    ? AppThemeData.surfaceElevated.withValues(alpha: 0.6)
+                    : Colors.white.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDark
+                      ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                      : Colors.white.withValues(alpha: 0.6),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.03),
-                    blurRadius: 6,
+                    color:
+                    Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                    blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
@@ -504,12 +585,20 @@ class DashboardView extends GetView<DashboardController> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: isDark ? AppThemeData.grey9 : AppThemeData.primaryWhite,
+              color: isDark
+                  ? AppThemeData.surfaceElevated.withValues(alpha: 0.6)
+                  : Colors.white.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                    : Colors.white.withValues(alpha: 0.6),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.03),
-                  blurRadius: 6,
+                  color:
+                  Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                  blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
@@ -528,7 +617,8 @@ class DashboardView extends GetView<DashboardController> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(50),
-                    child: employee?.profilePic != null && employee!.profilePic!.isNotEmpty
+                    child: employee?.profilePic != null &&
+                        employee!.profilePic!.isNotEmpty
                         ? NetworkImageWidget(
                       imageUrl: employee.profilePic!,
                       height: 40,
@@ -536,7 +626,9 @@ class DashboardView extends GetView<DashboardController> {
                       fit: BoxFit.cover,
                     )
                         : Container(
-                      color: isDark ? AppThemeData.grey8 : AppThemeData.grey2,
+                      color: isDark
+                          ? AppThemeData.grey8
+                          : AppThemeData.grey2,
                       child: Icon(
                         Icons.person_rounded,
                         size: 22,
@@ -555,7 +647,9 @@ class DashboardView extends GetView<DashboardController> {
                         title: employee?.fullName ?? 'Admin',
                         fontSize: 14,
                         fontFamily: FontFamily.bold,
-                        color: isDark ? AppThemeData.primaryWhite : AppThemeData.primaryBlack,
+                        color: isDark
+                            ? AppThemeData.primaryWhite
+                            : AppThemeData.primaryBlack,
                         maxLine: 1,
                       ),
                     ],
@@ -566,6 +660,113 @@ class DashboardView extends GetView<DashboardController> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _GlassmorphicNavShell extends StatelessWidget {
+  final Widget child;
+  final bool isDark;
+  final BorderRadius? borderRadius;
+
+  const _GlassmorphicNavShell({
+    required this.child,
+    required this.isDark,
+    this.borderRadius,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: borderRadius ?? BorderRadius.zero,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/login_bg.png',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey2,
+            ),
+          ),
+          ClipRRect(
+            borderRadius: borderRadius ?? BorderRadius.zero,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppThemeData.surfaceVoid.withValues(alpha: 0.55)
+                      : Colors.white.withValues(alpha: 0.65),
+                  borderRadius: borderRadius,
+                  border: borderRadius != null
+                      ? Border.all(
+                    color: isDark
+                        ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                        : Colors.white.withValues(alpha: 0.5),
+                    width: 1,
+                  )
+                      : null,
+                ),
+              ),
+            ),
+          ),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _GlassmorphicHeaderShell extends StatelessWidget {
+  final Widget child;
+  final bool isDark;
+
+  const _GlassmorphicHeaderShell({
+    required this.child,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        children: [
+          Image.asset(
+            'assets/images/login_bg.png',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: 72,
+            errorBuilder: (_, __, ___) => Container(
+              color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey2,
+              height: 72,
+            ),
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+              child: Container(
+                height: 72,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppThemeData.surfaceVoid.withValues(alpha: 0.55)
+                      : Colors.white.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark
+                        ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                        : Colors.white.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          child,
+        ],
+      ),
     );
   }
 }

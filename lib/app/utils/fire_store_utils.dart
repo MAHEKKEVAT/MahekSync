@@ -59,9 +59,6 @@ class FireStoreUtils {
     return null;
   }
 
-  // Track previous name/pic to detect changes
-  static String? _prevUserName;
-  static String? _prevUserPic;
 
   static Future<bool> updateOwner(UserModel userModel) async {
     try {
@@ -70,6 +67,23 @@ class FireStoreUtils {
       return true;
     } catch (e) {
       developer.log("Failed to update user: $e");
+      return false;
+    }
+  }
+
+  static Future<bool> updateOwnerProfileImage(String imageUrl) async {
+    try {
+      final uid = getCurrentUid();
+      if (uid == null) return false;
+      await fireStore.collection(CollectionName.owners).doc(uid).update({
+        MahekConstant.profileImageFieldKey: imageUrl,
+      });
+      if (MahekConstant.ownerModel != null) {
+        MahekConstant.ownerModel!.profilePic = imageUrl;
+      }
+      return true;
+    } catch (e) {
+      developer.log("Failed to update profile image: $e");
       return false;
     }
   }
