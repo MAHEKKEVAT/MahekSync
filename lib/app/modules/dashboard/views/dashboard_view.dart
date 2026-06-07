@@ -664,7 +664,7 @@ class DashboardView extends GetView<DashboardController> {
   }
 }
 
-class _GlassmorphicNavShell extends StatelessWidget {
+class _GlassmorphicNavShell extends StatefulWidget {
   final Widget child;
   final bool isDark;
   final BorderRadius? borderRadius;
@@ -676,32 +676,64 @@ class _GlassmorphicNavShell extends StatelessWidget {
   });
 
   @override
+  State<_GlassmorphicNavShell> createState() => _GlassmorphicNavShellState();
+}
+
+class _GlassmorphicNavShellState extends State<_GlassmorphicNavShell>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animController;
+  double _scale = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    );
+    _animController.addListener(() {
+      _scale = 1.0 + (_animController.value * 0.06);
+      setState(() {});
+    });
+    _animController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: borderRadius ?? BorderRadius.zero,
+      borderRadius: widget.borderRadius ?? BorderRadius.zero,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/login_bg.png',
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey2,
+          Transform.scale(
+            scale: _scale,
+            child: Image.asset(
+              'assets/images/login_bg.png',
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                color: widget.isDark ? AppThemeData.surfaceDeep : AppThemeData.grey2,
+              ),
             ),
           ),
           ClipRRect(
-            borderRadius: borderRadius ?? BorderRadius.zero,
+            borderRadius: widget.borderRadius ?? BorderRadius.zero,
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isDark
+                  color: widget.isDark
                       ? AppThemeData.surfaceVoid.withValues(alpha: 0.55)
                       : Colors.white.withValues(alpha: 0.65),
-                  borderRadius: borderRadius,
-                  border: borderRadius != null
+                  borderRadius: widget.borderRadius,
+                  border: widget.borderRadius != null
                       ? Border.all(
-                    color: isDark
+                    color: widget.isDark
                         ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
                         : Colors.white.withValues(alpha: 0.5),
                     width: 1,
@@ -711,14 +743,14 @@ class _GlassmorphicNavShell extends StatelessWidget {
               ),
             ),
           ),
-          child,
+          widget.child,
         ],
       ),
     );
   }
 }
 
-class _GlassmorphicHeaderShell extends StatelessWidget {
+class _GlassmorphicHeaderShell extends StatefulWidget {
   final Widget child;
   final bool isDark;
 
@@ -728,19 +760,51 @@ class _GlassmorphicHeaderShell extends StatelessWidget {
   });
 
   @override
+  State<_GlassmorphicHeaderShell> createState() => _GlassmorphicHeaderShellState();
+}
+
+class _GlassmorphicHeaderShellState extends State<_GlassmorphicHeaderShell>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animController;
+  double _scale = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    );
+    _animController.addListener(() {
+      _scale = 1.0 + (_animController.value * 0.06);
+      setState(() {});
+    });
+    _animController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: Stack(
         children: [
-          Image.asset(
-            'assets/images/login_bg.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: 72,
-            errorBuilder: (_, __, ___) => Container(
-              color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey2,
+          Transform.scale(
+            scale: _scale,
+            child: Image.asset(
+              'assets/images/login_bg.png',
+              fit: BoxFit.cover,
+              width: double.infinity,
               height: 72,
+              errorBuilder: (_, __, ___) => Container(
+                color: widget.isDark ? AppThemeData.surfaceDeep : AppThemeData.grey2,
+                height: 72,
+              ),
             ),
           ),
           ClipRRect(
@@ -750,12 +814,12 @@ class _GlassmorphicHeaderShell extends StatelessWidget {
               child: Container(
                 height: 72,
                 decoration: BoxDecoration(
-                  color: isDark
+                  color: widget.isDark
                       ? AppThemeData.surfaceVoid.withValues(alpha: 0.55)
                       : Colors.white.withValues(alpha: 0.65),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isDark
+                    color: widget.isDark
                         ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
                         : Colors.white.withValues(alpha: 0.5),
                     width: 1,
@@ -764,7 +828,7 @@ class _GlassmorphicHeaderShell extends StatelessWidget {
               ),
             ),
           ),
-          child,
+          widget.child,
         ],
       ),
     );

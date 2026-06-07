@@ -69,27 +69,27 @@ class AddEditPurchaseController extends GetxController {
     selectedStatus.value = purchase.status ?? 'DELIVERED';
     purchaseDate.value = purchase.purchaseDate;
     warrantyDate.value = purchase.warrantyDate;
-
-    // Set category
-    if (purchase.category != null) {
-      selectedCategory.value = categories.firstWhereOrNull((c) => c.name == purchase.category);
-    }
-
-    // Set payment method
-    if (purchase.paymentMethod != null) {
-      selectedPaymentMethod.value = paymentMethods.firstWhereOrNull((p) => p.pName == purchase.paymentMethod);
-    }
   }
 
   void loadCategories() {
     CategoryFirestoreUtils.getCategories().listen((cats) {
       categories.value = cats;
+      if (isEditMode.value && editingPurchase.value?.category != null) {
+        selectedCategory.value = cats.firstWhereOrNull(
+          (c) => c.name == editingPurchase.value!.category,
+        );
+      }
     });
   }
 
   void loadPaymentMethods() {
     PaymentMethodFirestoreUtils.getPaymentMethods().listen((methods) {
       paymentMethods.value = methods;
+      if (isEditMode.value && editingPurchase.value?.paymentMethod != null) {
+        selectedPaymentMethod.value = methods.firstWhereOrNull(
+          (p) => p.pName == editingPurchase.value!.paymentMethod,
+        );
+      }
     });
   }
 

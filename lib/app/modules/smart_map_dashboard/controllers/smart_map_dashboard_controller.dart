@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -54,10 +55,8 @@ class SmartMapDashboardController extends GetxController {
   ]
   ''';
 
-
   final currentPosition = Rxn<Position>();
-  Stream<Position>? _positionStream;
-
+  StreamSubscription<Position>? _positionSubscription;
   static const CameraPosition _defaultCamera = CameraPosition(
     target: LatLng(28.6139, 77.2090),
     zoom: 14.0,
@@ -85,12 +84,16 @@ class SmartMapDashboardController extends GetxController {
     final markers = <Marker>{currentMarker};
     for (int i = 0; i < savedLocations.length; i++) {
       final loc = savedLocations[i];
-      markers.add(Marker(
-        markerId: MarkerId('saved_$i'),
-        position: LatLng(loc.latitude, loc.longitude),
-        infoWindow: InfoWindow(title: loc.name, snippet: loc.address),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
-      ));
+      markers.add(
+        Marker(
+          markerId: MarkerId('saved_$i'),
+          position: LatLng(loc.latitude, loc.longitude),
+          infoWindow: InfoWindow(title: loc.name, snippet: loc.address),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueViolet,
+          ),
+        ),
+      );
     }
     return markers;
   }
@@ -99,60 +102,123 @@ class SmartMapDashboardController extends GetxController {
   void onInit() {
     super.onInit();
     requestPermission();
+    initializeLocation();
     searchController.addListener(() {
       searchQuery.value = searchController.text;
     });
   }
 
+  Future<void> initializeLocation() async {
+    isLoading.value = true;
+    await requestPermission();
+  }
+
   Future<void> requestPermission() async {
     isLoading.value = true;
+
     try {
       if (kIsWeb) {
         permissionGranted.value = true;
-        isLoading.value = false;
-        await Future.delayed(const Duration(milliseconds: 600));
+        await _getCurrentLocation();
+        _startLocationStream();
         mapKeyCounter.value++;
+        isLoading.value = false;
         return;
       }
+
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        permissionGranted.value = false;
+        isLoading.value = false;
+        ShowToastDialog.showSuccess('Please enable location services');
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied) {
+        permissionGranted.value = false;
+        isLoading.value = false;
+        ShowToastDialog.showSuccess('Location permission denied');
+        return;
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        permissionGranted.value = false;
+        isLoading.value = false;
+        ShowToastDialog.showSuccess('Location permission permanently denied');
+        return;
+      }
+
       permissionGranted.value = true;
       await _getCurrentLocation();
       _startLocationStream();
     } catch (e) {
       permissionGranted.value = false;
+    } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> _getCurrentLocation() async {
+  Future<bool> _getCurrentLocation() async {
     try {
-      final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
       currentPosition.value = position;
       latitude.value = position.latitude;
       longitude.value = position.longitude;
       currentZoom.value = 15.0;
+
       await _updateAddress(position);
-      _animateCamera(position.latitude, position.longitude);
-      isLoading.value = false;
+
+      if (_mapController != null) {
+        _animateCamera(position.latitude, position.longitude);
+      }
+
+      return true;
     } catch (e) {
-      isLoading.value = false;
+      print("GET CURRENT LOCATION ERROR => $e");
+      return false;
     }
   }
 
   void _startLocationStream() {
-    const locationSettings = LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 10);
-    _positionStream = Geolocator.getPositionStream(locationSettings: locationSettings);
-    _positionStream?.listen((Position position) {
-      currentPosition.value = position;
-      latitude.value = position.latitude;
-      longitude.value = position.longitude;
-      _updateAddress(position);
-    });
+    const locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
+    );
+
+    _positionSubscription?.cancel();
+
+    _positionSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+          (Position position) {
+            currentPosition.value = position;
+            latitude.value = position.latitude;
+            longitude.value = position.longitude;
+
+            _updateAddress(position);
+
+            if (_mapController != null) {
+              _animateCamera(position.latitude, position.longitude);
+            }
+          },
+        );
   }
 
   Future<void> _updateAddress(Position position) async {
     isAddressLoading.value = true;
     try {
-      final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
         _applyAddressData(place);
@@ -164,7 +230,8 @@ class SmartMapDashboardController extends GetxController {
     try {
       await _fetchAddressViaHttp(position.latitude, position.longitude);
     } catch (_) {
-      currentAddress.value = '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
+      currentAddress.value =
+          '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
       locationModel.value = SmartMapDashboardModel(
         latitude: position.latitude,
         longitude: position.longitude,
@@ -218,7 +285,6 @@ class SmartMapDashboardController extends GetxController {
 
       final data = json.decode(response.body);
 
-
       final status = data['status'];
 
       if (status != 'OK') {
@@ -235,8 +301,7 @@ class SmartMapDashboardController extends GetxController {
 
       final result = results.first;
 
-      currentAddress.value =
-          result['formatted_address'] ?? 'Unknown address';
+      currentAddress.value = result['formatted_address'] ?? 'Unknown address';
 
       String? city;
       String? state;
@@ -244,8 +309,7 @@ class SmartMapDashboardController extends GetxController {
       String? postalCode;
       String? subLocality;
 
-      final addressComponents =
-          result['address_components'] as List? ?? [];
+      final addressComponents = result['address_components'] as List? ?? [];
 
       for (var component in addressComponents) {
         final types = List<String>.from(component['types'] ?? []);
@@ -287,12 +351,14 @@ class SmartMapDashboardController extends GetxController {
       print("ADDRESS ERROR => $e");
 
       currentAddress.value =
-      '${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}';
+          '${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}';
     }
   }
 
   void _animateCamera(double lat, double lng) {
-    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), currentZoom.value));
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(LatLng(lat, lng), currentZoom.value),
+    );
   }
 
   void onMapCreated(GoogleMapController controller, bool isDark) {
@@ -334,8 +400,11 @@ class SmartMapDashboardController extends GetxController {
 
   Future<void> refreshLocation() async {
     isLoading.value = true;
-    await _getCurrentLocation();
-    ShowToastDialog.showSuccess('Location refreshed');
+    await requestPermission();
+    if (latitude.value != 0.0 && longitude.value != 0.0) {
+      recenterMap();
+      ShowToastDialog.showSuccess('Location refreshed');
+    }
   }
 
   void recenterMap() {
@@ -355,7 +424,8 @@ class SmartMapDashboardController extends GetxController {
   }
 
   void openInGoogleMaps() {
-    final url = 'https://www.google.com/maps/search/?api=1&query=${latitude.value},${longitude.value}';
+    final url =
+        'https://www.google.com/maps/search/?api=1&query=${latitude.value},${longitude.value}';
     ShowToastDialog.showSuccess('Opening Google Maps');
   }
 
@@ -366,56 +436,30 @@ class SmartMapDashboardController extends GetxController {
   }
 
   void shareLocation() {
-    final text = 'My location: $currentAddress\nhttps://www.google.com/maps/search/?api=1&query=${latitude.value},${longitude.value}';
+    final text =
+        'My location: $currentAddress\nhttps://www.google.com/maps/search/?api=1&query=${latitude.value},${longitude.value}';
     Clipboard.setData(ClipboardData(text: text));
     ShowToastDialog.showSuccess('Location link copied to clipboard');
   }
 
   Future<void> searchPlace(String query) async {
-    if (query.trim().isEmpty) {
-      searchResults.clear();
-      return;
-    }
-
-    isSearching.value = true;
-
     try {
-      final apiKey = MahekConstant.googleMapKey;
+      final locations = await locationFromAddress(query);
 
-      final url =
-          'https://maps.googleapis.com/maps/api/place/autocomplete/json'
-          '?input=${Uri.encodeComponent(query)}'
-          '&key=$apiKey'
-          '&components=country:in';
+      searchResults.clear();
 
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        print("SEARCH RESPONSE => $data");
-
-        if (data['status'] == 'OK') {
-          final predictions = data['predictions'] as List;
-
-          searchResults.value = predictions.map((p) {
-            return {
-              'place_id': p['place_id'],
-              'address': p['description'],
-            };
-          }).toList();
-        } else {
-          searchResults.clear();
-        }
+      for (final item in locations) {
+        searchResults.add({
+          "lat": item.latitude,
+          "lng": item.longitude,
+          "address": query,
+        });
       }
     } catch (e) {
       print("SEARCH ERROR => $e");
       searchResults.clear();
     }
-
-    isSearching.value = false;
   }
-
 
   void goToSearchResult(Map<String, dynamic> result) {
     final lat = result['lat'] as double;
@@ -461,6 +505,7 @@ class SmartMapDashboardController extends GetxController {
 
   @override
   void onClose() {
+    _positionSubscription?.cancel();
     searchController.dispose();
     _mapController?.dispose();
     super.onClose();
@@ -491,8 +536,7 @@ class SmartMapDashboardController extends GetxController {
           latitude.value = lat;
           longitude.value = lng;
 
-          currentAddress.value =
-              result['formatted_address'] ?? '';
+          currentAddress.value = result['formatted_address'] ?? '';
 
           _animateCamera(lat, lng);
 
@@ -502,6 +546,14 @@ class SmartMapDashboardController extends GetxController {
       }
     } catch (e) {
       print("PLACE DETAILS ERROR => $e");
+    }
+  }
+
+  void syncMapToCurrentLocation() {
+    if (latitude.value != 0.0 &&
+        longitude.value != 0.0 &&
+        _mapController != null) {
+      _animateCamera(latitude.value, longitude.value);
     }
   }
 }

@@ -202,17 +202,19 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                           padding: const EdgeInsets.all(40),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: image.networkUrl != null
-                                ? NetworkImageWidget(
-                              imageUrl: image.networkUrl!,
-                              fit: BoxFit.contain,
-                            )
-                                : image.memoryImage != null
-                                ? Image.memory(
-                              image.memoryImage!,
-                              fit: BoxFit.contain,
-                            )
-                                : const SizedBox(),
+                            child: InteractiveViewer(
+                              child: image.networkUrl != null
+                                  ? NetworkImageWidget(
+                                imageUrl: image.networkUrl!,
+                                fit: BoxFit.contain,
+                              )
+                                  : image.memoryImage != null
+                                  ? Image.memory(
+                                image.memoryImage!,
+                                fit: BoxFit.contain,
+                              )
+                                  : const SizedBox(),
+                            ),
                           ),
                         ),
                       ),
@@ -446,6 +448,13 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                   ],
                 ),
                 borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppThemeData.primary50.withValues(alpha: 0.1),
+                    blurRadius: 12,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               child: TextCustom(
                 title: '₹${(controller.purchase.value?.price ?? 0).toStringAsFixed(2)}',
@@ -495,11 +504,32 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack.withValues(alpha: 0.5) : AppThemeData.primaryWhite,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [
+                  AppThemeData.primaryBlack.withValues(alpha: 0.5),
+                  AppThemeData.surfaceDark.withValues(alpha: 0.3),
+                ]
+              : [
+                  AppThemeData.primaryWhite,
+                  AppThemeData.grey1.withValues(alpha: 0.8),
+                ],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? AppThemeData.grey8.withValues(alpha: 0.3) : AppThemeData.grey3.withValues(alpha: 0.3),
+          color: isDark
+              ? AppThemeData.grey8.withValues(alpha: 0.3)
+              : AppThemeData.primary50.withValues(alpha: 0.15),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -520,7 +550,14 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: AppThemeData.primary50, size: 20),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppThemeData.primary50.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: AppThemeData.primary50, size: 16),
+          ),
           spaceH(height: 6),
           TextCustom(title: label, fontSize: 9, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
           spaceH(height: 4),
@@ -534,7 +571,7 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
     return Container(
       width: 1,
       height: 40,
-      color: isDark ? AppThemeData.grey8.withValues(alpha: 0.3) : AppThemeData.grey3.withValues(alpha: 0.3),
+      color: isDark ? AppThemeData.grey8.withValues(alpha: 0.3) : AppThemeData.primary50.withValues(alpha: 0.1),
     );
   }
 
@@ -542,10 +579,24 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack.withValues(alpha: 0.3) : AppThemeData.primaryWhite,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [
+                  AppThemeData.primaryBlack.withValues(alpha: 0.3),
+                  AppThemeData.surfaceDark.withValues(alpha: 0.2),
+                ]
+              : [
+                  AppThemeData.primaryWhite,
+                  AppThemeData.grey1.withValues(alpha: 0.7),
+                ],
+        ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? AppThemeData.grey8.withValues(alpha: 0.2) : AppThemeData.grey3.withValues(alpha: 0.2),
+          color: isDark
+              ? AppThemeData.grey8.withValues(alpha: 0.2)
+              : AppThemeData.primary50.withValues(alpha: 0.12),
         ),
         boxShadow: [
           BoxShadow(
@@ -569,6 +620,13 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                     AppThemeData.primary4.withValues(alpha: 0.08),
                   ]),
                   borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppThemeData.primary50.withValues(alpha: 0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child:  Icon(Icons.info_outline, color: AppThemeData.primary50, size: 18),
               ),
@@ -731,12 +789,19 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF8B5CF6).withValues(alpha: isDark ? 0.08 : 0.04),
-            const Color(0xFF6D28D9).withValues(alpha: isDark ? 0.04 : 0.02),
+            AppThemeData.primary50.withValues(alpha: isDark ? 0.08 : 0.04),
+            AppThemeData.primary4.withValues(alpha: isDark ? 0.04 : 0.02),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF8B5CF6).withValues(alpha: 0.15)),
+        border: Border.all(color: AppThemeData.primary50.withValues(alpha: 0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: AppThemeData.primary50.withValues(alpha: isDark ? 0.04 : 0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -748,12 +813,19 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                 height: 36,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [
-                    const Color(0xFF8B5CF6).withValues(alpha: 0.15),
-                    const Color(0xFF6D28D9).withValues(alpha: 0.08),
+                    AppThemeData.primary50.withValues(alpha: 0.15),
+                    AppThemeData.primary4.withValues(alpha: 0.08),
                   ]),
                   borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppThemeData.primary50.withValues(alpha: 0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.description_outlined, color: Color(0xFF8B5CF6), size: 18),
+                child: Icon(Icons.description_outlined, color: AppThemeData.primary50, size: 18),
               ),
               spaceW(width: 12),
               TextCustom(title: 'Description', fontSize: 16, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),

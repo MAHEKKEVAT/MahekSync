@@ -54,9 +54,11 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
       return GoogleMap(
         key: ValueKey('map_${dark}_${controller.mapKeyCounter.value}'),
         mapType: controller.currentMapType.value,
-        initialCameraPosition: controller.initialCamera,
-        onMapCreated: (mapCtrl) => controller.onMapCreated(mapCtrl, dark),
-        myLocationEnabled: true,
+        initialCameraPosition: controller.initialCamera,onMapCreated: (mapCtrl) {
+        controller.onMapCreated(mapCtrl, dark);
+        controller.syncMapToCurrentLocation();
+      },
+        myLocationEnabled: controller.permissionGranted.value,
         myLocationButtonEnabled: false,
         zoomControlsEnabled: false,
         compassEnabled: true,
@@ -361,10 +363,6 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
                             padding: const EdgeInsets.all(20),
                             child: _searchTab(isDark),
                           ),
-                          SingleChildScrollView(
-                            padding: const EdgeInsets.all(20),
-                            child: _savedTab(isDark),
-                          ),
                         ],
                       ),
                     ),
@@ -482,14 +480,6 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
               selected,
               isDark,
             ),
-            spaceW(width: 6),
-            _tabButton(
-              'Saved',
-              SolarIconsOutline.bookmark,
-              2,
-              selected,
-              isDark,
-            ),
           ],
         ),
       );
@@ -589,13 +579,12 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
               ),
             );
           }
-          if (controller.searchResults.isEmpty &&
-              controller.searchQuery.value.isNotEmpty) {
+          if (controller.searchQuery.value.isEmpty) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: TextCustom(
-                  title: 'No results found',
+                  title: 'Search for a location',
                   fontSize: 13,
                   fontFamily: FontFamily.medium,
                   color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
@@ -630,7 +619,13 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
       child: TextField(
         controller: controller.searchController,
         onSubmitted: controller.searchPlace,
-        style: TextStyle(
+        onChanged: (value) {
+          if (value.trim().length >= 2) {
+            controller.searchPlace(value);
+          } else {
+            controller.searchResults.clear();
+          }
+        },        style: TextStyle(
           color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
           fontSize: 13,
         ),

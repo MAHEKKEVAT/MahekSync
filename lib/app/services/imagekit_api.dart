@@ -1,4 +1,3 @@
-// lib/app/services/imagekit_api.dart
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -8,7 +7,6 @@ import 'package:maheksync/app/constant/constants.dart';
 
 class ImageKitAPI {
   static const String _privateKey = 'private_u6KRAwruwE6w8xR63Vl7enrhpzk=';
-  // CORRECTED PUBLIC KEY from screenshot
   static const String _publicKey = 'public_AeErS1pNO37JZd9nLBeqgH1SP58=';
   static const String _uploadEndpoint = 'https://upload.imagekit.io/api/v1/files/upload';
 
@@ -48,6 +46,7 @@ class ImageKitAPI {
       final bytes = await imageFile.readAsBytes();
 
       final fileName = '${MahekConstant.getUuid()}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final fullPath = '/$folderName/$fileName';
 
       final uri = Uri.parse(_uploadEndpoint);
       final request = http.MultipartRequest('POST', uri);
@@ -70,13 +69,11 @@ class ImageKitAPI {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
+      print('ImageKit Response: $responseBody');
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(responseBody);
-        final url = data['url'] as String?;
-        if (url != null && url.isNotEmpty) {
-          return url;
-        }
-        return null;
+        return data['url'];
       } else {
         print('ImageKit upload failed with status ${response.statusCode}: $responseBody');
         return null;
@@ -87,13 +84,8 @@ class ImageKitAPI {
     }
   }
 
-  static Future<String?> uploadProfileImage({
-    required XFile imageFile,
-  }) async {
-    return await uploadImage(
-      imageFile: imageFile,
-      folderName: MahekConstant.profileImageFolder,
-    );
+  static Future<String?> uploadProfileImage({required XFile imageFile}) async {
+    return uploadImage(imageFile: imageFile, folderName: MahekConstant.profileImageFolder);
   }
 
   static Future<List<String>> uploadMultipleImages({
