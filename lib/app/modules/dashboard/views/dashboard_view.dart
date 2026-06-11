@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:html' as html;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -339,6 +339,8 @@ class DashboardView extends GetView<DashboardController> {
                     onLogout: () async {
                       await FirebaseAuth.instance.signOut();
                       Get.offAllNamed(Routes.LOGIN_SCREEN);
+                      html.window.history.pushState(
+                          null, '', Routes.LOGIN_SCREEN);
                       ShowToastDialog.showSuccess(
                           "Logged out successfully.".tr);
                     },
@@ -446,20 +448,17 @@ class DashboardView extends GetView<DashboardController> {
                       ),
                     ],
                   ),
-                  child: Obx(
-                        () => AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                      child: KeyedSubtree(
-                        key: ValueKey(controller.selectedIndex.value),
-                        child:
-                        controller.getPageWidget(controller.selectedIndex.value),
-                      ),
-                    ),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      return ClipRect(child: FadeTransition(opacity: animation, child: child));
+                    },
+                    child: Obx(() => KeyedSubtree(
+                      key: ValueKey(controller.selectedIndex.value),
+                      child: controller.getPageWidget(controller.selectedIndex.value),
+                    )),
                   ),
                 ),
               ),
@@ -679,72 +678,25 @@ class _GlassmorphicNavShell extends StatefulWidget {
   State<_GlassmorphicNavShell> createState() => _GlassmorphicNavShellState();
 }
 
-class _GlassmorphicNavShellState extends State<_GlassmorphicNavShell>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animController;
-  double _scale = 1.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    );
-    _animController.addListener(() {
-      _scale = 1.0 + (_animController.value * 0.06);
-      setState(() {});
-    });
-    _animController.repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
+class _GlassmorphicNavShellState extends State<_GlassmorphicNavShell> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: widget.borderRadius ?? BorderRadius.zero,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Transform.scale(
-            scale: _scale,
-            child: Image.asset(
-              'assets/images/login_bg.png',
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: widget.isDark ? AppThemeData.surfaceDeep : AppThemeData.grey2,
-              ),
-            ),
-          ),
-          ClipRRect(
-            borderRadius: widget.borderRadius ?? BorderRadius.zero,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: widget.isDark
-                      ? AppThemeData.surfaceVoid.withValues(alpha: 0.55)
-                      : Colors.white.withValues(alpha: 0.65),
-                  borderRadius: widget.borderRadius,
-                  border: widget.borderRadius != null
-                      ? Border.all(
-                    color: widget.isDark
-                        ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
-                        : Colors.white.withValues(alpha: 0.5),
-                    width: 1,
-                  )
-                      : null,
-                ),
-              ),
-            ),
-          ),
-          widget.child,
-        ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: widget.isDark ? AppThemeData.surfaceDeep.withValues(alpha: 0.92) : Colors.white.withValues(alpha: 0.85),
+          borderRadius: widget.borderRadius,
+          border: widget.borderRadius != null
+              ? Border.all(
+            color: widget.isDark
+                ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.5),
+            width: 1,
+          )
+              : null,
+        ),
+        child: widget.child,
       ),
     );
   }
@@ -763,73 +715,24 @@ class _GlassmorphicHeaderShell extends StatefulWidget {
   State<_GlassmorphicHeaderShell> createState() => _GlassmorphicHeaderShellState();
 }
 
-class _GlassmorphicHeaderShellState extends State<_GlassmorphicHeaderShell>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animController;
-  double _scale = 1.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    );
-    _animController.addListener(() {
-      _scale = 1.0 + (_animController.value * 0.06);
-      setState(() {});
-    });
-    _animController.repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
+class _GlassmorphicHeaderShellState extends State<_GlassmorphicHeaderShell> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: Stack(
-        children: [
-          Transform.scale(
-            scale: _scale,
-            child: Image.asset(
-              'assets/images/login_bg.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: 72,
-              errorBuilder: (_, __, ___) => Container(
-                color: widget.isDark ? AppThemeData.surfaceDeep : AppThemeData.grey2,
-                height: 72,
-              ),
-            ),
+      child: Container(
+        height: 72,
+        decoration: BoxDecoration(
+          color: widget.isDark ? AppThemeData.surfaceDeep.withValues(alpha: 0.88) : Colors.white.withValues(alpha: 0.82),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: widget.isDark
+                ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.5),
+            width: 1,
           ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-              child: Container(
-                height: 72,
-                decoration: BoxDecoration(
-                  color: widget.isDark
-                      ? AppThemeData.surfaceVoid.withValues(alpha: 0.55)
-                      : Colors.white.withValues(alpha: 0.65),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: widget.isDark
-                        ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
-                        : Colors.white.withValues(alpha: 0.5),
-                    width: 1,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          widget.child,
-        ],
+        ),
+        child: widget.child,
       ),
     );
   }

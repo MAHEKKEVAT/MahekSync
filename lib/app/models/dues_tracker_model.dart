@@ -1,3 +1,5 @@
+
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -64,6 +66,7 @@ class DuesTrackerModel {
   double? amount;
   String? paymentMethod;
   String? paymentMethodIcon;
+  String? paymentMethodId; // ← NEW: Firestore doc ID of the payment method
   DateTime? giveDate;
   DateTime? oweDate;
   String? note;
@@ -79,6 +82,7 @@ class DuesTrackerModel {
     this.amount,
     this.paymentMethod,
     this.paymentMethodIcon,
+    this.paymentMethodId, // ← NEW
     this.giveDate,
     this.oweDate,
     this.note,
@@ -96,6 +100,7 @@ class DuesTrackerModel {
       amount: _parseDouble(json['amount']),
       paymentMethod: json['paymentMethod'] as String?,
       paymentMethodIcon: json['paymentMethodIcon'] as String?,
+      paymentMethodId: json['paymentMethodId'] as String?, // ← NEW
       giveDate: _parseDateTime(json['giveDate']),
       oweDate: _parseDateTime(json['oweDate']),
       note: json['note'] as String?,
@@ -129,6 +134,7 @@ class DuesTrackerModel {
       'amount': amount,
       'paymentMethod': paymentMethod,
       'paymentMethodIcon': paymentMethodIcon,
+      'paymentMethodId': paymentMethodId, // ← NEW
       'giveDate': giveDate != null ? Timestamp.fromDate(giveDate!) : null,
       'oweDate': oweDate != null ? Timestamp.fromDate(oweDate!) : null,
       'note': note,

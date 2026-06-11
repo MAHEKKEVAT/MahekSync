@@ -1,3 +1,5 @@
+
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -40,8 +42,13 @@ class DuesTrackerController extends GetxController {
   final noteController = TextEditingController();
   final searchController = TextEditingController();
   final selectedDueTypeForm = DueType.owe.obs;
-  final selectedPaymentMethodForm = Rxn<String>();
-  final selectedPaymentMethodIconForm = Rxn<String>();
+
+  // ── NEW: replaces selectedPaymentMethodForm + selectedPaymentMethodIconForm ──
+  // Holds the full PaymentMethodModel selected in the Add/Edit form.
+  // From this we derive paymentMethodId, paymentMethod (name), and
+  // paymentMethodIcon when saving.
+  final selectedPaymentMethodObj = Rxn<PaymentMethodModel>();
+
   final selectedGiveDate = Rxn<DateTime>();
   final selectedOweDate = Rxn<DateTime>();
   final selectedStatusForm = DueStatus.pending.obs;
@@ -111,10 +118,13 @@ class DuesTrackerController extends GetxController {
     }
     DuesTrackerFirestoreUtils.getUserDues(ownerId!).listen((dueList) {
       for (var due in dueList) {
+        // ── FIX: Match by paymentMethodId instead of pName ──
         final matchedMethod = paymentMethods.firstWhereOrNull(
-              (m) => m.pName == due.paymentMethod,
+              (m) => m.id == due.paymentMethodId,
         );
-        if (matchedMethod != null && matchedMethod.pIcon != null) {
+        if (matchedMethod != null) {
+          // Always sync display fields from the master payment method record
+          due.paymentMethod = matchedMethod.pName;
           due.paymentMethodIcon = matchedMethod.pIcon;
         }
       }
@@ -211,9 +221,10 @@ class DuesTrackerController extends GetxController {
         break;
     }
 
+    // ── FIX: Filter by paymentMethodId, not pName ──
     if (selectedPaymentMethod.value != null) {
       result = result.where(
-            (d) => d.paymentMethod == selectedPaymentMethod.value!.pName,
+            (d) => d.paymentMethodId == selectedPaymentMethod.value!.id,
       ).toList();
     }
 
@@ -310,14 +321,17 @@ class DuesTrackerController extends GetxController {
     _applyFilters();
   }
 
+  // ═══════════════════════════════════════════════════════════════════════
+  //  ADD / EDIT FORM STATE
+  // ═══════════════════════════════════════════════════════════════════════
+
   void startAdding() {
     editingDue.value = null;
     customerNameController.clear();
     amountController.clear();
     noteController.clear();
     selectedDueTypeForm.value = DueType.owe;
-    selectedPaymentMethodForm.value = null;
-    selectedPaymentMethodIconForm.value = null;
+    selectedPaymentMethodObj.value = null; // ← was selectedPaymentMethodForm
     selectedGiveDate.value = null;
     selectedOweDate.value = null;
     selectedStatusForm.value = DueStatus.pending;
@@ -329,11 +343,21 @@ class DuesTrackerController extends GetxController {
     amountController.text = due.amount?.toStringAsFixed(2) ?? '';
     noteController.text = due.note ?? '';
     selectedDueTypeForm.value = due.dueType ?? DueType.owe;
-    selectedPaymentMethodForm.value = due.paymentMethod;
-    selectedPaymentMethodIconForm.value = due.paymentMethodIcon;
     selectedGiveDate.value = due.giveDate;
     selectedOweDate.value = due.oweDate;
     selectedStatusForm.value = due.status ?? DueStatus.pending;
+
+    // ── FIX: Resolve paymentMethodId → PaymentMethodModel ──
+    if (due.paymentMethodId != null) {
+      selectedPaymentMethodObj.value = paymentMethods.firstWhereOrNull(
+            (m) => m.id == due.paymentMethodId,
+      );
+    } else {
+      // Fallback: try matching by name for legacy data without paymentMethodId
+      selectedPaymentMethodObj.value = paymentMethods.firstWhereOrNull(
+            (m) => m.pName == due.paymentMethod,
+      );
+    }
   }
 
   void cancelEditing() {
@@ -342,34 +366,26 @@ class DuesTrackerController extends GetxController {
     amountController.clear();
     noteController.clear();
     selectedDueTypeForm.value = DueType.owe;
-    selectedPaymentMethodForm.value = null;
-    selectedPaymentMethodIconForm.value = null;
+    selectedPaymentMethodObj.value = null;
     selectedGiveDate.value = null;
     selectedOweDate.value = null;
     selectedStatusForm.value = DueStatus.pending;
   }
 
-  void onPaymentMethodSelected(String? methodName) {
-    selectedPaymentMethodForm.value = methodName;
-    if (methodName != null) {
-      final method = paymentMethods.firstWhereOrNull((m) =>
-      m.pName == methodName);
-      selectedPaymentMethodIconForm.value = method?.pIcon;
-    } else {
-      selectedPaymentMethodIconForm.value = null;
-    }
+  // ── NEW: Takes the full PaymentMethodModel object ──
+  void onPaymentMethodSelected(PaymentMethodModel? method) {
+    selectedPaymentMethodObj.value = method;
   }
 
+  // ── Helper: get the selected payment method ID ──
+  String? get selectedPaymentMethodId => selectedPaymentMethodObj.value?.id;
+
   Future<void> saveDue() async {
-    if (customerNameController.text
-        .trim()
-        .isEmpty) {
+    if (customerNameController.text.trim().isEmpty) {
       ShowToastDialog.showError('Customer name is required');
       return;
     }
-    if (amountController.text
-        .trim()
-        .isEmpty) {
+    if (amountController.text.trim().isEmpty) {
       ShowToastDialog.showError('Amount is required');
       return;
     }
@@ -378,22 +394,23 @@ class DuesTrackerController extends GetxController {
       ShowToastDialog.showError('Please enter a valid amount');
       return;
     }
-    if (selectedPaymentMethodForm.value == null ||
-        selectedPaymentMethodForm.value!.isEmpty) {
+    if (selectedPaymentMethodObj.value == null) {
       ShowToastDialog.showError('Please select a payment method');
       return;
     }
 
     isSaving.value = true;
     try {
+      final pm = selectedPaymentMethodObj.value!;
       final due = DuesTrackerModel(
         id: editingDue.value?.id ?? MahekConstant.getUuid(),
         ownerId: ownerId,
         customerName: customerNameController.text.trim(),
         dueType: selectedDueTypeForm.value,
         amount: amount,
-        paymentMethod: selectedPaymentMethodForm.value,
-        paymentMethodIcon: selectedPaymentMethodIconForm.value,
+        paymentMethod: pm.pName,           // denormalized display name
+        paymentMethodIcon: pm.pIcon,        // denormalized display icon
+        paymentMethodId: pm.id,             // ← KEY: the stable FK
         giveDate: selectedGiveDate.value,
         oweDate: selectedOweDate.value,
         note: noteController.text.trim(),
@@ -440,8 +457,7 @@ class DuesTrackerController extends GetxController {
           ],
         ),
         content: Text(
-          'Are you sure you want to delete the due for "${due
-              .customerName}"? This action cannot be undone.',
+          'Are you sure you want to delete the due for "${due.customerName}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
@@ -489,6 +505,7 @@ class DuesTrackerController extends GetxController {
       amount: due.amount,
       paymentMethod: due.paymentMethod,
       paymentMethodIcon: due.paymentMethodIcon,
+      paymentMethodId: due.paymentMethodId, // ← include paymentMethodId
       giveDate: due.giveDate,
       oweDate: due.oweDate,
       note: due.note,
@@ -513,13 +530,8 @@ class DuesTrackerController extends GetxController {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme
-                .of(context)
-                .colorScheme
-                .copyWith(
-              primary: Theme
-                  .of(context)
-                  .primaryColor,
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).primaryColor,
             ),
           ),
           child: child!,
@@ -540,13 +552,8 @@ class DuesTrackerController extends GetxController {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme
-                .of(context)
-                .colorScheme
-                .copyWith(
-              primary: Theme
-                  .of(context)
-                  .primaryColor,
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).primaryColor,
             ),
           ),
           child: child!,

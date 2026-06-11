@@ -1,5 +1,4 @@
-import 'dart:html' as html;
-
+// lib/app/modules/dashboard/controllers/dashboard_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/modules/admin_profile/views/admin_profile_view.dart';
@@ -34,6 +33,7 @@ import 'package:solar_icons/solar_icons.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/font_family.dart';
 import '../../../widgets/text_widget.dart';
+import '../../../utils/web_history.dart'; // ✅ REPLACED dart:html
 import '../../payement_method/controllers/payement_method_controller.dart';
 import '../views/dashboard_home_view.dart';
 
@@ -81,7 +81,7 @@ class DashboardController extends GetxController {
           icon: Icons.category_outlined,
           selectedIcon: Icons.category_rounded,
           route: Routes.CATEGORIES,
-            svgIcon: 'assets/icons/ic_categories.svg',
+          svgIcon: 'assets/icons/ic_categories.svg',
         ),
         NavigationItem(
           title: 'My Purchases'.tr,
@@ -111,7 +111,6 @@ class DashboardController extends GetxController {
           route: Routes.DUES_TRACKER,
           svgIcon: 'assets/icons/ic_dues.svg',
         ),
-
       ],
     ),
     NavigationSection(
@@ -138,7 +137,6 @@ class DashboardController extends GetxController {
         ),
       ],
     ),
-
 
     NavigationSection(
       title: 'SETTINGS'.tr,
@@ -188,7 +186,8 @@ class DashboardController extends GetxController {
 
     syncIndexFromRoute();
 
-    html.window.onPopState.listen((event) {
+    // ✅ Safe on all platforms — returns empty stream on Android/iOS
+    WebHistory.onPopState.listen((_) {
       print('🔙 PopState event detected');
       syncIndexFromRoute();
     });
@@ -235,7 +234,7 @@ class DashboardController extends GetxController {
   void goToProfile() {
     if (selectedIndex.value == -1) return;
     selectedIndex.value = -1;
-    html.window.history.pushState(null, '', profileRoute);
+    WebHistory.pushState(profileRoute); // ✅ Safe on all platforms
   }
 
   void changePage(int index) {
@@ -246,7 +245,7 @@ class DashboardController extends GetxController {
       final items = allItems;
       if (index >= 0 && index < items.length) {
         String route = items[index].route;
-        html.window.history.pushState(null, '', route);
+        WebHistory.pushState(route); // ✅ Safe on all platforms
         print('✅ Navigated to: $route');
       }
     } else {
@@ -272,7 +271,7 @@ class DashboardController extends GetxController {
 
   /// Set selected index based on current browser URL
   void syncIndexFromRoute() {
-    String currentPath = html.window.location.pathname ?? '';
+    String currentPath = WebHistory.getPathname(); // ✅ Safe on all platforms (returns '' on mobile)
 
     // Check for profile route
     if (currentPath.contains(profileRoute) || currentPath.endsWith(profileRoute)) {
@@ -316,6 +315,7 @@ class DashboardController extends GetxController {
     print('⚠️ No route match found for: "$currentPath"');
 
     // Only default to dashboard if we're at the root dashboard URL
+    // On Android, getPathname() returns '' — this ensures we default to dashboard
     if (currentPath == '/' || currentPath == '/dashboard' || currentPath.isEmpty) {
       if (selectedIndex.value != 0) {
         selectedIndex.value = 0;
@@ -404,7 +404,7 @@ class DashboardController extends GetxController {
           print('📦 Registered SentinelController');
         }
         return const SentinelView();
-      case Routes.VAULT:                                 // ← NEW
+      case Routes.VAULT:
         if (!Get.isRegistered<VaultController>()) {
           Get.put(VaultController());
           print('📦 Registered VaultController');

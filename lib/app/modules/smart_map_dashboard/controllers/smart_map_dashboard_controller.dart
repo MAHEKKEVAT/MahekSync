@@ -35,7 +35,8 @@ class SmartMapDashboardController extends GetxController {
   final selectedTabIndex = 0.obs;
 
   GoogleMapController? _mapController;
-  final mapKeyCounter = 0.obs;
+  final mapKeyCounter = 0.obs; // increments on theme change to force rebuild
+
   final isDarkMode = false.obs;
 
   static const String darkMapStyle = r'''
@@ -443,21 +444,28 @@ class SmartMapDashboardController extends GetxController {
   }
 
   Future<void> searchPlace(String query) async {
-    try {
-      final locations = await locationFromAddress(query);
-
+    final q = query.trim();
+    searchQuery.value = q;
+    if (q.isEmpty) {
       searchResults.clear();
-
+      return;
+    }
+    isSearching.value = true;
+    try {
+      final locations = await locationFromAddress(q);
+      searchResults.clear();
       for (final item in locations) {
         searchResults.add({
           "lat": item.latitude,
           "lng": item.longitude,
-          "address": query,
+          "address": q,
         });
       }
     } catch (e) {
-      print("SEARCH ERROR => $e");
+      debugPrint("SEARCH ERROR => $e");
       searchResults.clear();
+    } finally {
+      isSearching.value = false;
     }
   }
 

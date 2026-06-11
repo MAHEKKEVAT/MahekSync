@@ -9,10 +9,11 @@ Here’s your **updated `mahek.md` (clean + improved + copy-friendly + pro versi
 ```bash
 flutter pub get
 flutter run
+flutter pub get | flutter clean | flutter pub get
 ```
 
 ---
-
+``
 ## 🔄 Daily Git Workflow
 
 ### 👉 Start Work (IMPORTANT)

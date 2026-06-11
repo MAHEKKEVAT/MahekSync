@@ -36,8 +36,8 @@ class DashboardFloatingPainter extends CustomPainter {
 
     final gridPaint = Paint()..color = AppThemeData.neonBlue.withValues(alpha: 0.015) ..strokeWidth = 0.5;
     const spacing = 60.0;
-    for (double x = 0; x < size.width; x += spacing) canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
-    for (double y = 0; y < size.height; y += spacing) canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    for (double x = 0; x < size.width; x += spacing) { canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint); }
+    for (double y = 0; y < size.height; y += spacing) { canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint); }
   }
 
   @override
@@ -100,8 +100,6 @@ class AnimatedGlassCard extends StatefulWidget {
 
 class _AnimatedGlassCardState extends State<AnimatedGlassCard> with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-  bool _isPressed = false;
-
   @override
   void initState() {
     super.initState();
@@ -118,13 +116,10 @@ class _AnimatedGlassCardState extends State<AnimatedGlassCard> with SingleTicker
       onEnter: (_) => _ctrl.forward(),
       onExit: (_) => _ctrl.reverse(),
       child: GestureDetector(
-        onTapDown: (_) { _isPressed = true; _ctrl.reverse(); },
-        onTapUp: (_) { _isPressed = false; _ctrl.forward(); },
-        onTapCancel: () { _isPressed = false; _ctrl.forward(); },
         onTap: widget.onTap,
         child: AnimatedBuilder(
           animation: _ctrl,
-          builder: (_, __) => Transform.scale(
+          builder: (_, _) => Transform.scale(
             scale: _ctrl.value,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(widget.radius),
@@ -133,9 +128,9 @@ class _AnimatedGlassCardState extends State<AnimatedGlassCard> with SingleTicker
                 child: Container(
                   padding: widget.padding ?? const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: (isDark ? AppThemeData.surfaceDeep : Colors.white).withOpacity(isDark ? 0.65 : 0.85),
+                    color: (isDark ? AppThemeData.surfaceDeep : Colors.white).withValues(alpha: isDark ? 0.65 : 0.85),
                     borderRadius: BorderRadius.circular(widget.radius),
-                    border: Border.all(color: widget.borderColor ?? (isDark ? AppThemeData.primary50 : AppThemeData.grey3).withOpacity(0.25), width: 1),
+                    border: Border.all(color: widget.borderColor ?? (isDark ? AppThemeData.primary50 : AppThemeData.grey3).withValues(alpha: 0.25), width: 1),
                     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04), blurRadius: 16, offset: const Offset(0, 6))],
                   ),
                   child: widget.child,
@@ -167,42 +162,42 @@ class AnimatedMetricCard extends StatelessWidget {
     return StaggeredFadeSlide(
       index: 2,
       child: AnimatedGlassCard(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: accentColor.withValues(alpha: 0.25)),
-                  ),
-                  child: Icon(icon, size: 22, color: accentColor),
+        onTap: onTap,child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: accentColor.withValues(alpha: 0.25)),
                 ),
-                const Spacer(),
-                if (subtitle != null)
-                  TextCustom(title: subtitle!, fontSize: 11, fontFamily: FontFamily.medium, color: accentColor.withValues(alpha: 0.8)),
-              ],
-            ),
-            const Spacer(),
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: value.toDouble()),
-              duration: const Duration(milliseconds: 1000),
-              curve: Curves.easeOutQuart,
-              builder: (_, v, __) => TextCustom(
-                title: v >= 1000 ? '${(v/1000).toStringAsFixed(1)}K' : v.toInt().toString(),
-                fontSize: 26,
-                fontFamily: FontFamily.bold,
-                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                child: Icon(icon, size: 22, color: accentColor),
               ),
+              const Spacer(),
+              if (subtitle != null)
+                TextCustom(title: subtitle!, fontSize: 11, fontFamily: FontFamily.medium, color: accentColor.withValues(alpha: 0.8)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: value.toDouble()),
+            duration: const Duration(milliseconds: 1000),
+            curve: Curves.easeOutQuart,
+            builder: (_, v, _) => TextCustom(
+              title: v >= 1000 ? '${(v/1000).toStringAsFixed(1)}K' : v.toInt().toString(),
+              fontSize: 26,
+              fontFamily: FontFamily.bold,
+              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
             ),
-            const SizedBox(height: 6),
-            TextCustom(title: label, fontSize: 13, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey4 : AppThemeData.grey6),
-          ],
-        ),
+          ),
+          const SizedBox(height: 6),
+          TextCustom(title: label, fontSize: 13, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey4 : AppThemeData.grey6),
+        ],
+      ),
       ),
     );
   }
@@ -222,13 +217,154 @@ class QuickActionChip extends StatefulWidget {
   State<QuickActionChip> createState() => _QuickActionChipState();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION HEADER
+// ─────────────────────────────────────────────────────────────────────────────
+class SectionHeader extends StatelessWidget {
+  final String title;
+  final IconData? icon;
+  final Color? iconColor;
+  final Widget? trailing;
+  const SectionHeader({super.key, required this.title, this.icon, this.iconColor, this.trailing});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      children: [
+        if (icon != null) ...[
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: (iconColor ?? AppThemeData.primary50).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(icon, size: 16, color: iconColor ?? AppThemeData.primary50),
+          ),
+          spaceW(width: 10),
+        ],
+        TextCustom(title: title, fontSize: 17, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+        if (trailing != null) trailing!,
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHART LEGEND
+// ─────────────────────────────────────────────────────────────────────────────
+class ChartLegend extends StatelessWidget {
+  final List<LegendEntry> entries;
+  const ChartLegend({super.key, required this.entries});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 14,
+      runSpacing: 6,
+      children: entries.map((e) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 8, height: 8, decoration: BoxDecoration(color: e.color, shape: BoxShape.circle)),
+          spaceW(width: 5),
+          TextCustom(title: e.label, fontSize: 11, fontFamily: FontFamily.medium, color: e.color.withValues(alpha: 0.85)),
+        ],
+      )).toList(),
+    );
+  }
+}
+
+class LegendEntry {
+  final String label;
+  final Color color;
+  const LegendEntry(this.label, this.color);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INSIGHT CARD
+// ─────────────────────────────────────────────────────────────────────────────
+class InsightCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color accentColor;
+  final String actionLabel;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+  const InsightCard({
+    super.key,
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.accentColor,
+    this.actionLabel = 'View',
+    this.onTap,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.grey9 : AppThemeData.primaryWhite,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: accentColor.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(icon, size: 20, color: accentColor),
+          ),
+          spaceW(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextCustom(title: title, fontSize: 13, fontFamily: FontFamily.semiBold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+                spaceH(height: 2),
+                TextCustom(title: description, fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, maxLine: 1),
+              ],
+            ),
+          ),
+          if (trailing != null) trailing!,
+          if (onTap != null)
+            GestureDetector(
+              onTap: onTap,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(color: accentColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+                child: TextCustom(title: actionLabel, fontSize: 11, fontFamily: FontFamily.semiBold, color: accentColor),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _QuickActionChipState extends State<QuickActionChip> {
   bool _isHovered = false;
+
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
