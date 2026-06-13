@@ -91,15 +91,15 @@ class _DashboardStatCardState extends State<DashboardStatCard>
             borderRadius: BorderRadius.circular(20),
             border: _isHovered
                 ? Border.all(
-                    color: widget.accentColor.withOpacity(0.15),
+                    color: widget.accentColor.withValues(alpha: 0.15),
                     width: 1,
                   )
                 : null,
             boxShadow: [
               BoxShadow(
                 color: _isHovered
-                    ? widget.accentColor.withOpacity(0.08)
-                    : Colors.black.withOpacity(widget.isDark ? 0.12 : 0.03),
+                    ? widget.accentColor.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: widget.isDark ? 0.12 : 0.03),
                 blurRadius: _isHovered ? 20 : 10,
                 offset: const Offset(0, 4),
               ),
@@ -122,7 +122,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
       child: Icon(
         widget.icon,
         size: 80,
-        color: widget.accentColor.withOpacity(0.06),
+        color: widget.accentColor.withValues(alpha: 0.06),
       ),
     );
   }
@@ -159,11 +159,11 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                           imageUrl: images[0]!,
                           fit: BoxFit.cover,
                           placeholder: (_, __) => Container(
-                            color: widget.accentColor.withOpacity(0.08),
+                            color: widget.accentColor.withValues(alpha: 0.08),
                           ),
                           errorWidget: (_, __, ___) => Container(
-                            color: widget.accentColor.withOpacity(0.08),
-                            child: Icon(widget.icon, color: widget.accentColor.withOpacity(0.3), size: 28),
+                            color: widget.accentColor.withValues(alpha: 0.08),
+                            child: Icon(widget.icon, color: widget.accentColor.withValues(alpha: 0.3), size: 28),
                           ),
                         ),
                       ),
@@ -183,13 +183,13 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                   color: widget.isDark
-                                      ? AppThemeData.surfaceBorder.withOpacity(0.5)
+                                      ? AppThemeData.surfaceBorder.withValues(alpha: 0.5)
                                       : Colors.white,
                                   width: 2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
+                                    color: Colors.black.withValues(alpha: 0.2),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
@@ -201,18 +201,18 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                                   imageUrl: images[i]!,
                                   fit: BoxFit.cover,
                                   placeholder: (_, __) => Container(
-                                    color: widget.accentColor.withOpacity(0.12),
+                                    color: widget.accentColor.withValues(alpha: 0.12),
                                     child: Icon(
                                       widget.icon,
-                                      color: widget.accentColor.withOpacity(0.5),
+                                      color: widget.accentColor.withValues(alpha: 0.5),
                                       size: 18,
                                     ),
                                   ),
                                   errorWidget: (_, __, ___) => Container(
-                                    color: widget.accentColor.withOpacity(0.12),
+                                    color: widget.accentColor.withValues(alpha: 0.12),
                                     child: Icon(
                                       widget.icon,
-                                      color: widget.accentColor.withOpacity(0.5),
+                                      color: widget.accentColor.withValues(alpha: 0.5),
                                       size: 18,
                                     ),
                                   ),
@@ -231,8 +231,8 @@ class _DashboardStatCardState extends State<DashboardStatCard>
             Container(
               width: 1,
               color: widget.isDark
-                  ? AppThemeData.surfaceBorder.withOpacity(0.2)
-                  : AppThemeData.grey3.withOpacity(0.6),
+                  ? AppThemeData.surfaceBorder.withValues(alpha: 0.2)
+                  : AppThemeData.grey3.withValues(alpha: 0.6),
             ),
 
             // ── Right: Content ────────────────────
@@ -261,7 +261,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: widget.accentColor.withOpacity(0.08),
+                                color: widget.accentColor.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(7),
                               ),
                               child: Row(
@@ -323,7 +323,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: widget.accentColor.withOpacity(0.1),
+                              color: widget.accentColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: Text(
@@ -350,8 +350,8 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                             decoration: BoxDecoration(
                               color: widget.isDark
-                                  ? AppThemeData.surfaceMid.withOpacity(0.5)
-                                  : AppThemeData.grey3.withOpacity(0.6),
+                                  ? AppThemeData.surfaceMid.withValues(alpha: 0.5)
+                                  : AppThemeData.grey3.withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: Text(
@@ -414,7 +414,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: widget.accentColor.withOpacity(0.08),
+                          color: widget.accentColor.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(7),
                         ),
                         child: Row(
@@ -472,7 +472,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: widget.accentColor.withOpacity(0.1),
+                        color: widget.accentColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -499,7 +499,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
                         color: widget.isDark
-                            ? AppThemeData.surfaceMid.withOpacity(0.5)
+                            ? AppThemeData.surfaceMid.withValues(alpha: 0.5)
                             : AppThemeData.grey3,
                         borderRadius: BorderRadius.circular(5),
                       ),

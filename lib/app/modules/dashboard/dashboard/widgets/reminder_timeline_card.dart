@@ -29,15 +29,20 @@ class ReminderTimelineCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+              : AppThemeData.grey3.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppThemeData.neonOrange.withOpacity(0.03),
+            color: AppThemeData.neonOrange.withValues(alpha: 0.03),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
           if (!isDark)
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -52,7 +57,7 @@ class ReminderTimelineCard extends StatelessWidget {
             child: Icon(
               Icons.event_note_rounded,
               size: 90,
-              color: AppThemeData.neonOrange.withOpacity(0.04),
+              color: AppThemeData.neonOrange.withValues(alpha: 0.04),
             ),
           ),
 
@@ -71,7 +76,7 @@ class ReminderTimelineCard extends StatelessWidget {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: AppThemeData.neonOrange.withOpacity(0.1),
+                          color: AppThemeData.neonOrange.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -207,10 +212,10 @@ class _TimelineItem extends StatelessWidget {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            item.chipColor.withOpacity(0.3),
+                            item.chipColor.withValues(alpha: 0.3),
                             isDark
-                                ? AppThemeData.surfaceBorder.withOpacity(0.1)
-                                : AppThemeData.grey4.withOpacity(0.15),
+                                ? AppThemeData.surfaceBorder.withValues(alpha: 0.1)
+                                : AppThemeData.grey4.withValues(alpha: 0.15),
                           ],
                         ),
                       ),
@@ -229,8 +234,8 @@ class _TimelineItem extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? AppThemeData.surfaceElevated.withOpacity(0.35)
-                      : AppThemeData.grey2.withOpacity(0.7),
+                      ? AppThemeData.surfaceElevated.withValues(alpha: 0.35)
+                      : AppThemeData.grey2.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -306,7 +311,7 @@ class _CategoryChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(5),
       ),
       child: Text(

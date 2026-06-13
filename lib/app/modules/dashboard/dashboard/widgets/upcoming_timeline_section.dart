@@ -1,13 +1,5 @@
-// lib/app/modules/dashboard/widgets/upcoming_timeline_section.dart
-// ──────────────────────────────────────────────────────────────
-//  Totally redesigned Upcoming Reminders & Dues timeline
-//  Modern glass card style with gradient icons, bordered cards,
-//  neon glow dots, and category chips
-// ──────────────────────────────────────────────────────────────
 import 'package:flutter/material.dart';
 import 'package:maheksync/app/models/dues_tracker_model.dart';
-import 'package:maheksync/app/models/reminder_model.dart';
-import 'package:maheksync/app/models/personal_task_model.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
@@ -30,17 +22,15 @@ class UpcomingTimelineSection extends StatelessWidget {
     final items = _buildTimeline();
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppThemeData.neonOrange.withOpacity(0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.12)
+              : AppThemeData.grey3.withValues(alpha: 0.4),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,29 +43,22 @@ class UpcomingTimelineSection extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          AppThemeData.neonOrange,
-                          const Color(0xFFF97316)
-                        ],
+                        colors: [AppThemeData.neonOrange, const Color(0xFFF97316)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(11),
-                      boxShadow: AppThemeData.neonGlow(
-                          AppThemeData.neonOrange,
-                          blur: 10,
-                          opacity: 0.12),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.schedule_rounded,
-                        size: 17, color: Colors.white),
+                        size: 18, color: Colors.white),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   TextCustom(
-                    title: 'Upcoming',
+                    title: 'Upcoming Timeline',
                     fontSize: 17,
                     fontFamily: FontFamily.bold,
                     color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
@@ -87,32 +70,31 @@ class UpcomingTimelineSection extends StatelessWidget {
                   onTap: onViewAll,
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
-                      color: AppThemeData.neonOrange.withOpacity(0.08),
+                      color: isDark
+                          ? AppThemeData.surfaceElevated.withValues(alpha: 0.5)
+                          : AppThemeData.grey2,
                       borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark
+                            ? AppThemeData.surfaceBorder.withValues(alpha: 0.2)
+                            : AppThemeData.grey3.withValues(alpha: 0.4),
+                      ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'View All',
-                          style: TextStyle(
-                            fontFamily: FontFamily.medium,
-                            fontSize: 11,
-                            color: AppThemeData.neonOrange,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_rounded,
-                            size: 14, color: AppThemeData.neonOrange),
-                      ],
+                    child: Text(
+                      'View Calendar',
+                      style: TextStyle(
+                        fontFamily: FontFamily.medium,
+                        fontSize: 11,
+                        color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
+                      ),
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
           if (items.isEmpty)
             _EmptyTimeline(isDark: isDark)
@@ -121,12 +103,32 @@ class UpcomingTimelineSection extends StatelessWidget {
               final idx = entry.key;
               final item = entry.value;
               final isLast = idx >= 5 || idx == items.length - 1;
-              return _TimelineCard(
-                item: item,
-                isDark: isDark,
-                isLast: isLast,
-              );
+              return _TimelineCard(item: item, isDark: isDark, isLast: isLast);
             }),
+
+          // View full timeline
+          if (items.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: onViewAll,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'View Full Timeline',
+                    style: TextStyle(
+                      fontFamily: FontFamily.medium,
+                      fontSize: 12,
+                      color: AppThemeData.neonPurple,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.arrow_forward_rounded,
+                      size: 14, color: AppThemeData.neonPurple),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -138,10 +140,11 @@ class UpcomingTimelineSection extends StatelessWidget {
     for (final r in controller.latestReminders) {
       items.add(_TimelineItem(
         title: r.name ?? 'Reminder',
-        category: 'Reminder',
-        categoryColor: AppThemeData.neonOrange,
+        subtitle: r.importance ?? 'Normal',
         date: r.formattedExpiryDate,
-        detail: r.importance ?? '',
+        time: _formatTime(r.expiryDate),
+        dateLabel: _formatDateLabel(r.expiryDate),
+        color: AppThemeData.neonOrange,
         icon: Icons.alarm_rounded,
       ));
     }
@@ -149,12 +152,13 @@ class UpcomingTimelineSection extends StatelessWidget {
     for (final d in controller.latestDues) {
       items.add(_TimelineItem(
         title: d.customerName ?? 'Payment',
-        category: d.dueTypeLabel,
-        categoryColor: DueType.isOwe(d.dueType)
+        subtitle: d.shortFormattedAmount,
+        date: d.shortOweDate,
+        time: '--:--',
+        dateLabel: d.shortOweDate,
+        color: DueType.isOwe(d.dueType)
             ? AppThemeData.neonPink
             : AppThemeData.neonMint,
-        date: d.shortOweDate,
-        detail: d.shortFormattedAmount,
         icon: Icons.payment_rounded,
       ));
     }
@@ -162,32 +166,44 @@ class UpcomingTimelineSection extends StatelessWidget {
     for (final t in controller.latestTasks) {
       items.add(_TimelineItem(
         title: t.title ?? 'Task',
-        category: 'Task',
-        categoryColor: AppThemeData.neonPurple,
+        subtitle: t.priorityLabel,
         date: t.formattedDueDate,
-        detail: t.priorityLabel,
+        time: _formatTime(t.dueDate),
+        dateLabel: _formatDateLabel(t.dueDate),
+        color: AppThemeData.neonPurple,
         icon: Icons.task_alt_rounded,
-      ));
-    }
-
-    for (final s in controller.latestSubscriptions) {
-      items.add(_TimelineItem(
-        title: s.name ?? 'Subscription',
-        category: 'Subscription',
-        categoryColor: AppThemeData.neonBlue,
-        date: '',
-        detail: 'Active',
-        icon: Icons.subscriptions_rounded,
       ));
     }
 
     items.sort((a, b) => a.date.compareTo(b.date));
     return items;
   }
+
+  String _formatTime(DateTime? date) {
+    if (date == null) return '--:--';
+    final h = date.hour > 12 ? date.hour - 12 : (date.hour == 0 ? 12 : date.hour);
+    final m = date.minute.toString().padLeft(2, '0');
+    final period = date.hour >= 12 ? 'PM' : 'AM';
+    return '${h.toString().padLeft(2, '0')}:$m $period';
+  }
+
+  String _formatDateLabel(DateTime? date) {
+    if (date == null) return '';
+    final now = DateTime.now();
+    final diff = date.difference(DateTime(now.year, now.month, now.day)).inDays;
+    if (diff == 0) return 'Today';
+    if (diff == 1) return 'Tomorrow';
+    if (diff < 7) return '${date.day} ${_monthName(date.month)}';
+    return '${date.day} ${_monthName(date.month)}';
+  }
+
+  String _monthName(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
+  }
 }
 
-// ─── Timeline Card (modern glass card style) ────────────────
-class _TimelineCard extends StatelessWidget {
+class _TimelineCard extends StatefulWidget {
   final _TimelineItem item;
   final bool isDark;
   final bool isLast;
@@ -199,183 +215,147 @@ class _TimelineCard extends StatelessWidget {
   });
 
   @override
+  State<_TimelineCard> createState() => _TimelineCardState();
+}
+
+class _TimelineCardState extends State<_TimelineCard> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
+    final item = widget.item;
     return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Timeline column
-          SizedBox(
-            width: 44,
-            child: Column(
-              children: [
-                // Dot
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: item.categoryColor,
-                    shape: BoxShape.circle,
-                    boxShadow: AppThemeData.neonGlow(item.categoryColor,
-                        blur: 8, opacity: 0.25),
-                  ),
-                ),
-                // Connector
-                if (!isLast)
-                  Container(
-                    width: 2,
-                    height: 36,
-                    margin: const EdgeInsets.only(top: 4),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          item.categoryColor.withOpacity(0.3),
-                          isDark
-                              ? AppThemeData.surfaceBorder.withOpacity(0.06)
-                              : AppThemeData.grey3.withOpacity(0.1),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(1),
-                    ),
-                  ),
-              ],
+      padding: EdgeInsets.only(bottom: widget.isLast ? 0 : 10),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: _hovered
+                ? (widget.isDark
+                    ? AppThemeData.surfaceElevated
+                    : AppThemeData.grey2)
+                : (widget.isDark
+                    ? AppThemeData.surfaceMid.withValues(alpha: 0.35)
+                    : AppThemeData.grey2.withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: _hovered
+                  ? item.color.withValues(alpha: 0.2)
+                  : widget.isDark
+                      ? AppThemeData.surfaceBorder.withValues(alpha: 0.10)
+                      : AppThemeData.grey3.withValues(alpha: 0.3),
             ),
           ),
-
-          const SizedBox(width: 12),
-
-          // Content Card
-          Expanded(
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppThemeData.surfaceElevated.withOpacity(0.4)
-                    : AppThemeData.grey2.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: item.categoryColor.withOpacity(0.08),
-                  width: 1,
+          child: Row(
+            children: [
+              // Date column
+              SizedBox(
+                width: 60,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.dateLabel,
+                      style: TextStyle(
+                        fontFamily: FontFamily.semiBold,
+                        fontSize: 11,
+                        color: widget.isDark ? AppThemeData.grey3 : AppThemeData.grey8,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      item.date,
+                      style: TextStyle(
+                        fontFamily: FontFamily.regular,
+                        fontSize: 10,
+                        color: widget.isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Row(
+              const SizedBox(width: 12),
+              // Dot + line
+              Column(
                 children: [
-                  // Icon
                   Container(
-                    width: 34,
-                    height: 34,
+                    width: 12,
+                    height: 12,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          item.categoryColor.withOpacity(0.15),
-                          item.categoryColor.withOpacity(0.05)
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(item.icon,
-                        size: 15, color: item.categoryColor),
-                  ),
-                  const SizedBox(width: 10),
-
-                  // Text content
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.title,
-                          style: TextStyle(
-                            fontFamily: FontFamily.semiBold,
-                            fontSize: 12.5,
-                            color: isDark
-                                ? AppThemeData.grey1
-                                : AppThemeData.grey10,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Row(
-                          children: [
-                            // Category chip
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 2),
-                              decoration: BoxDecoration(
-                                color:
-                                    item.categoryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Text(
-                                item.category,
-                                style: TextStyle(
-                                  fontFamily: FontFamily.semiBold,
-                                  fontSize: 8,
-                                  color: item.categoryColor,
-                                ),
-                              ),
-                            ),
-                            if (item.date.isNotEmpty) ...[
-                              const SizedBox(width: 8),
-                              Icon(Icons.access_time_rounded,
-                                  size: 10,
-                                  color: isDark
-                                      ? AppThemeData.grey6
-                                      : AppThemeData.grey5),
-                              const SizedBox(width: 3),
-                              Text(
-                                item.date,
-                                style: TextStyle(
-                                  fontFamily: FontFamily.regular,
-                                  fontSize: 9,
-                                  color: isDark
-                                      ? AppThemeData.grey6
-                                      : AppThemeData.grey5,
-                                ),
-                              ),
-                            ],
-                          ],
+                      color: item.color,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: item.color.withValues(alpha: 0.3),
+                          blurRadius: 6,
                         ),
                       ],
                     ),
                   ),
-
-                  // Amount / priority
-                  if (item.detail.isNotEmpty)
+                  if (!widget.isLast)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                      width: 2,
+                      height: 30,
+                      margin: const EdgeInsets.only(top: 4),
                       decoration: BoxDecoration(
-                        color: item.categoryColor.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        item.detail,
-                        style: TextStyle(
-                          fontFamily: FontFamily.bold,
-                          fontSize: 11,
-                          color: item.categoryColor,
-                        ),
+                        color: item.color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(1),
                       ),
                     ),
                 ],
               ),
-            ),
+              const SizedBox(width: 14),
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: TextStyle(
+                        fontFamily: FontFamily.semiBold,
+                        fontSize: 13,
+                        color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      item.subtitle,
+                      style: TextStyle(
+                        fontFamily: FontFamily.regular,
+                        fontSize: 11,
+                        color: widget.isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Time
+              Text(
+                item.time,
+                style: TextStyle(
+                  fontFamily: FontFamily.medium,
+                  fontSize: 11,
+                  color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-// ─── Empty ──────────────────────────────────────────────────
 class _EmptyTimeline extends StatelessWidget {
   final bool isDark;
   const _EmptyTimeline({required this.isDark});
@@ -383,17 +363,17 @@ class _EmptyTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
+      padding: const EdgeInsets.symmetric(vertical: 28),
       child: Center(
         child: Column(
           children: [
             Icon(Icons.event_available_rounded,
-                size: 32,
+                size: 36,
                 color: isDark ? AppThemeData.grey7 : AppThemeData.grey5),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             TextCustom(
               title: 'Nothing upcoming',
-              fontSize: 12,
+              fontSize: 13,
               fontFamily: FontFamily.regular,
               color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
             ),
@@ -404,21 +384,22 @@ class _EmptyTimeline extends StatelessWidget {
   }
 }
 
-// ─── Data Model ─────────────────────────────────────────────
 class _TimelineItem {
   final String title;
-  final String category;
-  final Color categoryColor;
+  final String subtitle;
   final String date;
-  final String detail;
+  final String time;
+  final String dateLabel;
+  final Color color;
   final IconData icon;
 
   _TimelineItem({
     required this.title,
-    required this.category,
-    required this.categoryColor,
+    required this.subtitle,
     required this.date,
-    required this.detail,
+    required this.time,
+    required this.dateLabel,
+    required this.color,
     required this.icon,
   });
 }

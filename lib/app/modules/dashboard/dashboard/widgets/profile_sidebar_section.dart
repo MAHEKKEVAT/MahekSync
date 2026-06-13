@@ -1,10 +1,12 @@
-// lib/app/modules/dashboard/widgets/profile_sidebar_section.dart
 import 'package:flutter/material.dart';
 import 'package:maheksync/app/constant/constants.dart';
+import 'package:maheksync/app/modules/dashboard/controllers/dashboard_controller.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
+import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
-import 'package:percent_indicator/percent_indicator.dart';
+import 'package:get/get.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 class ProfileSidebarSection extends StatelessWidget {
   final DashboardHomeController controller;
@@ -18,124 +20,440 @@ class ProfileSidebarSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userName = MahekConstant.ownerModel?.fullName ?? 'Mahek Kevat';
-    final securityScore = _calculateSecurityScore();
-
     return Column(
       children: [
-        // ── Profile Card ─────────────────────────────
-        _ProfileCard(userName: userName, isDark: isDark),
-
-        const SizedBox(height: 16),
-
-        // ── Security Score Ring ──────────────────────
-        _SecurityScoreCard(score: securityScore, isDark: isDark),
-
-        const SizedBox(height: 16),
-
-        // ── Quick Stats ──────────────────────────────
-        _QuickStatsCard(controller: controller, isDark: isDark),
-
-        const SizedBox(height: 16),
-
-        // ── Recent Contact ───────────────────────────
-        _RecentContactCard(controller: controller, isDark: isDark),
+        // Need AI Help card
+        _AIHelpCard(isDark: isDark),
+        const SizedBox(height: 14),
+        // Quick Actions grid
+        _QuickActionsGrid(isDark: isDark),
+        const SizedBox(height: 14),
+        // Upgrade to Pro card
+        _UpgradeCard(isDark: isDark),
+        const SizedBox(height: 14),
+        // Profile card
+        _ProfileCard(isDark: isDark),
       ],
     );
   }
-
-  int _calculateSecurityScore() {
-    int score = 0;
-    if (controller.sentinelPasswordSet.value) score += 40;
-    if (!controller.sentinelLocked.value) score += 20;
-    if (controller.deviceCount.value > 0) score += 15;
-    if (controller.vaultCount.value > 0) score += 15;
-    if (controller.contactCount.value > 0) score += 10;
-    return score.clamp(0, 100);
-  }
 }
 
-// ─── Profile Card ─────────────────────────────────────────────
-class _ProfileCard extends StatelessWidget {
-  final String userName;
+class _AIHelpCard extends StatelessWidget {
   final bool isDark;
-
-  const _ProfileCard({required this.userName, required this.isDark});
+  const _AIHelpCard({required this.isDark});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppThemeData.neonPurple.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        gradient: LinearGradient(
+          colors: [
+            AppThemeData.neonPurple.withValues(alpha: 0.12),
+            AppThemeData.neonBlue.withValues(alpha: 0.08),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppThemeData.neonPurple.withValues(alpha: 0.2),
+        ),
       ),
-      child: Column(
+      child: Row(
         children: [
-          // Avatar
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: AppThemeData.neonPurpleBlueGradient,
-              boxShadow: AppThemeData.neonGlow(AppThemeData.neonPurple, blur: 16, opacity: 0.15),
-            ),
-            child: Center(
-              child: Text(
-                _initials(userName),
-                style: const TextStyle(
-                  fontFamily: FontFamily.bold,
-                  fontSize: 24,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            userName,
-            style: TextStyle(
-              fontFamily: FontFamily.bold,
-              fontSize: 16,
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-              letterSpacing: -0.2,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              gradient: AppThemeData.appleIntelligenceGradientCool,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.workspace_premium_rounded, size: 11, color: Colors.white),
-                SizedBox(width: 4),
                 Text(
-                  'Premium',
+                  'Need AI Help?',
                   style: TextStyle(
                     fontFamily: FontFamily.bold,
-                    fontSize: 10,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
+                    fontSize: 15,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Ask anything, I'm here to help!",
+                  style: TextStyle(
+                    fontFamily: FontFamily.regular,
+                    fontSize: 12,
+                    color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
                   ),
                 ),
               ],
             ),
           ),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppThemeData.neonPurple, AppThemeData.neonBlue],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppThemeData.neonPurple.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              SolarIconsBold.magicStick,
+              size: 22,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionsGrid extends StatelessWidget {
+  final bool isDark;
+  const _QuickActionsGrid({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final actions = [
+      _GridAction(
+        icon: SolarIconsBold.checkCircle,
+        label: 'Add Task',
+        color: AppThemeData.neonPurple,
+        route: Routes.PERSONAL_TASKS,
+      ),
+      _GridAction(
+        icon: SolarIconsBold.alarm,
+        label: 'Add Reminder',
+        color: AppThemeData.neonOrange,
+        route: Routes.REMINDER,
+      ),
+      _GridAction(
+        icon: SolarIconsBold.wallet,
+        label: 'Add Expense',
+        color: AppThemeData.danger300,
+        route: Routes.DUES_TRACKER,
+      ),
+      _GridAction(
+        icon: SolarIconsBold.camera,
+        label: 'Scan Document',
+        color: AppThemeData.neonTeal,
+        route: Routes.VAULT,
+      ),
+      _GridAction(
+        icon: SolarIconsBold.user,
+        label: 'New Contact',
+        color: AppThemeData.neonMint,
+        route: Routes.MY_CONTACTS,
+      ),
+      _GridAction(
+        icon: SolarIconsBold.bolt,
+        label: 'Voice Note',
+        color: AppThemeData.neonLavender,
+        route: Routes.VAULT,
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.12)
+              : AppThemeData.grey3.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Quick Actions',
+            style: TextStyle(
+              fontFamily: FontFamily.bold,
+              fontSize: 14,
+              color: isDark ? AppThemeData.grey2 : AppThemeData.grey9,
+            ),
+          ),
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final itemWidth = (constraints.maxWidth - 24) / 3;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: actions.map((action) {
+                  return SizedBox(
+                    width: itemWidth,
+                    child: _ActionTile(action: action, isDark: isDark),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GridAction {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final String route;
+  const _GridAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.route,
+  });
+}
+
+class _ActionTile extends StatelessWidget {
+  final _GridAction action;
+  final bool isDark;
+  const _ActionTile({required this.action, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        try {
+          final dc = Get.find<DashboardController>();
+          dc.navigateToRoute(action.route);
+        } catch (_) {
+          Get.toNamed(action.route);
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark
+              ? AppThemeData.surfaceMid.withValues(alpha: 0.3)
+              : AppThemeData.grey2.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark
+                ? AppThemeData.surfaceBorder.withValues(alpha: 0.10)
+                : AppThemeData.grey3.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: action.color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(action.icon, size: 18, color: action.color),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              action.label,
+              style: TextStyle(
+                fontFamily: FontFamily.medium,
+                fontSize: 10,
+                color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _UpgradeCard extends StatelessWidget {
+  final bool isDark;
+  const _UpgradeCard({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppThemeData.neonPurple.withValues(alpha: 0.15),
+            AppThemeData.neonBlue.withValues(alpha: 0.10),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppThemeData.neonPurple.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppThemeData.neonPurple, AppThemeData.neonBlue],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  size: 15,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Upgrade to Pro',
+                style: TextStyle(
+                  fontFamily: FontFamily.bold,
+                  fontSize: 14,
+                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Unlock advanced features and priority support.',
+            style: TextStyle(
+              fontFamily: FontFamily.regular,
+              fontSize: 11,
+              color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppThemeData.neonPurple, AppThemeData.neonBlue],
+                ),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppThemeData.neonPurple.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Text(
+                  'Upgrade Now',
+                  style: TextStyle(
+                    fontFamily: FontFamily.semiBold,
+                    fontSize: 12,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileCard extends StatelessWidget {
+  final bool isDark;
+  const _ProfileCard({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final userName = MahekConstant.ownerModel?.fullName ?? 'Mahek Kevat';
+    final initials = _initials(userName);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.12)
+              : AppThemeData.grey3.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: AppThemeData.neonPurpleBlueGradient,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppThemeData.neonPurple.withValues(alpha: 0.20),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  fontFamily: FontFamily.bold,
+                  fontSize: 17,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  userName,
+                  style: TextStyle(
+                    fontFamily: FontFamily.bold,
+                    fontSize: 14,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Premium User',
+                  style: TextStyle(
+                    fontFamily: FontFamily.regular,
+                    fontSize: 11,
+                    color: AppThemeData.neonPurple,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded,
+              size: 20,
+              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
         ],
       ),
     );
@@ -146,241 +464,5 @@ class _ProfileCard extends StatelessWidget {
     final parts = name.trim().split(' ');
     if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     return name[0].toUpperCase();
-  }
-}
-
-// ─── Security Score Card ──────────────────────────────────────
-class _SecurityScoreCard extends StatelessWidget {
-  final int score;
-  final bool isDark;
-
-  const _SecurityScoreCard({required this.score, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = score >= 80 ? AppThemeData.neonMint : score >= 50 ? AppThemeData.neonOrange : AppThemeData.neonRed;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: color.withOpacity(0.04), blurRadius: 16, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircularPercentIndicator(
-            radius: 30,
-            lineWidth: 4,
-            percent: score / 100,
-            circularStrokeCap: CircularStrokeCap.round,
-            backgroundColor: isDark ? AppThemeData.surfaceMid : AppThemeData.grey3,
-            linearGradient: AppThemeData.neonPurpleBlueGradient,
-            center: Text(
-              '$score',
-              style: TextStyle(
-                fontFamily: FontFamily.bold,
-                fontSize: 16,
-                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Security Score',
-                  style: TextStyle(
-                    fontFamily: FontFamily.bold,
-                    fontSize: 13,
-                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  score >= 80 ? 'Well protected' : score >= 50 ? 'Needs attention' : 'At risk',
-                  style: TextStyle(
-                    fontFamily: FontFamily.regular,
-                    fontSize: 11,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Quick Stats Card ─────────────────────────────────────────
-class _QuickStatsCard extends StatelessWidget {
-  final DashboardHomeController controller;
-  final bool isDark;
-
-  const _QuickStatsCard({required this.controller, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          _StatRow(icon: Icons.devices_rounded, label: 'Devices', value: controller.deviceCount.value.toString(), color: AppThemeData.neonTeal, isDark: isDark),
-          const SizedBox(height: 10),
-          _StatRow(icon: Icons.lock_rounded, label: 'Vault Items', value: controller.vaultCount.value.toString(), color: AppThemeData.neonPurple, isDark: isDark),
-          const SizedBox(height: 10),
-          _StatRow(icon: Icons.contacts_rounded, label: 'Contacts', value: controller.contactCount.value.toString(), color: AppThemeData.neonOrange, isDark: isDark),
-          const SizedBox(height: 10),
-          _StatRow(icon: Icons.shield_rounded, label: 'Sentinel', value: controller.sentinelPasswordSet.value ? 'Active' : 'Inactive', color: controller.sentinelPasswordSet.value ? AppThemeData.neonMint : AppThemeData.neonRed, isDark: isDark),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-  final bool isDark;
-
-  const _StatRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 13, color: color),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: FontFamily.regular,
-              fontSize: 12,
-              color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontFamily: FontFamily.bold,
-            fontSize: 13,
-            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Recent Contact ───────────────────────────────────────────
-class _RecentContactCard extends StatelessWidget {
-  final DashboardHomeController controller;
-  final bool isDark;
-
-  const _RecentContactCard({required this.controller, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final contacts = controller.latestContacts;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Recent Contacts',
-            style: TextStyle(
-              fontFamily: FontFamily.bold,
-              fontSize: 12,
-              color: isDark ? AppThemeData.grey3 : AppThemeData.grey8,
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (contacts.isEmpty)
-            Center(
-              child: Text(
-                'No contacts',
-                style: TextStyle(
-                  fontFamily: FontFamily.regular,
-                  fontSize: 11,
-                  color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-                ),
-              ),
-            )
-          else
-            ...contacts.take(3).map((c) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: AppThemeData.neonOrange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            c.initials,
-                            style: TextStyle(
-                              fontFamily: FontFamily.bold,
-                              fontSize: 10,
-                              color: AppThemeData.neonOrange,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          c.formattedName,
-                          style: TextStyle(
-                            fontFamily: FontFamily.medium,
-                            fontSize: 11,
-                            color: isDark ? AppThemeData.grey2 : AppThemeData.grey9,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
-        ],
-      ),
-    );
   }
 }

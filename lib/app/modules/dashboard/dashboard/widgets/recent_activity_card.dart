@@ -27,15 +27,20 @@ class RecentActivityCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+              : AppThemeData.grey3.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppThemeData.neonPurple.withOpacity(0.03),
+            color: AppThemeData.neonPurple.withValues(alpha: 0.03),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
           if (!isDark)
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -50,7 +55,7 @@ class RecentActivityCard extends StatelessWidget {
             child: Icon(
               Icons.history_rounded,
               size: 90,
-              color: AppThemeData.neonPurple.withOpacity(0.04),
+              color: AppThemeData.neonPurple.withValues(alpha: 0.04),
             ),
           ),
 
@@ -69,7 +74,7 @@ class RecentActivityCard extends StatelessWidget {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: AppThemeData.neonPurple.withOpacity(0.1),
+                          color: AppThemeData.neonPurple.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -200,7 +205,7 @@ class _ActivityItem extends StatelessWidget {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: activity.accentColor.withOpacity(0.1),
+              color: activity.accentColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(9),
             ),
             child: Icon(

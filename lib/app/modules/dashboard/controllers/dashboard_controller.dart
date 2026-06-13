@@ -34,6 +34,7 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/font_family.dart';
 import '../../../widgets/text_widget.dart';
 import '../../../utils/web_history.dart'; // ✅ REPLACED dart:html
+import '../../../constant/show_toast.dart';
 import '../../payement_method/controllers/payement_method_controller.dart';
 import '../views/dashboard_home_view.dart';
 
@@ -200,7 +201,7 @@ class DashboardController extends GetxController {
 
       bool? exitApp = await showDialog(
         context: context,
-        barrierColor: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(.5),
+        barrierColor: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.5),
         builder: (context) => AlertDialog(
           title: const TextCustom(
             title: 'Exit App',
@@ -238,18 +239,15 @@ class DashboardController extends GetxController {
   }
 
   void changePage(int index) {
-    print('🔄 changePage called with index: $index, current: ${selectedIndex.value}');
-
     if (selectedIndex.value != index) {
       selectedIndex.value = index;
       final items = allItems;
       if (index >= 0 && index < items.length) {
         String route = items[index].route;
-        WebHistory.pushState(route); // ✅ Safe on all platforms
-        print('✅ Navigated to: $route');
+        String title = items[index].title;
+        WebHistory.pushState(route);
+        ShowToastDialog.showSuccess('Navigated to $title');
       }
-    } else {
-      print('⚠️ Same index, no change needed');
     }
   }
 

@@ -97,6 +97,102 @@ class DashboardHomeController extends GetxController {
       overdueTaskCount > 0 ||
       overdueReminderCount > 0;
 
+  // ── Today Focus (for TodayFocusSection) ──────────────────────
+  List<PersonalTaskModel> get overdueTasks =>
+      latestTasks.where((t) => t.isOverdue).toList();
+
+  List<DuesTrackerModel> get expiringDues {
+    final now = DateTime.now();
+    final in7Days = now.add(const Duration(days: 7));
+    return latestDues.where((d) =>
+        !DueStatus.isSettled(d.status) &&
+        d.oweDate != null &&
+        d.oweDate!.isBefore(in7Days)).toList();
+  }
+
+  List<ReminderModel> get urgentReminders =>
+      latestReminders.where((r) => r.importance == 'HIGH' || (r.isExpired)).toList();
+
+  bool get hasTodayFocus =>
+      overdueTasks.isNotEmpty || expiringDues.isNotEmpty || urgentReminders.isNotEmpty;
+
+  String get todayFocusSummary {
+    final parts = <String>[];
+    if (overdueTasks.isNotEmpty) parts.add('${overdueTasks.length} task overdue');
+    if (expiringDues.isNotEmpty) parts.add('${expiringDues.length} due pending');
+    if (urgentReminders.isNotEmpty) parts.add('${urgentReminders.length} reminder');
+    return parts.isEmpty ? 'All clear for today!' : parts.join(', ');
+  }
+
+  // ── Life Overview (for LifeOverviewSection) ──────────────────
+  int get pendingTasks => latestTasks.where((t) => !(t.isCompleted ?? false)).length;
+
+  double get totalOweAmount =>
+      latestDues.where((d) => d.dueType == DueType.owe && d.amount != null).fold(0.0, (sum, d) => sum + d.amount!);
+
+  double get totalOwedToMe =>
+      latestDues.where((d) => d.dueType == DueType.take && d.amount != null).fold(0.0, (sum, d) => sum + d.amount!);
+
+  String get totalOweFormatted {
+    if (totalOweAmount >= 100000) return '\u20B9${(totalOweAmount / 100000).toStringAsFixed(1)}L';
+    if (totalOweAmount >= 1000) return '\u20B9${(totalOweAmount / 1000).toStringAsFixed(1)}K';
+    return '\u20B9${totalOweAmount.toStringAsFixed(0)}';
+  }
+
+  String get totalOwedFormatted {
+    if (totalOwedToMe >= 100000) return '\u20B9${(totalOwedToMe / 100000).toStringAsFixed(1)}L';
+    if (totalOwedToMe >= 1000) return '\u20B9${(totalOwedToMe / 1000).toStringAsFixed(1)}K';
+    return '\u20B9${totalOwedToMe.toStringAsFixed(0)}';
+  }
+
+  // ── Financial Snapshot (for FinancialSnapshotCard) ──────────
+  String get monthlyPurchaseTotal {
+    final now = DateTime.now();
+    final monthPurchases = latestPurchases.where((p) =>
+        p.purchaseDate != null &&
+        p.purchaseDate!.month == now.month &&
+        p.purchaseDate!.year == now.year);
+    final total = monthPurchases.fold<double>(0, (sum, p) => sum + (p.price ?? 0));
+    if (total >= 100000) return '\u20B9${(total / 100000).toStringAsFixed(1)}L';
+    if (total >= 1000) return '\u20B9${(total / 1000).toStringAsFixed(1)}K';
+    return '\u20B9${total.toStringAsFixed(0)}';
+  }
+
+  String get monthlyDueTotal {
+    final now = DateTime.now();
+    final monthDues = latestDues.where((d) =>
+        !DueStatus.isSettled(d.status) &&
+        d.oweDate != null &&
+        d.oweDate!.month == now.month &&
+        d.oweDate!.year == now.year);
+    final total = monthDues.fold<double>(0, (sum, d) => sum + (d.amount ?? 0));
+    if (total >= 100000) return '\u20B9${(total / 100000).toStringAsFixed(1)}L';
+    if (total >= 1000) return '\u20B9${(total / 1000).toStringAsFixed(1)}K';
+    return '\u20B9${total.toStringAsFixed(0)}';
+  }
+
+  // ── Security Score (computed once, for SecurityStatusCard) ──
+  int get securityScore {
+    int score = 0;
+    if (sentinelPasswordSet.value) score += 40;
+    if (!sentinelLocked.value) score += 30;
+    if (deviceCount.value > 0) score += 10;
+    if (vaultCount.value > 0) score += 10;
+    if (contactCount.value > 0) score += 10;
+    return score.clamp(0, 100);
+  }
+
+  bool get isSecurityGood => securityScore >= 70;
+
+  List<String> get securityTips {
+    final tips = <String>[];
+    if (!sentinelPasswordSet.value) tips.add('Set up Sentinel password');
+    if (sentinelLocked.value) tips.add('Unlock Sentinel access');
+    if (deviceCount.value == 0) tips.add('Add your first device');
+    if (vaultCount.value == 0) tips.add('Secure a vault item');
+    return tips;
+  }
+
   List<String> get activeModuleLabels {
     final labels = <String>[];
     if (deviceCount.value > 0) labels.add('Devices');

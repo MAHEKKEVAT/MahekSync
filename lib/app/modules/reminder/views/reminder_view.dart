@@ -1,8 +1,8 @@
-// lib/app/modules/reminder/views/reminder_view.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
@@ -23,264 +23,498 @@ class ReminderView extends GetView<ReminderController> {
         if (controller.isLoading.value) {
           return Center(
             child: MahekLoader(
-              showBackgroundOverlay: true,
-              message: 'Loading Reminders... ',
+              message: 'Loading Reminders...',
+              size: 50,
+              textSize: 16,
             ),
           );
         }
-        return _buildContent(isDark);
+        return _buildContent(isDark, context);
       }),
     );
   }
 
-  Widget _buildContent(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
+  Widget _buildContent(bool isDark, BuildContext context) {
+    final isMobile = context.isMobile;
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(isDark),
-          spaceH(height: 16),
-          _buildStatsRow(isDark),
-          spaceH(height: 16),
-          _buildSearchAndFilters(isDark),
-          spaceH(height: 16),
-          Expanded(child: _buildRemindersContent(isDark)),
+          _buildHeader(isDark, context),
+          spaceH(height: isMobile ? 16 : 24),
+          _buildStatsRow(isDark, context),
+          spaceH(height: isMobile ? 16 : 20),
+          _buildSectionHeader(isDark, context),
+          spaceH(height: isMobile ? 12 : 16),
+          _buildRemindersContent(isDark, context),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(bool isDark) {
+  Widget _buildHeader(bool isDark, BuildContext context) {
+    final isMobile = context.isMobile;
+
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppThemeData.primary50, AppThemeData.primary4],
+        Container(
+          width: isMobile ? 44 : 50,
+          height: isMobile ? 44 : 50,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppThemeData.neonOrange, AppThemeData.neonPink],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppThemeData.neonOrange.withValues(alpha: 0.35),
+                blurRadius: 14,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.alarm_rounded,
+            color: Colors.white,
+            size: isMobile ? 24 : 28,
+          ),
+        ),
+        spaceW(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextCustom(
+                title: 'Reminders',
+                fontSize: isMobile ? 22 : 28,
+                fontFamily: FontFamily.bold,
+                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+              ),
+              spaceH(height: 2),
+              TextCustom(
+                title: 'Stay on top of your tasks',
+                fontSize: 13,
+                fontFamily: FontFamily.regular,
+                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+              ),
+            ],
+          ),
+        ),
+        GestureDetector(
+          onTap: controller.goToAdd,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppThemeData.primary50, AppThemeData.primary4],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppThemeData.primary50.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppThemeData.primary50.withValues(alpha: 0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add_rounded, color: Colors.white, size: 18),
+                if (!isMobile) ...[
+                  spaceW(width: 6),
+                  TextCustom(
+                    title: 'Add Reminder',
+                    fontSize: 13,
+                    fontFamily: FontFamily.semiBold,
+                    color: Colors.white,
                   ),
                 ],
-              ),
-              child: const Icon(
-                Icons.alarm_rounded,
-                color: Colors.white,
-                size: 26,
-              ),
+              ],
             ),
-            spaceW(width: 14),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsRow(bool isDark, BuildContext context) {
+    final isMobile = context.isMobile;
+
+    return Obx(() {
+      final stats = [
+        _StatData(
+          icon: Icons.alarm_on_rounded,
+          label: 'Active',
+          value: '${controller.activeCount}',
+          color: AppThemeData.success400,
+        ),
+        _StatData(
+          icon: Icons.priority_high_rounded,
+          label: 'High Priority',
+          value: '${controller.highCount}',
+          color: AppThemeData.danger300,
+        ),
+        _StatData(
+          icon: Icons.event_busy_rounded,
+          label: 'Expired',
+          value: '${controller.expiredCount}',
+          color: AppThemeData.grey5,
+        ),
+        _StatData(
+          icon: Icons.list_rounded,
+          label: 'Total',
+          value: '${controller.reminders.length}',
+          color: AppThemeData.neonTeal,
+        ),
+      ];
+
+      if (isMobile) {
+        return Column(
+          children: [
+            Row(
               children: [
-                TextCustom(
-                  title: 'Reminders',
-                  fontSize: 24,
-                  fontFamily: FontFamily.bold,
-                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                ),
-                TextCustom(
-                  title: 'Stay on top of your tasks',
-                  fontSize: 13,
-                  fontFamily: FontFamily.regular,
-                  color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                ),
+                Expanded(child: _buildStatCard(stats[0], isDark)),
+                spaceW(width: 10),
+                Expanded(child: _buildStatCard(stats[1], isDark)),
+              ],
+            ),
+            spaceH(height: 10),
+            Row(
+              children: [
+                Expanded(child: _buildStatCard(stats[2], isDark)),
+                spaceW(width: 10),
+                Expanded(child: _buildStatCard(stats[3], isDark)),
               ],
             ),
           ],
-        ),
-        ElevatedButton.icon(
-          onPressed: controller.goToAdd,
-          icon: const Icon(Icons.add_rounded, size: 18),
-          label: const TextCustom(
-            title: 'Add Reminder',
-            fontSize: 13,
-            fontFamily: FontFamily.semiBold,
-            color: Colors.white,
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppThemeData.primary50,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-          ),
-        ),
-      ],
-    );
+        );
+      }
+
+      return Row(
+        children: stats
+            .map((s) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: _buildStatCard(s, isDark),
+                  ),
+                ))
+            .toList(),
+      );
+    });
   }
 
-  Widget _buildStatsRow(bool isDark) {
-    return Obx(
-      () => Row(
-        children: [
-          _buildStatChip(
-            'Active',
-            '${controller.activeCount}',
-            AppThemeData.success400,
-            isDark,
-          ),
-          spaceW(width: 10),
-          _buildStatChip(
-            'High Priority',
-            '${controller.highCount}',
-            AppThemeData.danger300,
-            isDark,
-          ),
-          spaceW(width: 10),
-          _buildStatChip(
-            'Expired',
-            '${controller.expiredCount}',
-            AppThemeData.grey5,
-            isDark,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatChip(String label, String value, Color color, bool isDark) {
+  Widget _buildStatCard(_StatData stat, bool isDark) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+              : AppThemeData.grey3,
+        ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          TextCustom(
-            title: value,
-            fontSize: 16,
-            fontFamily: FontFamily.bold,
-            color: color,
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: stat.color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(stat.icon, size: 18, color: stat.color),
           ),
-          spaceW(width: 6),
-          TextCustom(
-            title: label,
-            fontSize: 11,
-            fontFamily: FontFamily.medium,
-            color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+          spaceW(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextCustom(
+                title: stat.value,
+                fontSize: 18,
+                fontFamily: FontFamily.bold,
+                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+              ),
+              TextCustom(
+                title: stat.label,
+                fontSize: 10,
+                fontFamily: FontFamily.medium,
+                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchAndFilters(bool isDark) {
+  Widget _buildSectionHeader(bool isDark, BuildContext context) {
+    final isMobile = context.isMobile;
+
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppThemeData.primaryBlack
-                  : AppThemeData.primaryWhite,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+        TextCustom(
+          title: 'All Reminders',
+          fontSize: isMobile ? 18 : 22,
+          fontFamily: FontFamily.bold,
+          color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+        ),
+        Row(
+          children: [
+            _buildImportanceFilter(isDark),
+            spaceW(width: 10),
+            _buildSortDropdown(isDark),
+            spaceW(width: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDark
+                      ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                      : AppThemeData.grey3,
                 ),
-              ],
-              border: Border.all(
-                color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-                width: 0.5,
+              ),
+              child: Row(
+                children: [
+                  _buildViewToggle(
+                    icon: Icons.grid_view_rounded,
+                    isSelected: controller.isGridView.value,
+                    onTap: () => controller.isGridView.value = true,
+                    isDark: isDark,
+                  ),
+                  _buildViewToggle(
+                    icon: Icons.view_list_rounded,
+                    isSelected: !controller.isGridView.value,
+                    onTap: () => controller.isGridView.value = false,
+                    isDark: isDark,
+                  ),
+                ],
               ),
             ),
-            child: TextField(
-              onChanged: controller.updateSearchQuery,
-              style: TextStyle(
-                fontFamily: FontFamily.medium,
-                fontSize: 14,
-                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Search reminders...',
-                hintStyle: TextStyle(
-                  fontFamily: FontFamily.regular,
-                  fontSize: 14,
-                  color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-                ),
-                prefixIcon: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppThemeData.primary50.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.search_rounded,
-                    color: AppThemeData.primary50,
-                    size: 20,
-                  ),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.transparent,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ),
-        ),
-        spaceW(width: 10),
-        _buildViewToggle(
-          Icons.grid_view_rounded,
-          controller.isGridView.value,
-          () => controller.isGridView.value = true,
-          isDark,
-        ),
-        _buildViewToggle(
-          Icons.list_rounded,
-          !controller.isGridView.value,
-          () => controller.isGridView.value = false,
-          isDark,
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildViewToggle(
-    IconData icon,
-    bool isSelected,
-    VoidCallback onTap,
-    bool isDark,
-  ) {
+  Widget _buildImportanceFilter(bool isDark) {
+    return Obx(() {
+      final isFiltered = controller.selectedImportance.value != 'ALL';
+      return GestureDetector(
+        onTap: () => _showImportanceMenu(isDark),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: isFiltered
+                ? AppThemeData.neonOrange.withValues(alpha: 0.1)
+                : (isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isFiltered
+                  ? AppThemeData.neonOrange.withValues(alpha: 0.3)
+                  : (isDark
+                      ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                      : AppThemeData.grey3),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isFiltered)
+                Icon(Icons.filter_alt_rounded, size: 14, color: AppThemeData.neonOrange)
+              else
+                Icon(Icons.filter_list_rounded, size: 14, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+              spaceW(width: 4),
+              Text(
+                controller.selectedImportance.value == 'ALL'
+                    ? 'All'
+                    : controller.selectedImportance.value,
+                style: TextStyle(
+                  fontFamily: FontFamily.medium,
+                  fontSize: 12,
+                  color: isFiltered
+                      ? AppThemeData.neonOrange
+                      : (isDark ? AppThemeData.grey4 : AppThemeData.grey7),
+                ),
+              ),
+              spaceW(width: 2),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 14,
+                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  void _showImportanceMenu(bool isDark) {
+    final RenderBox renderBox = Get.context!.findRenderObject() as RenderBox;
+    final offset = renderBox.localToGlobal(Offset.zero);
+
+    showMenu<String>(
+      context: Get.context!,
+      position: RelativeRect.fromLTRB(
+        offset.dx + renderBox.size.width - 200,
+        offset.dy + 300,
+        offset.dx + renderBox.size.width,
+        offset.dy + 400,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: isDark ? AppThemeData.surfaceElevated : Colors.white,
+      elevation: 8,
+      items: ['ALL', 'HIGH', 'MEDIUM', 'LOW'].map((option) {
+        final isSelected = controller.selectedImportance.value == option;
+        final color = option == 'ALL'
+            ? AppThemeData.grey5
+            : option == 'HIGH'
+                ? AppThemeData.danger300
+                : option == 'MEDIUM'
+                    ? AppThemeData.pending400
+                    : AppThemeData.success400;
+        return PopupMenuItem<String>(
+          value: option,
+          child: Row(
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              spaceW(width: 10),
+              Expanded(
+                child: Text(
+                  option == 'ALL' ? 'All Priorities' : option,
+                  style: TextStyle(
+                    fontFamily: isSelected ? FontFamily.semiBold : FontFamily.medium,
+                    fontSize: 13,
+                    color: isSelected
+                        ? AppThemeData.primary50
+                        : (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+                  ),
+                ),
+              ),
+              if (isSelected)
+                Icon(Icons.check_rounded, size: 16, color: AppThemeData.primary50),
+            ],
+          ),
+        );
+      }).toList(),
+    ).then((value) {
+      if (value != null) controller.filterByImportance(value);
+    });
+  }
+
+  Widget _buildSortDropdown(bool isDark) {
+    return Obx(() => GestureDetector(
+      onTap: () => _showSortMenu(isDark),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isDark
+                ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                : AppThemeData.grey3,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Sort: ${controller.selectedSortOption.value}',
+              style: TextStyle(
+                fontFamily: FontFamily.medium,
+                fontSize: 12,
+                color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+              ),
+            ),
+            spaceW(width: 4),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 14,
+              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+            ),
+          ],
+        ),
+      ),
+    ));
+  }
+
+  void _showSortMenu(bool isDark) {
+    final RenderBox renderBox = Get.context!.findRenderObject() as RenderBox;
+    final offset = renderBox.localToGlobal(Offset.zero);
+
+    showMenu<String>(
+      context: Get.context!,
+      position: RelativeRect.fromLTRB(
+        offset.dx + renderBox.size.width - 240,
+        offset.dy + 300,
+        offset.dx + renderBox.size.width,
+        offset.dy + 420,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: isDark ? AppThemeData.surfaceElevated : Colors.white,
+      elevation: 8,
+      items: controller.sortOptions.map((option) {
+        final isSelected = controller.selectedSortOption.value == option;
+        return PopupMenuItem<String>(
+          value: option,
+          child: Row(
+            children: [
+              if (isSelected)
+                Icon(Icons.check_rounded, size: 16, color: AppThemeData.primary50)
+              else
+                spaceW(width: 16),
+              spaceW(width: 8),
+              Expanded(
+                child: Text(
+                  option,
+                  style: TextStyle(
+                    fontFamily: isSelected ? FontFamily.semiBold : FontFamily.medium,
+                    fontSize: 13,
+                    color: isSelected
+                        ? AppThemeData.primary50
+                        : (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    ).then((value) {
+      if (value != null) controller.sortBy(value);
+    });
+  }
+
+  Widget _buildViewToggle({
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          gradient: isSelected
-              ? LinearGradient(
-                  colors: [AppThemeData.primary50, AppThemeData.primary4],
-                )
-              : null,
-          borderRadius: BorderRadius.circular(12),
-          color: isSelected
-              ? null
-              : (isDark ? AppThemeData.grey9 : AppThemeData.grey1),
+          color: isSelected ? AppThemeData.primary50 : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
           icon,
-          size: 20,
+          size: 16,
           color: isSelected
               ? Colors.white
               : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
@@ -289,7 +523,7 @@ class ReminderView extends GetView<ReminderController> {
     );
   }
 
-  Widget _buildRemindersContent(bool isDark) {
+  Widget _buildRemindersContent(bool isDark, BuildContext context) {
     return Obx(() {
       if (controller.filteredReminders.isEmpty) return _buildEmptyState(isDark);
       return controller.isGridView.value
@@ -300,11 +534,13 @@ class ReminderView extends GetView<ReminderController> {
 
   Widget _buildGridView(bool isDark) {
     return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 340,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 380,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 1.8,
+        childAspectRatio: 1.6,
       ),
       itemCount: controller.filteredReminders.length,
       itemBuilder: (context, index) =>
@@ -314,8 +550,10 @@ class ReminderView extends GetView<ReminderController> {
 
   Widget _buildListView(bool isDark) {
     return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: controller.filteredReminders.length,
-      separatorBuilder: (_, __) => spaceH(height: 10),
+      separatorBuilder: (context, index) => spaceH(height: 10),
       itemBuilder: (context, index) =>
           _buildListCard(controller.filteredReminders[index], isDark),
     );
@@ -323,122 +561,209 @@ class ReminderView extends GetView<ReminderController> {
 
   Widget _buildGridCard(ReminderModel reminder, bool isDark) {
     final color = reminder.importanceColor;
-    return InkWell(
-      onTap: () => controller.goToEdit(reminder),
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-          borderRadius: BorderRadius.circular(14),
-          border: Border(left: BorderSide(color: color, width: 3)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+    final daysLeft = reminder.daysRemaining;
+    final isExpired = reminder.isExpired;
+    final isActive = reminder.isActive ?? true;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => controller.goToEdit(reminder),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark
+                  ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+                  : AppThemeData.grey3.withValues(alpha: 0.5),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ─── Top: Icon + Name + Toggle ───
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child:
-                        reminder.iconUrl != null && reminder.iconUrl!.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: NetworkImageWidget(
-                              imageUrl: reminder.iconUrl!,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Icon(reminder.importanceIcon, color: color, size: 20),
-                  ),
-                  spaceW(width: 8),
-                  Expanded(
-                    child: TextCustom(
-                      title: reminder.name ?? 'Unknown',
-                      fontSize: 13,
-                      fontFamily: FontFamily.bold,
-                      color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                      maxLine: 1,
-                    ),
-                  ),
-                  Transform.scale(
-                    scale: 0.8,
-                    child: Switch(
-                      value: reminder.isActive ?? true,
-                      onChanged: (_) => controller.toggleReminder(reminder),
-                      activeColor: AppThemeData.success400,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
-                ],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
               ),
-            ),
-
-            // ─── Middle: Description ───
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: TextCustom(
-                title: reminder.description ?? 'No description',
-                fontSize: 11,
-                fontFamily: FontFamily.regular,
-                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                maxLine: 1,
-              ),
-            ),
-
-            const Spacer(),
-
-            // ─── Bottom: Date + Actions ───
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextCustom(
-                    title: reminder.formattedExpiryDate != 'N/A'
-                        ? 'Due: ${reminder.formattedExpiryDate}'
-                        : 'No expiry',
-                    fontSize: 13,
-                    fontFamily: FontFamily.medium,
-                    color: reminder.isExpiringSoon
-                        ? AppThemeData.danger300
-                        : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                  ),
-                  Row(
-                    children: [
-                      _buildActionBtn(
-                        Icons.edit_rounded,
-                        isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                        () => controller.goToEdit(reminder),
-                        isDark,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top section: icon + name + days badge
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                child: Row(
+                  children: [
+                    // Icon with importance glow
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: color.withValues(alpha: 0.2),
+                        ),
                       ),
-                      spaceW(width: 4),
-                      _buildActionBtn(
-                        Icons.delete_outline,
-                        AppThemeData.danger300,
-                        () => controller.deleteReminder(reminder),
-                        isDark,
+                      child: reminder.iconUrl != null && reminder.iconUrl!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: NetworkImageWidget(
+                                imageUrl: reminder.iconUrl!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Icon(reminder.importanceIcon, color: color, size: 20),
+                    ),
+                    spaceW(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextCustom(
+                            title: reminder.name ?? 'Unknown',
+                            fontSize: 14,
+                            fontFamily: FontFamily.bold,
+                            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                            maxLine: 1,
+                          ),
+                          spaceH(height: 2),
+                          TextCustom(
+                            title: reminder.importanceLabel,
+                            fontSize: 10,
+                            fontFamily: FontFamily.semiBold,
+                            color: color,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    // Days remaining badge
+                    if (!isExpired && daysLeft > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: reminder.isExpiringSoon
+                              ? AppThemeData.danger300.withValues(alpha: 0.12)
+                              : AppThemeData.success400.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${daysLeft}d left',
+                          style: TextStyle(
+                            fontFamily: FontFamily.bold,
+                            fontSize: 10,
+                            color: reminder.isExpiringSoon
+                                ? AppThemeData.danger300
+                                : AppThemeData.success400,
+                          ),
+                        ),
+                      )
+                    else if (isExpired)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppThemeData.danger300.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Expired',
+                          style: TextStyle(
+                            fontFamily: FontFamily.bold,
+                            fontSize: 10,
+                            color: AppThemeData.danger300,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              spaceH(height: 8),
+
+              // Description
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: TextCustom(
+                  title: reminder.description ?? 'No description',
+                  fontSize: 11,
+                  fontFamily: FontFamily.regular,
+                  color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                  maxLine: 2,
+                ),
+              ),
+
+              const Spacer(),
+
+              // Bottom: due date + toggle + actions
+              Container(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      size: 12,
+                      color: isExpired
+                          ? AppThemeData.danger300
+                          : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                    ),
+                    spaceW(width: 4),
+                    Expanded(
+                      child: TextCustom(
+                        title: reminder.formattedExpiryDate != 'N/A'
+                            ? 'Due: ${reminder.formattedExpiryDate}'
+                            : 'No expiry',
+                        fontSize: 11,
+                        fontFamily: FontFamily.medium,
+                        color: isExpired
+                            ? AppThemeData.danger300
+                            : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                      ),
+                    ),
+                    // Active toggle
+                    GestureDetector(
+                      onTap: () => controller.toggleReminder(reminder),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? AppThemeData.success400.withValues(alpha: 0.12)
+                              : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          isActive ? 'Active' : 'Off',
+                          style: TextStyle(
+                            fontFamily: FontFamily.bold,
+                            fontSize: 10,
+                            color: isActive
+                                ? AppThemeData.success400
+                                : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                          ),
+                        ),
+                      ),
+                    ),
+                    spaceW(width: 6),
+                    // More actions
+                    GestureDetector(
+                      onTap: () => _showReminderActions(reminder, isDark),
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppThemeData.surfaceMid : AppThemeData.grey2,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.more_vert_rounded,
+                          size: 14,
+                          color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -446,109 +771,295 @@ class ReminderView extends GetView<ReminderController> {
 
   Widget _buildListCard(ReminderModel reminder, bool isDark) {
     final color = reminder.importanceColor;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-        borderRadius: BorderRadius.circular(14),
-        border: Border(left: BorderSide(color: color, width: 3)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
+    final daysLeft = reminder.daysRemaining;
+    final isExpired = reminder.isExpired;
+    final isActive = reminder.isActive ?? true;
+
+    // Calculate progress for remaining time
+    double progress = 0;
+    if (!isExpired && daysLeft > 0) {
+      progress = (daysLeft / 30).clamp(0.0, 1.0);
+    } else if (isExpired) {
+      progress = 0;
+    } else {
+      progress = 1;
+    }
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => controller.goToEdit(reminder),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark
+                  ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+                  : AppThemeData.grey3.withValues(alpha: 0.5),
             ),
-            child: reminder.iconUrl != null && reminder.iconUrl!.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: NetworkImageWidget(
-                      imageUrl: reminder.iconUrl!,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Icon(reminder.importanceIcon, color: color, size: 22),
-          ),
-          spaceW(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextCustom(
-                        title: reminder.name ?? 'Unknown',
-                        fontSize: 15,
-                        fontFamily: FontFamily.bold,
-                        color: isDark
-                            ? AppThemeData.grey1
-                            : AppThemeData.grey10,
-                      ),
-                    ),
-                    TextCustom(
-                      title: reminder.importanceLabel,
-                      fontSize: 11,
-                      fontFamily: FontFamily.medium,
-                      color: color,
-                    ),
-                  ],
-                ),
-                spaceH(height: 4),
-                TextCustom(
-                  title: reminder.description ?? 'No description',
-                  fontSize: 12,
-                  fontFamily: FontFamily.regular,
-                  color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                  maxLine: 1,
-                ),
-                spaceH(height: 4),
-                TextCustom(
-                  title: reminder.formattedExpiryDate != 'N/A'
-                      ? 'Due: ${reminder.formattedExpiryDate}'
-                      : 'No expiry',
-                  fontSize: 10,
-                  color: reminder.isExpiringSoon
-                      ? AppThemeData.danger300
-                      : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: reminder.isActive ?? true,
-            onChanged: (_) => controller.toggleReminder(reminder),
-            activeColor: AppThemeData.success400,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          Column(
-            children: [
-              _buildActionBtn(
-                Icons.edit_rounded,
-                isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                () => controller.goToEdit(reminder),
-                isDark,
-              ),
-              spaceH(height: 4),
-              _buildActionBtn(
-                Icons.delete_outline,
-                AppThemeData.danger300,
-                () => controller.deleteReminder(reminder),
-                isDark,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
-        ],
+          child: Row(
+            children: [
+              // Icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: color.withValues(alpha: 0.2)),
+                ),
+                child: reminder.iconUrl != null && reminder.iconUrl!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: NetworkImageWidget(
+                          imageUrl: reminder.iconUrl!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Icon(reminder.importanceIcon, color: color, size: 22),
+              ),
+              spaceW(width: 14),
+
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextCustom(
+                            title: reminder.name ?? 'Unknown',
+                            fontSize: 15,
+                            fontFamily: FontFamily.bold,
+                            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                          ),
+                        ),
+                        // Importance chip
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            reminder.importanceLabel,
+                            style: TextStyle(
+                              fontFamily: FontFamily.bold,
+                              fontSize: 9,
+                              color: color,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    spaceH(height: 4),
+                    TextCustom(
+                      title: reminder.description ?? 'No description',
+                      fontSize: 12,
+                      fontFamily: FontFamily.regular,
+                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      maxLine: 1,
+                    ),
+                    spaceH(height: 6),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today_rounded,
+                          size: 12,
+                          color: isExpired
+                              ? AppThemeData.danger300
+                              : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                        ),
+                        spaceW(width: 4),
+                        TextCustom(
+                          title: reminder.formattedExpiryDate != 'N/A'
+                              ? 'Due: ${reminder.formattedExpiryDate}'
+                              : 'No expiry',
+                          fontSize: 11,
+                          fontFamily: FontFamily.medium,
+                          color: isExpired
+                              ? AppThemeData.danger300
+                              : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                        ),
+                        if (!isExpired && daysLeft > 0) ...[
+                          spaceW(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: reminder.isExpiringSoon
+                                  ? AppThemeData.danger300.withValues(alpha: 0.12)
+                                  : AppThemeData.success400.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '${daysLeft}d left',
+                              style: TextStyle(
+                                fontFamily: FontFamily.bold,
+                                fontSize: 9,
+                                color: reminder.isExpiringSoon
+                                    ? AppThemeData.danger300
+                                    : AppThemeData.success400,
+                              ),
+                            ),
+                          ),
+                        ] else if (isExpired) ...[
+                          spaceW(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppThemeData.danger300.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Expired',
+                              style: TextStyle(
+                                fontFamily: FontFamily.bold,
+                                fontSize: 9,
+                                color: AppThemeData.danger300,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    // Progress bar for time remaining
+                    if (!isExpired && daysLeft > 0) ...[
+                      spaceH(height: 6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 3,
+                          backgroundColor: (isDark ? AppThemeData.grey8 : AppThemeData.grey3).withValues(alpha: 0.5),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            reminder.isExpiringSoon ? AppThemeData.danger300 : color,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              spaceW(width: 12),
+
+              // Actions column
+              Column(
+                children: [
+                  // Active toggle
+                  GestureDetector(
+                    onTap: () => controller.toggleReminder(reminder),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? AppThemeData.success400.withValues(alpha: 0.12)
+                            : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        isActive ? 'ON' : 'OFF',
+                        style: TextStyle(
+                          fontFamily: FontFamily.bold,
+                          fontSize: 9,
+                          color: isActive
+                              ? AppThemeData.success400
+                              : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                        ),
+                      ),
+                    ),
+                  ),
+                  spaceH(height: 8),
+                  _buildActionBtn(
+                    Icons.more_vert_rounded,
+                    isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                    () => _showReminderActions(reminder, isDark),
+                    isDark,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showReminderActions(ReminderModel reminder, bool isDark) {
+    Get.bottomSheet(
+      Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isDark ? AppThemeData.surfaceElevated : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.edit_outlined, color: AppThemeData.primary50, size: 20),
+              title: Text(
+                'Edit Reminder',
+                style: TextStyle(
+                  fontFamily: FontFamily.medium,
+                  fontSize: 14,
+                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                ),
+              ),
+              onTap: () {
+                Get.back();
+                controller.goToEdit(reminder);
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                (reminder.isActive ?? true) ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                color: (reminder.isActive ?? true) ? AppThemeData.pending400 : AppThemeData.success400,
+                size: 20,
+              ),
+              title: Text(
+                (reminder.isActive ?? true) ? 'Pause Reminder' : 'Resume Reminder',
+                style: TextStyle(
+                  fontFamily: FontFamily.medium,
+                  fontSize: 14,
+                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                ),
+              ),
+              onTap: () {
+                Get.back();
+                controller.toggleReminder(reminder);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: AppThemeData.danger300, size: 20),
+              title: Text(
+                'Delete Reminder',
+                style: TextStyle(
+                  fontFamily: FontFamily.medium,
+                  fontSize: 14,
+                  color: AppThemeData.danger300,
+                ),
+              ),
+              onTap: () {
+                Get.back();
+                controller.deleteReminder(reminder);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -576,12 +1087,6 @@ class ReminderView extends GetView<ReminderController> {
     return Center(
       child: Container(
         padding: const EdgeInsets.all(40),
-        decoration: BoxDecoration(
-          color: isDark
-              ? AppThemeData.primaryBlack.withValues(alpha: 0.5)
-              : AppThemeData.primaryWhite,
-          borderRadius: BorderRadius.circular(28),
-        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -591,16 +1096,16 @@ class ReminderView extends GetView<ReminderController> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppThemeData.primary50.withValues(alpha: 0.15),
-                    AppThemeData.primary4.withValues(alpha: 0.08),
+                    AppThemeData.neonOrange.withValues(alpha: 0.15),
+                    AppThemeData.neonPink.withValues(alpha: 0.08),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(28),
+                shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.alarm_off_outlined,
                 size: 50,
-                color: AppThemeData.primary50.withValues(alpha: 0.6),
+                color: AppThemeData.neonOrange.withValues(alpha: 0.5),
               ),
             ),
             spaceH(height: 20),
@@ -612,28 +1117,40 @@ class ReminderView extends GetView<ReminderController> {
             ),
             spaceH(height: 8),
             TextCustom(
-              title: 'Create your first reminder',
+              title: 'Create your first reminder to stay organized',
               fontSize: 14,
               color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
             ),
-            spaceH(height: 20),
-            ElevatedButton.icon(
-              onPressed: controller.goToAdd,
-              icon: const Icon(Icons.add_rounded),
-              label: const TextCustom(
-                title: 'Add Reminder',
-                fontSize: 14,
-                fontFamily: FontFamily.semiBold,
-                color: Colors.white,
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppThemeData.primary50,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 14,
-                ),
-                shape: RoundedRectangleBorder(
+            spaceH(height: 24),
+            GestureDetector(
+              onTap: controller.goToAdd,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppThemeData.neonOrange, AppThemeData.neonPink],
+                  ),
                   borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppThemeData.neonOrange.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add_rounded, color: Colors.white, size: 18),
+                    spaceW(width: 6),
+                    TextCustom(
+                      title: 'Add Reminder',
+                      fontSize: 14,
+                      fontFamily: FontFamily.semiBold,
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -642,4 +1159,18 @@ class ReminderView extends GetView<ReminderController> {
       ),
     );
   }
+}
+
+class _StatData {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  const _StatData({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 }

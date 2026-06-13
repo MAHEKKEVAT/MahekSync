@@ -74,7 +74,7 @@ class DashboardHeroCard extends StatelessWidget {
                 ? const Color(0xFFF47340)
                 : hour < 17
                     ? const Color(0xFF3B82F6)
-                    : const Color(0xFF8B5CF6)).withOpacity(0.2),
+                    : const Color(0xFF8B5CF6)).withValues(alpha: 0.2),
             blurRadius: 30,
             offset: const Offset(0, 8),
           ),
@@ -90,9 +90,9 @@ class DashboardHeroCard extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.white.withOpacity(0.08),
-                  Colors.white.withOpacity(0.01),
-                  Colors.white.withOpacity(0.05),
+                  Colors.white.withValues(alpha: 0.08),
+                  Colors.white.withValues(alpha: 0.01),
+                  Colors.white.withValues(alpha: 0.05),
                 ],
               ),
             ),
@@ -109,7 +109,7 @@ class DashboardHeroCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Colors.white.withOpacity(0.08),
+                    Colors.white.withValues(alpha: 0.08),
                     Colors.transparent,
                   ],
                 ),
@@ -126,7 +126,7 @@ class DashboardHeroCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Colors.white.withOpacity(0.06),
+                    Colors.white.withValues(alpha: 0.06),
                     Colors.transparent,
                   ],
                 ),
@@ -148,7 +148,7 @@ class DashboardHeroCard extends StatelessWidget {
             child: Icon(
               greetingIcon,
               size: 140,
-              color: Colors.white.withOpacity(0.06),
+              color: Colors.white.withValues(alpha: 0.06),
             ),
           ),
 
@@ -166,13 +166,13 @@ class DashboardHeroCard extends StatelessWidget {
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: Icon(
                         greetingIcon,
                         size: 16,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -181,7 +181,7 @@ class DashboardHeroCard extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: FontFamily.medium,
                         fontSize: 14,
-                        color: Colors.white.withOpacity(0.75),
+                        color: Colors.white.withValues(alpha: 0.75),
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -212,19 +212,19 @@ class DashboardHeroCard extends StatelessWidget {
                       icon: Icons.task_alt_rounded,
                       value: controller.overdueTaskCount.toString(),
                       label: 'Tasks',
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                     ),
                     _HeroStatChip(
                       icon: Icons.event_rounded,
                       value: controller.overdueReminderCount.toString(),
                       label: 'Due',
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                     ),
                     _HeroStatChip(
                       icon: Icons.devices_rounded,
                       value: controller.deviceCount.value.toString(),
                       label: 'Devices',
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                     ),
                     _HeroStatChip(
                       icon: Icons.shield_rounded,
@@ -233,7 +233,7 @@ class DashboardHeroCard extends StatelessWidget {
                           : 'Off',
                       label: 'Sentinel',
                       color: controller.sentinelPasswordSet.value
-                          ? Colors.white.withOpacity(0.85)
+                          ? Colors.white.withValues(alpha: 0.85)
                           : Colors.white38,
                     ),
                   ],
@@ -266,9 +266,9 @@ class _HeroStatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -277,7 +277,7 @@ class _HeroStatChip extends StatelessWidget {
             width: 26,
             height: 26,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 13, color: color),
@@ -301,7 +301,7 @@ class _HeroStatChip extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: FontFamily.regular,
                   fontSize: 9,
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   height: 1.2,
                 ),
               ),
@@ -318,7 +318,7 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.02)
+      ..color = Colors.white.withValues(alpha: 0.02)
       ..strokeWidth = 0.5;
 
     const spacing = 40.0;

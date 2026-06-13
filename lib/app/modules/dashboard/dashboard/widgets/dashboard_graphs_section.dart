@@ -38,7 +38,7 @@ class DashboardGraphsSection extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Icon(Icons.analytics_rounded,
-                size: 16, color: AppThemeData.neonCyan.withOpacity(0.7)),
+                size: 16, color: AppThemeData.neonCyan.withValues(alpha: 0.7)),
             const SizedBox(width: 8),
             Text(
               'Analytics & Graphs',
@@ -297,9 +297,14 @@ class _MiniGraphCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+              : AppThemeData.grey3.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withOpacity(0.04),
+            color: accentColor.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -311,7 +316,7 @@ class _MiniGraphCard extends StatelessWidget {
           Positioned(
             right: -8,
             bottom: -8,
-            child: Icon(icon, size: 70, color: accentColor.withOpacity(0.04)),
+            child: Icon(icon, size: 70, color: accentColor.withValues(alpha: 0.04)),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,7 +331,7 @@ class _MiniGraphCard extends StatelessWidget {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: accentColor.withOpacity(0.1),
+                          color: accentColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(icon, size: 15, color: accentColor),

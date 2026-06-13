@@ -28,13 +28,13 @@ class ProfileSummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppThemeData.neonPurple.withOpacity(0.04),
+            color: AppThemeData.neonPurple.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
           if (!isDark)
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -49,7 +49,7 @@ class ProfileSummaryCard extends StatelessWidget {
             child: Icon(
               Icons.person_rounded,
               size: 90,
-              color: AppThemeData.neonPurple.withOpacity(0.04),
+              color: AppThemeData.neonPurple.withValues(alpha: 0.04),
             ),
           ),
 
@@ -137,8 +137,8 @@ class ProfileSummaryCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? AppThemeData.surfaceElevated.withOpacity(0.4)
-                      : AppThemeData.grey2.withOpacity(0.7),
+                      ? AppThemeData.surfaceElevated.withValues(alpha: 0.4)
+                      : AppThemeData.grey2.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
@@ -178,8 +178,8 @@ class ProfileSummaryCard extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? AppThemeData.surfaceElevated.withOpacity(0.4)
-                      : AppThemeData.grey2.withOpacity(0.7),
+                      ? AppThemeData.surfaceElevated.withValues(alpha: 0.4)
+                      : AppThemeData.grey2.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
@@ -298,7 +298,7 @@ class _MetricItem extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(9),
           ),
           child: Icon(icon, size: 15, color: color),
@@ -336,8 +336,8 @@ class _MetricDivider extends StatelessWidget {
       width: 1,
       height: 36,
       color: isDark
-          ? AppThemeData.surfaceBorder.withOpacity(0.2)
-          : AppThemeData.grey4.withOpacity(0.3),
+          ? AppThemeData.surfaceBorder.withValues(alpha: 0.2)
+          : AppThemeData.grey4.withValues(alpha: 0.3),
     );
   }
 }

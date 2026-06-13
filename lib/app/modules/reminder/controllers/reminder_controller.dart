@@ -1,5 +1,4 @@
 // lib/app/modules/reminder/controllers/reminder_controller.dart
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
@@ -16,8 +15,10 @@ class ReminderController extends GetxController {
   final searchQuery = ''.obs;
   final isGridView = true.obs;
   final selectedImportance = 'ALL'.obs;
+  final selectedSortOption = 'Expiry: Soonest'.obs;
 
   final importances = ['ALL', 'HIGH', 'MEDIUM', 'LOW'];
+  final sortOptions = ['Expiry: Soonest', 'Expiry: Latest', 'Importance: High', 'Importance: Low', 'Name: A to Z', 'Recently Added'];
 
   String? get ownerId => MahekConstant.ownerModel?.id;
 
@@ -52,6 +53,7 @@ class ReminderController extends GetxController {
       result = result.where((r) => r.importance == selectedImportance.value).toList();
     }
     filteredReminders.value = result;
+    _applySort();
   }
 
   void updateSearchQuery(String query) {
@@ -62,6 +64,46 @@ class ReminderController extends GetxController {
   void filterByImportance(String importance) {
     selectedImportance.value = importance;
     _applyFilters();
+  }
+
+  void sortBy(String option) {
+    selectedSortOption.value = option;
+    _applySort();
+  }
+
+  void _applySort() {
+    final list = filteredReminders.toList();
+    switch (selectedSortOption.value) {
+      case 'Expiry: Soonest':
+        list.sort((a, b) {
+          if (a.expiryDate == null) return 1;
+          if (b.expiryDate == null) return -1;
+          return a.expiryDate!.compareTo(b.expiryDate!);
+        });
+        break;
+      case 'Expiry: Latest':
+        list.sort((a, b) {
+          if (a.expiryDate == null) return 1;
+          if (b.expiryDate == null) return -1;
+          return b.expiryDate!.compareTo(a.expiryDate!);
+        });
+        break;
+      case 'Importance: High':
+        final order = {'HIGH': 0, 'MEDIUM': 1, 'LOW': 2};
+        list.sort((a, b) => (order[a.importance] ?? 3).compareTo(order[b.importance] ?? 3));
+        break;
+      case 'Importance: Low':
+        final order = {'LOW': 0, 'MEDIUM': 1, 'HIGH': 2};
+        list.sort((a, b) => (order[a.importance] ?? 3).compareTo(order[b.importance] ?? 3));
+        break;
+      case 'Name: A to Z':
+        list.sort((a, b) => (a.name ?? '').compareTo(b.name ?? ''));
+        break;
+      case 'Recently Added':
+        list.sort((a, b) => (b.createdAt?.toDate() ?? DateTime(0)).compareTo(a.createdAt?.toDate() ?? DateTime(0)));
+        break;
+    }
+    filteredReminders.value = list;
   }
 
   Future<void> deleteReminder(ReminderModel reminder) async {
@@ -82,7 +124,7 @@ class ReminderController extends GetxController {
               spaceH(height: 16),
               const Text('Delete Reminder', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
               spaceH(height: 8),
-              Text('Delete "${reminder.name}"?', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
+              Text('Delete "${reminder.name}"?', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14)),
               spaceH(height: 24),
               Row(
                 children: [

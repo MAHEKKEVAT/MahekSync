@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:html' as html;
+import 'dart:math' as math;
+import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -35,25 +38,92 @@ class DashboardView extends GetView<DashboardController> {
 
     controller.syncIndexFromRoute();
 
+    return _DashboardViewBody(
+      isDark: isDark,
+      isMobile: isMobile,
+      isTablet: isTablet,
+      isDesktop: isDesktop,
+      controller: controller,
+      theme: theme,
+    );
+  }
+}
+
+class _DashboardViewBody extends StatefulWidget {
+  final bool isDark;
+  final bool isMobile;
+  final bool isTablet;
+  final bool isDesktop;
+  final DashboardController controller;
+  final DarkThemeProvider theme;
+
+  const _DashboardViewBody({
+    required this.isDark,
+    required this.isMobile,
+    required this.isTablet,
+    required this.isDesktop,
+    required this.controller,
+    required this.theme,
+  });
+
+  @override
+  State<_DashboardViewBody> createState() => _DashboardViewBodyState();
+}
+
+class _DashboardViewBodyState extends State<_DashboardViewBody>
+    with TickerProviderStateMixin {
+  late Timer _timer;
+  DateTime _now = DateTime.now();
+  late AnimationController _starAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      setState(() => _now = DateTime.now());
+    });
+    _starAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _starAnim.dispose();
+    super.dispose();
+  }
+
+  String get _greeting {
+    final h = _now.hour;
+    if (h < 12) return 'Morning';
+    if (h < 17) return 'Afternoon';
+    if (h < 20) return 'Evening';
+    return 'Night';
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ? AppThemeData.primaryBlack : AppThemeData.grey1,
-      body: isMobile
-          ? _buildMobileLayout(context, theme, isDark)
-          : _buildDesktopLayout(context, theme, isDesktop, isTablet, isDark),
+      backgroundColor: widget.isDark ? AppThemeData.primaryBlack : AppThemeData.grey1,
+      body: widget.isMobile
+          ? _buildMobileLayout(context, widget.theme, widget.isDark)
+          : _buildDesktopLayout(context, widget.theme, widget.isDesktop, widget.isTablet, widget.isDark),
     );
   }
 
   Widget _buildDesktopLayout(BuildContext context, DarkThemeProvider theme,
       bool isDesktop, bool isTablet, bool isDark) {
     return WillPopScope(
-      onWillPop: () => controller.onWillPop(context, isDark),
+      onWillPop: () => widget.controller.onWillPop(context, isDark),
       child: Row(
         children: [
           Obx(
                 () => AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOutCubic,
-              width: controller.isNavExpanded.value
+              width: widget.controller.isNavExpanded.value
                   ? (isDesktop
                   ? (MediaQuery.of(context).size.width > 1600 ? 280 : 260)
                   : (isTablet ? 240 : 72))
@@ -62,7 +132,7 @@ class DashboardView extends GetView<DashboardController> {
               child: _GlassmorphicNavShell(
                 isDark: isDark,
                 child: _buildSideNavigation(
-                    context, theme, controller.isNavExpanded.value),
+                    context, theme, widget.controller.isNavExpanded.value),
               ),
             ),
           ),
@@ -84,7 +154,7 @@ class DashboardView extends GetView<DashboardController> {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     return WillPopScope(
-      onWillPop: () => controller.onWillPop(context, isDark),
+      onWillPop: () => widget.controller.onWillPop(context, isDark),
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: isDark ? AppThemeData.primaryBlack : AppThemeData.grey1,
@@ -114,8 +184,8 @@ class DashboardView extends GetView<DashboardController> {
     final isDark = theme.isDarkTheme();
     final isMobile = ResponsiveWidget.isMobile(context);
     final isDesktop = ResponsiveWidget.isDesktop(context);
-    final sections = controller.navigationSections;
-    final allItems = controller.allItems;
+    final sections = widget.controller.navigationSections;
+    final allItems = widget.controller.allItems;
 
     return Column(
       children: [
@@ -216,7 +286,7 @@ class DashboardView extends GetView<DashboardController> {
                     final itemIndex = allItems.indexOf(item);
                     return Obx(() {
                       final isSelected =
-                          controller.selectedIndex.value == itemIndex;
+                          widget.controller.selectedIndex.value == itemIndex;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Material(
@@ -224,7 +294,7 @@ class DashboardView extends GetView<DashboardController> {
                           child: InkWell(
                             onTap: () {
                               if (isMobile) Navigator.pop(context);
-                              controller.changePage(itemIndex);
+                              widget.controller.changePage(itemIndex);
                             },
                             borderRadius: BorderRadius.circular(12),
                             child: AnimatedContainer(
@@ -420,10 +490,7 @@ class DashboardView extends GetView<DashboardController> {
           Padding(
             padding: EdgeInsets.fromLTRB(
                 isMobile ? 16 : 20, isMobile ? 14 : 18, isMobile ? 16 : 20, 0),
-            child: _GlassmorphicHeaderShell(
-              isDark: isDark,
-              child: _buildHeader(context, theme, scaffoldKey: scaffoldKey),
-            ),
+            child: _buildHeader(context, theme, scaffoldKey: scaffoldKey),
           ),
           spaceH(height: 12),
           Expanded(
@@ -456,8 +523,8 @@ class DashboardView extends GetView<DashboardController> {
                       return ClipRect(child: FadeTransition(opacity: animation, child: child));
                     },
                     child: Obx(() => KeyedSubtree(
-                      key: ValueKey(controller.selectedIndex.value),
-                      child: controller.getPageWidget(controller.selectedIndex.value),
+                      key: ValueKey(widget.controller.selectedIndex.value),
+                      child: widget.controller.getPageWidget(widget.controller.selectedIndex.value),
                     )),
                   ),
                 ),
@@ -476,189 +543,170 @@ class DashboardView extends GetView<DashboardController> {
     final isDesktop = ResponsiveWidget.isDesktop(context);
     final employee = MahekConstant.ownerModel;
 
-    return Row(
-      children: [
-        if (!isDesktop)
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                if (isMobile && scaffoldKey != null) {
-                  scaffoldKey.currentState?.openDrawer();
-                } else {
-                  controller.toggleNavigation();
-                }
-              },
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                margin: const EdgeInsets.only(right: 12),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppThemeData.surfaceElevated.withValues(alpha: 0.6)
-                      : Colors.white.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isDark
-                        ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
-                        : Colors.white.withValues(alpha: 0.6),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                      Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.menu_rounded,
-                  color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
-                  size: 24,
-                ),
-              ),
+    final hour = _now.hour;
+    final isNight = hour >= 20 || hour < 6;
+    final isEvening = hour >= 17 && hour < 20;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedBuilder(
+        animation: _starAnim,
+        builder: (_, _) => Container(
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isNight
+                  ? const [Color(0xFF0A0A1A), Color(0xFF1E1B4B), Color(0xFF312E81)]
+                  : isEvening
+                      ? const [Color(0xFF1A0533), Color(0xFF4C1D95), Color(0xFFDB2777)]
+                      : const [Color(0xFF2D1B69), Color(0xFF5B21B6), Color(0xFFD97706)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
           ),
-        Container(
-          margin: const EdgeInsets.only(right: 12),
-          child: Row(
+          child: Stack(
             children: [
-              if (!isMobile) ...[
-                spaceW(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+              // Stars
+              ...List.generate(18, (i) {
+                final rng = math.Random(i);
+                final twinkle = (math.sin(_starAnim.value * math.pi * 2 + i * 0.7) + 1) / 2;
+                return Positioned(
+                  left: rng.nextDouble() * 800 + 10,
+                  top: rng.nextDouble() * 36 + 6,
+                  child: Container(
+                    width: rng.nextDouble() * 1.5 + 0.4,
+                    height: rng.nextDouble() * 1.5 + 0.4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: twinkle * 0.45 + 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                );
+              }),
+              // Content
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
                   children: [
-                    TextCustom(
-                      title: 'PREMIUM',
-                      fontSize: 23,
-                      fontFamily: FontFamily.bold,
-                      color: const Color(0xFFFFD700),
+                    if (!isDesktop)
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            if (isMobile && scaffoldKey != null) {
+                              scaffoldKey.currentState?.openDrawer();
+                            } else {
+                              widget.controller.toggleNavigation();
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            margin: const EdgeInsets.only(right: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.15),
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.menu_rounded,
+                              color: Colors.white.withValues(alpha: 0.8),
+                              size: 22,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (isDesktop)
+                      _ModernDesktopClock(
+                        now: _now,
+                        greeting: _greeting,
+                        starAnim: _starAnim,
+                      ),
+                    if (!isDesktop) _PremiumHeaderBadge(isDark: true, now: _now),
+                    const Spacer(),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => theme.darkTheme = isDark ? 1 : 0,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.15),
+                            ),
+                          ),
+                          child: Icon(
+                            isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                            color: Colors.white.withValues(alpha: 0.8),
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => widget.controller.goToProfile(),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 36,
+                            width: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: employee?.profilePic != null &&
+                                  employee!.profilePic!.isNotEmpty
+                                  ? NetworkImageWidget(
+                                      imageUrl: employee.profilePic!,
+                                      height: 36,
+                                      width: 36,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      color: Colors.white.withValues(alpha: 0.15),
+                                      child: Icon(
+                                        Icons.person_rounded,
+                                        size: 20,
+                                        color: Colors.white.withValues(alpha: 0.8),
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          if (!isMobile) ...[
+                            spaceW(width: 10),
+                            Text(
+                              employee?.fullName ?? 'Admin',
+                              style: TextStyle(
+                                fontFamily: FontFamily.bold,
+                                fontSize: 13,
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ],
           ),
         ),
-        const Spacer(),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => theme.darkTheme = isDark ? 1 : 0,
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppThemeData.surfaceElevated.withValues(alpha: 0.6)
-                    : Colors.white.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isDark
-                      ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
-                      : Colors.white.withValues(alpha: 0.6),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                    Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                color: isDark ? AppThemeData.pending300 : AppThemeData.primary50,
-                size: 22,
-              ),
-            ),
-          ),
-        ),
-        InkWell(
-          onTap: () => controller.goToProfile(),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppThemeData.surfaceElevated.withValues(alpha: 0.6)
-                  : Colors.white.withValues(alpha: 0.8),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDark
-                    ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
-                    : Colors.white.withValues(alpha: 0.6),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color:
-                  Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppThemeData.primary50.withValues(alpha: 0.5),
-                      width: 2,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: employee?.profilePic != null &&
-                        employee!.profilePic!.isNotEmpty
-                        ? NetworkImageWidget(
-                      imageUrl: employee.profilePic!,
-                      height: 40,
-                      width: 40,
-                      fit: BoxFit.cover,
-                    )
-                        : Container(
-                      color: isDark
-                          ? AppThemeData.grey8
-                          : AppThemeData.grey2,
-                      child: Icon(
-                        Icons.person_rounded,
-                        size: 22,
-                        color: AppThemeData.primary50,
-                      ),
-                    ),
-                  ),
-                ),
-                if (!isMobile) ...[
-                  spaceW(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextCustom(
-                        title: employee?.fullName ?? 'Admin',
-                        fontSize: 14,
-                        fontFamily: FontFamily.bold,
-                        color: isDark
-                            ? AppThemeData.primaryWhite
-                            : AppThemeData.primaryBlack,
-                        maxLine: 1,
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -683,20 +731,42 @@ class _GlassmorphicNavShellState extends State<_GlassmorphicNavShell> {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: widget.borderRadius ?? BorderRadius.zero,
-      child: Container(
-        decoration: BoxDecoration(
-          color: widget.isDark ? AppThemeData.surfaceDeep.withValues(alpha: 0.92) : Colors.white.withValues(alpha: 0.85),
-          borderRadius: widget.borderRadius,
-          border: widget.borderRadius != null
-              ? Border.all(
-            color: widget.isDark
-                ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.5),
-            width: 1,
-          )
-              : null,
-        ),
-        child: widget.child,
+      child: Stack(
+        children: [
+          // Background image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/login_bg.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // Blur overlay
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Container(
+                color: widget.isDark
+                    ? const Color(0xFF0D0F14).withValues(alpha: 0.82)
+                    : Colors.white.withValues(alpha: 0.80),
+              ),
+            ),
+          ),
+          // Content
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: widget.borderRadius,
+              border: widget.borderRadius != null
+                  ? Border.all(
+                      color: widget.isDark
+                          ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                          : Colors.white.withValues(alpha: 0.5),
+                      width: 1,
+                    )
+                  : null,
+            ),
+            child: widget.child,
+          ),
+        ],
       ),
     );
   }
@@ -733,6 +803,241 @@ class _GlassmorphicHeaderShellState extends State<_GlassmorphicHeaderShell> {
           ),
         ),
         child: widget.child,
+      ),
+    );
+  }
+}
+
+// ─── Modern Desktop Clock ──────────────────────────────────
+class _ModernDesktopClock extends StatelessWidget {
+  final DateTime now;
+  final String greeting;
+  final Animation<double> starAnim;
+
+  const _ModernDesktopClock({
+    required this.now,
+    required this.greeting,
+    required this.starAnim,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final h = now.hour > 12 ? now.hour - 12 : (now.hour == 0 ? 12 : now.hour);
+    final hh = h.toString().padLeft(2, '0');
+    final mm = now.minute.toString().padLeft(2, '0');
+    final ss = now.second.toString().padLeft(2, '0');
+    final period = now.hour >= 12 ? 'PM' : 'AM';
+
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final dayName = days[now.weekday - 1];
+    final monthName = months[now.month - 1];
+
+    final hourGlow = now.hour >= 20 || now.hour < 6 ? 0.3 : 0.5;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.12),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Live dot
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: AppThemeData.neonMint,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppThemeData.neonMint.withValues(alpha: 0.6),
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+          ),
+          spaceW(width: 10),
+          // Greeting
+          Text(
+            'Good $greeting',
+            style: TextStyle(
+              fontFamily: FontFamily.medium,
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.65),
+            ),
+          ),
+          spaceW(width: 12),
+          // Time with hour glow
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: hourGlow * 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  hh,
+                  style: TextStyle(
+                    fontFamily: FontFamily.bold,
+                    fontSize: 18,
+                    height: 1,
+                    color: Colors.white.withValues(alpha: 0.95),
+                  ),
+                ),
+                // Animated colon
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 1.0, end: 0.0),
+                  duration: const Duration(milliseconds: 800),
+                  builder: (_, v, _) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 1),
+                    child: Text(
+                      ':',
+                      style: TextStyle(
+                        fontFamily: FontFamily.bold,
+                        fontSize: 18,
+                        height: 1,
+                        color: Colors.white.withValues(alpha: v * 0.6 + 0.2),
+                      ),
+                    ),
+                  ),
+                ),
+                Text(
+                  mm,
+                  style: TextStyle(
+                    fontFamily: FontFamily.bold,
+                    fontSize: 18,
+                    height: 1,
+                    color: Colors.white.withValues(alpha: 0.95),
+                  ),
+                ),
+                spaceW(width: 2),
+                Text(
+                  ss,
+                  style: TextStyle(
+                    fontFamily: FontFamily.regular,
+                    fontSize: 10,
+                    color: AppThemeData.neonMint.withValues(alpha: 0.8),
+                  ),
+                ),
+                spaceW(width: 3),
+                Text(
+                  period,
+                  style: TextStyle(
+                    fontFamily: FontFamily.bold,
+                    fontSize: 9,
+                    color: AppThemeData.neonMint,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          spaceW(width: 10),
+          // Vertical divider
+          Container(
+            width: 1,
+            height: 18,
+            color: Colors.white.withValues(alpha: 0.15),
+          ),
+          spaceW(width: 10),
+          // Date
+          Icon(
+            Icons.calendar_today_rounded,
+            size: 12,
+            color: Colors.white.withValues(alpha: 0.5),
+          ),
+          spaceW(width: 5),
+          Text(
+            '$dayName ${now.day} $monthName',
+            style: TextStyle(
+              fontFamily: FontFamily.medium,
+              fontSize: 11,
+              color: Colors.white.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Premium Header Badge (Mobile, Subscription Grade) ─────
+class _PremiumHeaderBadge extends StatelessWidget {
+  final bool isDark;
+  final DateTime now;
+
+  const _PremiumHeaderBadge({required this.isDark, required this.now});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFFD4A843).withValues(alpha: 0.18),
+            const Color(0xFFE8C564).withValues(alpha: 0.10),
+            const Color(0xFFF5D76E).withValues(alpha: 0.18),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: const Color(0xFFD4A843).withValues(alpha: 0.35),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFD4A843).withValues(alpha: 0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Crown icon
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Color(0xFFD4A843), Color(0xFFF5D76E), Color(0xFFD4A843)],
+            ).createShader(bounds),
+            child: const Icon(
+              Icons.workspace_premium_rounded,
+              size: 15,
+              color: Colors.white,
+            ),
+          ),
+          spaceW(width: 5),
+          // PREMIUM text with gradient
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Color(0xFFD4A843), Color(0xFFF5D76E), Color(0xFFD4A843)],
+            ).createShader(bounds),
+            child: const Text(
+              'PREMIUM',
+              style: TextStyle(
+                fontFamily: FontFamily.bold,
+                fontSize: 9,
+                letterSpacing: 2,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

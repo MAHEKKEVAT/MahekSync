@@ -1,15 +1,7 @@
-// lib/app/modules/dashboard/views/dashboard_home_view.dart
-// ──────────────────────────────────────────────────────────────
-//  MaheKSync Digital Life OS Dashboard – v4 Redesign
-//  Apple Intelligence / Arc / Linear / Raycast / Notion AI style
-//  Preserves ALL DashboardHomeController data & Firestore streams.
-//  Only UI/UX rebuilt; no business logic altered.
-// ──────────────────────────────────────────────────────────────
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_controller.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
-import 'package:maheksync/app/modules/dashboard/dashboard/widgets/dashboard_top_bar.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
@@ -17,15 +9,13 @@ import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/utils/responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
-import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:provider/provider.dart';
 
-// ─── Section Widgets ─────────────────────────────────────
 import 'package:maheksync/app/modules/dashboard/dashboard/widgets/dashboard_hero_section.dart';
-import 'package:maheksync/app/modules/dashboard/dashboard/widgets/analytics_overview_section.dart';
-import 'package:maheksync/app/modules/dashboard/dashboard/widgets/financial_chart_card.dart';
-import 'package:maheksync/app/modules/dashboard/dashboard/widgets/category_showcase_row.dart';
-import 'package:maheksync/app/modules/dashboard/dashboard/widgets/dashboard_graphs_section.dart';
+import 'package:maheksync/app/modules/dashboard/dashboard/widgets/today_focus_section.dart';
+import 'package:maheksync/app/modules/dashboard/dashboard/widgets/life_overview_section.dart';
+import 'package:maheksync/app/modules/dashboard/dashboard/widgets/financial_snapshot_card.dart';
+import 'package:maheksync/app/modules/dashboard/dashboard/widgets/security_status_card.dart';
 import 'package:maheksync/app/modules/dashboard/dashboard/widgets/upcoming_timeline_section.dart';
 import 'package:maheksync/app/modules/dashboard/dashboard/widgets/activity_feed_section.dart';
 import 'package:maheksync/app/modules/dashboard/dashboard/widgets/profile_sidebar_section.dart';
@@ -38,7 +28,7 @@ class DashboardHomeView extends StatefulWidget {
 }
 
 class _DashboardHomeViewState extends State<DashboardHomeView> {
-  static const _spacing = 24.0;
+  static const _spacing = 20.0;
 
   @override
   Widget build(BuildContext context) {
@@ -64,42 +54,17 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
 
       return Container(
         color: isDark ? AppThemeData.surfaceVoid : AppThemeData.grey1,
-        child: Column(
-          children: [
-            // ════════════════════════════════════════════
-            //  TOP BAR
-            // ════════════════════════════════════════════
-            DashboardTopBar(
-              onMenuTap: () {
-                try {
-                  final dc = Get.find<DashboardController>();
-                  dc.toggleNavigation();
-                } catch (_) {}
-              },
-            ),
-
-            // ════════════════════════════════════════════
-            //  MAIN CONTENT AREA
-            // ════════════════════════════════════════════
-            Expanded(
-              child: isDesktop
-                  ? _buildDesktopLayout(c, isDark)
-                  : _buildMobileLayout(c, isDark, isTablet),
-            ),
-          ],
-        ),
+        child: isDesktop
+            ? _buildDesktopLayout(c, isDark)
+            : _buildMobileLayout(c, isDark, isTablet),
       );
     });
   }
 
-  // ════════════════════════════════════════════════════════════
-  //  DESKTOP LAYOUT: Main Content + Right Sidebar
-  // ════════════════════════════════════════════════════════════
   Widget _buildDesktopLayout(DashboardHomeController c, bool isDark) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Main Content (scrollable) ────────────────
         Expanded(
           flex: 3,
           child: SingleChildScrollView(
@@ -108,37 +73,69 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // SECTION 1: Hero (Good Morning + Name + Chips)
-                DashboardHeroSection(controller: c, isDark: isDark),
-                spaceH(height: _spacing),
-
-                // SECTION 2: Category Showcase Row (Devices, Purchases, Subs, Dues)
-                CategoryShowcaseRow(
+                DashboardHeroSection(
                   controller: c,
                   isDark: isDark,
-                  onViewDevices: () => _navigateTo(Routes.MY_DEVICES),
-                  onViewPurchases: () => _navigateTo(Routes.MY_PURCHASES),
-                  onViewSubscriptions: () => _navigateTo(Routes.SUBSCRIPTION),
-                  onViewDues: () => _navigateTo(Routes.DUES_TRACKER),
+                  onViewPlan: () => _navigateTo(Routes.PERSONAL_TASKS),
                 ),
                 spaceH(height: _spacing),
 
-                // SECTION 3: Analytics Overview (4 cards)
-                _sectionHeader('Insights', Icons.insights_rounded,
-                    AppThemeData.neonPurple, isDark),
-                const SizedBox(height: 14),
-                AnalyticsOverviewSection(controller: c, isDark: isDark),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TodayFocusSection(
+                        controller: c,
+                        isDark: isDark,
+                        onTaskTap: () => _navigateTo(Routes.PERSONAL_TASKS),
+                        onDueTap: () => _navigateTo(Routes.DUES_TRACKER),
+                        onReminderTap: () => _navigateTo(Routes.REMINDER),
+                        onViewAll: () => _navigateTo(Routes.PERSONAL_TASKS),
+                      ),
+                    ),
+                    const SizedBox(width: _spacing),
+                    Expanded(
+                      flex: 3,
+                      child: LifeOverviewSection(
+                        controller: c,
+                        isDark: isDark,
+                        onDevicesTap: () => _navigateTo(Routes.MY_DEVICES),
+                        onSubscriptionsTap: () => _navigateTo(Routes.SUBSCRIPTION),
+                        onVaultTap: () => _navigateTo(Routes.VAULT),
+                        onContactsTap: () => _navigateTo(Routes.MY_CONTACTS),
+                        onViewAll: () => _navigateTo(Routes.SETTINGS),
+                      ),
+                    ),
+                  ],
+                ),
                 spaceH(height: _spacing),
 
-                // SECTION 4: Financial Chart
-                FinancialChartCard(controller: c, isDark: isDark),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: FinancialSnapshotCard(
+                        controller: c,
+                        isDark: isDark,
+                        onDuesTap: () => _navigateTo(Routes.DUES_TRACKER),
+                        onViewAll: () => _navigateTo(Routes.DUES_TRACKER),
+                      ),
+                    ),
+                    const SizedBox(width: _spacing),
+                    Expanded(
+                      flex: 2,
+                      child: SecurityStatusCard(
+                        controller: c,
+                        isDark: isDark,
+                        onTap: () => _navigateTo(Routes.SENTINEL),
+                      ),
+                    ),
+                  ],
+                ),
                 spaceH(height: _spacing),
 
-                // SECTION 5: Analytics Graphs (8 graphs)
-                DashboardGraphsSection(controller: c, isDark: isDark),
-                spaceH(height: _spacing),
-
-                // SECTION 6 + 7: Timeline + Activity (side by side)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -154,20 +151,21 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
                     Expanded(
                       flex: 2,
                       child: ActivityFeedSection(
-                          controller: c, isDark: isDark),
+                        controller: c,
+                        isDark: isDark,
+                        onViewAll: () => _navigateTo(Routes.MY_PURCHASES),
+                      ),
                     ),
                   ],
                 ),
                 spaceH(height: _spacing),
 
-                // Quick Actions Bar
                 _buildQuickActions(c, isDark),
               ],
             ),
           ),
         ),
 
-        // ── Right Sidebar (sticky) ───────────────────
         SizedBox(
           width: 300,
           child: SingleChildScrollView(
@@ -184,9 +182,6 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
     );
   }
 
-  // ════════════════════════════════════════════════════════════
-  //  MOBILE / TABLET LAYOUT (single column, no sidebar)
-  // ════════════════════════════════════════════════════════════
   Widget _buildMobileLayout(
       DashboardHomeController c, bool isDark, bool isTablet) {
     return SingleChildScrollView(
@@ -195,41 +190,49 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero
-          DashboardHeroSection(controller: c, isDark: isDark),
-          spaceH(height: _spacing),
-
-          // Profile Sidebar (shown inline on mobile)
-          ProfileSidebarSection(controller: c, isDark: isDark),
-          spaceH(height: _spacing),
-
-          // Category Showcase
-          CategoryShowcaseRow(
+          DashboardHeroSection(
             controller: c,
             isDark: isDark,
-            onViewDevices: () => _navigateTo(Routes.MY_DEVICES),
-            onViewPurchases: () => _navigateTo(Routes.MY_PURCHASES),
-            onViewSubscriptions: () => _navigateTo(Routes.SUBSCRIPTION),
-            onViewDues: () => _navigateTo(Routes.DUES_TRACKER),
+            onViewPlan: () => _navigateTo(Routes.PERSONAL_TASKS),
           ),
           spaceH(height: _spacing),
 
-          // Analytics
-          _sectionHeader('Insights', Icons.insights_rounded,
-              AppThemeData.neonPurple, isDark),
-          const SizedBox(height: 14),
-          AnalyticsOverviewSection(controller: c, isDark: isDark),
+          TodayFocusSection(
+            controller: c,
+            isDark: isDark,
+            onTaskTap: () => _navigateTo(Routes.PERSONAL_TASKS),
+            onDueTap: () => _navigateTo(Routes.DUES_TRACKER),
+            onReminderTap: () => _navigateTo(Routes.REMINDER),
+            onViewAll: () => _navigateTo(Routes.PERSONAL_TASKS),
+          ),
           spaceH(height: _spacing),
 
-          // Financial
-          FinancialChartCard(controller: c, isDark: isDark),
+          LifeOverviewSection(
+            controller: c,
+            isDark: isDark,
+            onDevicesTap: () => _navigateTo(Routes.MY_DEVICES),
+            onSubscriptionsTap: () => _navigateTo(Routes.SUBSCRIPTION),
+            onVaultTap: () => _navigateTo(Routes.VAULT),
+            onContactsTap: () => _navigateTo(Routes.MY_CONTACTS),
+            onViewAll: () => _navigateTo(Routes.SETTINGS),
+          ),
           spaceH(height: _spacing),
 
-          // Graphs
-          DashboardGraphsSection(controller: c, isDark: isDark),
+          FinancialSnapshotCard(
+            controller: c,
+            isDark: isDark,
+            onDuesTap: () => _navigateTo(Routes.DUES_TRACKER),
+            onViewAll: () => _navigateTo(Routes.DUES_TRACKER),
+          ),
           spaceH(height: _spacing),
 
-          // Timeline
+          SecurityStatusCard(
+            controller: c,
+            isDark: isDark,
+            onTap: () => _navigateTo(Routes.SENTINEL),
+          ),
+          spaceH(height: _spacing),
+
           UpcomingTimelineSection(
             controller: c,
             isDark: isDark,
@@ -237,76 +240,95 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
           ),
           spaceH(height: _spacing),
 
-          // Activity
-          ActivityFeedSection(controller: c, isDark: isDark),
+          ActivityFeedSection(
+            controller: c,
+            isDark: isDark,
+            onViewAll: () => _navigateTo(Routes.MY_PURCHASES),
+          ),
           spaceH(height: _spacing),
 
-          // Quick Actions
           _buildQuickActions(c, isDark),
+          spaceH(height: _spacing),
+
+          ProfileSidebarSection(controller: c, isDark: isDark),
         ],
       ),
     );
   }
 
-  // ════════════════════════════════════════════════════════════
-  //  QUICK ACTIONS (Scan Doc REMOVED)
-  // ════════════════════════════════════════════════════════════
   Widget _buildQuickActions(DashboardHomeController c, bool isDark) {
-    final actions = [
-      _QuickActionData(Icons.add_task_rounded, 'Add Task',
-          AppThemeData.neonPurple, () => _navigateTo(Routes.PERSONAL_TASKS)),
-      _QuickActionData(Icons.alarm_add_rounded, 'Reminder',
-          AppThemeData.neonOrange, () => _navigateTo(Routes.REMINDER)),
-      _QuickActionData(Icons.add_circle_rounded, 'Add Device',
-          AppThemeData.neonTeal, () => _navigateTo(Routes.MY_DEVICES)),
-      _QuickActionData(Icons.add_shopping_cart_rounded, 'Add Purchase',
-          AppThemeData.neonMint, () => _navigateTo(Routes.MY_PURCHASES)),
-      _QuickActionData(Icons.note_add_rounded, 'Create Note',
-          AppThemeData.neonLavender, () => _navigateTo(Routes.VAULT)),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionHeader('Quick Actions', Icons.bolt_rounded,
-            AppThemeData.neonBlue, isDark),
-        const SizedBox(height: 14),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: actions
-              .map((a) => _QuickActionButton(action: a, isDark: isDark))
-              .toList(),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.12)
+              : AppThemeData.grey3.withValues(alpha: 0.4),
         ),
-      ],
-    );
-  }
-
-  // ════════════════════════════════════════════════════════════
-  //  SECTION HEADER
-  // ════════════════════════════════════════════════════════════
-  Widget _sectionHeader(
-      String label, IconData icon, Color color, bool isDark) {
-    return Row(
-      children: [
-        Container(
-          width: 3,
-          height: 18,
-          decoration: BoxDecoration(
-            gradient: AppThemeData.neonPurpleBlueGradient,
-            borderRadius: BorderRadius.circular(2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Quick Actions',
+            style: TextStyle(
+              fontFamily: FontFamily.bold,
+              fontSize: 16,
+              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Icon(icon, size: 16, color: color.withOpacity(0.7)),
-        const SizedBox(width: 8),
-        TextCustom(
-          title: label,
-          fontSize: 15,
-          fontFamily: FontFamily.bold,
-          color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-        ),
-      ],
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _QuickCircleAction(
+                icon: Icons.add_task_rounded,
+                label: 'Add Task',
+                color: AppThemeData.neonPurple,
+                onTap: () => _navigateTo(Routes.PERSONAL_TASKS),
+                isDark: isDark,
+              ),
+              _QuickCircleAction(
+                icon: Icons.alarm_add_rounded,
+                label: 'Add Reminder',
+                color: AppThemeData.neonOrange,
+                onTap: () => _navigateTo(Routes.REMINDER),
+                isDark: isDark,
+              ),
+              _QuickCircleAction(
+                icon: Icons.add_circle_rounded,
+                label: 'Add Expense',
+                color: AppThemeData.danger300,
+                onTap: () => _navigateTo(Routes.DUES_TRACKER),
+                isDark: isDark,
+              ),
+              _QuickCircleAction(
+                icon: Icons.document_scanner_rounded,
+                label: 'Scan Document',
+                color: AppThemeData.neonTeal,
+                onTap: () => _navigateTo(Routes.VAULT),
+                isDark: isDark,
+              ),
+              _QuickCircleAction(
+                icon: Icons.person_add_rounded,
+                label: 'New Contact',
+                color: AppThemeData.neonMint,
+                onTap: () => _navigateTo(Routes.MY_CONTACTS),
+                isDark: isDark,
+              ),
+              _QuickCircleAction(
+                icon: Icons.mic_rounded,
+                label: 'Voice Note',
+                color: AppThemeData.neonLavender,
+                onTap: () => _navigateTo(Routes.VAULT),
+                isDark: isDark,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -320,97 +342,51 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-//  QUICK ACTION DATA + BUTTON (improved UI)
-// ══════════════════════════════════════════════════════════════
-class _QuickActionData {
+class _QuickCircleAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
   final VoidCallback onTap;
-  const _QuickActionData(this.icon, this.label, this.color, this.onTap);
-}
-
-class _QuickActionButton extends StatefulWidget {
-  final _QuickActionData action;
   final bool isDark;
-  const _QuickActionButton(
-      {required this.action, required this.isDark});
 
-  @override
-  State<_QuickActionButton> createState() => _QuickActionButtonState();
-}
-
-class _QuickActionButtonState extends State<_QuickActionButton> {
-  bool _hovered = false;
+  const _QuickCircleAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.action.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-          decoration: BoxDecoration(
-            gradient: _hovered
-                ? LinearGradient(
-                    colors: [
-                      widget.action.color.withOpacity(0.2),
-                      widget.action.color.withOpacity(0.08),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
-            color: _hovered
-                ? null
-                : (widget.isDark
-                    ? AppThemeData.surfaceElevated
-                    : AppThemeData.grey2),
-            borderRadius: BorderRadius.circular(14),
-            border: _hovered
-                ? Border.all(
-                    color: widget.action.color.withOpacity(0.35))
-                : Border.all(
-                    color: widget.isDark
-                        ? AppThemeData.surfaceBorder.withOpacity(0.3)
-                        : AppThemeData.grey4.withOpacity(0.3),
-                  ),
-            boxShadow: _hovered
-                ? AppThemeData.neonGlow(widget.action.color,
-                    blur: 14, opacity: 0.12)
-                : [],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                widget.action.icon,
-                size: 16,
-                color: _hovered
-                    ? Colors.white
-                    : widget.action.color,
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: color.withValues(alpha: 0.2),
               ),
-              const SizedBox(width: 7),
-              Text(
-                widget.action.label,
-                style: TextStyle(
-                  fontFamily: FontFamily.medium,
-                  fontSize: 12,
-                  color: _hovered
-                      ? widget.action.color
-                      : (widget.isDark
-                          ? AppThemeData.grey3
-                          : AppThemeData.grey8),
-                ),
-              ),
-            ],
+            ),
+            child: Icon(icon, size: 22, color: color),
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: FontFamily.medium,
+              fontSize: 10,
+              color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

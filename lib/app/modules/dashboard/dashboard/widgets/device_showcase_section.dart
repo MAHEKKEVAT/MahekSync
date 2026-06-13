@@ -58,7 +58,7 @@ class DeviceShowcaseSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppThemeData.neonTeal.withOpacity(0.1),
+                    color: AppThemeData.neonTeal.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -78,7 +78,7 @@ class DeviceShowcaseSection extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppThemeData.neonTeal.withOpacity(0.08),
+                    color: AppThemeData.neonTeal.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -145,7 +145,7 @@ class _DeviceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.1 : 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -161,7 +161,7 @@ class _DeviceCard extends StatelessWidget {
             child: Icon(
               _categoryIcon(device.category),
               size: 60,
-              color: AppThemeData.neonTeal.withOpacity(0.05),
+              color: AppThemeData.neonTeal.withValues(alpha: 0.05),
             ),
           ),
 
@@ -177,15 +177,15 @@ class _DeviceCard extends StatelessWidget {
                     imageUrl: device.deviceImageUrls!.first,
                     fit: BoxFit.cover,
                     placeholder: (_, __) => Container(
-                      color: AppThemeData.neonTeal.withOpacity(0.06),
+                      color: AppThemeData.neonTeal.withValues(alpha: 0.06),
                       child: Center(
-                        child: Icon(_categoryIcon(device.category), size: 28, color: AppThemeData.neonTeal.withOpacity(0.2)),
+                        child: Icon(_categoryIcon(device.category), size: 28, color: AppThemeData.neonTeal.withValues(alpha: 0.2)),
                       ),
                     ),
                     errorWidget: (_, __, ___) => Container(
-                      color: AppThemeData.neonTeal.withOpacity(0.06),
+                      color: AppThemeData.neonTeal.withValues(alpha: 0.06),
                       child: Center(
-                        child: Icon(_categoryIcon(device.category), size: 28, color: AppThemeData.neonTeal.withOpacity(0.2)),
+                        child: Icon(_categoryIcon(device.category), size: 28, color: AppThemeData.neonTeal.withValues(alpha: 0.2)),
                       ),
                     ),
                   ),
@@ -194,9 +194,9 @@ class _DeviceCard extends StatelessWidget {
                 Container(
                   height: 110,
                   width: 220,
-                  color: AppThemeData.neonTeal.withOpacity(0.06),
+                  color: AppThemeData.neonTeal.withValues(alpha: 0.06),
                   child: Center(
-                    child: Icon(_categoryIcon(device.category), size: 36, color: AppThemeData.neonTeal.withOpacity(0.15)),
+                    child: Icon(_categoryIcon(device.category), size: 36, color: AppThemeData.neonTeal.withValues(alpha: 0.15)),
                   ),
                 ),
 
@@ -234,7 +234,7 @@ class _DeviceCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppThemeData.neonTeal.withOpacity(0.08),
+                              color: AppThemeData.neonTeal.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: Text(
@@ -314,7 +314,7 @@ class _EmptyDeviceState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_circle_outline_rounded, size: 32, color: AppThemeData.neonTeal.withOpacity(0.3)),
+            Icon(Icons.add_circle_outline_rounded, size: 32, color: AppThemeData.neonTeal.withValues(alpha: 0.3)),
             const SizedBox(height: 8),
             Text(
               'No devices added yet',

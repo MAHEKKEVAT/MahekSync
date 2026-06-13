@@ -26,9 +26,14 @@ class FinancialChartCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+              : AppThemeData.grey3.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.12 : 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.04),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -43,7 +48,7 @@ class FinancialChartCard extends StatelessWidget {
             child: Icon(
               Icons.bar_chart_rounded,
               size: 100,
-              color: AppThemeData.neonPurple.withOpacity(0.04),
+              color: AppThemeData.neonPurple.withValues(alpha: 0.04),
             ),
           ),
 
@@ -204,8 +209,8 @@ class _FinancialBarChart extends StatelessWidget {
           horizontalInterval: maxY / 4,
           getDrawingHorizontalLine: (value) => FlLine(
             color: isDark
-                ? AppThemeData.surfaceBorder.withOpacity(0.15)
-                : AppThemeData.grey3.withOpacity(0.3),
+                ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+                : AppThemeData.grey3.withValues(alpha: 0.3),
             strokeWidth: 0.5,
           ),
         ),
@@ -383,7 +388,7 @@ class _SummaryChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.06),
+          color: color.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

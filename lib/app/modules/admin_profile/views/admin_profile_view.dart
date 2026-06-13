@@ -692,7 +692,7 @@ class AdminProfileView extends StatelessWidget {
       color: Colors.black.withValues(alpha: 0.45),
       child: MahekLoader(
         message: message,
-        style: MahekLoaderStyle.arc,
+        style: MahekLoaderStyle.aurora,
         showBackgroundOverlay: false,
         size: 56,
       ),

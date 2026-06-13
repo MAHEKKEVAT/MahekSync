@@ -1,9 +1,3 @@
-// lib/app/modules/dashboard/widgets/activity_feed_section.dart
-// ──────────────────────────────────────────────────────────────
-//  Totally redesigned Recent Activity feed
-//  Shows images when available (devices, purchases)
-//  Modern glass card rows with image/avatar support
-// ──────────────────────────────────────────────────────────────
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
@@ -14,11 +8,13 @@ import 'package:maheksync/app/widgets/text_widget.dart';
 class ActivityFeedSection extends StatelessWidget {
   final DashboardHomeController controller;
   final bool isDark;
+  final VoidCallback? onViewAll;
 
   const ActivityFeedSection({
     super.key,
     required this.controller,
     required this.isDark,
+    this.onViewAll,
   });
 
   @override
@@ -26,17 +22,15 @@ class ActivityFeedSection extends StatelessWidget {
     final activities = _buildActivities();
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppThemeData.neonPurple.withOpacity(0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.12)
+              : AppThemeData.grey3.withValues(alpha: 0.4),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,30 +38,60 @@ class ActivityFeedSection extends StatelessWidget {
         children: [
           // Header
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppThemeData.neonPurple, AppThemeData.neonBlue],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppThemeData.neonPurple, AppThemeData.neonBlue],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.history_rounded,
+                        size: 18, color: Colors.white),
                   ),
-                  borderRadius: BorderRadius.circular(11),
-                  boxShadow: AppThemeData.neonGlow(AppThemeData.neonPurple,
-                      blur: 10, opacity: 0.12),
+                  const SizedBox(width: 14),
+                  TextCustom(
+                    title: 'Recent Activity',
+                    fontSize: 17,
+                    fontFamily: FontFamily.bold,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  ),
+                ],
+              ),
+              if (onViewAll != null)
+                GestureDetector(
+                  onTap: onViewAll,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppThemeData.surfaceElevated.withValues(alpha: 0.5)
+                          : AppThemeData.grey2,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark
+                            ? AppThemeData.surfaceBorder.withValues(alpha: 0.2)
+                            : AppThemeData.grey3.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Text(
+                      'View All',
+                      style: TextStyle(
+                        fontFamily: FontFamily.medium,
+                        fontSize: 11,
+                        color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
+                      ),
+                    ),
+                  ),
                 ),
-                child: const Icon(Icons.history_rounded,
-                    size: 17, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              TextCustom(
-                title: 'Recent Activity',
-                fontSize: 17,
-                fontFamily: FontFamily.bold,
-                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-              ),
             ],
           ),
           const SizedBox(height: 18),
@@ -75,9 +99,7 @@ class ActivityFeedSection extends StatelessWidget {
           if (activities.isEmpty)
             _EmptyActivity(isDark: isDark)
           else
-            ...activities
-                .take(6)
-                .map((a) => _ActivityCard(activity: a, isDark: isDark)),
+            ...activities.take(6).map((a) => _ActivityCard(activity: a, isDark: isDark)),
         ],
       ),
     );
@@ -99,8 +121,10 @@ class ActivityFeedSection extends StatelessWidget {
         icon: Icons.devices_rounded,
         accentColor: AppThemeData.neonTeal,
         timestamp: d.createdAt?.toDate() ?? DateTime.now(),
-        category: 'device',
+        category: 'New Device',
         imageUrl: imgUrl,
+        statusIcon: Icons.arrow_forward_rounded,
+        statusColor: AppThemeData.grey5,
       ));
       i++;
     }
@@ -117,8 +141,10 @@ class ActivityFeedSection extends StatelessWidget {
         icon: Icons.shopping_bag_rounded,
         accentColor: AppThemeData.neonMint,
         timestamp: DateTime.now(),
-        category: 'purchase',
+        category: 'Purchased',
         imageUrl: imgUrl,
+        statusIcon: null,
+        statusColor: AppThemeData.danger300,
       ));
       i++;
     }
@@ -131,8 +157,10 @@ class ActivityFeedSection extends StatelessWidget {
         icon: Icons.alarm_rounded,
         accentColor: AppThemeData.neonOrange,
         timestamp: r.expiryDate ?? DateTime.now(),
-        category: 'reminder',
+        category: 'Reminder',
         imageUrl: null,
+        statusIcon: Icons.check_circle_rounded,
+        statusColor: AppThemeData.success400,
       ));
       i++;
     }
@@ -145,8 +173,10 @@ class ActivityFeedSection extends StatelessWidget {
         icon: Icons.task_alt_rounded,
         accentColor: AppThemeData.neonPurple,
         timestamp: t.dueDate ?? DateTime.now(),
-        category: 'task',
+        category: 'Task Completed',
         imageUrl: null,
+        statusIcon: Icons.check_circle_rounded,
+        statusColor: AppThemeData.success400,
       ));
       i++;
     }
@@ -156,7 +186,6 @@ class ActivityFeedSection extends StatelessWidget {
   }
 }
 
-// ─── Activity Model with Image ──────────────────────────────
 class _ActivityWithImage {
   final String id;
   final String title;
@@ -166,6 +195,8 @@ class _ActivityWithImage {
   final DateTime timestamp;
   final String category;
   final String? imageUrl;
+  final IconData? statusIcon;
+  final Color statusColor;
 
   _ActivityWithImage({
     required this.id,
@@ -176,6 +207,8 @@ class _ActivityWithImage {
     required this.timestamp,
     required this.category,
     this.imageUrl,
+    this.statusIcon,
+    required this.statusColor,
   });
 
   String get timeAgo {
@@ -188,156 +221,141 @@ class _ActivityWithImage {
   }
 }
 
-// ─── Activity Card (with image support) ─────────────────────
-class _ActivityCard extends StatelessWidget {
+class _ActivityCard extends StatefulWidget {
   final _ActivityWithImage activity;
   final bool isDark;
 
   const _ActivityCard({required this.activity, required this.isDark});
 
   @override
+  State<_ActivityCard> createState() => _ActivityCardState();
+}
+
+class _ActivityCardState extends State<_ActivityCard> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
+    final a = widget.activity;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isDark
-              ? AppThemeData.surfaceElevated.withOpacity(0.3)
-              : AppThemeData.grey2.withOpacity(0.6),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: activity.accentColor.withOpacity(0.06),
-            width: 1,
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: _hovered
+                ? (widget.isDark
+                    ? AppThemeData.surfaceElevated
+                    : AppThemeData.grey2)
+                : (widget.isDark
+                    ? AppThemeData.surfaceMid.withValues(alpha: 0.3)
+                    : AppThemeData.grey2.withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: _hovered
+                  ? a.accentColor.withValues(alpha: 0.15)
+                  : widget.isDark
+                      ? AppThemeData.surfaceBorder.withValues(alpha: 0.10)
+                      : AppThemeData.grey3.withValues(alpha: 0.3),
+            ),
           ),
-        ),
-        child: Row(
-          children: [
-            // Image or Icon
-            if (activity.imageUrl != null &&
-                activity.imageUrl!.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: CachedNetworkImage(
-                  imageUrl: activity.imageUrl!,
-                  width: 42,
-                  height: 42,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: activity.accentColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(activity.icon,
-                        size: 18, color: activity.accentColor),
-                  ),
-                  errorWidget: (_, __, ___) => Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: activity.accentColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(activity.icon,
-                        size: 18, color: activity.accentColor),
-                  ),
-                ),
-              )
-            else
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      activity.accentColor.withOpacity(0.15),
-                      activity.accentColor.withOpacity(0.05)
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+          child: Row(
+            children: [
+              // Image or icon
+              if (a.imageUrl != null && a.imageUrl!.isNotEmpty)
+                ClipRRect(
                   borderRadius: BorderRadius.circular(10),
+                  child: CachedNetworkImage(
+                    imageUrl: a.imageUrl!,
+                    width: 44,
+                    height: 44,
+                    fit: BoxFit.cover,
+                    placeholder: (_, _) => _iconContainer(a),
+                    errorWidget: (_, _, _) => _iconContainer(a),
+                  ),
+                )
+              else
+                _iconContainer(a),
+
+              const SizedBox(width: 12),
+
+              // Title + description
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      a.title,
+                      style: TextStyle(
+                        fontFamily: FontFamily.semiBold,
+                        fontSize: 12,
+                        color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      '${a.category} \u00B7 ${a.timeAgo}',
+                      style: TextStyle(
+                        fontFamily: FontFamily.regular,
+                        fontSize: 10,
+                        color: widget.isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                child: Icon(activity.icon,
-                    size: 18, color: activity.accentColor),
               ),
 
-            const SizedBox(width: 12),
-
-            // Text
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    activity.title,
-                    style: TextStyle(
-                      fontFamily: FontFamily.semiBold,
-                      fontSize: 12,
-                      color:
-                          isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    activity.description,
-                    style: TextStyle(
-                      fontFamily: FontFamily.regular,
-                      fontSize: 10,
-                      color:
-                          isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-
-            // Category badge + Time
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: activity.accentColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Text(
-                    activity.category,
-                    style: TextStyle(
-                      fontFamily: FontFamily.medium,
-                      fontSize: 8,
-                      color: activity.accentColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
+              // Status indicator
+              if (a.statusIcon != null)
+                Icon(a.statusIcon, size: 18, color: a.statusColor)
+              else if (a.id.startsWith('pur_'))
                 Text(
-                  activity.timeAgo,
+                  a.description,
                   style: TextStyle(
-                    fontFamily: FontFamily.regular,
-                    fontSize: 9,
-                    color:
-                        isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+                    fontFamily: FontFamily.semiBold,
+                    fontSize: 11,
+                    color: a.statusColor,
                   ),
-                ),
-              ],
-            ),
-          ],
+                )
+              else
+                Icon(Icons.arrow_forward_rounded,
+                    size: 16,
+                    color: widget.isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  Widget _iconContainer(_ActivityWithImage a) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            a.accentColor.withValues(alpha: 0.15),
+            a.accentColor.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(a.icon, size: 18, color: a.accentColor),
+    );
+  }
 }
 
-// ─── Empty ──────────────────────────────────────────────────
 class _EmptyActivity extends StatelessWidget {
   final bool isDark;
   const _EmptyActivity({required this.isDark});
@@ -345,17 +363,17 @@ class _EmptyActivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       child: Center(
         child: Column(
           children: [
             Icon(Icons.history_rounded,
-                size: 28,
+                size: 32,
                 color: isDark ? AppThemeData.grey7 : AppThemeData.grey5),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             TextCustom(
               title: 'No recent activity',
-              fontSize: 12,
+              fontSize: 13,
               fontFamily: FontFamily.regular,
               color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
             ),

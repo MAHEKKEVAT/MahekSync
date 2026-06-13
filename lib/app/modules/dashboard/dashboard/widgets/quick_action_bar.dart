@@ -1,7 +1,4 @@
 // lib/app/modules/dashboard/widgets/quick_action_bar.dart
-// ──────────────────────────────────────────────────────────────
-//  Quick Action Bar — Scan Doc REMOVED, improved button UI
-// ──────────────────────────────────────────────────────────────
 import 'package:flutter/material.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
@@ -89,14 +86,12 @@ class QuickActionBar extends StatelessWidget {
       runSpacing: 10,
       alignment: WrapAlignment.start,
       children: actions
-          .map((action) =>
-              _QuickActionButton(action: action, isDark: isDark))
+          .map((action) => _QuickActionButton(action: action, isDark: isDark))
           .toList(),
     );
   }
 }
 
-// ─── Quick Action Model ───────────────────────────────────────
 class _QuickAction {
   final String title;
   final IconData icon;
@@ -113,15 +108,11 @@ class _QuickAction {
   });
 }
 
-// ─── Quick Action Button (improved UI) ──────────────────────
 class _QuickActionButton extends StatefulWidget {
   final _QuickAction action;
   final bool isDark;
 
-  const _QuickActionButton({
-    required this.action,
-    required this.isDark,
-  });
+  const _QuickActionButton({required this.action, required this.isDark});
 
   @override
   State<_QuickActionButton> createState() => _QuickActionButtonState();
@@ -140,14 +131,13 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
           decoration: BoxDecoration(
             gradient: _isHovered
                 ? LinearGradient(
                     colors: [
-                      widget.action.accentColor.withOpacity(0.2),
-                      widget.action.accentColor.withOpacity(0.08),
+                      widget.action.accentColor.withValues(alpha: 0.2),
+                      widget.action.accentColor.withValues(alpha: 0.08),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -160,12 +150,11 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
                     : AppThemeData.grey2),
             borderRadius: BorderRadius.circular(14),
             border: _isHovered
-                ? Border.all(
-                    color: widget.action.accentColor.withOpacity(0.35))
+                ? Border.all(color: widget.action.accentColor.withValues(alpha: 0.35))
                 : Border.all(
                     color: widget.isDark
-                        ? AppThemeData.surfaceBorder.withOpacity(0.3)
-                        : AppThemeData.grey4.withOpacity(0.3),
+                        ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                        : AppThemeData.grey4.withValues(alpha: 0.3),
                   ),
             boxShadow: _isHovered
                 ? AppThemeData.neonGlow(widget.action.accentColor,
@@ -178,9 +167,7 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
               Icon(
                 widget.action.icon,
                 size: 16,
-                color: _isHovered
-                    ? Colors.white
-                    : widget.action.accentColor,
+                color: _isHovered ? Colors.white : widget.action.accentColor,
               ),
               const SizedBox(width: 7),
               Text(
@@ -190,9 +177,7 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
                   fontSize: 12,
                   color: _isHovered
                       ? widget.action.accentColor
-                      : (widget.isDark
-                          ? AppThemeData.grey3
-                          : AppThemeData.grey8),
+                      : (widget.isDark ? AppThemeData.grey3 : AppThemeData.grey8),
                 ),
               ),
             ],

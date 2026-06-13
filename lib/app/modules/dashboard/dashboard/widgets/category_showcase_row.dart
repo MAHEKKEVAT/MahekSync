@@ -229,13 +229,13 @@ class _CategoryCardState extends State<_CategoryCard> {
             borderRadius: BorderRadius.circular(20),
             border: _hovered
                 ? Border.all(
-                    color: widget.accentColor.withOpacity(0.2), width: 1)
+                    color: widget.accentColor.withValues(alpha: 0.2), width: 1)
                 : null,
             boxShadow: [
               BoxShadow(
                 color: _hovered
-                    ? widget.accentColor.withOpacity(0.08)
-                    : Colors.black.withOpacity(widget.isDark ? 0.12 : 0.03),
+                    ? widget.accentColor.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: widget.isDark ? 0.12 : 0.03),
                 blurRadius: _hovered ? 20 : 10,
                 offset: const Offset(0, 4),
               ),
@@ -250,7 +250,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                 bottom: -10,
                 child: Icon(widget.icon,
                     size: 80,
-                    color: widget.accentColor.withOpacity(0.05)),
+                    color: widget.accentColor.withValues(alpha: 0.05)),
               ),
 
               // Warning badge for dues
@@ -262,7 +262,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppThemeData.neonPink.withOpacity(0.15),
+                      color: AppThemeData.neonPink.withValues(alpha: 0.15),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(10),
                         topRight: Radius.circular(20),
@@ -304,7 +304,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                             gradient: LinearGradient(
                               colors: [
                                 widget.accentColor,
-                                widget.accentColor.withOpacity(0.7)
+                                widget.accentColor.withValues(alpha: 0.7)
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -326,7 +326,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                                   horizontal: 10, vertical: 5),
                               decoration: BoxDecoration(
                                 color:
-                                    widget.accentColor.withOpacity(0.08),
+                                    widget.accentColor.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -388,7 +388,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: widget.accentColor.withOpacity(0.1),
+                            color: widget.accentColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(5),
                           ),
                           child: Text(
@@ -409,14 +409,14 @@ class _CategoryCardState extends State<_CategoryCard> {
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: widget.isDark
-                            ? AppThemeData.surfaceMid.withOpacity(0.4)
-                            : AppThemeData.grey2.withOpacity(0.8),
+                            ? AppThemeData.surfaceMid.withValues(alpha: 0.4)
+                            : AppThemeData.grey2.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: widget.isDark
                               ? AppThemeData.surfaceBorder
-                                  .withOpacity(0.2)
-                              : AppThemeData.grey3.withOpacity(0.5),
+                                  .withValues(alpha: 0.2)
+                              : AppThemeData.grey3.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Row(
@@ -436,26 +436,26 @@ class _CategoryCardState extends State<_CategoryCard> {
                                   height: 38,
                                   decoration: BoxDecoration(
                                     color:
-                                        widget.accentColor.withOpacity(0.1),
+                                        widget.accentColor.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(widget.icon,
                                       size: 16,
                                       color: widget.accentColor
-                                          .withOpacity(0.5)),
+                                          .withValues(alpha: 0.5)),
                                 ),
                                 errorWidget: (_, __, ___) => Container(
                                   width: 38,
                                   height: 38,
                                   decoration: BoxDecoration(
                                     color:
-                                        widget.accentColor.withOpacity(0.1),
+                                        widget.accentColor.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(widget.icon,
                                       size: 16,
                                       color: widget.accentColor
-                                          .withOpacity(0.5)),
+                                          .withValues(alpha: 0.5)),
                                 ),
                               ),
                             )
@@ -464,13 +464,13 @@ class _CategoryCardState extends State<_CategoryCard> {
                               width: 38,
                               height: 38,
                               decoration: BoxDecoration(
-                                color: widget.accentColor.withOpacity(0.1),
+                                color: widget.accentColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(widget.icon,
                                   size: 16,
                                   color:
-                                      widget.accentColor.withOpacity(0.6)),
+                                      widget.accentColor.withValues(alpha: 0.6)),
                             ),
                           const SizedBox(width: 10),
                           Expanded(

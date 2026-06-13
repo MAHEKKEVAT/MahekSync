@@ -24,14 +24,12 @@ class MetricChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppThemeData.surfaceDeep
-            : AppThemeData.grey1,
+        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark
-              ? AppThemeData.surfaceBorder.withOpacity(0.4)
-              : AppThemeData.grey3,
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.4)
+              : AppThemeData.grey3.withValues(alpha: 0.6),
         ),
       ),
       child: Row(
@@ -41,7 +39,7 @@ class MetricChip extends StatelessWidget {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color: accentColor.withOpacity(0.12),
+              color: accentColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(9),
             ),
             child: Icon(icon, size: 14, color: accentColor),

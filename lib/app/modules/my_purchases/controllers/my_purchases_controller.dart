@@ -1,5 +1,4 @@
 // lib/app/modules/my_purchases/controllers/my_purchases_controller.dart
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
@@ -28,8 +27,10 @@ class MyPurchasesController extends GetxController {
   final selectedCategory = Rxn<CategoryModel>();
   final selectedPaymentMethod = Rxn<PaymentMethodModel>();
   final selectedStatus = 'ALL'.obs;
+  final selectedSortOption = 'Latest'.obs;
 
   final statusOptions = ['ALL', 'DELIVERED', 'IN TRANSIT', 'PRE-ORDER'];
+  final sortOptions = ['Latest', 'Oldest', 'Price: Low to High', 'Price: High to Low', 'Name: A to Z'];
 
   String? get ownerId => MahekConstant.ownerModel?.id;
 
@@ -117,6 +118,7 @@ class MyPurchasesController extends GetxController {
     }
 
     filteredPurchases.value = result;
+    _applySort();
   }
 
   void updateSearchQuery(String query) {
@@ -145,7 +147,35 @@ class MyPurchasesController extends GetxController {
     selectedPaymentMethod.value = null;
     selectedStatus.value = 'ALL';
     selectedDateRange.value = null;
+    selectedSortOption.value = 'Latest';
     _applyFilters();
+  }
+
+  void sortBy(String option) {
+    selectedSortOption.value = option;
+    _applySort();
+  }
+
+  void _applySort() {
+    final list = filteredPurchases.toList();
+    switch (selectedSortOption.value) {
+      case 'Latest':
+        list.sort((a, b) => (b.purchaseDate ?? DateTime(0)).compareTo(a.purchaseDate ?? DateTime(0)));
+        break;
+      case 'Oldest':
+        list.sort((a, b) => (a.purchaseDate ?? DateTime(0)).compareTo(b.purchaseDate ?? DateTime(0)));
+        break;
+      case 'Price: Low to High':
+        list.sort((a, b) => (a.price ?? 0).compareTo(b.price ?? 0));
+        break;
+      case 'Price: High to Low':
+        list.sort((a, b) => (b.price ?? 0).compareTo(a.price ?? 0));
+        break;
+      case 'Name: A to Z':
+        list.sort((a, b) => (a.assetName ?? '').compareTo(b.assetName ?? ''));
+        break;
+    }
+    filteredPurchases.value = list;
   }
 
   Future<void> refreshPurchases() async {

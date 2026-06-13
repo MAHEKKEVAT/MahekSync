@@ -166,9 +166,14 @@ class _AnalyticsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+              : AppThemeData.grey3.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withOpacity(0.04),
+            color: accentColor.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -180,7 +185,7 @@ class _AnalyticsCard extends StatelessWidget {
           Positioned(
             right: -8,
             bottom: -8,
-            child: Icon(icon, size: 70, color: accentColor.withOpacity(0.05)),
+            child: Icon(icon, size: 70, color: accentColor.withValues(alpha: 0.05)),
           ),
 
           // ── Content ──────────────────────────────
@@ -204,8 +209,8 @@ class _AnalyticsCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: trend == 'up'
-                          ? AppThemeData.neonRed.withOpacity(0.08)
-                          : AppThemeData.neonMint.withOpacity(0.08),
+                          ? AppThemeData.neonRed.withValues(alpha: 0.08)
+                          : AppThemeData.neonMint.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
