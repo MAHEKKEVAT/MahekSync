@@ -36,7 +36,9 @@ dependencies:
   shimmer: ^3.0.0
   file_picker: ^8.0.0
   image_cropper: ^8.0.2
-
+  percent_indicator: ^4.2.3
+  url_launcher: ^6.3.1
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:

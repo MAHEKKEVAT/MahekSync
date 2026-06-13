@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
@@ -94,7 +95,9 @@ class _MahekLoaderState extends State<MahekLoader>
     final loaderColor = widget.color ?? AppThemeData.primary50;
     final trackColor =
         widget.backgroundColor ??
-            (isDark ? AppThemeData.grey8.withOpacity(0.2) : AppThemeData.grey3.withOpacity(0.4));
+            (isDark
+                ? AppThemeData.grey8.withValues(alpha: 0.2)
+                : AppThemeData.grey3.withValues(alpha: 0.4));
 
     Widget loaderContent = FadeTransition(
       opacity: _fadeAnimation,
@@ -116,7 +119,9 @@ class _MahekLoaderState extends State<MahekLoader>
               title: widget.message.tr,
               fontSize: widget.textSize,
               fontFamily: FontFamily.medium,
-              color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
+              color: isDark
+                  ? AppThemeData.textNeonPurple.withValues(alpha: 0.85)
+                  : AppThemeData.grey7,
               textAlign: TextAlign.center,
             ),
           ],
@@ -125,6 +130,18 @@ class _MahekLoaderState extends State<MahekLoader>
     );
 
     if (widget.showBackgroundOverlay) {
+      if (isDark) {
+        return ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: Container(
+              color: widget.overlayColor ??
+                  AppThemeData.primaryBlack.withValues(alpha: 0.6),
+              child: loaderContent,
+            ),
+          ),
+        );
+      }
       return Container(
         color: widget.overlayColor ?? Colors.black54,
         child: loaderContent,
@@ -137,24 +154,24 @@ class _MahekLoaderState extends State<MahekLoader>
   Widget _buildLoaderByStyle(Color color, Color trackColor, bool isDark) {
     switch (widget.style) {
       case MahekLoaderStyle.arc:
-        return _buildArcLoader(color, trackColor);
+        return _buildArcLoader(color, trackColor, isDark);
       case MahekLoaderStyle.pulse:
         return _buildPulseLoader(color, isDark);
       case MahekLoaderStyle.wave:
-        return _buildWaveLoader(color);
+        return _buildWaveLoader(color, isDark);
       case MahekLoaderStyle.ring:
-        return _buildRingLoader(color, trackColor);
+        return _buildRingLoader(color, trackColor, isDark);
       case MahekLoaderStyle.dualRing:
         return _buildDualRingLoader(color, trackColor, isDark);
       case MahekLoaderStyle.shimmer:
-        return _buildShimmerLoader(color);
+        return _buildShimmerLoader(color, isDark);
     }
   }
 
   // ═══════════════════════════════════
-  // 1. UPGRADED ARC LOADER (Glowing Core + Smooth Trail)
+  // 1. ARC LOADER (Glowing Core + Smooth Trail)
   // ═══════════════════════════════════
-  Widget _buildArcLoader(Color color, Color trackColor) {
+  Widget _buildArcLoader(Color color, Color trackColor, bool isDark) {
     return AnimatedBuilder(
       animation: _mainController,
       builder: (_, __) {
@@ -165,6 +182,7 @@ class _MahekLoaderState extends State<MahekLoader>
             color: color,
             trackColor: trackColor,
             strokeWidth: widget.strokeWidth,
+            isDark: isDark,
           ),
         );
       },
@@ -172,7 +190,7 @@ class _MahekLoaderState extends State<MahekLoader>
   }
 
   // ═══════════════════════════════════
-  // 2. UPGRADED PULSE LOADER (Double Ambient Neon Wave)
+  // 2. PULSE LOADER (Double Ambient Neon Wave)
   // ═══════════════════════════════════
   Widget _buildPulseLoader(Color color, bool isDark) {
     return AnimatedBuilder(
@@ -190,8 +208,11 @@ class _MahekLoaderState extends State<MahekLoader>
               height: widget.size * (0.4 + pulse1 * 0.6),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color.withOpacity(0.12 * (1.0 - progress)),
-                border: Border.all(color: color.withOpacity(0.3 * (1.0 - progress)), width: 1.5),
+                color: color.withValues(alpha: 0.12 * (1.0 - progress)),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.3 * (1.0 - progress)),
+                  width: 1.5,
+                ),
               ),
             ),
             Container(
@@ -200,12 +221,12 @@ class _MahekLoaderState extends State<MahekLoader>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [color, color.withOpacity(0.0)],
+                  colors: [color, color.withValues(alpha: 0.0)],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(isDark ? 0.25 : 0.12),
-                    blurRadius: 16,
+                    color: color.withValues(alpha: isDark ? 0.35 : 0.12),
+                    blurRadius: isDark ? 24 : 16,
                   )
                 ],
               ),
@@ -217,37 +238,53 @@ class _MahekLoaderState extends State<MahekLoader>
   }
 
   // ═══════════════════════════════════
-  // 3. UPGRADED WAVE LOADER (Fluid Capsule Height Bars)
+  // 3. WAVE LOADER (Fluid Capsule Height Bars)
   // ═══════════════════════════════════
-  Widget _buildWaveLoader(Color color) {
+  Widget _buildWaveLoader(Color color, bool isDark) {
     return AnimatedBuilder(
       animation: _mainController,
       builder: (_, __) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: List.generate(4, (index) {
-            final delay = index * 0.22;
-            final bounceValue = (math.sin((_mainController.value * 2 * math.pi) - (delay * 2 * math.pi)) + 1) / 2;
+          children: List.generate(5, (index) {
+            final delay = index * 0.18;
+            final bounceValue =
+                (math.sin((_mainController.value * 2 * math.pi) -
+                        (delay * 2 * math.pi)) +
+                    1) /
+                    2;
             return Container(
-              width: widget.size * 0.14,
-              height: widget.size * 0.2 + (bounceValue * widget.size * 0.55),
-              margin: EdgeInsets.symmetric(horizontal: widget.size * 0.05),
+              width: widget.size * 0.1,
+              height: widget.size * 0.2 +
+                  (bounceValue * widget.size * 0.55),
+              margin: EdgeInsets.symmetric(horizontal: widget.size * 0.035),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    color,
-                    color.withOpacity(0.4),
-                  ],
+                  colors: isDark
+                      ? [
+                          AppThemeData.neonPurple.withValues(alpha: 0.9),
+                          color.withValues(alpha: 0.5),
+                        ]
+                      : [
+                          color,
+                          color.withValues(alpha: 0.4),
+                        ],
                 ),
                 boxShadow: [
+                  if (isDark)
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.25),
+                      blurRadius: 10,
+                      offset: Offset(0, bounceValue * 4),
+                    ),
                   BoxShadow(
-                    color: color.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: Offset(0, bounceValue * 3),
+                    color: color.withValues(alpha: 0.15),
+                    blurRadius: 6,
+                    offset: Offset(0, bounceValue * 2),
                   ),
                 ],
               ),
@@ -259,9 +296,9 @@ class _MahekLoaderState extends State<MahekLoader>
   }
 
   // ═══════════════════════════════════
-  // 4. UPGRADED RING LOADER (Progressive Velocity Ring)
+  // 4. RING LOADER (Progressive Velocity Ring)
   // ═══════════════════════════════════
-  Widget _buildRingLoader(Color color, Color trackColor) {
+  Widget _buildRingLoader(Color color, Color trackColor, bool isDark) {
     return AnimatedBuilder(
       animation: _mainController,
       builder: (_, __) {
@@ -272,6 +309,7 @@ class _MahekLoaderState extends State<MahekLoader>
             color: color,
             trackColor: trackColor,
             strokeWidth: widget.strokeWidth,
+            isDark: isDark,
           ),
         );
       },
@@ -279,10 +317,11 @@ class _MahekLoaderState extends State<MahekLoader>
   }
 
   // ═══════════════════════════════════
-  // 5. UPGRADED DUAL RING LOADER (Counter-Rotational Loops)
+  // 5. DUAL RING LOADER (Counter-Rotational Loops)
   // ═══════════════════════════════════
   Widget _buildDualRingLoader(Color color, Color trackColor, bool isDark) {
-    final secondaryColor = isDark ? AppThemeData.neonPurpleDim : AppThemeData.primary2;
+    final secondaryColor =
+        isDark ? AppThemeData.neonPurpleDim : AppThemeData.primary2;
     return AnimatedBuilder(
       animation: _mainController,
       builder: (_, __) {
@@ -295,6 +334,7 @@ class _MahekLoaderState extends State<MahekLoader>
             secondaryColor: secondaryColor,
             trackColor: trackColor,
             strokeWidth: widget.strokeWidth,
+            isDark: isDark,
           ),
         );
       },
@@ -302,9 +342,9 @@ class _MahekLoaderState extends State<MahekLoader>
   }
 
   // ═══════════════════════════════════
-  // 6. UPGRADED SHIMMER LOADER (Gemini Inspired Pill)
+  // 6. SHIMMER LOADER (Gemini Inspired Pill)
   // ═══════════════════════════════════
-  Widget _buildShimmerLoader(Color color) {
+  Widget _buildShimmerLoader(Color color, bool isDark) {
     return AnimatedBuilder(
       animation: _mainController,
       builder: (_, __) {
@@ -318,21 +358,30 @@ class _MahekLoaderState extends State<MahekLoader>
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 colors: [
-                  color.withOpacity(0.05),
-                  color.withOpacity(0.3),
-                  AppThemeData.neonPurple.withOpacity(0.8),
-                  color.withOpacity(0.3),
-                  color.withOpacity(0.05),
+                  color.withValues(alpha: 0.05),
+                  color.withValues(alpha: 0.3),
+                  (isDark
+                          ? AppThemeData.neonPurple
+                          : AppThemeData.primary50)
+                      .withValues(alpha: 0.8),
+                  color.withValues(alpha: 0.3),
+                  color.withValues(alpha: 0.05),
                 ],
                 stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
                 transform: _SlidingGradient(_mainController.value),
               ),
               boxShadow: [
+                if (isDark)
+                  BoxShadow(
+                    color: AppThemeData.neonPurple.withValues(alpha: 0.2),
+                    blurRadius: 14,
+                    spreadRadius: 1,
+                  ),
                 BoxShadow(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   blurRadius: 10,
                   spreadRadius: 1,
-                )
+                ),
               ],
             ),
           ),
@@ -363,12 +412,14 @@ class _ArcPainter extends CustomPainter {
   final Color color;
   final Color trackColor;
   final double strokeWidth;
+  final bool isDark;
 
   _ArcPainter({
     required this.progress,
     required this.color,
     required this.trackColor,
     required this.strokeWidth,
+    this.isDark = false,
   });
 
   @override
@@ -376,7 +427,14 @@ class _ArcPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
 
-    canvas.drawCircle(center, radius, Paint()..color = trackColor..style = PaintingStyle.stroke..strokeWidth = strokeWidth * 0.5);
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = trackColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth * 0.5,
+    );
 
     final sweepAngle = math.pi * 0.85;
     final startAngle = (progress * 2 * math.pi) - (math.pi / 2);
@@ -385,15 +443,44 @@ class _ArcPainter extends CustomPainter {
     final gradient = SweepGradient(
       startAngle: startAngle,
       endAngle: startAngle + sweepAngle,
-      colors: [color.withOpacity(0.0), color.withOpacity(0.4), color],
+      colors: [
+        color.withValues(alpha: 0.0),
+        color.withValues(alpha: 0.4),
+        color,
+      ],
       stops: const [0.0, 0.5, 1.0],
       transform: GradientRotation(startAngle),
     );
 
-    canvas.drawArc(rect, startAngle, sweepAngle, false, Paint()..shader = gradient.createShader(rect)..style = PaintingStyle.stroke..strokeWidth = strokeWidth..strokeCap = StrokeCap.round);
+    canvas.drawArc(
+      rect,
+      startAngle,
+      sweepAngle,
+      false,
+      Paint()
+        ..shader = gradient.createShader(rect)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round,
+    );
 
     final dotAngle = startAngle + sweepAngle;
-    canvas.drawCircle(Offset(center.dx + radius * math.cos(dotAngle), center.dy + radius * math.sin(dotAngle)), strokeWidth * 0.75, Paint()..color = color..style = PaintingStyle.fill);
+    final dotPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    if (isDark) {
+      dotPaint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+    }
+
+    canvas.drawCircle(
+      Offset(
+        center.dx + radius * math.cos(dotAngle),
+        center.dy + radius * math.sin(dotAngle),
+      ),
+      strokeWidth * 0.75,
+      dotPaint,
+    );
   }
 
   @override
@@ -405,12 +492,14 @@ class _RingPainter extends CustomPainter {
   final Color color;
   final Color trackColor;
   final double strokeWidth;
+  final bool isDark;
 
   _RingPainter({
     required this.progress,
     required this.color,
     required this.trackColor,
     required this.strokeWidth,
+    this.isDark = false,
   });
 
   @override
@@ -418,26 +507,35 @@ class _RingPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
 
-    canvas.drawCircle(center, radius, Paint()..color = trackColor..style = PaintingStyle.stroke..strokeWidth = strokeWidth * 0.4);
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = trackColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth * 0.4,
+    );
 
     final rect = Rect.fromCircle(center: center, radius: radius);
 
-    // Smooth nonlinear speed breathing arc curve
     final double offsetProgress = math.sin(progress * math.pi);
     final double startAngle = (progress * 2 * math.pi) - (math.pi / 2);
     final double sweepAngle = 0.3 * math.pi + (offsetProgress * math.pi * 1.2);
 
-    canvas.drawArc(
-        rect,
-        startAngle,
-        sweepAngle,
-        false,
-        Paint()
-          ..shader = SweepGradient(colors: [color.withOpacity(0.2), color]).createShader(rect)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = strokeWidth
-          ..strokeCap = StrokeCap.round
-    );
+    final arcPaint = Paint()
+      ..shader = SweepGradient(colors: [
+        color.withValues(alpha: 0.2),
+        color,
+      ]).createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    if (isDark) {
+      arcPaint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    }
+
+    canvas.drawArc(rect, startAngle, sweepAngle, false, arcPaint);
   }
 
   @override
@@ -451,6 +549,7 @@ class _DualRingPainter extends CustomPainter {
   final Color secondaryColor;
   final Color trackColor;
   final double strokeWidth;
+  final bool isDark;
 
   _DualRingPainter({
     required this.progress1,
@@ -459,6 +558,7 @@ class _DualRingPainter extends CustomPainter {
     required this.secondaryColor,
     required this.trackColor,
     required this.strokeWidth,
+    this.isDark = false,
   });
 
   @override
@@ -468,27 +568,59 @@ class _DualRingPainter extends CustomPainter {
     final innerRadius = outerRadius * 0.65;
 
     // Outer Loop
-    canvas.drawCircle(center, outerRadius, Paint()..color = trackColor..style = PaintingStyle.stroke..strokeWidth = strokeWidth * 0.4);
+    canvas.drawCircle(
+      center,
+      outerRadius,
+      Paint()
+        ..color = trackColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth * 0.4,
+    );
     final outerRect = Rect.fromCircle(center: center, radius: outerRadius);
     final outerProgress = math.sin(progress1 * math.pi);
+
+    final outerPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    if (isDark) {
+      outerPaint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    }
+
     canvas.drawArc(
       outerRect,
       (progress1 * 2 * math.pi) - (math.pi / 2),
       0.4 * math.pi + (outerProgress * math.pi * 1.1),
       false,
-      Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = strokeWidth..strokeCap = StrokeCap.round,
+      outerPaint,
     );
 
     // Inner Counter Loop
-    canvas.drawCircle(center, innerRadius, Paint()..color = trackColor..style = PaintingStyle.stroke..strokeWidth = strokeWidth * 0.3);
+    canvas.drawCircle(
+      center,
+      innerRadius,
+      Paint()
+        ..color = trackColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth * 0.3,
+    );
     final innerRect = Rect.fromCircle(center: center, radius: innerRadius);
     final innerProgress = math.cos(progress2 * math.pi).abs();
+
+    final innerPaint = Paint()
+      ..color = secondaryColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth * 0.75
+      ..strokeCap = StrokeCap.round;
+
     canvas.drawArc(
       innerRect,
       (-progress2 * 2 * math.pi) + (math.pi / 2),
       -(0.3 * math.pi + (innerProgress * math.pi * 1.0)),
       false,
-      Paint()..color = secondaryColor..style = PaintingStyle.stroke..strokeWidth = strokeWidth * 0.75..strokeCap = StrokeCap.round,
+      innerPaint,
     );
   }
 

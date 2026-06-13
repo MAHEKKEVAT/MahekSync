@@ -10,6 +10,7 @@ import 'package:maheksync/app/utils/responsive.dart';
 import 'package:maheksync/app/dependency/shimmer.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../constant/show_toast.dart';
 import '../controllers/smart_map_dashboard_controller.dart';
 
@@ -54,10 +55,11 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
       return GoogleMap(
         key: ValueKey('map_${dark}_${controller.mapKeyCounter.value}'),
         mapType: controller.currentMapType.value,
-        initialCameraPosition: controller.initialCamera,onMapCreated: (mapCtrl) {
-        controller.onMapCreated(mapCtrl, dark);
-        controller.syncMapToCurrentLocation();
-      },
+        initialCameraPosition: controller.initialCamera,
+        onMapCreated: (mapCtrl) {
+          controller.onMapCreated(mapCtrl, dark);
+          controller.syncMapToCurrentLocation();
+        },
         myLocationEnabled: controller.permissionGranted.value,
         myLocationButtonEnabled: false,
         zoomControlsEnabled: false,
@@ -115,33 +117,29 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
   }
 
   Widget _zoomControls(bool isDark, bool isMobile) {
-    return Positioned(
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
       right: controller.panelExpanded.value ? 396 : 72,
       bottom: 24,
-      child: AnimatedPositioned(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeOutCubic,
-        right: controller.panelExpanded.value ? 396 : 72,
-        bottom: 24,
-        child: Column(
-          children: [
-            _glassButton(
-              icon: SolarIconsBold.addCircle,
-              onTap: controller.zoomIn,
-              isDark: isDark,
-              tooltip: 'Zoom In',
-              size: 40,
-            ),
-            spaceH(height: 4),
-            _glassButton(
-              icon: SolarIconsBold.minusCircle,
-              onTap: controller.zoomOut,
-              isDark: isDark,
-              tooltip: 'Zoom Out',
-              size: 40,
-            ),
-          ],
-        ),
+      child: Column(
+        children: [
+          _glassButton(
+            icon: SolarIconsBold.addCircle,
+            onTap: controller.zoomIn,
+            isDark: isDark,
+            tooltip: 'Zoom In',
+            size: 40,
+          ),
+          spaceH(height: 4),
+          _glassButton(
+            icon: SolarIconsBold.minusCircle,
+            onTap: controller.zoomOut,
+            isDark: isDark,
+            tooltip: 'Zoom Out',
+            size: 40,
+          ),
+        ],
       ),
     );
   }
@@ -164,28 +162,53 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
             width: size,
             height: size,
             decoration: BoxDecoration(
-              color: isDark
-                  ? AppThemeData.grey10.withValues(alpha: 0.85)
-                  : AppThemeData.primaryWhite.withValues(alpha: 0.9),
+              gradient: isDark
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppThemeData.grey10.withValues(alpha: 0.9),
+                        AppThemeData.grey9.withValues(alpha: 0.8),
+                      ],
+                    )
+                  : LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppThemeData.primaryWhite.withValues(alpha: 0.95),
+                        AppThemeData.primaryWhite.withValues(alpha: 0.85),
+                      ],
+                    ),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isDark
-                    ? AppThemeData.grey8.withValues(alpha: 0.3)
-                    : AppThemeData.grey3.withValues(alpha: 0.5),
-                width: 0.5,
+                    ? AppThemeData.primary50.withValues(alpha: 0.15)
+                    : AppThemeData.primary50.withValues(alpha: 0.1),
+                width: 0.8,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
+                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 ),
+                BoxShadow(
+                  color: AppThemeData.primary50.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  spreadRadius: -2,
+                ),
               ],
             ),
-            child: Icon(
-              icon,
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-              size: size == 40 ? 18 : 20,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Icon(
+                  icon,
+                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  size: size == 40 ? 18 : 20,
+                ),
+              ),
             ),
           ),
         ),
@@ -210,20 +233,39 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
                 curve: Curves.easeOutCubic,
                 width: 48,
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? AppThemeData.grey10.withValues(alpha: 0.92)
-                      : AppThemeData.primaryWhite.withValues(alpha: 0.95),
+                  gradient: isDark
+                      ? LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppThemeData.grey10.withValues(alpha: 0.95),
+                            AppThemeData.grey10.withValues(alpha: 0.88),
+                          ],
+                        )
+                      : LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppThemeData.primaryWhite.withValues(alpha: 0.98),
+                            AppThemeData.primaryWhite.withValues(alpha: 0.92),
+                          ],
+                        ),
                   borderRadius: const BorderRadius.horizontal(
                     left: Radius.circular(20),
                     right: Radius.circular(4),
                   ),
                   border: Border.all(
                     color: isDark
-                        ? AppThemeData.grey8.withValues(alpha: 0.3)
-                        : AppThemeData.grey3.withValues(alpha: 0.5),
-                    width: 0.5,
+                        ? AppThemeData.primary50.withValues(alpha: 0.12)
+                        : AppThemeData.primary50.withValues(alpha: 0.08),
+                    width: 0.8,
                   ),
                   boxShadow: [
+                    BoxShadow(
+                      color: AppThemeData.primary50.withValues(alpha: 0.04),
+                      blurRadius: 16,
+                      spreadRadius: -2,
+                    ),
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 24,
@@ -252,6 +294,13 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
                               ],
                             ),
                             borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppThemeData.primary50.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Icon(
                             SolarIconsBold.mapPoint,
@@ -264,9 +313,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
                           width: 3,
                           height: 24,
                           decoration: BoxDecoration(
-                            color: AppThemeData.primary50.withValues(
-                              alpha: 0.4,
-                            ),
+                            color: AppThemeData.primary50.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -330,13 +377,18 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: isDark
-                  ? AppThemeData.grey8.withValues(alpha: 0.25)
-                  : AppThemeData.grey3.withValues(alpha: 0.4),
-              width: 0.5,
+                  ? AppThemeData.primary50.withValues(alpha: 0.12)
+                  : AppThemeData.primary50.withValues(alpha: 0.08),
+              width: 0.8,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
+                color: AppThemeData.primary50.withValues(alpha: isDark ? 0.05 : 0.03),
+                blurRadius: 32,
+                spreadRadius: -4,
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 24,
                 offset: const Offset(-4, 0),
               ),
@@ -345,7 +397,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
               child: Column(
                 children: [
                   _panelHeader(isDark),
@@ -383,8 +435,8 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
         border: Border(
           bottom: BorderSide(
             color: isDark
-                ? AppThemeData.grey8.withValues(alpha: 0.2)
-                : AppThemeData.grey3.withValues(alpha: 0.3),
+                ? AppThemeData.primary50.withValues(alpha: 0.08)
+                : AppThemeData.primary50.withValues(alpha: 0.06),
             width: 0.5,
           ),
         ),
@@ -396,13 +448,17 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
             height: 36,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppThemeData.primary50, const Color(0xFF6C63FF)],
+                colors: [
+                  AppThemeData.primary50,
+                  const Color(0xFF6C63FF),
+                ],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
                   color: AppThemeData.primary50.withValues(alpha: 0.3),
                   blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -605,14 +661,28 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
   Widget _searchBar(bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? AppThemeData.primaryBlack.withValues(alpha: 0.3)
-            : AppThemeData.grey1.withValues(alpha: 0.5),
+        gradient: isDark
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppThemeData.primaryBlack.withValues(alpha: 0.4),
+                  AppThemeData.primaryBlack.withValues(alpha: 0.2),
+                ],
+              )
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppThemeData.grey1.withValues(alpha: 0.6),
+                  AppThemeData.grey1.withValues(alpha: 0.3),
+                ],
+              ),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark
-              ? AppThemeData.grey8.withValues(alpha: 0.15)
-              : AppThemeData.grey3.withValues(alpha: 0.3),
+              ? AppThemeData.primary50.withValues(alpha: 0.1)
+              : AppThemeData.primary50.withValues(alpha: 0.08),
           width: 0.5,
         ),
       ),
@@ -625,7 +695,8 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
           } else {
             controller.searchResults.clear();
           }
-        },        style: TextStyle(
+        },
+        style: TextStyle(
           color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
           fontSize: 13,
         ),
@@ -638,7 +709,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
           prefixIcon: Icon(
             SolarIconsOutline.cardSearch,
             size: 18,
-            color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+            color: AppThemeData.primary50.withValues(alpha: 0.6),
           ),
           suffixIcon: Obx(
             () => controller.searchQuery.value.isNotEmpty
@@ -667,7 +738,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
 
   Widget _searchResultItem(Map<String, dynamic> result, bool isDark) {
     return GestureDetector(
-      onTap: () => controller.goToPlaceDetails(result['place_id']),
+      onTap: () => controller.goToSearchResult(result),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
@@ -909,14 +980,16 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              AppThemeData.primary50.withValues(alpha: 0.12),
-              const Color(0xFF6C63FF).withValues(alpha: 0.06),
+              AppThemeData.success400.withValues(alpha: 0.08),
+              AppThemeData.success400.withValues(alpha: 0.02),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppThemeData.primary50.withValues(alpha: 0.2),
+            color: AppThemeData.success400.withValues(alpha: 0.15),
             width: 0.5,
           ),
         ),
@@ -926,7 +999,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppThemeData.success400.withValues(alpha: 0.15),
+                color: AppThemeData.success400.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
@@ -942,7 +1015,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
                 children: [
                   TextCustom(
                     title: 'Live Location',
-                    fontSize: 12,
+                    fontSize: 11,
                     fontFamily: FontFamily.medium,
                     color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
                   ),
@@ -1354,7 +1427,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 350),
           curve: Curves.easeOutCubic,
-          height: expanded ? 420 : 80,
+          height: expanded ? 480 : 80,
           decoration: BoxDecoration(
             color: isDark
                 ? AppThemeData.grey10.withValues(alpha: 0.95)
@@ -1363,12 +1436,17 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
             border: Border(
               top: BorderSide(
                 color: isDark
-                    ? AppThemeData.grey8.withValues(alpha: 0.2)
-                    : AppThemeData.grey3.withValues(alpha: 0.3),
-                width: 0.5,
+                    ? AppThemeData.primary50.withValues(alpha: 0.1)
+                    : AppThemeData.primary50.withValues(alpha: 0.08),
+                width: 0.8,
               ),
             ),
             boxShadow: [
+              BoxShadow(
+                color: AppThemeData.primary50.withValues(alpha: isDark ? 0.03 : 0.02),
+                blurRadius: 32,
+                spreadRadius: -4,
+              ),
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.15),
                 blurRadius: 24,
@@ -1376,63 +1454,104 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
               ),
             ],
           ),
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: controller.togglePanel,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
-                      borderRadius: BorderRadius.circular(2),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: controller.togglePanel,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppThemeData.grey7
+                                  : AppThemeData.grey4,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          if (!expanded) ...[
+                            spaceH(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          AppThemeData.primary50,
+                                          const Color(0xFF6C63FF),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      SolarIconsBold.mapPoint,
+                                      color: Colors.white,
+                                      size: 14,
+                                    ),
+                                  ),
+                                  spaceW(width: 10),
+                                  Expanded(
+                                    child: TextCustom(
+                                      title: controller.currentAddress.value.isEmpty
+                                          ? 'Tap to expand'
+                                          : controller.locationModel.value
+                                                ?.shortAddress ??
+                                                'Unknown',
+                                      fontSize: 13,
+                                      fontFamily: FontFamily.medium,
+                                      color: isDark
+                                          ? AppThemeData.grey1
+                                          : AppThemeData.grey10,
+                                      maxLine: 1,
+                                    ),
+                                  ),
+                                  Icon(
+                                    SolarIconsBold.gps,
+                                    color: AppThemeData.success400,
+                                    size: 16,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              if (!expanded)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Icon(
-                        SolarIconsBold.mapPoint,
-                        color: AppThemeData.primary50,
-                        size: 20,
-                      ),
-                      spaceW(width: 10),
-                      Expanded(
-                        child: TextCustom(
-                          title: controller.currentAddress.value.isEmpty
-                              ? 'Tap to expand'
-                              : controller.locationModel.value?.shortAddress ??
-                                    'Unknown',
-                          fontSize: 13,
-                          fontFamily: FontFamily.medium,
-                          color: isDark
-                              ? AppThemeData.grey1
-                              : AppThemeData.grey10,
-                          maxLine: 1,
+                  if (expanded) ...[
+                    _panelTabs(isDark),
+                    Expanded(
+                      child: Obx(
+                        () => IndexedStack(
+                          index: controller.selectedTabIndex.value,
+                          children: [
+                            SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              child: _infoTab(isDark),
+                            ),
+                            SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              child: _searchTab(isDark),
+                            ),
+                          ],
                         ),
                       ),
-                      Icon(
-                        SolarIconsBold.gps,
-                        color: AppThemeData.success400,
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                )
-              else
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: _infoTab(isDark),
-                  ),
-                ),
-            ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       );
@@ -1449,38 +1568,64 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: 88,
+              height: 88,
               decoration: BoxDecoration(
-                color: AppThemeData.primary50.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(24),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppThemeData.primary50.withValues(alpha: 0.12),
+                    AppThemeData.primary50.withValues(alpha: 0.04),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: AppThemeData.primary50.withValues(alpha: 0.15),
+                  width: 0.8,
+                ),
               ),
               child: Icon(
                 SolarIconsBold.mapPoint,
                 size: 40,
-                color: AppThemeData.primary50.withValues(alpha: 0.5),
+                color: AppThemeData.primary50.withValues(alpha: 0.6),
               ),
             ),
-            spaceH(height: 20),
+            spaceH(height: 24),
             Shimmer.fromColors(
               baseColor: base,
               highlightColor: highlight,
               child: Container(
-                width: 180,
-                height: 14,
+                width: 160,
+                height: 12,
                 decoration: BoxDecoration(
                   color: isDark
                       ? AppThemeData.primaryBlack
                       : AppThemeData.primaryWhite,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             ),
-            spaceH(height: 8),
+            spaceH(height: 10),
+            Shimmer.fromColors(
+              baseColor: base,
+              highlightColor: highlight,
+              child: Container(
+                width: 120,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppThemeData.primaryBlack
+                      : AppThemeData.primaryWhite,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+            ),
+            spaceH(height: 16),
             TextCustom(
-              title: 'Loading map...',
-              fontSize: 14,
-              fontFamily: FontFamily.regular,
+              title: 'Initializing map...',
+              fontSize: 13,
+              fontFamily: FontFamily.medium,
               color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
             ),
           ],
@@ -1499,19 +1644,30 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 80,
-                height: 80,
+                width: 88,
+                height: 88,
                 decoration: BoxDecoration(
-                  color: AppThemeData.danger300.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(24),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppThemeData.danger300.withValues(alpha: 0.12),
+                      AppThemeData.danger300.withValues(alpha: 0.04),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: AppThemeData.danger300.withValues(alpha: 0.15),
+                    width: 0.8,
+                  ),
                 ),
                 child: Icon(
                   SolarIconsOutline.map,
                   size: 40,
-                  color: AppThemeData.danger300.withValues(alpha: 0.5),
+                  color: AppThemeData.danger300.withValues(alpha: 0.6),
                 ),
               ),
-              spaceH(height: 20),
+              spaceH(height: 24),
               TextCustom(
                 title: 'Location Permission Required',
                 fontSize: 18,
@@ -1527,7 +1683,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
                 color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
                 textAlign: TextAlign.center,
               ),
-              spaceH(height: 24),
+              spaceH(height: 28),
               ElevatedButton.icon(
                 onPressed: controller.requestPermission,
                 icon: Icon(SolarIconsBold.gps, size: 18),
@@ -1540,12 +1696,14 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppThemeData.primary50,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
+                    horizontal: 28,
                     vertical: 14,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
+                  elevation: 0,
+                  shadowColor: AppThemeData.primary50.withValues(alpha: 0.3),
                 ),
               ),
             ],
@@ -1555,12 +1713,4 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
     );
   }
 
-  String get _darkMapStyle => '''[
-    {"elementType": "geometry", "stylers": [{"color": "#1a1a2e"}]},
-    {"elementType": "labels.text.fill", "stylers": [{"color": "#8a8a9a"}]},
-    {"elementType": "labels.text.stroke", "stylers": [{"color": "#1a1a2e"}]},
-    {"featureType": "road", "elementType": "geometry", "stylers": [{"color": "#2d2d44"}]},
-    {"featureType": "water", "elementType": "geometry", "stylers": [{"color": "#0e1628"}]},
-    {"featureType": "poi", "elementType": "labels", "stylers": [{"visibility": "off"}]}
-  ]''';
 }

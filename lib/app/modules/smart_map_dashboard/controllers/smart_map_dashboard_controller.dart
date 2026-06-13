@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/constant/show_toast.dart';
 import 'package:maheksync/app/models/smart_map_dashboard_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SmartMapDashboardController extends GetxController {
   final isLoading = true.obs;
@@ -424,10 +425,15 @@ class SmartMapDashboardController extends GetxController {
     _mapController?.animateCamera(CameraUpdate.zoomOut());
   }
 
-  void openInGoogleMaps() {
-    final url =
-        'https://www.google.com/maps/search/?api=1&query=${latitude.value},${longitude.value}';
-    ShowToastDialog.showSuccess('Opening Google Maps');
+  Future<void> openInGoogleMaps() async {
+    final url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${latitude.value},${longitude.value}',
+    );
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      ShowToastDialog.showSuccess('Could not open Google Maps');
+    }
   }
 
   void copyCoordinates() {
