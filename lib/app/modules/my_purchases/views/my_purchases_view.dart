@@ -42,25 +42,47 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
   Widget _buildLayout(bool isDark, BuildContext context) {
     final isMobile = context.isMobile;
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.all(isMobile ? 16 : 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(isDark, context),
-          spaceH(height: isMobile ? 16 : 24),
-          _buildStatsRow(isDark, context),
-          spaceH(height: isMobile ? 20 : 28),
-          _buildSectionHeader(isDark, context),
-          spaceH(height: isMobile ? 12 : 16),
-          controller.isGridView.value
-              ? _buildPurchaseGrid(isDark, context)
-              : _buildPurchaseList(isDark, context),
-          spaceH(height: 20),
-          _buildLoadMore(isDark),
-        ],
-      ),
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(isDark, context),
+              spaceH(height: isMobile ? 16 : 24),
+              _buildStatsRow(isDark, context),
+              spaceH(height: isMobile ? 20 : 28),
+              _buildSectionHeader(isDark, context),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: spaceH(height: isMobile ? 12 : 16),
+                ),
+                controller.isGridView.value
+                    ? _buildPurchaseGrid(isDark, context)
+                    : _buildPurchaseList(isDark, context),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      spaceH(height: 20),
+                      _buildLoadMore(isDark),
+                      spaceH(height: 20),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -351,24 +373,43 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            stat.color.withValues(alpha: isDark ? 0.2 : 0.12),
+            stat.color.withValues(alpha: isDark ? 0.08 : 0.04),
+          ],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark
-              ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
-              : AppThemeData.grey3,
+          color: stat.color.withValues(alpha: isDark ? 0.25 : 0.18),
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: stat.color.withValues(alpha: 0.15),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  stat.color.withValues(alpha: 0.9),
+                  stat.color,
+                ],
+              ),
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: stat.color.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: Icon(stat.icon, size: 20, color: stat.color),
+            child: Icon(stat.icon, size: 20, color: Colors.white),
           ),
           spaceW(width: 14),
           Expanded(
@@ -380,10 +421,10 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
                   style: TextStyle(
                     fontFamily: FontFamily.medium,
                     fontSize: 11,
-                    color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                    color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
                   ),
                 ),
-                spaceH(height: 2),
+                spaceH(height: 3),
                 Text(
                   stat.value,
                   style: TextStyle(
@@ -424,7 +465,7 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
         ),
         Row(
           children: [
-            _buildSortDropdown(isDark),
+            _buildSortDropdown(isDark, context: context),
             spaceW(width: 10),
             Container(
               decoration: BoxDecoration(
@@ -459,10 +500,10 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
     );
   }
 
-  Widget _buildSortDropdown(bool isDark) {
+  Widget _buildSortDropdown(bool isDark, {required BuildContext context}) {
     return Obx(() => GestureDetector(
       onTap: () {
-        _showSortMenu(isDark);
+        _showSortMenu(isDark, context: context);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -498,12 +539,12 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
     ));
   }
 
-  void _showSortMenu(bool isDark) {
-    final RenderBox renderBox = Get.context!.findRenderObject() as RenderBox;
+  void _showSortMenu(bool isDark, {required BuildContext context}) {
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
 
     showMenu<String>(
-      context: Get.context!,
+      context: context,
       position: RelativeRect.fromLTRB(
         offset.dx + renderBox.size.width - 220,
         offset.dy + 280,
@@ -576,46 +617,50 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
     final isMobile = context.isMobile;
 
     if (controller.filteredPurchases.isEmpty) {
-      return _buildEmptyState(isDark);
+      return SliverToBoxAdapter(child: _buildEmptyState(isDark));
     }
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: isMobile ? 400 : 300,
-        mainAxisSpacing: 14,
-        crossAxisSpacing: 14,
-        childAspectRatio: 0.85,
+    return SliverPadding(
+      padding: const EdgeInsets.only(bottom: 10),
+      sliver: SliverGrid(
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: isMobile ? 400 : 300,
+          mainAxisSpacing: 14,
+          crossAxisSpacing: 14,
+          childAspectRatio: 0.85,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return _buildPurchaseCard(
+              controller.filteredPurchases[index],
+              isDark,
+              context,
+            );
+          },
+          childCount: controller.filteredPurchases.length,
+        ),
       ),
-      itemCount: controller.filteredPurchases.length,
-      itemBuilder: (context, index) {
-        return _buildPurchaseCard(
-          controller.filteredPurchases[index],
-          isDark,
-          context,
-        );
-      },
     );
   }
 
   Widget _buildPurchaseList(bool isDark, BuildContext context) {
     if (controller.filteredPurchases.isEmpty) {
-      return _buildEmptyState(isDark);
+      return SliverToBoxAdapter(child: _buildEmptyState(isDark));
     }
 
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: controller.filteredPurchases.length,
-      separatorBuilder: (_, _) => spaceH(height: 10),
-      itemBuilder: (context, index) {
-        return _buildPurchaseListTile(
-          controller.filteredPurchases[index],
-          isDark,
-          context,
-        );
-      },
+    return SliverPadding(
+      padding: const EdgeInsets.only(bottom: 10),
+      sliver: SliverList.separated(
+        itemCount: controller.filteredPurchases.length,
+        separatorBuilder: (_, _) => spaceH(height: 10),
+        itemBuilder: (context, index) {
+          return _buildPurchaseListTile(
+            controller.filteredPurchases[index],
+            isDark,
+            context,
+          );
+        },
+      ),
     );
   }
 
@@ -1459,7 +1504,7 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
 
   Widget _buildDateRangeButton(bool isDark, BuildContext context) {
     return Obx(() => GestureDetector(
-      onTap: () => _showDateRangeDialog(isDark),
+      onTap: () => _showDateRangeDialog(isDark, context: context),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -1508,12 +1553,12 @@ class MyPurchasesView extends GetView<MyPurchasesController> {
     ));
   }
 
-  void _showDateRangeDialog(bool isDark) async {
+  void _showDateRangeDialog(bool isDark, {required BuildContext context}) async {
     DateTime? start = controller.selectedDateRange.value?.start;
     DateTime? end = controller.selectedDateRange.value?.end;
 
     final result = await showDialog<Map<String, DateTime>>(
-      context: Get.context!,
+      context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setState) {

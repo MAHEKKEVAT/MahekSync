@@ -80,7 +80,7 @@ class DeviceModel {
     return data;
   }
 
-  String get formattedPrice => '\$${price?.toStringAsFixed(2) ?? '0.00'}';
+  String get formattedPrice => '₹${price?.toStringAsFixed(2) ?? '0.00'}';
 
   String get formattedPurchaseDate => purchaseDate != null
       ? '${purchaseDate!.month}/${purchaseDate!.day}/${purchaseDate!.year}'

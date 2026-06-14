@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart' hide AnimatedBuilder;
 import 'package:get/get.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:provider/provider.dart';
@@ -765,7 +766,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(s.buttonBorderRadius)),
                   ),
                   child: loading
-                      ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.9))))
+                      ? const MahekLoader(size: 22, showBranding: false)
                       : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     const TextCustom(title: 'Authenticate', fontSize: 15, fontFamily: FontFamily.semiBold, color: Colors.white),
                     spaceW(width: 8),

@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:maheksync/app/widgets/global_widgets.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -10,160 +11,202 @@ class ToastService {
   factory ToastService() => _instance;
   ToastService._internal();
 
-  bool _isLoading = false;
   OverlayEntry? _currentToast;
+  OverlayEntry? _currentLoader;
+
+  // ─── Loader ──────────────────────────────────────────────────
 
   void showLoader(String message) {
     try {
-      if (_isLoading) return;
-      _isLoading = true;
+      if (_currentLoader != null) return;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         try {
-          final context = navigatorKey.currentContext;
-          if (context == null) {
-            _isLoading = false;
-            return;
-          }
+          if (_currentLoader != null) return;
 
-          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final overlay = navigatorKey.currentState?.overlay;
+          if (overlay == null) return;
 
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => PopScope(
-              canPop: false,
-              child: Center(
-                child: Container(
-                  width: 180,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 8))],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(width: 50, height: 50, child: CircularProgressIndicator(strokeWidth: 7, strokeCap: StrokeCap.round)),
-                      const SizedBox(height: 24),
-                      Text(message, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: isDark ? Colors.white : Colors.black87, decoration: TextDecoration.none), textAlign: TextAlign.center),
-                    ],
-                  ),
-                ),
-              ),
+          final ctx = navigatorKey.currentContext;
+          if (ctx == null) return;
+
+          final isDark = Theme.of(ctx).brightness == Brightness.dark;
+
+          _currentLoader = OverlayEntry(
+            builder: (_) => _GlassmorphicLoader(
+              message: message,
+              isDark: isDark,
             ),
           );
+
+          overlay.insert(_currentLoader!);
         } catch (e) {
-          developer.log("Error in showLoader: $e");
-          _isLoading = false;
+          developer.log("Error showing loader: $e");
         }
       });
     } catch (e) {
       developer.log("Error in showLoader: $e");
-      _isLoading = false;
     }
   }
 
   void closeLoader() {
     try {
+      final entry = _currentLoader;
+      _currentLoader = null;
+
+      if (entry == null) return;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         try {
-          final context = navigatorKey.currentContext;
-          if (context != null && _isLoading) {
-            Navigator.pop(context);
-            _isLoading = false;
-          }
+          entry.remove();
         } catch (e) {
-          developer.log("Error in closeLoader: $e");
-          _isLoading = false;
+          developer.log("Error closing loader: $e");
         }
       });
     } catch (e) {
       developer.log("Error in closeLoader: $e");
-      _isLoading = false;
+      _currentLoader = null;
     }
   }
 
+  // ─── Toasts ──────────────────────────────────────────────────
+
   void showSuccessToast(String message, {ToastPosition position = ToastPosition.top}) {
-    _showToast(message, backgroundColor: const Color(0xFF4CAF50), icon: Icons.check_circle);
+    _showToast(
+      message,
+      accentColor: const Color(0xFF34C759),
+      icon: Icons.check_circle_rounded,
+    );
   }
 
   void showErrorToast(String message, {ToastPosition position = ToastPosition.top}) {
-    _showToast(message, backgroundColor: const Color(0xFFF44336), icon: Icons.error);
+    _showToast(
+      message,
+      accentColor: const Color(0xFFFF3B30),
+      icon: Icons.cancel_rounded,
+    );
   }
 
   void showWarningToast(String message, {ToastPosition position = ToastPosition.top}) {
-    _showToast(message, backgroundColor: const Color(0xFFFF9800), icon: Icons.warning);
+    _showToast(
+      message,
+      accentColor: const Color(0xFFFF9500),
+      icon: Icons.warning_rounded,
+    );
   }
 
-  void _showToast(String message, {required Color backgroundColor, required IconData icon}) {
-    final context = navigatorKey.currentContext;
-    if (context == null) return;
-
-    _currentToast?.remove();
+  void _showToast(String message, {required Color accentColor, required IconData icon}) {
+    final oldToast = _currentToast;
     _currentToast = null;
+
+    if (oldToast != null) {
+      try {
+        oldToast.remove();
+      } catch (_) {}
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
+        final overlay = navigatorKey.currentState?.overlay;
+        if (overlay == null) return;
+
         final ctx = navigatorKey.currentContext;
         if (ctx == null) return;
 
-        final overlay = Overlay.of(ctx);
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
 
-        _currentToast = OverlayEntry(
-          builder: (context) => _TopToast(
+        late final OverlayEntry entry;
+        entry = OverlayEntry(
+          builder: (_) => _GlassmorphicToast(
             message: message,
-            backgroundColor: backgroundColor,
+            accentColor: accentColor,
             icon: icon,
+            isDark: isDark,
             onDismiss: () {
-              _currentToast?.remove();
-              _currentToast = null;
+              if (_currentToast == entry) {
+                _currentToast = null;
+              }
+              try {
+                entry.remove();
+              } catch (_) {}
             },
           ),
         );
 
-        overlay.insert(_currentToast!);
+        _currentToast = entry;
+        overlay.insert(entry);
       } catch (e) {
-        developer.log("Error inserting toast overlay: $e");
+        developer.log("Error inserting toast: $e");
       }
     });
   }
 }
 
-class _TopToast extends StatefulWidget {
+// ═══════════════════════════════════════════════════════════════
+// GLASSMORPHIC TOAST — iOS 26/27 style, bottom-right
+// ═══════════════════════════════════════════════════════════════
+
+class _GlassmorphicToast extends StatefulWidget {
   final String message;
-  final Color backgroundColor;
+  final Color accentColor;
   final IconData icon;
+  final bool isDark;
   final VoidCallback onDismiss;
 
-  const _TopToast({required this.message, required this.backgroundColor, required this.icon, required this.onDismiss});
+  const _GlassmorphicToast({
+    required this.message,
+    required this.accentColor,
+    required this.icon,
+    required this.isDark,
+    required this.onDismiss,
+  });
 
   @override
-  State<_TopToast> createState() => _TopToastState();
+  State<_GlassmorphicToast> createState() => _GlassmorphicToastState();
 }
 
-class _TopToastState extends State<_TopToast> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
+class _GlassmorphicToastState extends State<_GlassmorphicToast>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slideAnim;
+  late final Animation<double> _fadeAnim;
+  bool _dismissed = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0.4, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
 
     _controller.forward();
 
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        _controller.reverse().then((_) {
-          if (mounted) widget.onDismiss();
-        });
-      }
+      if (mounted && !_dismissed) _dismiss();
     });
+  }
+
+  void _dismiss() {
+    if (_dismissed) return;
+    _dismissed = true;
+    if (_controller.status == AnimationStatus.forward ||
+        _controller.isAnimating) {
+      _controller.reverse().then((_) {
+        if (mounted) widget.onDismiss();
+      });
+    } else {
+      widget.onDismiss();
+    }
   }
 
   @override
@@ -174,45 +217,204 @@ class _TopToastState extends State<_TopToast> with SingleTickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Positioned(
-      top: topPadding + 10,
-      left: 16,
-      right: 16,
+      bottom: bottomPadding + 20,
+      right: 20,
       child: SlideTransition(
-        position: _slideAnimation,
+        position: _slideAnim,
         child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Material(
-            color: Colors.transparent,
-            child: GestureDetector(
-              onTap: () {
-                _controller.reverse().then((_) {
-                  if (mounted) widget.onDismiss();
-                });
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: widget.backgroundColor,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [BoxShadow(color: widget.backgroundColor.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
-                ),
-                child: Row(
-                  children: [
-                    Icon(widget.icon, color: Colors.white, size: 22),
-                    spaceW(width: 12),
-                    Expanded(
-                      child: Text(
-                        widget.message,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white, decoration: TextDecoration.none),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+          opacity: _fadeAnim,
+          child: GestureDetector(
+            onTap: _dismiss,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: widget.isDark
+                          ? Colors.white.withValues(alpha: 0.92)
+                          : const Color(0xFF1C1C1E).withValues(alpha: 0.90),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: widget.isDark
+                            ? Colors.black.withValues(alpha: 0.06)
+                            : Colors.white.withValues(alpha: 0.1),
+                        width: 0.5,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: widget.accentColor.withValues(alpha: 0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: widget.isDark ? 0.06 : 0.3),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    spaceW(width: 8),
-                    Icon(Icons.close, color: Colors.white.withValues(alpha: 0.7), size: 18),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: widget.accentColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(widget.icon, color: widget.accentColor, size: 26),
+                        ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            widget.message,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: widget.isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                              decoration: TextDecoration.none,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        GestureDetector(
+                          onTap: _dismiss,
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: widget.isDark
+                                  ? Colors.black.withValues(alpha: 0.06)
+                                  : Colors.white.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 13,
+                              color: widget.isDark
+                                  ? Colors.black.withValues(alpha: 0.35)
+                                  : Colors.white.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GLASSMORPHIC LOADER — Compact centered overlay
+// ═══════════════════════════════════════════════════════════════
+
+class _GlassmorphicLoader extends StatefulWidget {
+  final String message;
+  final bool isDark;
+
+  const _GlassmorphicLoader({
+    required this.message,
+    required this.isDark,
+  });
+
+  @override
+  State<_GlassmorphicLoader> createState() => _GlassmorphicLoaderState();
+}
+
+class _GlassmorphicLoaderState extends State<_GlassmorphicLoader>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnim;
+  late final Animation<double> _scaleAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    _scaleAnim = Tween<double>(begin: 0.9, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnim,
+      child: ScaleTransition(
+        scale: _scaleAnim,
+        child: Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              child: Container(
+                width: 200,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                decoration: BoxDecoration(
+                  color: widget.isDark
+                      ? Colors.white.withValues(alpha: 0.92)
+                      : const Color(0xFF1C1C1E).withValues(alpha: 0.90),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: widget.isDark
+                        ? Colors.black.withValues(alpha: 0.06)
+                        : Colors.white.withValues(alpha: 0.1),
+                    width: 0.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: widget.isDark ? 0.08 : 0.3),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MahekLoader(size: 40, showBranding: false),
+                    const SizedBox(height: 20),
+                    Text(
+                      widget.message,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: widget.isDark
+                            ? const Color(0xFF1C1C1E).withValues(alpha: 0.8)
+                            : Colors.white.withValues(alpha: 0.9),
+                        decoration: TextDecoration.none,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
               ),

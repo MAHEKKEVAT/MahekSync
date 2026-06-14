@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
 import 'package:solar_icons/solar_icons.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
@@ -36,7 +37,7 @@ class VaultCrudView extends GetView<VaultCrudController> {
           Obx(() => TextButton(
             onPressed: controller.isLoading.value ? null : controller.saveItem,
             child: controller.isLoading.value
-                ?  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppThemeData.primary50))
+                ?  const MahekLoader(size: 20, showBranding: false)
                 :  TextCustom(title: 'Save', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.primary50),
           )),
         ],
@@ -435,7 +436,7 @@ class VaultCrudView extends GetView<VaultCrudController> {
           disabledBackgroundColor: AppThemeData.primary50.withValues(alpha: 0.5),
         ),
         child: controller.isLoading.value
-            ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+            ? const MahekLoader(size: 22, showBranding: false)
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

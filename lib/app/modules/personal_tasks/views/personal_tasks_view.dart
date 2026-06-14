@@ -536,22 +536,21 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () => controller.goToEdit(task),
-          child: Row(
-            children: [
-              Container(
-                width: 5,
-                height: double.infinity,
-                decoration: BoxDecoration(
-                  color: priorityColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(18),
-                    bottomLeft: Radius.circular(18),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 5,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(color: priorityColor),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 16, 16, 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -587,6 +586,27 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
                             ),
                           ),
                           spaceW(width: 12),
+                          if (task.iconUrl != null && task.iconUrl!.isNotEmpty)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                task.iconUrl!,
+                                width: 52,
+                                height: 52,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: 52,
+                                  height: 52,
+                                  decoration: BoxDecoration(
+                                    color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(SolarIconsOutline.gallery, size: 16, color: AppThemeData.primary50),
+                                ),
+                              ),
+                            ),
+                          if (task.iconUrl != null && task.iconUrl!.isNotEmpty)
+                            spaceW(width: 8),
                           Expanded(
                             child: TextCustom(
                               title: task.title ?? '',
@@ -712,8 +732,8 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

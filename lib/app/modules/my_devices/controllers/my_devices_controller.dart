@@ -33,6 +33,10 @@ class MyDevicesController extends GetxController {
 
   int get totalItems => filteredDevices.length;
 
+  int get activeWarrantyCount => filteredDevices.where((d) => d.warrantyEndDate != null && !d.isWarrantyExpired).length;
+
+  int get expiredWarrantyCount => filteredDevices.where((d) => d.warrantyEndDate != null && d.isWarrantyExpired).length;
+
   Map<String, int> get categoryItemCount {
     final Map<String, int> counts = {};
     for (var device in filteredDevices) {

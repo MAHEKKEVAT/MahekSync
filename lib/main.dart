@@ -3,7 +3,6 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/toast_service.dart';
 import 'package:maheksync/app/modules/splash_screen/views/splash_screen_view.dart';
@@ -12,13 +11,11 @@ import 'package:provider/provider.dart';
 import 'app/constant/global_controller.dart';
 import 'app/modules/auth/controllers/auth_controller.dart';
 import 'app/routes/app_pages.dart';
-import 'app/utils/app_colors.dart';
 import 'app/utils/dark_theme_provider.dart';
 import 'app/utils/preferences.dart';
 import 'app/utils/styles.dart';
 import 'firebase_options.dart';
 
-// lib/main.dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Preferences.initPref();
@@ -37,10 +34,8 @@ void main() async {
     );
   }
   Get.put(AuthController(), permanent: true);
-  Get.put(MahekReminderController(), permanent: true); // ✅ GLOBAL + PERMANENT
+  Get.put(MahekReminderController(), permanent: true);
 
-
-  configLoading();
   runApp(const MyApp());
 }
 
@@ -95,7 +90,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ),
               darkTheme: Styles.themeData(true, context),
               themeMode: themeChangeProvider.darkTheme == 1 ? ThemeMode.light : ThemeMode.dark,
-              builder: EasyLoading.init(),
               initialRoute: AppPages.INITIAL,
               getPages: AppPages.routes,
               home: GetBuilder<GlobalController>(
@@ -110,20 +104,4 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ),
     );
   }
-}
-
-void configLoading() {
-  EasyLoading.instance
-    ..displayDuration = const Duration(milliseconds: 2000)
-    ..indicatorType = EasyLoadingIndicatorType.fadingCircle
-    ..loadingStyle = EasyLoadingStyle.custom
-    ..indicatorSize = 45
-    ..radius = 10
-    ..progressColor = AppThemeData.primary50
-    ..backgroundColor = AppThemeData.primaryWhite
-    ..indicatorColor = AppThemeData.primary50
-    ..textColor = AppThemeData.primary50
-    ..maskColor = AppThemeData.primaryWhite
-    ..dismissOnTap = false
-    ..userInteractions = false;
 }

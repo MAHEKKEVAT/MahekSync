@@ -1,5 +1,6 @@
 // lib/app/modules/view_devices/views/view_devices_view.dart
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -40,9 +41,7 @@ class ViewDevicesView extends GetView<ViewDevicesController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(
-                color: AppThemeData.primary50,
-              ),
+              const MahekLoader(size: 40, showBranding: false),
               spaceH(height: 16),
               TextCustom(
                 title: 'Redirecting...',

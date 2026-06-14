@@ -1,14 +1,12 @@
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:maheksync/app/constant/toast_service.dart';
-
 
 class ShowToastDialog {
   static void showLoader(String message) {
-    EasyLoading.show(status: message);
+    ToastService().showLoader(message);
   }
 
   static void closeLoader() {
-    EasyLoading.dismiss();
+    ToastService().closeLoader();
   }
 
   static void showSuccess(String message, {ToastPosition position = ToastPosition.top}) {

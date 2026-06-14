@@ -267,9 +267,9 @@ class ReminderView extends GetView<ReminderController> {
         ),
         Row(
           children: [
-            _buildImportanceFilter(isDark),
+            _buildImportanceFilter(isDark, context: context),
             spaceW(width: 10),
-            _buildSortDropdown(isDark),
+            _buildSortDropdown(isDark, context: context),
             spaceW(width: 10),
             Container(
               decoration: BoxDecoration(
@@ -304,11 +304,11 @@ class ReminderView extends GetView<ReminderController> {
     );
   }
 
-  Widget _buildImportanceFilter(bool isDark) {
+  Widget _buildImportanceFilter(bool isDark, {required BuildContext context}) {
     return Obx(() {
       final isFiltered = controller.selectedImportance.value != 'ALL';
       return GestureDetector(
-        onTap: () => _showImportanceMenu(isDark),
+        onTap: () => _showImportanceMenu(isDark, context: context),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
@@ -357,12 +357,12 @@ class ReminderView extends GetView<ReminderController> {
     });
   }
 
-  void _showImportanceMenu(bool isDark) {
-    final RenderBox renderBox = Get.context!.findRenderObject() as RenderBox;
+  void _showImportanceMenu(bool isDark, {required BuildContext context}) {
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
 
     showMenu<String>(
-      context: Get.context!,
+      context: context,
       position: RelativeRect.fromLTRB(
         offset.dx + renderBox.size.width - 200,
         offset.dy + 300,
@@ -414,9 +414,9 @@ class ReminderView extends GetView<ReminderController> {
     });
   }
 
-  Widget _buildSortDropdown(bool isDark) {
+  Widget _buildSortDropdown(bool isDark, {required BuildContext context}) {
     return Obx(() => GestureDetector(
-      onTap: () => _showSortMenu(isDark),
+      onTap: () => _showSortMenu(isDark, context: context),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
@@ -451,12 +451,12 @@ class ReminderView extends GetView<ReminderController> {
     ));
   }
 
-  void _showSortMenu(bool isDark) {
-    final RenderBox renderBox = Get.context!.findRenderObject() as RenderBox;
+  void _showSortMenu(bool isDark, {required BuildContext context}) {
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
 
     showMenu<String>(
-      context: Get.context!,
+      context: context,
       position: RelativeRect.fromLTRB(
         offset.dx + renderBox.size.width - 240,
         offset.dy + 300,

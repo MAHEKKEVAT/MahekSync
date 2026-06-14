@@ -1,5 +1,6 @@
 // lib/app/modules/generate_bill/views/generate_bill_create_view.dart
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/models/bill_model.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
@@ -49,7 +50,7 @@ class _GenerateBillCreateViewState extends State<GenerateBillCreateView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildBillInfoSection(isDark),
+                    _buildBillInfoSection(isDark, context: context),
                     spaceH(height: 24),
                     _buildItemsSection(isDark),
                     spaceH(height: 24),
@@ -122,7 +123,7 @@ class _GenerateBillCreateViewState extends State<GenerateBillCreateView> {
     );
   }
 
-  Widget _buildBillInfoSection(bool isDark) {
+  Widget _buildBillInfoSection(bool isDark, {required BuildContext context}) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -182,7 +183,7 @@ class _GenerateBillCreateViewState extends State<GenerateBillCreateView> {
           Obx(() => GestureDetector(
                 onTap: () async {
                   final date = await showDatePicker(
-                    context: Get.context!,
+                    context: context,
                     initialDate: controller.billDate.value ?? DateTime.now(),
                     firstDate: DateTime(2020),
                     lastDate: DateTime(2030),
@@ -801,14 +802,7 @@ class _GenerateBillCreateViewState extends State<GenerateBillCreateView> {
             ),
             child: Center(
               child: controller.isSaving.value
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
+                  ? const MahekLoader(size: 22, showBranding: false)
                   : TextCustom(
                       title: controller.isEditMode.value ? 'Update Bill' : 'Save Bill',
                       fontSize: 16,

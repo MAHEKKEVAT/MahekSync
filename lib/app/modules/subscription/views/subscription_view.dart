@@ -46,7 +46,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
           spaceH(height: 14),
           _buildCategoryChips(isDark),
           spaceH(height: 14),
-          _buildSortAndToggleRow(isDark),
+          _buildSortAndToggleRow(isDark, context: context),
           spaceH(height: 16),
           _buildSubscriptionsContent(isDark),
         ],
@@ -242,12 +242,12 @@ class SubscriptionView extends GetView<SubscriptionController> {
   // ═══════════════════════════════════════
   // SORT + VIEW TOGGLE ROW
   // ═══════════════════════════════════════
-  Widget _buildSortAndToggleRow(bool isDark) {
+  Widget _buildSortAndToggleRow(bool isDark, {required BuildContext context}) {
     return Row(
       children: [
         // Sort dropdown
         GestureDetector(
-          onTap: () => _showSortMenu(isDark),
+          onTap: () => _showSortMenu(isDark, context: context),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
@@ -291,9 +291,9 @@ class SubscriptionView extends GetView<SubscriptionController> {
     );
   }
 
-  void _showSortMenu(bool isDark) {
-    final RenderBox button = Get.context!.findRenderObject() as RenderBox;
-    final RenderBox overlay = Navigator.of(Get.context!).overlay!.context.findRenderObject() as RenderBox;
+  void _showSortMenu(bool isDark, {required BuildContext context}) {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
@@ -303,7 +303,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
     );
 
     showMenu(
-      context: Get.context!,
+      context: context,
       color: isDark ? AppThemeData.grey9 : AppThemeData.primaryWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       position: position,
@@ -369,7 +369,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
         childAspectRatio: 1.1,
       ),
       itemCount: controller.filteredSubscriptions.length,
-      itemBuilder: (context, index) => _buildGridCard(controller.filteredSubscriptions[index], isDark),
+      itemBuilder: (context, index) => _buildGridCard(controller.filteredSubscriptions[index], isDark, context: context),
     );
   }
 
@@ -379,14 +379,14 @@ class SubscriptionView extends GetView<SubscriptionController> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: controller.filteredSubscriptions.length,
       separatorBuilder: (context, index) => spaceH(height: 14),
-      itemBuilder: (context, index) => _buildListCard(controller.filteredSubscriptions[index], isDark),
+      itemBuilder: (context, index) => _buildListCard(controller.filteredSubscriptions[index], isDark, context: context),
     );
   }
 
   // ═══════════════════════════════════════
   // GRID CARD (matches screenshot)
   // ═══════════════════════════════════════
-  Widget _buildGridCard(SubscriptionModel sub, bool isDark) {
+  Widget _buildGridCard(SubscriptionModel sub, bool isDark, {required BuildContext context}) {
     final statusColor = sub.statusColor;
     final usedPercent = ((1 - sub.remainingPercentage) * 100).toInt();
     final usedColor = sub.isExpiringCritical ? AppThemeData.danger300 : (sub.isExpiringSoon ? AppThemeData.pending400 : AppThemeData.primary50);
@@ -443,7 +443,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
                     ),
                     spaceW(width: 6),
                     GestureDetector(
-                      onTap: () => _showCardMenu(sub, isDark),
+                      onTap: () => _showCardMenu(sub, isDark, context: context),
                       child: Icon(Icons.more_vert_rounded, size: 18, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
                     ),
                   ],
@@ -522,7 +522,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
   // ═══════════════════════════════════════
   // LIST CARD (matches screenshot)
   // ═══════════════════════════════════════
-  Widget _buildListCard(SubscriptionModel sub, bool isDark) {
+  Widget _buildListCard(SubscriptionModel sub, bool isDark, {required BuildContext context}) {
     final statusColor = sub.statusColor;
     final usedPercent = ((1 - sub.remainingPercentage) * 100).toInt();
     final usedColor = sub.isExpiringCritical ? AppThemeData.danger300 : (sub.isExpiringSoon ? AppThemeData.pending400 : AppThemeData.primary50);
@@ -568,7 +568,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
                           ),
                           spaceW(width: 6),
                           GestureDetector(
-                            onTap: () => _showCardMenu(sub, isDark),
+                            onTap: () => _showCardMenu(sub, isDark, context: context),
                             child: Icon(Icons.more_vert_rounded, size: 18, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
                           ),
                         ],
@@ -688,9 +688,9 @@ class SubscriptionView extends GetView<SubscriptionController> {
     );
   }
 
-  void _showCardMenu(SubscriptionModel sub, bool isDark) {
+  void _showCardMenu(SubscriptionModel sub, bool isDark, {required BuildContext context}) {
     showModalBottomSheet(
-      context: Get.context!,
+      context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -710,7 +710,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
                 spaceH(height: 16),
                 _buildMenuOption(Icons.visibility_rounded, 'View Details', AppThemeData.primary50, () { Get.back(); controller.goToDetails(sub); }, isDark),
                 _buildMenuOption(Icons.edit_rounded, 'Edit', isDark ? AppThemeData.grey4 : AppThemeData.grey7, () { Get.back(); controller.goToEdit(sub); }, isDark),
-                _buildMenuOption(Icons.refresh_rounded, 'Renew', AppThemeData.success400, () { Get.back(); _showRenewDialog(sub); }, isDark),
+                _buildMenuOption(Icons.refresh_rounded, 'Renew', AppThemeData.success400, () { Get.back(); _showRenewDialog(sub, context: context); }, isDark),
                 _buildMenuOption(Icons.delete_outline, 'Delete', AppThemeData.danger300, () { Get.back(); controller.deleteSubscription(sub); }, isDark),
                 spaceH(height: 8),
               ],
@@ -735,9 +735,9 @@ class SubscriptionView extends GetView<SubscriptionController> {
     );
   }
 
-  Future<void> _showRenewDialog(SubscriptionModel sub) async {
+  Future<void> _showRenewDialog(SubscriptionModel sub, {required BuildContext context}) async {
     final selectedDate = await showDialog<DateTime>(
-      context: Get.context!,
+      context: context,
       builder: (context) {
         DateTime tempDate = DateTime.now().add(const Duration(days: 30));
         return StatefulBuilder(

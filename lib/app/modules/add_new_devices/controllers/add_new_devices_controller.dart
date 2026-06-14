@@ -38,12 +38,31 @@ class AddNewDevicesController extends GetxController {
 
   final conditions = ['NEW', 'USED', 'REFURB', 'MINT', 'FACTORY NEW'];
 
+  DeviceModel? _editingDevice;
+  bool get isEditMode => _editingDevice != null;
+
   @override
   void onInit() {
     super.onInit();
+    _populateFromArguments();
     loadCategories();
     loadPaymentMethods();
     _loadStats();
+  }
+
+  void _populateFromArguments() {
+    final device = Get.arguments;
+    if (device is DeviceModel) {
+      _editingDevice = device;
+      deviceNameController.text = device.deviceName ?? '';
+      brandNameController.text = device.brandName ?? '';
+      descriptionController.text = device.description ?? '';
+      priceController.text = (device.price ?? 0.0).toString();
+      storeNameController.text = device.storeName ?? '';
+      selectedCondition.value = device.condition ?? 'NEW';
+      purchaseDate.value = device.purchaseDate;
+      warrantyEndDate.value = device.warrantyEndDate;
+    }
   }
 
   void _loadStats() {
@@ -143,13 +162,40 @@ class AddNewDevicesController extends GetxController {
         deviceImageUrls: uploadedUrls,
       );
 
-      final success = await DeviceFirestoreUtils.addDevice(device);
-
-      if (success) {
-        ShowToastDialog.showSuccess('Device Registered successfully!');
-        Get.back(result: true);
+      bool success;
+      if (isEditMode) {
+        final updated = DeviceModel(
+          id: _editingDevice!.id,
+          ownerId: _editingDevice!.ownerId,
+          deviceName: deviceNameController.text.trim(),
+          brandName: brandNameController.text.trim(),
+          category: selectedCategory.value?.name ?? device.category,
+          condition: selectedCondition.value,
+          price: double.tryParse(priceController.text) ?? 0.0,
+          storeName: storeNameController.text.trim(),
+          description: descriptionController.text.trim(),
+          purchaseDate: purchaseDate.value,
+          warrantyEndDate: warrantyEndDate.value,
+          paymentMethod: selectedPaymentMethod.value?.pName,
+          deviceImageUrls: _editingDevice!.deviceImageUrls,
+          notes: _editingDevice!.notes,
+          createdAt: _editingDevice!.createdAt,
+        );
+        success = await DeviceFirestoreUtils.updateDevice(updated);
+        if (success) {
+          ShowToastDialog.showSuccess('Device updated successfully!');
+          Get.back(result: true);
+        } else {
+          ShowToastDialog.showError('Failed to update device');
+        }
       } else {
-        ShowToastDialog.showError('Failed to register device');
+        success = await DeviceFirestoreUtils.addDevice(device);
+        if (success) {
+          ShowToastDialog.showSuccess('Device registered successfully!');
+          Get.back(result: true);
+        } else {
+          ShowToastDialog.showError('Failed to register device');
+        }
       }
     } catch (e) {
       ShowToastDialog.showError('Error: ${e.toString()}');

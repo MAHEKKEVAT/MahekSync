@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -624,14 +625,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppThemeData.primary50,
-                  ),
-                ),
+                child: const MahekLoader(size: 20, showBranding: false),
               ),
             );
           }
@@ -1181,14 +1175,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
                 ),
                 const Spacer(),
                 if (controller.isAddressLoading.value)
-                  SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.5,
-                      color: AppThemeData.primary50,
-                    ),
-                  )
+                  MahekLoader(size: 12, showBranding: false)
                 else
                   GestureDetector(
                     onTap: () {

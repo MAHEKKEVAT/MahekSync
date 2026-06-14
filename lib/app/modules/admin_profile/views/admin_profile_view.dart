@@ -64,21 +64,25 @@ class AdminProfileView extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 42,
-          height: 42,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
-            gradient: AppThemeData.neonPurpleBlueGradient,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: AppThemeData.neonGlow(
-              AppThemeData.neonPurple,
-              blur: 12,
-              opacity: 0.15,
+            gradient: LinearGradient(
+              colors: [AppThemeData.primary50, AppThemeData.primary4],
             ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppThemeData.primary50.withValues(alpha: 0.35),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: const Icon(
             Icons.person_rounded,
             color: Colors.white,
-            size: 22,
+            size: 24,
           ),
         ),
         spaceW(width: 14),
@@ -92,7 +96,7 @@ class AdminProfileView extends StatelessWidget {
                 fontFamily: FontFamily.bold,
                 color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
               ),
-              spaceH(height: 2),
+              spaceH(height: 3),
               TextCustom(
                 title: 'Update your personal information and profile photo',
                 fontSize: 13,
@@ -112,7 +116,7 @@ class AdminProfileView extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(flex: 5, child: _buildAvatarCard(context, controller, isDark)),
+          Expanded(flex: 4, child: _buildAvatarCard(context, controller, isDark)),
           spaceW(width: 24),
           Expanded(flex: 6, child: _buildFormCard(controller, isDark)),
         ],
@@ -124,43 +128,26 @@ class AdminProfileView extends StatelessWidget {
       BuildContext context, AdminProfileController controller, bool isDark) {
     return Column(
       children: [
-        _buildAvatarSection(context, controller, isDark),
+        _buildAvatarCard(context, controller, isDark),
         spaceH(height: 24),
         _buildFormCard(controller, isDark),
       ],
     );
   }
 
+  // ─── Avatar Card ─────────────────────────────────────────────
   Widget _buildAvatarCard(
       BuildContext context, AdminProfileController controller, bool isDark) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppThemeData.surfaceElevated.withValues(alpha: 0.6)
-            : Colors.white.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark
-              ? AppThemeData.surfaceBorder.withValues(alpha: 0.4)
-              : AppThemeData.grey3,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 36),
+      decoration: _cardDecoration(isDark),
       child: Column(
         children: [
-          _buildAvatarCircle(context, controller, isDark, size: 140),
+          _buildAvatarCircle(context, controller, isDark, size: 130),
           spaceH(height: 20),
           ListenableBuilder(
             listenable: controller.fullNameController,
-            builder: (_, __) => TextCustom(
+            builder: (_, _) => TextCustom(
               title: controller.fullNameController.text.isEmpty
                   ? 'Your Name'
                   : controller.fullNameController.text,
@@ -173,7 +160,7 @@ class AdminProfileView extends StatelessWidget {
           spaceH(height: 4),
           ListenableBuilder(
             listenable: controller.emailController,
-            builder: (_, __) => TextCustom(
+            builder: (_, _) => TextCustom(
               title: controller.emailController.text.isEmpty
                   ? 'email@example.com'
                   : controller.emailController.text,
@@ -191,73 +178,7 @@ class AdminProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatarSection(
-      BuildContext context, AdminProfileController controller, bool isDark) {
-    return Center(
-      child: Column(
-        children: [
-          _buildAvatarCircle(context, controller, isDark, size: 120),
-          spaceH(height: 14),
-          _buildChangePhotoButton(controller, isDark, fullWidth: false),
-          Obx(() => _buildRemoveButton(controller, isDark)),
-        ],
-      ),
-    );
-  }
-
-  void _showImageOptionsSheet(
-      BuildContext context, AdminProfileController controller, bool isDark) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.only(top: 12, bottom: 24),
-        decoration: BoxDecoration(
-          color: isDark ? AppThemeData.grey10 : Colors.white,
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isDark ? AppThemeData.grey7 : AppThemeData.grey3,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: Icon(Icons.image_outlined,
-                  color: isDark
-                      ? AppThemeData.textNeonPurple
-                      : AppThemeData.primary50),
-              title: Text('View Image',
-                  style: TextStyle(
-                      color: isDark
-                          ? AppThemeData.grey1
-                          : AppThemeData.grey10)),
-              onTap: () {
-                Get.back();
-                controller.viewFullScreenImage(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete_outline,
-                  color: AppThemeData.danger300),
-              title: const Text('Delete Photo',
-                  style: TextStyle(color: AppThemeData.danger300)),
-              onTap: () {
-                Get.back();
-                controller.removeProfileImage();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
+  // ─── Avatar Circle ───────────────────────────────────────────
   Widget _buildAvatarCircle(
     BuildContext context,
     AdminProfileController controller,
@@ -281,12 +202,22 @@ class AdminProfileView extends StatelessWidget {
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: AppThemeData.geminiGradient,
-              boxShadow: AppThemeData.neonGlow(
-                AppThemeData.neonPurple,
-                blur: 24,
-                opacity: 0.2,
+              gradient: LinearGradient(
+                colors: [
+                  AppThemeData.primary50,
+                  AppThemeData.primary4,
+                  AppThemeData.primary50.withValues(alpha: 0.6),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppThemeData.primary50.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             padding: const EdgeInsets.all(3),
             child: Container(
@@ -297,35 +228,23 @@ class AdminProfileView extends StatelessWidget {
               child: ClipOval(
                 child: hasPreview
                     ? (kIsWeb
-                        ? Image.network(
-                            previewPath,
-                            fit: BoxFit.cover,
-                            width: innerSize,
-                            height: innerSize,
-                          )
-                        : Image.file(
-                            File(previewPath),
-                            fit: BoxFit.cover,
-                            width: innerSize,
-                            height: innerSize,
-                          ))
+                        ? Image.network(previewPath, fit: BoxFit.cover, width: innerSize, height: innerSize)
+                        : Image.file(File(previewPath), fit: BoxFit.cover, width: innerSize, height: innerSize))
                     : (currentUrl != null && currentUrl.isNotEmpty)
-                    ? NetworkImageWidget(
-                        imageUrl: currentUrl,
-                        height: innerSize,
-                        width: innerSize,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-                        child: Icon(
-                          Icons.person_rounded,
-                          size: size * 0.4,
-                          color: isDark
-                              ? AppThemeData.grey5
-                              : AppThemeData.grey6,
-                        ),
-                      ),
+                        ? NetworkImageWidget(
+                            imageUrl: currentUrl,
+                            height: innerSize,
+                            width: innerSize,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(
+                            color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+                            child: Icon(
+                              Icons.person_rounded,
+                              size: size * 0.38,
+                              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                            ),
+                          ),
               ),
             ),
           ),
@@ -334,6 +253,106 @@ class AdminProfileView extends StatelessWidget {
     });
   }
 
+  // ─── Image Options Bottom Sheet ──────────────────────────────
+  void _showImageOptionsSheet(
+      BuildContext context, AdminProfileController controller, bool isDark) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.only(top: 12, bottom: 24),
+        decoration: BoxDecoration(
+          color: isDark ? AppThemeData.grey10 : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isDark ? AppThemeData.grey6 : AppThemeData.grey4,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            spaceH(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextCustom(
+                title: 'Profile Photo',
+                fontSize: 16,
+                fontFamily: FontFamily.bold,
+                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+              ),
+            ),
+            spaceH(height: 8),
+            _buildSheetOption(
+              context: context,
+              icon: Icons.fullscreen_rounded,
+              iconColor: AppThemeData.primary50,
+              title: 'View Full Image',
+              isDark: isDark,
+              onTap: () {
+                Get.back();
+                controller.viewFullScreenImage(context);
+              },
+            ),
+            _buildSheetOption(
+              context: context,
+              icon: Icons.delete_outline_rounded,
+              iconColor: AppThemeData.danger300,
+              title: 'Delete Photo',
+              isDark: isDark,
+              onTap: () {
+                Get.back();
+                controller.removeProfileImage();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSheetOption({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              spaceW(width: 14),
+              TextCustom(
+                title: title,
+                fontSize: 14,
+                fontFamily: FontFamily.medium,
+                color: isDark ? AppThemeData.grey2 : AppThemeData.grey9,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Change Photo Button ─────────────────────────────────────
   Widget _buildChangePhotoButton(
     AdminProfileController controller,
     bool isDark, {
@@ -345,12 +364,12 @@ class AdminProfileView extends StatelessWidget {
         onTap: controller.pickAndCropImage,
         child: Container(
           width: fullWidth ? double.infinity : null,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: AppThemeData.neonPurple.withValues(alpha: 0.12),
+            color: AppThemeData.primary50.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: AppThemeData.neonPurple.withValues(alpha: 0.3),
+              color: AppThemeData.primary50.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -361,18 +380,14 @@ class AdminProfileView extends StatelessWidget {
               Icon(
                 Icons.camera_alt_rounded,
                 size: 17,
-                color: isDark
-                    ? AppThemeData.textNeonPurple
-                    : AppThemeData.primary50,
+                color: isDark ? AppThemeData.textNeonPurple : AppThemeData.primary50,
               ),
               spaceW(width: 8),
               Obx(() => TextCustom(
                     title: controller.hasImage ? 'Change Photo' : 'Add Photo',
                     fontSize: 13,
                     fontFamily: FontFamily.semiBold,
-                    color: isDark
-                        ? AppThemeData.textNeonPurple
-                        : AppThemeData.primary50,
+                    color: isDark ? AppThemeData.textNeonPurple : AppThemeData.primary50,
                   )),
             ],
           ),
@@ -381,6 +396,7 @@ class AdminProfileView extends StatelessWidget {
     );
   }
 
+  // ─── Remove Button ───────────────────────────────────────────
   Widget _buildRemoveButton(AdminProfileController controller, bool isDark) {
     final hasPreview = controller.previewImagePath.value.isNotEmpty;
     if (!hasPreview) return const SizedBox.shrink();
@@ -393,7 +409,7 @@ class AdminProfileView extends StatelessWidget {
           onTap: controller.clearSelectedImage,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
               color: AppThemeData.danger300.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(14),
@@ -405,13 +421,9 @@ class AdminProfileView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.close_rounded,
-                  size: 15,
-                  color: AppThemeData.danger300,
-                ),
+                const Icon(Icons.close_rounded, size: 15, color: AppThemeData.danger300),
                 spaceW(width: 6),
-                TextCustom(
+                const TextCustom(
                   title: 'Remove Selected',
                   fontSize: 12,
                   fontFamily: FontFamily.medium,
@@ -425,41 +437,30 @@ class AdminProfileView extends StatelessWidget {
     );
   }
 
+  // ─── Form Card ───────────────────────────────────────────────
   Widget _buildFormCard(AdminProfileController controller, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppThemeData.surfaceElevated.withValues(alpha: 0.6)
-            : Colors.white.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark
-              ? AppThemeData.surfaceBorder.withValues(alpha: 0.4)
-              : AppThemeData.grey3,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: _cardDecoration(isDark),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.edit_note_rounded,
-                size: 20,
-                color: isDark
-                    ? AppThemeData.textNeonPurple
-                    : AppThemeData.primary50,
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppThemeData.primary50.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Icon(
+                  Icons.edit_note_rounded,
+                  size: 18,
+                  color: isDark ? AppThemeData.textNeonPurple : AppThemeData.primary50,
+                ),
               ),
-              spaceW(width: 8),
+              spaceW(width: 10),
               TextCustom(
                 title: 'Personal Information',
                 fontSize: 16,
@@ -475,7 +476,7 @@ class AdminProfileView extends StatelessWidget {
             fontFamily: FontFamily.regular,
             color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
           ),
-          spaceH(height: 22),
+          spaceH(height: 24),
           _buildTextField(
             controller: controller.fullNameController,
             hint: 'Full Name *',
@@ -515,6 +516,7 @@ class AdminProfileView extends StatelessWidget {
     );
   }
 
+  // ─── Disabled Badge ──────────────────────────────────────────
   Widget _buildDisabledBadge(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -533,6 +535,7 @@ class AdminProfileView extends StatelessWidget {
     );
   }
 
+  // ─── Field Label ─────────────────────────────────────────────
   Widget _buildFieldLabel(String label, bool isDark, {Widget? trailing}) {
     return Row(
       children: [
@@ -547,6 +550,7 @@ class AdminProfileView extends StatelessWidget {
     );
   }
 
+  // ─── Text Field ──────────────────────────────────────────────
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
@@ -582,11 +586,12 @@ class AdminProfileView extends StatelessWidget {
       fillColor: enabled
           ? (isDark ? AppThemeData.grey9 : AppThemeData.grey2)
           : (isDark
-                ? AppThemeData.grey9.withValues(alpha: 0.5)
-                : AppThemeData.grey2.withValues(alpha: 0.6)),
+              ? AppThemeData.grey9.withValues(alpha: 0.5)
+              : AppThemeData.grey2.withValues(alpha: 0.6)),
     );
   }
 
+  // ─── Save Button ─────────────────────────────────────────────
   Widget _buildSaveButton(AdminProfileController controller, bool isDark) {
     return Obx(
       () => Container(
@@ -594,17 +599,19 @@ class AdminProfileView extends StatelessWidget {
         height: 52,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          gradient: AppThemeData.neonPurpleBlueGradient,
-          boxShadow: AppThemeData.neonGlow(
-            AppThemeData.neonPurple,
-            blur: 20,
-            opacity: 0.25,
+          gradient: LinearGradient(
+            colors: [AppThemeData.primary50, AppThemeData.primary4],
           ),
+          boxShadow: [
+            BoxShadow(
+              color: AppThemeData.primary50.withValues(alpha: 0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: ElevatedButton(
-          onPressed: controller.isLoading
-              ? null
-              : controller.saveProfileChanges,
+          onPressed: controller.isLoading ? null : controller.saveProfileChanges,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
@@ -614,29 +621,18 @@ class AdminProfileView extends StatelessWidget {
             ),
           ),
           child: controller.isLoading
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
+              ? const MahekLoader(size: 22, showBranding: false)
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TextCustom(
+                    const TextCustom(
                       title: 'Save Changes',
                       fontSize: 15,
                       fontFamily: FontFamily.semiBold,
                       color: Colors.white,
                     ),
                     spaceW(width: 8),
-                    const Icon(
-                      Icons.check_rounded,
-                      color: Colors.white,
-                      size: 19,
-                    ),
+                    const Icon(Icons.check_rounded, color: Colors.white, size: 19),
                   ],
                 ),
         ),
@@ -644,6 +640,7 @@ class AdminProfileView extends StatelessWidget {
     );
   }
 
+  // ─── Loading Overlay ─────────────────────────────────────────
   Widget _buildLoadingOverlay(AdminProfileController controller) {
     if (!controller.isUploadingImage.value && !controller.isSaving.value) {
       return const SizedBox.shrink();
@@ -655,10 +652,28 @@ class AdminProfileView extends StatelessWidget {
       color: Colors.black.withValues(alpha: 0.45),
       child: MahekLoader(
         message: message,
-        style: MahekLoaderStyle.aurora,
         showBackgroundOverlay: false,
-        size: 56,
+        size: 200,
       ),
+    );
+  }
+
+  // ─── Shared Card Decoration ──────────────────────────────────
+  BoxDecoration _cardDecoration(bool isDark) {
+    return BoxDecoration(
+      color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(
+        color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+        width: 0.5,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+        ),
+      ],
     );
   }
 }

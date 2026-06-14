@@ -1,5 +1,6 @@
 // lib/app/modules/splash_screen/views/splash_screen_view.dart
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -387,19 +388,7 @@ class SplashScreenView extends GetView<SplashScreenController> {
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 500),
       builder: (context, double value, child) {
-        return SizedBox(
-          width: 32,
-          height: 32,
-          child: Transform.scale(
-            scale: value,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                const Color(0xFF5D54F2).withValues(alpha: 0.6),
-              ),
-            ),
-          ),
-        );
+        return MahekLoader(size: 32, showBranding: false);
       },
     );
   }

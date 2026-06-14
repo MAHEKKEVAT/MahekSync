@@ -90,7 +90,7 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
             Positioned(
               bottom: 24,
               right: 24,
-              child: _buildFloatingAddButton(isDark),
+              child: _buildFloatingAddButton(isDark, context: context),
             ),
         ],
       ),
@@ -335,7 +335,7 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
             children: [
               Expanded(child: _buildSearchField(isDark)),
               if (!isMobile) spaceW(width: 16),
-              if (!isMobile) _buildAddButton(isDark),
+              if (!isMobile) _buildAddButton(isDark, context: context),
             ],
           ),
           const SizedBox(height: 12),
@@ -370,7 +370,7 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                 spaceW(width: 12),
                 _buildViewToggle(isDark),
                 if (isMobile) spaceW(width: 12),
-                if (isMobile) _buildAddButton(isDark, compact: true),
+                if (isMobile) _buildAddButton(isDark, compact: true, context: context),
               ],
             )),
           ),
@@ -499,9 +499,9 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
     );
   }
 
-  Widget _buildAddButton(bool isDark, {bool compact = false}) {
+  Widget _buildAddButton(bool isDark, {bool compact = false, required BuildContext context}) {
     return ElevatedButton.icon(
-      onPressed: () => _showAddEditDialog(Get.context!, isDark),
+      onPressed: () => _showAddEditDialog(context, isDark),
       icon: Icon(SolarIconsOutline.addCircle, size: compact ? 18 : 20),
       label: TextCustom(
         title: 'Add Due', fontSize: compact ? 13 : 14,
@@ -519,9 +519,9 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
     );
   }
 
-  Widget _buildFloatingAddButton(bool isDark) {
+  Widget _buildFloatingAddButton(bool isDark, {required BuildContext context}) {
     return FloatingActionButton(
-      onPressed: () => _showAddEditDialog(Get.context!, isDark),
+      onPressed: () => _showAddEditDialog(context, isDark),
       backgroundColor: AppThemeData.primary50, elevation: 4,
       child: const Icon(SolarIconsOutline.addCircle, color: Colors.white),
     );
@@ -573,7 +573,7 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                   const Spacer(),
                   _buildStatusBadge(due, isDark),
                   spaceW(width: 8),
-                  _buildPopupMenu(due, isDark),
+                   _buildPopupMenu(due, isDark, context: context),
                 ],
               ),
               const SizedBox(height: 12),
@@ -680,7 +680,7 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
             ),
             _buildStatusBadge(due, isDark),
             spaceW(width: 8),
-            _buildPopupMenu(due, isDark),
+            _buildPopupMenu(due, isDark, context: context),
           ],
         ),
         subtitle: Column(
@@ -798,14 +798,14 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
     );
   }
 
-  Widget _buildPopupMenu(DuesTrackerModel due, bool isDark) {
+  Widget _buildPopupMenu(DuesTrackerModel due, bool isDark, {required BuildContext context}) {
     return PopupMenuButton<String>(
       icon: Icon(SolarIconsOutline.menuDots, size: 20, color: AppThemeData.grey5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onSelected: (value) {
         switch (value) {
           case 'edit':
-            _showAddEditDialog(Get.context!, isDark, due: due);
+            _showAddEditDialog(context, isDark, due: due);
             break;
           case 'settle':
             controller.markAsSettled(due);

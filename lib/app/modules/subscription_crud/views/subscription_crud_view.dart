@@ -1,6 +1,7 @@
 // lib/app/modules/subscription_crud/views/subscription_crud_view.dart
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
@@ -37,7 +38,7 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
           Obx(() => controller.isLoading.value
               ? Padding(
                   padding: const EdgeInsets.all(16),
-                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppThemeData.primary50)),
+                  child: const MahekLoader(size: 20, showBranding: false),
                 )
               : TextButton(
                   onPressed: controller.saveSubscription,
@@ -126,9 +127,9 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
               spaceH(height: 12),
               Row(
                 children: [
-                  Expanded(child: _buildDatePicker('Start Date', controller.startDate, isDark)),
-                  spaceW(width: 14),
-                  Expanded(child: _buildDatePicker('Expiry Date', controller.expiryDate, isDark)),
+          Expanded(child: _buildDatePicker('Start Date', controller.startDate, isDark, context: context)),
+          spaceW(width: 14),
+          Expanded(child: _buildDatePicker('Expiry Date', controller.expiryDate, isDark, context: context)),
                 ],
               ),
               spaceH(height: 24),
@@ -164,7 +165,7 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
                     elevation: 0,
                   ),
                   child: controller.isLoading.value
-                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                      ? const MahekLoader(size: 22, showBranding: false)
                       : TextCustom(
                           title: controller.isEditMode.value ? 'Update Subscription' : 'Add Subscription',
                           fontSize: 16,
@@ -222,7 +223,7 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
     );
   }
 
-  Widget _buildDatePicker(String label, Rx<DateTime?> date, bool isDark) {
+  Widget _buildDatePicker(String label, Rx<DateTime?> date, bool isDark, {required BuildContext context}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -230,7 +231,7 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
         spaceH(height: 6),
         Obx(() => GestureDetector(
           onTap: () async {
-            final picked = await showDatePicker(context: Get.context!, initialDate: date.value ?? DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035));
+            final picked = await showDatePicker(context: context, initialDate: date.value ?? DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2035));
             if (picked != null) date.value = picked;
           },
           child: Container(

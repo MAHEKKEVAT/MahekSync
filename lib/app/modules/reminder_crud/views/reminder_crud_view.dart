@@ -115,6 +115,7 @@ class ReminderCrudView extends GetView<ReminderCrudController> {
                       'Created Date',
                       controller.createdDate,
                       isDark,
+                      context: context,
                     ),
                   ),
                   spaceW(width: 14),
@@ -123,6 +124,7 @@ class ReminderCrudView extends GetView<ReminderCrudController> {
                       'Expiry Date',
                       controller.expiryDate,
                       isDark,
+                      context: context,
                     ),
                   ),
                 ],
@@ -246,7 +248,7 @@ class ReminderCrudView extends GetView<ReminderCrudController> {
     );
   }
 
-  Widget _buildDatePicker(String label, Rx<DateTime?> date, bool isDark) {
+  Widget _buildDatePicker(String label, Rx<DateTime?> date, bool isDark, {required BuildContext context}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -261,7 +263,7 @@ class ReminderCrudView extends GetView<ReminderCrudController> {
           () => GestureDetector(
             onTap: () async {
               final picked = await showDatePicker(
-                context: Get.context!,
+                context: context,
                 initialDate: date.value ?? DateTime.now(),
                 firstDate: DateTime(2020),
                 lastDate: DateTime(2035),

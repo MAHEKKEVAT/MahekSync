@@ -53,7 +53,7 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     child: controller.isSaving.value
-                        ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        ? const MahekLoader(size: 18, showBranding: false)
                         : const TextCustom(title: 'Save', fontSize: 13, color: Colors.white),
                   ),
                   spaceW(width: 8),
@@ -89,13 +89,13 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
         if (controller.isLoading.value) {
           return Center(child: MahekLoader(message: 'Loading...', size: 50, textSize: 16));
         }
-        return _buildContent(isDark);
+        return _buildContent(isDark, context: context);
       }),
     );
   }
 
-  Widget _buildContent(bool isDark) {
-    final screenWidth = MediaQuery.of(Get.context!).size.width;
+  Widget _buildContent(bool isDark, {required BuildContext context}) {
+    final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 1000;
 
     return isSmallScreen

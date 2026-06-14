@@ -37,7 +37,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
         title: TextCustom(title: sub.name ?? 'Details', fontSize: 18, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
         actions: [
           TextButton.icon(
-            onPressed: () => _showRenewDialog(sub),
+            onPressed: () => _showRenewDialog(sub, context: context),
             icon: const Icon(Icons.refresh_rounded, size: 18, color: AppThemeData.success400),
             label: TextCustom(title: 'Renew', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.success400),
           ),
@@ -66,7 +66,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
               children: [
                 _buildHeaderSection(sub, isDark),
                 spaceH(height: 20),
-                _buildWaterBubbleSection(sub, isDark),
+                _buildWaterBubbleSection(sub, isDark, context: context),
                 spaceH(height: 16),
                 _buildDetailCard(sub, isDark),
                 spaceH(height: 12),
@@ -74,7 +74,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                 spaceH(height: 12),
                 _buildPaymentCard(sub, isDark),
                 spaceH(height: 20),
-                _buildActionButtons(sub, isDark),
+                _buildActionButtons(sub, isDark, context: context),
               ],
             ),
           ),
@@ -98,7 +98,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
               children: [
                 _buildHeaderSection(sub, isDark),
                 spaceH(height: 16),
-                _buildWaterBubbleSection(sub, isDark),
+                _buildWaterBubbleSection(sub, isDark, context: context),
                 spaceH(height: 16),
                 _buildDetailCard(sub, isDark),
                 spaceH(height: 12),
@@ -106,7 +106,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                 spaceH(height: 12),
                 _buildPaymentCard(sub, isDark),
                 spaceH(height: 20),
-                _buildActionButtons(sub, isDark),
+                _buildActionButtons(sub, isDark, context: context),
               ],
             ),
           ),
@@ -118,14 +118,14 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   // ═══════════════════════════════════════
   // ACTION BUTTONS
   // ═══════════════════════════════════════
-  Widget _buildActionButtons(SubscriptionModel sub, bool isDark) {
+  Widget _buildActionButtons(SubscriptionModel sub, bool isDark, {required BuildContext context}) {
     return Row(
       children: [
         Expanded(
           child: SizedBox(
             height: 48,
             child: OutlinedButton.icon(
-              onPressed: () => _showRenewDialog(sub),
+              onPressed: () => _showRenewDialog(sub, context: context),
               icon: const Icon(Icons.refresh_rounded, size: 18, color: AppThemeData.success400),
               label: TextCustom(title: 'Renew', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.success400),
               style: OutlinedButton.styleFrom(
@@ -356,9 +356,9 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   // ═══════════════════════════════════════
   // WATER BUBBLE SECTION
   // ═══════════════════════════════════════
-  Widget _buildWaterBubbleSection(SubscriptionModel sub, bool isDark) {
+  Widget _buildWaterBubbleSection(SubscriptionModel sub, bool isDark, {required BuildContext context}) {
     final color = sub.isExpiringCritical ? AppThemeData.danger300 : (sub.isExpiringSoon ? AppThemeData.pending400 : AppThemeData.success400);
-    final screenWidth = MediaQuery.of(Get.context!).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
     final bubbleSize = screenWidth < 900 ? 140.0 : 160.0;
 
     return Container(
@@ -536,9 +536,9 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   // ═══════════════════════════════════════
   // RENEW DIALOG
   // ═══════════════════════════════════════
-  Future<void> _showRenewDialog(SubscriptionModel sub) async {
+  Future<void> _showRenewDialog(SubscriptionModel sub, {required BuildContext context}) async {
     final selectedDate = await showDialog<DateTime>(
-      context: Get.context!,
+      context: context,
       builder: (context) {
         DateTime tempDate = DateTime.now().add(const Duration(days: 30));
         return StatefulBuilder(

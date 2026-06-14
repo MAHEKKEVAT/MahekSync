@@ -1,5 +1,6 @@
 // lib/app/modules/add_new_devices/views/add_new_devices_view.dart
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:maheksync/app/models/category_model.dart';
@@ -36,7 +37,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
           ),
         ),
         title: TextCustom(
-          title: 'Add New Device',
+          title: controller.isEditMode ? 'Edit Device' : 'Add New Device',
           fontSize: 22,
           fontFamily: FontFamily.bold,
           color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
@@ -82,24 +83,24 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                             ),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(
-                            Icons.add_rounded,
-                            color: Colors.white,
-                            size: 26,
-                          ),
+                    child: Icon(
+                      controller.isEditMode ? Icons.edit_rounded : Icons.add_rounded,
+                      color: Colors.white,
+                      size: 26,
+                    ),
                         ),
                         spaceW(width: 14),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TextCustom(
-                              title: 'Register New Device',
+                              title: controller.isEditMode ? 'Update Device' : 'Register New Device',
                               fontSize: 20,
                               fontFamily: FontFamily.bold,
                               color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                             ),
                             TextCustom(
-                              title: 'Add a new device to your inventory',
+                              title: controller.isEditMode ? 'Update device details' : 'Add a new device to your inventory',
                               fontSize: 13,
                               fontFamily: FontFamily.regular,
                               color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
@@ -194,7 +195,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                         spaceW(width: 16),
                         Expanded(
                           child: TextFieldWidget(
-                            title: 'PRICE (\$)',
+                            title: 'PRICE (₹)',
                             hintText: '0.00',
                             controller: controller.priceController,
                             onPress: () {},
@@ -245,9 +246,9 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                     spaceH(height: 16),
                     Row(
                       children: [
-                        Expanded(child: _buildDatePicker(isDark)),
+                        Expanded(child: _buildDatePicker(isDark, context: context)),
                         spaceW(width: 16),
-                        Expanded(child: _buildWarrantyDatePicker(isDark)),
+                        Expanded(child: _buildWarrantyDatePicker(isDark, context: context)),
                       ],
                     ),
                   ],
@@ -662,7 +663,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
     }
   }
 
-  Widget _buildDatePicker(bool isDark) {
+  Widget _buildDatePicker(bool isDark, {required BuildContext context}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -676,7 +677,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
         Obx(() => GestureDetector(
           onTap: () async {
             final selected = await showDatePicker(
-              context: Get.context!,
+              context: context,
               initialDate: DateTime.now(),
               firstDate: DateTime(2000),
               lastDate: DateTime(2030),
@@ -726,7 +727,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
     );
   }
 
-  Widget _buildWarrantyDatePicker(bool isDark) {
+  Widget _buildWarrantyDatePicker(bool isDark, {required BuildContext context}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -740,7 +741,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
         Obx(() => GestureDetector(
           onTap: () async {
             final selected = await showDatePicker(
-              context: Get.context!,
+              context: context,
               initialDate: DateTime.now().add(const Duration(days: 365)),
               firstDate: DateTime.now(),
               lastDate: DateTime(2030),
@@ -999,7 +1000,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
               _buildStatRow(
                 'Price',
                 controller.priceController.text.isNotEmpty
-                    ? '\$${controller.priceController.text}'
+                    ? '₹${controller.priceController.text}'
                     : '—',
                 isDark,
               ),
@@ -1069,21 +1070,14 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
               shadowColor: AppThemeData.primary50.withValues(alpha: 0.4),
             ),
             child: controller.isLoading.value
-                ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            )
+                ? const MahekLoader(size: 20, showBranding: false)
                 : Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.check_rounded, color: Colors.white, size: 18),
                 spaceW(width: 8),
                 TextCustom(
-                  title: 'Save Device',
+                  title: controller.isEditMode ? 'Update Device' : 'Save Device',
                   fontSize: 15,
                   fontFamily: FontFamily.bold,
                   color: Colors.white,

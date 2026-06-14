@@ -37,14 +37,10 @@ class CategoriesView extends GetView<CategoriesController> {
     );
   }
 
-  // ═══════════════════════════════════════
-  // DESKTOP LAYOUT
-  // ═══════════════════════════════════════
   Widget _buildDesktopLayout(bool isDark, BuildContext context) {
     final panelWidth = MahekResponsive.filterPanelWidth(context);
     return Row(
       children: [
-        // Left Panel - Add/Edit Form
         Container(
           width: panelWidth,
           padding: MahekResponsive.responsivePadding(context),
@@ -84,7 +80,6 @@ class CategoriesView extends GetView<CategoriesController> {
             ],
           ),
         ),
-        // Right Panel - Categories List
         Expanded(
           child: Container(
             padding: MahekResponsive.responsivePadding(context),
@@ -104,9 +99,6 @@ class CategoriesView extends GetView<CategoriesController> {
     );
   }
 
-  // ═══════════════════════════════════════
-  // MOBILE/TABLET LAYOUT
-  // ═══════════════════════════════════════
   Widget _buildMobileLayout(bool isDark, BuildContext context) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(MahekResponsive.responsivePadding(context).left),
@@ -132,9 +124,6 @@ class CategoriesView extends GetView<CategoriesController> {
     );
   }
 
-  // ═══════════════════════════════════════
-  // HEADER
-  // ═══════════════════════════════════════
   Widget _buildHeader(bool isDark, BuildContext context) {
     final iconSize = MahekResponsive.isMobile(context) ? 44.0 : 56.0;
     final titleSize = MahekResponsive.responsiveFontSize(context, mobile: 16, tablet: 18, laptop: 20, desktop: 20);
@@ -194,9 +183,6 @@ class CategoriesView extends GetView<CategoriesController> {
     ));
   }
 
-  // ═══════════════════════════════════════
-  // FORM
-  // ═══════════════════════════════════════
   Widget _buildForm(bool isDark, BuildContext context) {
     final inputFontSize = MahekResponsive.responsiveFontSize(context, mobile: 13, tablet: 14, laptop: 15, desktop: 15);
 
@@ -364,12 +350,25 @@ class CategoriesView extends GetView<CategoriesController> {
           children: [
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: controller.isSaving.value ? null : controller.saveCategory,
-                style: ElevatedButton.styleFrom(backgroundColor: AppThemeData.primary50, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), elevation: 3, shadowColor: AppThemeData.primary50.withValues(alpha: 0.5)),
-                child: controller.isSaving.value
-                    ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                    : Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(isEditing ? Icons.save_rounded : Icons.add_rounded, color: Colors.white, size: 20), spaceW(width: 8), TextCustom(title: isEditing ? 'Update Category' : 'Create Category', fontSize: 15, fontFamily: FontFamily.bold, color: Colors.white)]),
+              child: GestureDetector(
+                onTap: controller.isSaving.value ? null : controller.saveCategory,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [AppThemeData.primary50, AppThemeData.primary4]),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6)),
+                    ],
+                  ),
+                  child: controller.isSaving.value
+                      ? const Center(child: MahekLoader(size: 24, showBranding: false))
+                      : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                          Icon(isEditing ? Icons.save_rounded : Icons.add_rounded, color: Colors.white, size: 20),
+                          spaceW(width: 8),
+                          TextCustom(title: isEditing ? 'Update Category' : 'Create Category', fontSize: 15, fontFamily: FontFamily.bold, color: Colors.white),
+                        ]),
+                ),
               ),
             ),
             if (isEditing) ...[
@@ -389,9 +388,6 @@ class CategoriesView extends GetView<CategoriesController> {
     });
   }
 
-  // ═══════════════════════════════════════
-  // LIST HEADER
-  // ═══════════════════════════════════════
   Widget _buildListHeader(bool isDark, BuildContext context) {
     final titleSize = MahekResponsive.responsiveFontSize(context, mobile: 18, tablet: 20, laptop: 22, desktop: 22);
     return Container(
@@ -437,7 +433,8 @@ class CategoriesView extends GetView<CategoriesController> {
   Widget _buildViewToggle({required IconData icon, required bool isSelected, required VoidCallback onTap, required bool isDark}) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           gradient: isSelected ? LinearGradient(colors: [AppThemeData.primary50, AppThemeData.primary4]) : null,
@@ -451,7 +448,12 @@ class CategoriesView extends GetView<CategoriesController> {
 
   Widget _buildSearchBar(bool isDark, BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.03), blurRadius: 12, offset: const Offset(0, 4))]),
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? AppThemeData.grey8.withValues(alpha: 0.3) : AppThemeData.grey3.withValues(alpha: 0.3)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.03), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
       child: TextField(
         onChanged: controller.updateSearchQuery,
         style: TextStyle(fontFamily: FontFamily.medium, fontSize: 14, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
@@ -516,14 +518,40 @@ class CategoriesView extends GetView<CategoriesController> {
     );
   }
 
+  Color _getCategoryAccent(int index) {
+    final accents = [
+      AppThemeData.neonPurple,
+      AppThemeData.neonTeal,
+      AppThemeData.neonMint,
+      AppThemeData.pending400,
+      AppThemeData.primary50,
+    ];
+    return accents[index % accents.length];
+  }
+
   Widget _buildCategoryGridCard(CategoryModel category, bool isDark, BuildContext context) {
     final nameSize = MahekResponsive.responsiveFontSize(context, mobile: 14, tablet: 15, laptop: 16, desktop: 18);
+    final index = controller.filteredCategories.indexOf(category);
+    final accent = _getCategoryAccent(index);
+
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite, isDark ? AppThemeData.grey9.withValues(alpha: 0.5) : AppThemeData.grey1]),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+            isDark ? AppThemeData.grey9.withValues(alpha: 0.5) : AppThemeData.grey1,
+          ],
+        ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? AppThemeData.grey8.withValues(alpha: 0.3) : AppThemeData.grey3.withValues(alpha: 0.3)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.05), blurRadius: 16, offset: const Offset(0, 4))],
+        border: Border.all(
+          color: isDark ? AppThemeData.grey8.withValues(alpha: 0.3) : AppThemeData.grey3.withValues(alpha: 0.3),
+        ),
+        boxShadow: [
+          BoxShadow(color: accent.withValues(alpha: isDark ? 0.08 : 0.04), blurRadius: 20, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.05), blurRadius: 16, offset: const Offset(0, 4)),
+        ],
       ),
       child: InkWell(
         onTap: () => controller.startEditing(category),
@@ -535,32 +563,65 @@ class CategoriesView extends GetView<CategoriesController> {
               flex: 3,
               child: Container(
                 margin: const EdgeInsets.all(16),
-                decoration: BoxDecoration(gradient: LinearGradient(colors: [AppThemeData.primary50.withValues(alpha: 0.12), AppThemeData.primary4.withValues(alpha: 0.06)]), borderRadius: BorderRadius.circular(16), border: Border.all(color: AppThemeData.primary50.withValues(alpha: 0.15))),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      accent.withValues(alpha: 0.12),
+                      accent.withValues(alpha: 0.04),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: accent.withValues(alpha: 0.2)),
+                ),
                 child: category.iconUrl != null && category.iconUrl!.isNotEmpty
                     ? ClipRRect(borderRadius: BorderRadius.circular(16), child: NetworkImageWidget(imageUrl: category.iconUrl!, fit: BoxFit.contain))
-                    : Icon(Icons.category_rounded, color: AppThemeData.primary50, size: 48),
+                    : Icon(Icons.category_rounded, color: accent, size: 48),
               ),
             ),
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Expanded(child: TextCustom(title: category.name ?? 'Unknown', fontSize: nameSize, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10, maxLine: 1)),
-                        Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(gradient: LinearGradient(colors: [AppThemeData.primary50.withValues(alpha: 0.15), AppThemeData.primary4.withValues(alpha: 0.1)]), borderRadius: BorderRadius.circular(16)), child: TextCustom(title: '${category.itemCount ?? 0}', fontSize: 11, fontFamily: FontFamily.bold, color: AppThemeData.primary50)),
+                        Expanded(
+                          child: TextCustom(
+                            title: category.name ?? 'Unknown',
+                            fontSize: nameSize,
+                            fontFamily: FontFamily.bold,
+                            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                            maxLine: 1,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(colors: [accent.withValues(alpha: 0.15), accent.withValues(alpha: 0.08)]),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: TextCustom(title: '${category.itemCount ?? 0}', fontSize: 11, fontFamily: FontFamily.bold, color: accent),
+                        ),
                       ],
                     ),
                     spaceH(height: 4),
-                    TextCustom(title: category.shortDescription, fontSize: 12, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, maxLine: 2),
-                    const Spacer(),
+                    Expanded(
+                      child: TextCustom(
+                        title: category.shortDescription,
+                        fontSize: 12,
+                        fontFamily: FontFamily.regular,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                        maxLine: 2,
+                      ),
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        _buildActionChip(Icons.edit_outlined, isDark ? AppThemeData.grey4 : AppThemeData.grey7, () => controller.startEditing(category), isDark),
+                        _buildActionChip(Icons.edit_outlined, accent, () => controller.startEditing(category), isDark),
                         spaceW(width: 6),
                         _buildActionChip(Icons.delete_outline, AppThemeData.danger300, () => controller.deleteCategory(category), isDark, isDanger: true),
                       ],
@@ -577,25 +638,49 @@ class CategoriesView extends GetView<CategoriesController> {
 
   Widget _buildCategoryListCard(CategoryModel category, bool isDark, BuildContext context) {
     final nameSize = MahekResponsive.responsiveFontSize(context, mobile: 14, tablet: 16, laptop: 17, desktop: 17);
+    final index = controller.filteredCategories.indexOf(category);
+    final accent = _getCategoryAccent(index);
+
     return InkWell(
       onTap: () => controller.startEditing(category),
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite, isDark ? AppThemeData.grey9.withValues(alpha: 0.5) : AppThemeData.grey1]),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+              isDark ? AppThemeData.grey9.withValues(alpha: 0.5) : AppThemeData.grey1,
+            ],
+          ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: isDark ? AppThemeData.grey8.withValues(alpha: 0.3) : AppThemeData.grey3.withValues(alpha: 0.3)),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.05), blurRadius: 16, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(color: accent.withValues(alpha: isDark ? 0.06 : 0.03), blurRadius: 16, offset: const Offset(0, 4)),
+            BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.05), blurRadius: 16, offset: const Offset(0, 4)),
+          ],
         ),
         child: Row(
           children: [
             Container(
               width: 60, height: 60,
-              decoration: BoxDecoration(gradient: LinearGradient(colors: [AppThemeData.primary50.withValues(alpha: 0.15), AppThemeData.primary4.withValues(alpha: 0.08)]), borderRadius: BorderRadius.circular(16), border: Border.all(color: AppThemeData.primary50.withValues(alpha: 0.15))),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    accent.withValues(alpha: 0.15),
+                    accent.withValues(alpha: 0.06),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: accent.withValues(alpha: 0.2)),
+              ),
               child: category.iconUrl != null && category.iconUrl!.isNotEmpty
                   ? ClipRRect(borderRadius: BorderRadius.circular(16), child: NetworkImageWidget(imageUrl: category.iconUrl!, fit: BoxFit.cover))
-                  : Icon(Icons.category_rounded, color: AppThemeData.primary50, size: 30),
+                  : Icon(Icons.category_rounded, color: accent, size: 30),
             ),
             spaceW(width: 16),
             Expanded(
@@ -605,7 +690,14 @@ class CategoriesView extends GetView<CategoriesController> {
                   Row(
                     children: [
                       Expanded(child: TextCustom(title: category.name ?? 'Unknown', fontSize: nameSize, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10)),
-                      Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), decoration: BoxDecoration(gradient: LinearGradient(colors: [AppThemeData.primary50.withValues(alpha: 0.15), AppThemeData.primary4.withValues(alpha: 0.1)]), borderRadius: BorderRadius.circular(16)), child: TextCustom(title: '${category.itemCount ?? 0} items', fontSize: 11, fontFamily: FontFamily.bold, color: AppThemeData.primary50)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: [accent.withValues(alpha: 0.15), accent.withValues(alpha: 0.08)]),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: TextCustom(title: '${category.itemCount ?? 0} items', fontSize: 11, fontFamily: FontFamily.bold, color: accent),
+                      ),
                     ],
                   ),
                   spaceH(height: 4),
@@ -615,7 +707,7 @@ class CategoriesView extends GetView<CategoriesController> {
             ),
             Row(
               children: [
-                _buildActionChip(Icons.edit_outlined, isDark ? AppThemeData.grey4 : AppThemeData.grey7, () => controller.startEditing(category), isDark),
+                _buildActionChip(Icons.edit_outlined, accent, () => controller.startEditing(category), isDark),
                 spaceW(width: 6),
                 _buildActionChip(Icons.delete_outline, AppThemeData.danger300, () => controller.deleteCategory(category), isDark, isDanger: true),
               ],
@@ -627,16 +719,26 @@ class CategoriesView extends GetView<CategoriesController> {
   }
 
   Widget _buildActionChip(IconData icon, Color color, VoidCallback onTap, bool isDark, {bool isDanger = false}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          gradient: isDanger ? LinearGradient(colors: [AppThemeData.danger50.withValues(alpha: isDark ? 0.15 : 0.8), AppThemeData.danger100.withValues(alpha: isDark ? 0.1 : 0.5)]) : null,
-          color: isDanger ? null : (isDark ? AppThemeData.grey9 : AppThemeData.grey1),
-          borderRadius: BorderRadius.circular(10),
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: isDanger
+                ? LinearGradient(colors: [AppThemeData.danger300.withValues(alpha: 0.15), AppThemeData.danger300.withValues(alpha: 0.08)])
+                : LinearGradient(colors: [color.withValues(alpha: 0.12), color.withValues(alpha: 0.06)]),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isDanger
+                  ? AppThemeData.danger300.withValues(alpha: 0.2)
+                  : color.withValues(alpha: 0.15),
+            ),
+          ),
+          child: Icon(icon, color: color, size: 18),
         ),
-        child: Icon(icon, color: color, size: 18),
       ),
     );
   }

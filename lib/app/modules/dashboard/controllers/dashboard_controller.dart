@@ -26,6 +26,7 @@ import 'package:maheksync/app/modules/subscription/controllers/subscription_cont
 import 'package:maheksync/app/modules/subscription/views/subscription_view.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/modules/settings/views/settings_view.dart';
+import 'package:maheksync/app/modules/settings/controllers/settings_controller.dart';
 import 'package:maheksync/app/modules/sentinel/controllers/sentinel_controller.dart';
 import 'package:maheksync/app/modules/sentinel/views/sentinel_view.dart';
 import 'package:maheksync/app/modules/vault/controllers/vault_controller.dart';
@@ -188,12 +189,6 @@ class DashboardController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-
-    print('📋 Available routes in navigation:');
-    for (int i = 0; i < allItems.length; i++) {
-      print('   [$i] ${allItems[i].route} - ${allItems[i].title}');
-    }
-
     syncIndexFromRoute();
 
     // ✅ Safe on all platforms — returns empty stream on Android/iOS
@@ -429,6 +424,9 @@ class DashboardController extends GetxController {
         return const GenerateBillListView();
 
       case Routes.SETTINGS:
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.put(SettingsController());
+        }
         return const SettingsView();
       case Routes.POLICY_SETTINGS:
         return const PolicySettingsView();

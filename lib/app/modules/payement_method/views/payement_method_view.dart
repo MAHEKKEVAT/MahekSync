@@ -2,6 +2,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
 import 'package:maheksync/app/modules/payement_method/controllers/payement_method_controller.dart';
@@ -337,14 +338,7 @@ class PaymentMethodsView extends GetView<PaymentMethodsController> {
                 ),
               ),
               child: controller.isSaving.value
-                  ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
+                  ? const MahekLoader(size: 20, showBranding: false)
                   : TextCustom(
                 title: isEditing ? 'Update Method' : 'Add Method',
                 fontSize: 14,

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:solar_icons/solar_icons.dart';
@@ -37,19 +38,19 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
           TextButton(
             onPressed: controller.isLoading.value ? null : controller.saveTask,
             child: Obx(() => controller.isLoading.value
-                ?  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppThemeData.primary50))
+                ?  const MahekLoader(size: 20, showBranding: false)
                 : TextCustom(title: 'Save', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.primary50)),
           ),
         ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: _buildForm(isDark),
+        child: _buildForm(isDark, context: context),
       ),
     );
   }
 
-  Widget _buildForm(bool isDark) {
+  Widget _buildForm(bool isDark, {required BuildContext context}) {
     return Container(
       padding:  EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -107,7 +108,7 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
           spaceH(height: 20),
           _buildSectionTitle('Due Date', SolarIconsOutline.calendar, isDark),
           spaceH(height: 10),
-          _buildDatePicker(controller.dueDate, isDark),
+          _buildDatePicker(controller.dueDate, isDark, context: context),
           spaceH(height: 20),
           _buildSectionTitle('Notes', SolarIconsOutline.notes, isDark),
           spaceH(height: 10),
@@ -248,11 +249,11 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
     ));
   }
 
-  Widget _buildDatePicker(Rx<DateTime?> date, bool isDark) {
+  Widget _buildDatePicker(Rx<DateTime?> date, bool isDark, {required BuildContext context}) {
     return Obx(() => GestureDetector(
       onTap: () async {
         final picked = await showDatePicker(
-          context: Get.context!,
+          context: context,
           initialDate: date.value ?? DateTime.now(),
           firstDate: DateTime(2020),
           lastDate: DateTime(2035),
@@ -440,7 +441,7 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
           disabledBackgroundColor: AppThemeData.primary50.withValues(alpha: 0.5),
         ),
         child: controller.isLoading.value
-            ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+            ? const MahekLoader(size: 22, showBranding: false)
             : Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

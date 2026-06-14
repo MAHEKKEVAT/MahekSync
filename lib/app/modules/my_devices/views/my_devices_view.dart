@@ -49,6 +49,8 @@ class MyDevicesView extends GetView<MyDevicesController> {
               children: [
                 _buildHeader(isDark),
                 spaceH(height: 24),
+                _buildStatsRow(isDark),
+                spaceH(height: 24),
                 _buildFilterBar(isDark),
                 spaceH(height: 20),
                 _buildSearchAndViewToggle(isDark),
@@ -136,6 +138,132 @@ class MyDevicesView extends GetView<MyDevicesController> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildStatsRow(bool isDark) {
+    final stats = [
+      _DeviceStatData(
+        icon: Icons.devices_rounded,
+        label: 'Total Devices',
+        value: '${controller.totalItems}',
+        sub: 'All registered',
+        color: AppThemeData.primary50,
+      ),
+      _DeviceStatData(
+        icon: Icons.attach_money_rounded,
+        label: 'Total Value',
+        value: '₹${controller.totalPrice.toStringAsFixed(0)}',
+        sub: 'Portfolio worth',
+        color: AppThemeData.success400,
+      ),
+      _DeviceStatData(
+        icon: Icons.verified_rounded,
+        label: 'Active Warranty',
+        value: '${controller.activeWarrantyCount}',
+        sub: 'Under warranty',
+        color: AppThemeData.neonPurple,
+      ),
+      _DeviceStatData(
+        icon: Icons.warning_amber_rounded,
+        label: 'Expired',
+        value: '${controller.expiredWarrantyCount}',
+        sub: 'Warranty ended',
+        color: AppThemeData.danger300,
+      ),
+    ];
+
+    return Row(
+      children: stats
+          .map((s) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: _buildStatCard(s, isDark),
+                ),
+              ))
+          .toList(),
+    );
+  }
+
+  Widget _buildStatCard(_DeviceStatData stat, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            stat.color.withValues(alpha: isDark ? 0.2 : 0.12),
+            stat.color.withValues(alpha: isDark ? 0.08 : 0.04),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: stat.color.withValues(alpha: isDark ? 0.25 : 0.18),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  stat.color.withValues(alpha: 0.9),
+                  stat.color,
+                ],
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: stat.color.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(stat.icon, size: 20, color: Colors.white),
+          ),
+          spaceW(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  stat.label,
+                  style: TextStyle(
+                    fontFamily: FontFamily.medium,
+                    fontSize: 11,
+                    color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
+                  ),
+                ),
+                spaceH(height: 3),
+                Text(
+                  stat.value,
+                  style: TextStyle(
+                    fontFamily: FontFamily.bold,
+                    fontSize: 22,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                spaceH(height: 2),
+                Text(
+                  stat.sub,
+                  style: TextStyle(
+                    fontFamily: FontFamily.medium,
+                    fontSize: 10,
+                    color: stat.color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1035,7 +1163,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                 ),
                 spaceW(width: 10),
                 TextCustom(
-                  title: '\$${controller.totalPrice.toStringAsFixed(2)}',
+                  title: '₹${controller.totalPrice.toStringAsFixed(2)}',
                   fontSize: 18,
                   fontFamily: FontFamily.bold,
                   color: AppThemeData.success400,
@@ -1183,4 +1311,20 @@ class MyDevicesView extends GetView<MyDevicesController> {
       ),
     );
   }
+}
+
+class _DeviceStatData {
+  final IconData icon;
+  final String label;
+  final String value;
+  final String sub;
+  final Color color;
+
+  _DeviceStatData({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.sub,
+    required this.color,
+  });
 }

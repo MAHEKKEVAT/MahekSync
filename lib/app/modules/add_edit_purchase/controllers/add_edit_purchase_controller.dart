@@ -115,6 +115,14 @@ class AddEditPurchaseController extends GetxController {
     imageBytes.removeAt(index);
   }
 
+  void removeExistingImage(int index) {
+    final urls = editingPurchase.value?.imageUrls;
+    if (urls != null && index < urls.length) {
+      final updatedUrls = List<String>.from(urls)..removeAt(index);
+      editingPurchase.value = editingPurchase.value!..imageUrls = updatedUrls;
+    }
+  }
+
   void setPurchaseDate(DateTime date) => purchaseDate.value = date;
   void setWarrantyDate(DateTime date) => warrantyDate.value = date;
 
@@ -124,8 +132,14 @@ class AddEditPurchaseController extends GetxController {
       return;
     }
 
-    if (selectedImages.length < 3 && !isEditMode.value) {
+    final totalImages = (editingPurchase.value?.imageUrls?.length ?? 0) + selectedImages.length;
+    if (totalImages < 3 && !isEditMode.value) {
       ShowToastDialog.showError('At least three high-resolution images are required');
+      return;
+    }
+
+    if (totalImages < 1 && isEditMode.value) {
+      ShowToastDialog.showError('At least one image is required');
       return;
     }
 

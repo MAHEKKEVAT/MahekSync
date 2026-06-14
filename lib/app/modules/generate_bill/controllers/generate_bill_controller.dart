@@ -50,6 +50,27 @@ class GenerateBillController extends GetxController {
 
   String? get ownerId => MahekConstant.ownerModel?.id;
 
+  // ── Computed stats for stat cards ──────────────────────────────────
+  double get totalAmount => bills.fold<double>(0, (sum, b) => sum + (b.totalAmount ?? 0));
+  double get avgBill => bills.isEmpty ? 0 : totalAmount / bills.length;
+  int get thisMonthCount {
+    final now = DateTime.now();
+    return bills.where((b) =>
+      b.billDate != null &&
+      b.billDate!.year == now.year &&
+      b.billDate!.month == now.month
+    ).length;
+  }
+  double get thisMonthAmount {
+    final now = DateTime.now();
+    return bills
+      .where((b) =>
+        b.billDate != null &&
+        b.billDate!.year == now.year &&
+        b.billDate!.month == now.month)
+      .fold<double>(0, (sum, b) => sum + (b.totalAmount ?? 0));
+  }
+
   @override
   void onInit() {
     super.onInit();

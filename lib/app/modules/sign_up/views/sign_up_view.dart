@@ -1,5 +1,6 @@
 // lib/app/modules/auth/views/sign_up_view.dart
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
@@ -645,14 +646,7 @@ class _SignUpViewState extends State<SignUpView> {
           ),
         ),
         child: controller.isLoading.value
-            ? const SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-          ),
-        )
+            ? const MahekLoader(size: 24, showBranding: false)
             : Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
