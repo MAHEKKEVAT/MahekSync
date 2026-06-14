@@ -12,6 +12,7 @@ import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../controllers/add_edit_purchase_controller.dart';
 
@@ -95,23 +96,35 @@ class AddEditPurchaseView extends GetView<AddEditPurchaseController> {
                       isDark,
                     ),
                     spaceH(height: 16),
-                    _buildTextField(
-                      'ASSET NAME',
-                      controller.assetNameController,
-                      'e.g. Minimalist Aluminum Structure',
-                      Icons.shopping_bag_rounded,
-                      isDark,
+                    TextFieldWidget(
+                      title: 'ASSET NAME',
+                      controller: controller.assetNameController,
+                      hintText: 'e.g. Minimalist Aluminum Structure',
+                      onPress: () {},
+                      prefix: Container(
+                        decoration: BoxDecoration(
+                          color: AppThemeData.primary50.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.shopping_bag_rounded, color: AppThemeData.primary50, size: 18),
+                      ),
                     ),
                     spaceH(height: 16),
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
-                            'BRAND',
-                            controller.brandController,
-                            'Studio Kinetic',
-                            Icons.business_outlined,
-                            isDark,
+                          child: TextFieldWidget(
+                            title: 'BRAND',
+                            controller: controller.brandController,
+                            hintText: 'Studio Kinetic',
+                            onPress: () {},
+                            prefix: Container(
+                              decoration: BoxDecoration(
+                                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.business_outlined, color: AppThemeData.primary50, size: 18),
+                            ),
                           ),
                         ),
                         spaceW(width: 16),
@@ -128,13 +141,19 @@ class AddEditPurchaseView extends GetView<AddEditPurchaseController> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
-                            'PRICE (USD)',
-                            controller.priceController,
-                            '0.00',
-                            Icons.attach_money_rounded,
-                            isDark,
-                            keyboardType: TextInputType.number,
+                          child: TextFieldWidget(
+                            title: 'PRICE (USD)',
+                            controller: controller.priceController,
+                            hintText: '0.00',
+                            onPress: () {},
+                            textInputType: TextInputType.number,
+                            prefix: Container(
+                              decoration: BoxDecoration(
+                                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.attach_money_rounded, color: AppThemeData.primary50, size: 18),
+                            ),
                           ),
                         ),
                         spaceW(width: 16),
@@ -172,22 +191,34 @@ class AddEditPurchaseView extends GetView<AddEditPurchaseController> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
-                            'SIZE',
-                            controller.sizeController,
-                            'XL / 500L',
-                            Icons.straighten_outlined,
-                            isDark,
+                          child: TextFieldWidget(
+                            title: 'SIZE',
+                            controller: controller.sizeController,
+                            hintText: 'XL / 500L',
+                            onPress: () {},
+                            prefix: Container(
+                              decoration: BoxDecoration(
+                                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.straighten_outlined, color: AppThemeData.primary50, size: 18),
+                            ),
                           ),
                         ),
                         spaceW(width: 16),
                         Expanded(
-                          child: _buildTextField(
-                            'STORE / LOCATION',
-                            controller.storeLocationController,
-                            'Warehouse 7',
-                            Icons.store_outlined,
-                            isDark,
+                          child: TextFieldWidget(
+                            title: 'STORE / LOCATION',
+                            controller: controller.storeLocationController,
+                            hintText: 'Warehouse 7',
+                            onPress: () {},
+                            prefix: Container(
+                              decoration: BoxDecoration(
+                                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.store_outlined, color: AppThemeData.primary50, size: 18),
+                            ),
                           ),
                         ),
                       ],
@@ -204,13 +235,19 @@ class AddEditPurchaseView extends GetView<AddEditPurchaseController> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
-                            'UNITS',
-                            controller.unitsController,
-                            '1',
-                            Icons.numbers_rounded,
-                            isDark,
-                            keyboardType: TextInputType.number,
+                          child: TextFieldWidget(
+                            title: 'UNITS',
+                            controller: controller.unitsController,
+                            hintText: '1',
+                            onPress: () {},
+                            textInputType: TextInputType.number,
+                            prefix: Container(
+                              decoration: BoxDecoration(
+                                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.numbers_rounded, color: AppThemeData.primary50, size: 18),
+                            ),
                           ),
                         ),
                         spaceW(width: 16),
@@ -224,13 +261,19 @@ class AddEditPurchaseView extends GetView<AddEditPurchaseController> {
                       isDark,
                     ),
                     spaceH(height: 16),
-                    _buildTextField(
-                      'DESCRIPTION',
-                      controller.descriptionController,
-                      'Describe your purchase...',
-                      Icons.description_outlined,
-                      isDark,
-                      maxLines: 4,
+                    TextFieldWidget(
+                      title: 'DESCRIPTION',
+                      controller: controller.descriptionController,
+                      hintText: 'Describe your purchase...',
+                      onPress: () {},
+                      line: 4,
+                      prefix: Container(
+                        decoration: BoxDecoration(
+                          color: AppThemeData.primary50.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.description_outlined, color: AppThemeData.primary50, size: 18),
+                      ),
                     ),
                   ],
                 ),
@@ -342,70 +385,6 @@ class AddEditPurchaseView extends GetView<AddEditPurchaseController> {
           fontSize: 13,
           fontFamily: FontFamily.bold,
           color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller,
-    String hint,
-    IconData icon,
-    bool isDark, {
-    int maxLines = 1,
-    TextInputType? keyboardType,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(
-          title: label,
-          fontSize: 11,
-          fontFamily: FontFamily.medium,
-          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-        ),
-        spaceH(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-              width: 0.5,
-            ),
-          ),
-          child: TextField(
-            controller: controller,
-            maxLines: maxLines,
-            keyboardType: keyboardType,
-            decoration: InputDecoration(
-              hintText: hint,
-              prefixIcon: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppThemeData.primary50.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: AppThemeData.primary50, size: 18),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: AppThemeData.primary50,
-                  width: 1.5,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-            ),
-          ),
         ),
       ],
     );

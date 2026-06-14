@@ -12,6 +12,7 @@ import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 
 class PaymentMethodsView extends GetView<PaymentMethodsController> {
   const PaymentMethodsView({super.key});
@@ -148,45 +149,10 @@ class PaymentMethodsView extends GetView<PaymentMethodsController> {
           color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
         ),
         spaceH(height: 8),
-        TextField(
+        TextFieldWidget(
+          hintText: 'e.g. Credit Card, PayPal, UPI',
           controller: controller.nameController,
-          style: TextStyle(
-            fontFamily: FontFamily.regular,
-            fontSize: 14,
-            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-          ),
-          decoration: InputDecoration(
-            hintText: 'e.g. Credit Card, PayPal, UPI',
-            hintStyle: TextStyle(
-              fontFamily: FontFamily.regular,
-              fontSize: 14,
-              color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-            ),
-            filled: true,
-            fillColor: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-                width: 0.5,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF5D54F2),
-                width: 1.5,
-              ),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 14,
-            ),
-          ),
+          onPress: () {},
         ),
       ],
     );

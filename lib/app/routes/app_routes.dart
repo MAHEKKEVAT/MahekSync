@@ -37,6 +37,9 @@ abstract class Routes {
   static const VAULT_CRUD = _Paths.VAULT_CRUD;
   static const SMART_MAP_DASHBOARD = _Paths.SMART_MAP_DASHBOARD;
   static const MY_CONTACTS = _Paths.MY_CONTACTS;
+  static const GENERATE_BILL = _Paths.GENERATE_BILL;
+  static const GENERATE_BILL_CREATE = _Paths.GENERATE_BILL_CREATE;
+  static const GENERATE_BILL_PREVIEW = _Paths.GENERATE_BILL_PREVIEW;
 }
 
 abstract class _Paths {
@@ -76,4 +79,7 @@ abstract class _Paths {
   static const VAULT_CRUD = '/vault-crud';
   static const SMART_MAP_DASHBOARD = '/smart-map-dashboard';
   static const MY_CONTACTS = '/my-contacts';
+  static const GENERATE_BILL = '/generate-bill';
+  static const GENERATE_BILL_CREATE = '/generate-bill-create';
+  static const GENERATE_BILL_PREVIEW = '/generate-bill-preview';
 }

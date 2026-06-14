@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/collection_name.dart';
 import 'package:maheksync/app/constant/constants.dart';
+import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/models/user_model.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/fire_store_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../constant/show_toast.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -194,14 +196,17 @@ class AuthController extends GetxController {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
+            TextFieldWidget(
+              hintText: 'Email address',
               controller: emailController,
-              decoration: InputDecoration(
-                hintText: 'Email address',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+              onPress: () {},
+              prefix: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppThemeData.primary50.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                prefixIcon: const Icon(Icons.email_outlined),
+                child: const Icon(Icons.email_outlined, size: 18),
               ),
             ),
           ],

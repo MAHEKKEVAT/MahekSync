@@ -190,7 +190,7 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
     return Column(
       children: [
         Container(
-          height: isMobile ? 72 : 84,
+          height: isMobile ? 72 : 124,
           padding: EdgeInsets.symmetric(
               horizontal: isExpanded ? 18 : 8, vertical: 14),
           width: double.infinity,
@@ -208,7 +208,7 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
               ? Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   color: AppThemeData.primary50.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(14),
@@ -231,14 +231,10 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
               ),
               spaceW(width: 14),
               Expanded(
-                child: TextCustom(
-                  title: MahekConstant.appName.toString(),
-                  fontSize: isDesktop ? 22 : 20,
-                  fontFamily: FontFamily.bold,
-                  color: isDark
-                      ? AppThemeData.textNeonPurple
-                      : AppThemeData.primary50,
-                  maxLine: 1,
+                child: Image.asset(
+                  'assets/images/maheksync.png',
+                  height: isDesktop ? 115 : 32,
+                  fit: BoxFit.contain,
                 ),
               ),
             ],

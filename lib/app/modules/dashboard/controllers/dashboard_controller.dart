@@ -13,6 +13,8 @@ import 'package:maheksync/app/modules/my_devices/views/my_devices_view.dart';
 import 'package:maheksync/app/modules/my_purchases/controllers/my_purchases_controller.dart';
 import 'package:maheksync/app/modules/my_purchases/views/my_purchases_view.dart';
 import 'package:maheksync/app/modules/payement_method/views/payement_method_view.dart' show PaymentMethodsView;
+import 'package:maheksync/app/modules/generate_bill/controllers/generate_bill_controller.dart';
+import 'package:maheksync/app/modules/generate_bill/views/generate_bill_list_view.dart';
 import 'package:maheksync/app/modules/personal_tasks/controllers/personal_tasks_controller.dart';
 import 'package:maheksync/app/modules/personal_tasks/views/personal_tasks_view.dart';
 import 'package:maheksync/app/modules/policy_settings/views/policy_settings_view.dart';
@@ -111,6 +113,13 @@ class DashboardController extends GetxController {
           selectedIcon: Icons.account_balance_wallet_rounded,
           route: Routes.DUES_TRACKER,
           svgIcon: 'assets/icons/ic_dues.svg',
+        ),
+        NavigationItem(
+          title: 'Generate Bill'.tr,
+          icon: Icons.receipt_long_outlined,
+          selectedIcon: Icons.receipt_long_rounded,
+          route: Routes.GENERATE_BILL,
+          svgIcon: 'assets/icons/ic_bill.svg',
         ),
       ],
     ),
@@ -329,7 +338,6 @@ class DashboardController extends GetxController {
   }
 
   Widget getPageWidget(int index) {
-    print('📄 getPageWidget called with index: $index');
 
     if (index == -1) {
       return const AdminProfileView();
@@ -342,7 +350,6 @@ class DashboardController extends GetxController {
     }
 
     String route = items[index].route;
-    print('📄 Loading page for route: $route');
 
     switch (route) {
       case Routes.DASHBOARD:
@@ -414,6 +421,12 @@ class DashboardController extends GetxController {
           Get.put(MyContactsController());
         }
         return const MyContactsView();
+
+      case Routes.GENERATE_BILL:
+        if (!Get.isRegistered<GenerateBillController>()) {
+          Get.put(GenerateBillController());
+        }
+        return const GenerateBillListView();
 
       case Routes.SETTINGS:
         return const SettingsView();

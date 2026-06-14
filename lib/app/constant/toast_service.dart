@@ -18,40 +18,47 @@ class ToastService {
       if (_isLoading) return;
       _isLoading = true;
 
-      final context = navigatorKey.currentContext;
-      if (context == null) {
-        _isLoading = false;
-        return;
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        try {
+          final context = navigatorKey.currentContext;
+          if (context == null) {
+            _isLoading = false;
+            return;
+          }
 
-      final isDark = Theme.of(context).brightness == Brightness.dark;
+          final isDark = Theme.of(context).brightness == Brightness.dark;
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => PopScope(
-          canPop: false,
-          child: Center(
-            child: Container(
-              width: 180,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 8))],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(width: 50, height: 50, child: CircularProgressIndicator(strokeWidth: 7, strokeCap: StrokeCap.round)),
-                  const SizedBox(height: 24),
-                  Text(message, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: isDark ? Colors.white : Colors.black87, decoration: TextDecoration.none), textAlign: TextAlign.center),
-                ],
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => PopScope(
+              canPop: false,
+              child: Center(
+                child: Container(
+                  width: 180,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 8))],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(width: 50, height: 50, child: CircularProgressIndicator(strokeWidth: 7, strokeCap: StrokeCap.round)),
+                      const SizedBox(height: 24),
+                      Text(message, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: isDark ? Colors.white : Colors.black87, decoration: TextDecoration.none), textAlign: TextAlign.center),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      );
+          );
+        } catch (e) {
+          developer.log("Error in showLoader: $e");
+          _isLoading = false;
+        }
+      });
     } catch (e) {
       developer.log("Error in showLoader: $e");
       _isLoading = false;
@@ -60,11 +67,18 @@ class ToastService {
 
   void closeLoader() {
     try {
-      final context = navigatorKey.currentContext;
-      if (context != null && _isLoading) {
-        Navigator.pop(context);
-        _isLoading = false;
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        try {
+          final context = navigatorKey.currentContext;
+          if (context != null && _isLoading) {
+            Navigator.pop(context);
+            _isLoading = false;
+          }
+        } catch (e) {
+          developer.log("Error in closeLoader: $e");
+          _isLoading = false;
+        }
+      });
     } catch (e) {
       developer.log("Error in closeLoader: $e");
       _isLoading = false;
@@ -90,21 +104,30 @@ class ToastService {
     _currentToast?.remove();
     _currentToast = null;
 
-    final overlay = Overlay.of(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        final ctx = navigatorKey.currentContext;
+        if (ctx == null) return;
 
-    _currentToast = OverlayEntry(
-      builder: (context) => _TopToast(
-        message: message,
-        backgroundColor: backgroundColor,
-        icon: icon,
-        onDismiss: () {
-          _currentToast?.remove();
-          _currentToast = null;
-        },
-      ),
-    );
+        final overlay = Overlay.of(ctx);
 
-    overlay.insert(_currentToast!);
+        _currentToast = OverlayEntry(
+          builder: (context) => _TopToast(
+            message: message,
+            backgroundColor: backgroundColor,
+            icon: icon,
+            onDismiss: () {
+              _currentToast?.remove();
+              _currentToast = null;
+            },
+          ),
+        );
+
+        overlay.insert(_currentToast!);
+      } catch (e) {
+        developer.log("Error inserting toast overlay: $e");
+      }
+    });
   }
 }
 

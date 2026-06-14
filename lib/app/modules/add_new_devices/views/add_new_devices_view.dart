@@ -10,6 +10,7 @@ import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../controllers/add_new_devices_controller.dart';
 
@@ -112,23 +113,37 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                     // Product Identity
                     _buildSectionTitle('PRODUCT IDENTITY', Icons.inventory_2_outlined, isDark),
                     spaceH(height: 16),
-                    _buildTextField(
-                      label: 'DEVICE NAME',
+                    TextFieldWidget(
+                      title: 'DEVICE NAME',
+                      hintText: 'e.g. iPhone 15 Pro',
                       controller: controller.deviceNameController,
-                      hint: 'e.g. iPhone 15 Pro',
-                      icon: Icons.devices_rounded,
-                      isDark: isDark,
+                      onPress: () {},
+                      prefix: Container(
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppThemeData.primary50.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.devices_rounded, color: AppThemeData.primary50, size: 18),
+                      ),
                     ),
                     spaceH(height: 16),
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
-                            label: 'BRAND NAME',
+                          child: TextFieldWidget(
+                            title: 'BRAND NAME',
+                            hintText: 'e.g. Apple',
                             controller: controller.brandNameController,
-                            hint: 'e.g. Apple',
-                            icon: Icons.business_outlined,
-                            isDark: isDark,
+                            onPress: () {},
+                            prefix: Container(
+                              margin: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.business_outlined, color: AppThemeData.primary50, size: 18),
+                            ),
                           ),
                         ),
                         spaceW(width: 16),
@@ -138,13 +153,20 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                       ],
                     ),
                     spaceH(height: 16),
-                    _buildTextField(
-                      label: 'DESCRIPTION',
+                    TextFieldWidget(
+                      title: 'DESCRIPTION',
+                      hintText: 'Describe the device...',
                       controller: controller.descriptionController,
-                      hint: 'Describe the device...',
-                      icon: Icons.description_outlined,
-                      isDark: isDark,
-                      maxLines: 3,
+                      onPress: () {},
+                      prefix: Container(
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppThemeData.primary50.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.description_outlined, color: AppThemeData.primary50, size: 18),
+                      ),
+                      line: 3,
                     ),
                     spaceH(height: 28),
 
@@ -154,23 +176,37 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
-                            label: 'DEVICE NAME (DISPLAY)',
+                          child: TextFieldWidget(
+                            title: 'DEVICE NAME (DISPLAY)',
+                            hintText: 'iPhone 15 Pro',
                             controller: controller.deviceNameController,
-                            hint: 'iPhone 15 Pro',
-                            icon: Icons.phone_android_rounded,
-                            isDark: isDark,
+                            onPress: () {},
+                            prefix: Container(
+                              margin: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.phone_android_rounded, color: AppThemeData.primary50, size: 18),
+                            ),
                           ),
                         ),
                         spaceW(width: 16),
                         Expanded(
-                          child: _buildTextField(
-                            label: 'PRICE (\$)',
+                          child: TextFieldWidget(
+                            title: 'PRICE (\$)',
+                            hintText: '0.00',
                             controller: controller.priceController,
-                            hint: '0.00',
-                            icon: Icons.attach_money_rounded,
-                            isDark: isDark,
-                            keyboardType: TextInputType.number,
+                            onPress: () {},
+                            prefix: Container(
+                              margin: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.attach_money_rounded, color: AppThemeData.primary50, size: 18),
+                            ),
+                            textInputType: TextInputType.number,
                           ),
                         ),
                       ],
@@ -179,12 +215,19 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
-                            label: 'STORE NAME',
+                          child: TextFieldWidget(
+                            title: 'STORE NAME',
+                            hintText: 'e.g. Apple Store',
                             controller: controller.storeNameController,
-                            hint: 'e.g. Apple Store',
-                            icon: Icons.store_outlined,
-                            isDark: isDark,
+                            onPress: () {},
+                            prefix: Container(
+                              margin: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.store_outlined, color: AppThemeData.primary50, size: 18),
+                            ),
                           ),
                         ),
                         spaceW(width: 16),
@@ -268,97 +311,6 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
           fontSize: 13,
           fontFamily: FontFamily.bold,
           color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    required bool isDark,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(
-          title: label,
-          fontSize: 11,
-          fontFamily: FontFamily.medium,
-          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-        ),
-        spaceH(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-            border: Border.all(
-              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-              width: 0.5,
-            ),
-          ),
-          child: TextField(
-            controller: controller,
-            maxLines: maxLines,
-            keyboardType: keyboardType,
-            style: TextStyle(
-              fontFamily: FontFamily.medium,
-              fontSize: 14,
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-            ),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(
-                fontFamily: FontFamily.regular,
-                fontSize: 14,
-                color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-              ),
-              prefixIcon: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppThemeData.primary50.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  color: AppThemeData.primary50,
-                  size: 18,
-                ),
-              ),
-              filled: true,
-              fillColor: Colors.transparent,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: AppThemeData.primary50,
-                  width: 1.5,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-            ),
-          ),
         ),
       ],
     );

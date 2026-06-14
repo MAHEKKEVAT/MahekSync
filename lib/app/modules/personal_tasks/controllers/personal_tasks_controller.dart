@@ -16,7 +16,6 @@ class PersonalTasksController extends GetxController {
   final selectedPriority = 'ALL'.obs;
   final selectedStatus = 'ALL'.obs;
   final selectedCategory = 'ALL'.obs;
-  final isGridView = true.obs;
 
   final priorities = ['ALL', 'HIGH', 'MEDIUM', 'LOW'];
   final statuses = ['ALL', 'PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
@@ -172,7 +171,7 @@ class PersonalTasksController extends GetxController {
               Text(
                 'Delete "${task.title}"?',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 14,
                 ),
               ),

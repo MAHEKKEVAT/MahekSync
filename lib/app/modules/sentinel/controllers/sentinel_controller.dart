@@ -7,6 +7,7 @@ import 'package:maheksync/app/models/sentinel_model.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:solar_icons/solar_icons.dart';
 
@@ -172,33 +173,18 @@ class SentinelController extends GetxController {
                 textAlign: TextAlign.center,
               ),
               spaceH(height: 20),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppThemeData.grey9,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppThemeData.grey8, width: 0.5),
-                ),
-                child: TextField(
-                  controller: currentPasswordController,
-                  obscureText: true,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: 'Master password',
-                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 14),
-                    prefixIcon: Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppThemeData.primary50.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(SolarIconsOutline.lockKeyhole, color: AppThemeData.primary50, size: 18),
-                    ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    filled: true,
-                    fillColor: Colors.transparent,
+              TextFieldWidget(
+                hintText: 'Master password',
+                controller: currentPasswordController,
+                onPress: () {},
+                obscureText: true,
+                prefix: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppThemeData.primary50.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  onSubmitted: (_) => Get.back(result: true),
+                  child: Icon(SolarIconsOutline.lockKeyhole, color: AppThemeData.primary50, size: 18),
                 ),
               ),
               spaceH(height: 20),

@@ -6,6 +6,7 @@ import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import '../../../constant/show_toast.dart';
 import '../controllers/sign_up_controller.dart';
@@ -473,207 +474,56 @@ class _SignUpViewState extends State<SignUpView> {
   }
 
   Widget _buildFullNameField(bool isDark) {
-    return TextFormField(
+    return TextFieldWidget(
+      hintText: 'John Doe',
       controller: controller.fullNameController,
-      style: TextStyle(
-        fontFamily: FontFamily.regular,
-        fontSize: 15,
-        color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-      ),
-      decoration: InputDecoration(
-        hintText: 'John Doe',
-        hintStyle: TextStyle(
-          fontFamily: FontFamily.regular,
-          fontSize: 15,
-          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-        ),
-        filled: true,
-        fillColor: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFF5D54F2),
-            width: 1.5,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: AppThemeData.danger300,
-            width: 1,
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: AppThemeData.danger300,
-            width: 1.5,
-          ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 16,
-        ),
-        prefixIcon: Icon(
-          Icons.person_outline_rounded,
-          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-          size: 20,
-        ),
-        errorStyle: const TextStyle(
-          fontFamily: FontFamily.regular,
-          fontSize: 12,
-        ),
-      ),
+      onPress: () {},
       validator: controller.validateFullName,
-      textCapitalization: TextCapitalization.words,
+      prefix: Icon(
+        Icons.person_outline_rounded,
+        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+        size: 20,
+      ),
     );
   }
 
   Widget _buildEmailField(bool isDark) {
-    return TextFormField(
+    return TextFieldWidget(
+      hintText: 'name@example.com',
       controller: controller.emailController,
-      keyboardType: TextInputType.emailAddress,
-      style: TextStyle(
-        fontFamily: FontFamily.regular,
-        fontSize: 15,
-        color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-      ),
-      decoration: InputDecoration(
-        hintText: 'name@example.com',
-        hintStyle: TextStyle(
-          fontFamily: FontFamily.regular,
-          fontSize: 15,
-          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-        ),
-        filled: true,
-        fillColor: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFF5D54F2),
-            width: 1.5,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: AppThemeData.danger300,
-            width: 1,
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: AppThemeData.danger300,
-            width: 1.5,
-          ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 16,
-        ),
-        prefixIcon: Icon(
-          Icons.email_outlined,
-          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-          size: 20,
-        ),
-        errorStyle: const TextStyle(
-          fontFamily: FontFamily.regular,
-          fontSize: 12,
-        ),
-      ),
+      onPress: () {},
+      textInputType: TextInputType.emailAddress,
       validator: controller.validateEmail,
+      prefix: Icon(
+        Icons.email_outlined,
+        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+        size: 20,
+      ),
     );
   }
 
   Widget _buildPasswordField(bool isDark) {
-    return Obx(() => TextFormField(
+    return Obx(() => TextFieldWidget(
+      hintText: '••••••••',
       controller: controller.passwordController,
+      onPress: () {},
       obscureText: controller.obscurePassword.value,
-      style: TextStyle(
-        fontFamily: FontFamily.regular,
-        fontSize: 15,
-        color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+      validator: controller.validatePassword,
+      prefix: Icon(
+        Icons.lock_outline_rounded,
+        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+        size: 20,
       ),
-      decoration: InputDecoration(
-        hintText: '••••••••',
-        hintStyle: TextStyle(
-          fontFamily: FontFamily.regular,
-          fontSize: 15,
-          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-        ),
-        filled: true,
-        fillColor: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFF5D54F2),
-            width: 1.5,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: AppThemeData.danger300,
-            width: 1,
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: AppThemeData.danger300,
-            width: 1.5,
-          ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 16,
-        ),
-        prefixIcon: Icon(
-          Icons.lock_outline_rounded,
+      suffix: GestureDetector(
+        onTap: controller.togglePasswordVisibility,
+        child: Icon(
+          controller.obscurePassword.value
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
           color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
           size: 20,
         ),
-        suffixIcon: IconButton(
-          onPressed: controller.togglePasswordVisibility,
-          icon: Icon(
-            controller.obscurePassword.value
-                ? Icons.visibility_outlined
-                : Icons.visibility_off_outlined,
-            color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-            size: 20,
-          ),
-        ),
-        errorStyle: const TextStyle(
-          fontFamily: FontFamily.regular,
-          fontSize: 12,
-        ),
       ),
-      validator: controller.validatePassword,
     ));
   }
 

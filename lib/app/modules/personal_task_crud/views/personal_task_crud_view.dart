@@ -7,6 +7,7 @@ import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../controllers/personal_task_crud_controller.dart';
 
@@ -61,9 +62,36 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
         children: [
           _buildSectionTitle('Basic Information', SolarIconsOutline.infoCircle, isDark),
           spaceH(height: 12),
-          _buildTextField(controller.titleController, 'e.g. Finish project report', 'Task Title', SolarIconsOutline.checklist, isDark),
+          TextFieldWidget(
+            title: 'Task Title',
+            hintText: 'e.g. Finish project report',
+            controller: controller.titleController,
+            onPress: () {},
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.checklist, color: AppThemeData.primary50, size: 18),
+            ),
+          ),
           spaceH(height: 14),
-          _buildTextField(controller.descriptionController, 'Brief description...', 'Description', SolarIconsOutline.notes, isDark, maxLines: 2),
+          TextFieldWidget(
+            title: 'Description',
+            hintText: 'Brief description...',
+            controller: controller.descriptionController,
+            onPress: () {},
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.notes, color: AppThemeData.primary50, size: 18),
+            ),
+            line: 2,
+          ),
           spaceH(height: 20),
           _buildSectionTitle('Priority', SolarIconsOutline.flag, isDark),
           spaceH(height: 10),
@@ -83,7 +111,21 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
           spaceH(height: 20),
           _buildSectionTitle('Notes', SolarIconsOutline.notes, isDark),
           spaceH(height: 10),
-          _buildTextField(controller.notesController, 'Additional notes...', 'Notes', SolarIconsOutline.notes, isDark, maxLines: 3),
+          TextFieldWidget(
+            title: 'Notes',
+            hintText: 'Additional notes...',
+            controller: controller.notesController,
+            onPress: () {},
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.notes, color: AppThemeData.primary50, size: 18),
+            ),
+            line: 3,
+          ),
           spaceH(height: 20),
           _buildSectionTitle('Tags', SolarIconsOutline.tag, isDark),
           spaceH(height: 10),
@@ -110,43 +152,6 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
         ),
         spaceW(width: 10),
         TextCustom(title: title, fontSize: 14, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey3 : AppThemeData.grey7),
-      ],
-    );
-  }
-
-  Widget _buildTextField(TextEditingController ctrl, String hint, String label, IconData icon, bool isDark, {int maxLines = 1}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(title: label, fontSize: 11, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-        spaceH(height: 6),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02), blurRadius: 8, offset: const Offset(0, 2))],
-            border: Border.all(color: isDark ? AppThemeData.grey8 : AppThemeData.grey3, width: 0.5),
-          ),
-          child: TextField(
-            controller: ctrl,
-            maxLines: maxLines,
-            style: TextStyle(fontFamily: FontFamily.medium, fontSize: 14, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: 14, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
-              prefixIcon: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                child: Icon(icon, color: AppThemeData.primary50, size: 18),
-              ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppThemeData.primary50, width: 1.5)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              filled: true,
-              fillColor: Colors.transparent,
-            ),
-          ),
-        ),
       ],
     );
   }

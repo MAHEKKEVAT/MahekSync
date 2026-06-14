@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:maheksync/app/models/subscription_model.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
-import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
@@ -51,18 +50,13 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   }
 
   // ═══════════════════════════════════════
-  // DESKTOP LAYOUT - Side by Side
+  // DESKTOP LAYOUT
   // ═══════════════════════════════════════
   Widget _buildDesktopLayout(SubscriptionModel sub, bool isDark, BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ─── LEFT - Image Gallery (50% width) ───
-        Expanded(
-          flex: 5,
-          child: _buildImageGallery(sub, isDark),
-        ),
-        // ─── RIGHT - Details (50% width) ───
+        Expanded(flex: 5, child: _buildImageGallery(sub, isDark)),
         Expanded(
           flex: 5,
           child: SingleChildScrollView(
@@ -71,14 +65,16 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeaderSection(sub, isDark),
-                spaceH(height: 24),
+                spaceH(height: 20),
                 _buildWaterBubbleSection(sub, isDark),
-                spaceH(height: 24),
+                spaceH(height: 16),
                 _buildDetailCard(sub, isDark),
-                spaceH(height: 14),
+                spaceH(height: 12),
                 _buildDatesCard(sub, isDark),
-                spaceH(height: 14),
+                spaceH(height: 12),
                 _buildPaymentCard(sub, isDark),
+                spaceH(height: 20),
+                _buildActionButtons(sub, isDark),
               ],
             ),
           ),
@@ -88,36 +84,75 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   }
 
   // ═══════════════════════════════════════
-  // SMALL LAYOUT - Stacked
+  // SMALL LAYOUT
   // ═══════════════════════════════════════
   Widget _buildSmallLayout(SubscriptionModel sub, bool isDark, BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // ─── Image Gallery on top ───
-          SizedBox(
-            height: 300,
-            child: _buildImageGallery(sub, isDark),
-          ),
+          SizedBox(height: 300, child: _buildImageGallery(sub, isDark)),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeaderSection(sub, isDark),
-                spaceH(height: 20),
+                spaceH(height: 16),
                 _buildWaterBubbleSection(sub, isDark),
-                spaceH(height: 20),
+                spaceH(height: 16),
                 _buildDetailCard(sub, isDark),
                 spaceH(height: 12),
                 _buildDatesCard(sub, isDark),
                 spaceH(height: 12),
                 _buildPaymentCard(sub, isDark),
+                spaceH(height: 20),
+                _buildActionButtons(sub, isDark),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // ═══════════════════════════════════════
+  // ACTION BUTTONS
+  // ═══════════════════════════════════════
+  Widget _buildActionButtons(SubscriptionModel sub, bool isDark) {
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: 48,
+            child: OutlinedButton.icon(
+              onPressed: () => _showRenewDialog(sub),
+              icon: const Icon(Icons.refresh_rounded, size: 18, color: AppThemeData.success400),
+              label: TextCustom(title: 'Renew', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.success400),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                side: BorderSide(color: AppThemeData.success400.withValues(alpha: 0.3)),
+              ),
+            ),
+          ),
+        ),
+        spaceW(width: 12),
+        Expanded(
+          child: SizedBox(
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () => Get.toNamed('/subscription-crud', arguments: sub),
+              icon: const Icon(Icons.edit_rounded, size: 18, color: Colors.white),
+              label: TextCustom(title: 'Edit', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppThemeData.primary50,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -142,8 +177,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 80,
-                height: 80,
+                width: 80, height: 80,
                 decoration: BoxDecoration(
                   color: AppThemeData.primary50.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(24),
@@ -160,87 +194,59 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
 
     return Column(
       children: [
-        // ─── Main Image - FULL SIZE ───
         Expanded(
           child: Container(
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: isDark ? AppThemeData.grey9 : const Color(0xFFF1F5F9),
-            ),
+            decoration: BoxDecoration(color: isDark ? AppThemeData.grey9 : const Color(0xFFF1F5F9)),
             child: Obx(() {
               final index = selectedImageIndex.value.clamp(0, images.length - 1);
               return Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Main Image - Fill the entire container
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: NetworkImageWidget(
-                          imageUrl: images[index],
-                          fit: BoxFit.contain,
-                        ),
+                        child: NetworkImageWidget(imageUrl: images[index], fit: BoxFit.contain),
                       ),
                     ),
                   ),
-                  // Navigation Arrows
                   if (images.length > 1) ...[
                     Positioned(
-                      left: 8,
-                      top: 0,
-                      bottom: 0,
+                      left: 8, top: 0, bottom: 0,
                       child: Center(
                         child: GestureDetector(
                           onTap: () => selectedImageIndex.value = (selectedImageIndex.value - 1 + images.length) % images.length,
                           child: Container(
                             padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(25),
-                            ),
+                            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(25)),
                             child: const Icon(Icons.chevron_left_rounded, color: Colors.white, size: 28),
                           ),
                         ),
                       ),
                     ),
                     Positioned(
-                      right: 8,
-                      top: 0,
-                      bottom: 0,
+                      right: 8, top: 0, bottom: 0,
                       child: Center(
                         child: GestureDetector(
                           onTap: () => selectedImageIndex.value = (selectedImageIndex.value + 1) % images.length,
                           child: Container(
                             padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(25),
-                            ),
+                            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(25)),
                             child: const Icon(Icons.chevron_right_rounded, color: Colors.white, size: 28),
                           ),
                         ),
                       ),
                     ),
                   ],
-                  // Image Counter
                   if (images.length > 1)
                     Positioned(
-                      bottom: 12,
-                      right: 12,
+                      bottom: 12, right: 12,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: TextCustom(
-                          title: '${selectedImageIndex.value + 1} / ${images.length}',
-                          fontSize: 12,
-                          fontFamily: FontFamily.semiBold,
-                          color: Colors.white,
-                        ),
+                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(20)),
+                        child: TextCustom(title: '${selectedImageIndex.value + 1} / ${images.length}', fontSize: 12, fontFamily: FontFamily.semiBold, color: Colors.white),
                       ),
                     ),
                 ],
@@ -248,8 +254,6 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
             }),
           ),
         ),
-
-        // ─── Thumbnail Strip ───
         if (images.length > 1)
           Container(
             height: 80,
@@ -266,14 +270,13 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: images.length,
-                    separatorBuilder: (_, __) => spaceW(width: 8),
+                    separatorBuilder: (context, index) => spaceW(width: 8),
                     itemBuilder: (context, index) {
                       final isSelected = selectedImageIndex.value == index;
                       return GestureDetector(
                         onTap: () => selectedImageIndex.value = index,
                         child: Container(
-                          width: 60,
-                          height: 60,
+                          width: 60, height: 60,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
@@ -312,8 +315,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
       child: Row(
         children: [
           Container(
-            width: 64,
-            height: 64,
+            width: 64, height: 64,
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [sub.statusColor.withValues(alpha: 0.2), sub.statusColor.withValues(alpha: 0.05)]),
               borderRadius: BorderRadius.circular(18),
@@ -330,7 +332,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
               children: [
                 TextCustom(title: sub.name ?? 'Unknown', fontSize: 20, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
                 spaceH(height: 4),
-                TextCustom(title: sub.category ?? 'OTHER', fontSize: 13, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                TextCustom(title: sub.formattedCategory, fontSize: 13, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
               ],
             ),
           ),
@@ -352,7 +354,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   }
 
   // ═══════════════════════════════════════
-  // WATER BUBBLE PROGRESS SECTION
+  // WATER BUBBLE SECTION
   // ═══════════════════════════════════════
   Widget _buildWaterBubbleSection(SubscriptionModel sub, bool isDark) {
     final color = sub.isExpiringCritical ? AppThemeData.danger300 : (sub.isExpiringSoon ? AppThemeData.pending400 : AppThemeData.success400);
@@ -376,7 +378,6 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
             ],
           ),
           spaceH(height: 20),
-          // THE WATER BUBBLE
           Center(
             child: WaterBubbleProgress(
               progress: sub.remainingPercentage,
@@ -390,7 +391,6 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
             ),
           ),
           spaceH(height: 20),
-          // Date Info
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -404,7 +404,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  TextCustom(title: '${(sub.remainingPercentage * 100).toInt()}% used', fontSize: 13, fontFamily: FontFamily.bold, color: color),
+                  TextCustom(title: '${((1 - sub.remainingPercentage) * 100).toInt()}% used', fontSize: 13, fontFamily: FontFamily.bold, color: color),
                 ],
               ),
               Column(
@@ -438,7 +438,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
           _buildSectionHeader('Details', Icons.info_outline, AppThemeData.primary50, isDark),
           spaceH(height: 16),
           _buildDetailRow('Name', sub.name ?? '—', isDark),
-          _buildDetailRow('Category', sub.category ?? '—', isDark),
+          _buildDetailRow('Category', sub.formattedCategory, isDark),
           _buildDetailRow('Status', sub.status ?? '—', isDark, valueColor: sub.statusColor),
           _buildDetailRow('Price', sub.formattedPrice, isDark, valueColor: AppThemeData.primary50),
           _buildDetailRow('Billing', sub.billingCycleDisplay, isDark),
@@ -510,8 +510,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
     return Row(
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 32, height: 32,
           decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
           child: Icon(icon, color: color, size: 18),
         ),
@@ -553,8 +552,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 56,
-                      height: 56,
+                      width: 56, height: 56,
                       decoration: BoxDecoration(color: AppThemeData.success400.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
                       child: const Icon(Icons.refresh_rounded, color: AppThemeData.success400, size: 28),
                     ),
@@ -573,7 +571,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                         decoration: BoxDecoration(color: AppThemeData.grey9, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppThemeData.grey7)),
                         child: Row(
                           children: [
-                            Icon(Icons.calendar_today_rounded, color: AppThemeData.primary50, size: 20),
+                            const Icon(Icons.calendar_today_rounded, color: AppThemeData.success400, size: 20),
                             spaceW(width: 12),
                             Text(DateFormat('dd MMMM yyyy').format(tempDate), style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
                           ],
@@ -611,6 +609,23 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
 
     if (selectedDate != null) {
       await controller.renewSubscriptionWithCustomDate(selectedDate);
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+// FORMATTED CATEGORY ON MODEL
+// ═══════════════════════════════════════
+extension _SubscriptionModelExt on SubscriptionModel {
+  String get formattedCategory {
+    switch (category) {
+      case 'ENTERTAINMENT': return 'Entertainment';
+      case 'UTILITIES': return 'Utilities';
+      case 'PRODUCTIVITY': return 'Productivity';
+      case 'CLOUD': return 'Cloud';
+      case 'MUSIC': return 'Music';
+      case 'VIDEO': return 'Video';
+      default: return category ?? 'Other';
     }
   }
 }

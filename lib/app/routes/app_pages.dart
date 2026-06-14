@@ -18,6 +18,10 @@ import '../modules/login_screen/bindings/login_screen_binding.dart';
 import '../modules/login_screen/views/login_screen_view.dart';
 import '../modules/my_contacts/bindings/my_contacts_binding.dart';
 import '../modules/my_contacts/views/my_contacts_view.dart';
+import '../modules/generate_bill/bindings/generate_bill_binding.dart';
+import '../modules/generate_bill/views/generate_bill_list_view.dart';
+import '../modules/generate_bill/views/generate_bill_create_view.dart';
+import '../modules/generate_bill/views/generate_bill_preview_view.dart';
 import '../modules/my_devices/bindings/my_devices_binding.dart';
 import '../modules/my_purchases/bindings/my_purchases_binding.dart';
 import '../modules/my_purchases/views/my_purchases_view.dart';
@@ -155,6 +159,8 @@ class AppPages {
         screenBinding: SmartMapDashboardBinding()),
     _dashboardPage(_Paths.MY_CONTACTS,
         screenBinding: MyContactsBinding()),
+    _dashboardPage(_Paths.GENERATE_BILL,
+        screenBinding: GenerateBillBinding()),
 
     GetPage(
       name: _Paths.CATEGORIES,
@@ -196,6 +202,16 @@ class AppPages {
       name: _Paths.VAULT_CRUD,
       page: () => const VaultCrudView(),
       binding: VaultCrudBinding(),
+    ),
+    GetPage(
+      name: _Paths.GENERATE_BILL_CREATE,
+      page: () => const GenerateBillCreateView(),
+      binding: GenerateBillBinding(),
+    ),
+    GetPage(
+      name: _Paths.GENERATE_BILL_PREVIEW,
+      page: () => const GenerateBillPreviewView(),
+      binding: GenerateBillBinding(),
     ),
   ];
 }

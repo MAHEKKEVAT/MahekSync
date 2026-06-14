@@ -13,6 +13,7 @@ import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import '../controllers/admin_profile_controller.dart';
 
 class AdminProfileView extends StatelessWidget {
@@ -475,11 +476,9 @@ class AdminProfileView extends StatelessWidget {
             color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
           ),
           spaceH(height: 22),
-          _buildFieldLabel('Full Name *', isDark),
-          spaceH(height: 8),
           _buildTextField(
             controller: controller.fullNameController,
-            hint: 'Enter your full name',
+            hint: 'Full Name *',
             icon: Icons.person_outline_rounded,
             isDark: isDark,
           ),
@@ -504,11 +503,9 @@ class AdminProfileView extends StatelessWidget {
             ),
           ),
           spaceH(height: 20),
-          _buildFieldLabel('Phone Number', isDark),
-          spaceH(height: 8),
           _buildTextField(
             controller: controller.phoneController,
-            hint: 'Enter your phone number',
+            hint: 'Phone Number',
             icon: Icons.phone_outlined,
             isDark: isDark,
             keyboardType: TextInputType.phone,
@@ -560,67 +557,33 @@ class AdminProfileView extends StatelessWidget {
     Widget? suffixIcon,
     List<TextInputFormatter>? inputFormatters,
   }) {
-    final fillColor = enabled
-        ? (isDark ? AppThemeData.grey9 : AppThemeData.grey2)
-        : (isDark
-              ? AppThemeData.grey9.withValues(alpha: 0.5)
-              : AppThemeData.grey2.withValues(alpha: 0.6));
-
-    return TextFormField(
+    return TextFieldWidget(
+      hintText: hint,
       controller: controller,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
+      onPress: () {},
+      textInputType: keyboardType,
       enabled: enabled,
-      style: TextStyle(
-        fontFamily: FontFamily.regular,
-        fontSize: 14,
-        color: enabled
-            ? (isDark ? AppThemeData.grey1 : AppThemeData.grey10)
-            : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-      ),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(
-          fontFamily: FontFamily.regular,
-          fontSize: 14,
-          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+      inputFormatters: inputFormatters,
+      prefix: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppThemeData.primary50.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
         ),
-        filled: true,
-        fillColor: fillColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isDark
-                ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
-                : AppThemeData.grey3,
-            width: 1,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppThemeData.primary50, width: 1.5),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        prefixIcon: Icon(
+        child: Icon(
           icon,
           color: enabled
               ? (isDark ? AppThemeData.grey5 : AppThemeData.grey6)
               : (isDark ? AppThemeData.grey7 : AppThemeData.grey4),
           size: 19,
         ),
-        suffixIcon: suffixIcon,
       ),
+      suffix: suffixIcon,
+      fillColor: enabled
+          ? (isDark ? AppThemeData.grey9 : AppThemeData.grey2)
+          : (isDark
+                ? AppThemeData.grey9.withValues(alpha: 0.5)
+                : AppThemeData.grey2.withValues(alpha: 0.6)),
     );
   }
 

@@ -7,6 +7,7 @@ import 'package:maheksync/app/utils/responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import '../controllers/sentinel_controller.dart';
 
 class SentinelView extends GetView<SentinelController> {
@@ -292,38 +293,58 @@ class SentinelView extends GetView<SentinelController> {
   }
 
   Widget _buildPasswordField(TextEditingController ctrl, String label, String hint, bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(title: label, fontSize: 11, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-        spaceH(height: 6),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: isDark ? AppThemeData.grey8 : AppThemeData.grey3, width: 0.5),
-          ),
-          child: TextField(
-            controller: ctrl,
-            obscureText: true,
-            style: TextStyle(fontFamily: FontFamily.medium, fontSize: 14, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: 14, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
-              prefixIcon: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                child: Icon(SolarIconsOutline.lockKeyhole, color: AppThemeData.primary50, size: 18),
-              ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppThemeData.primary50, width: 1.5)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              filled: true,
-              fillColor: Colors.transparent,
-            ),
-          ),
+    return _PasswordFieldWidget(
+      controller: ctrl,
+      label: label,
+      hint: hint,
+      isDark: isDark,
+    );
+  }
+}
+
+class _PasswordFieldWidget extends StatefulWidget {
+  final TextEditingController controller;
+  final String label;
+  final String hint;
+  final bool isDark;
+
+  const _PasswordFieldWidget({
+    required this.controller,
+    required this.label,
+    required this.hint,
+    required this.isDark,
+  });
+
+  @override
+  State<_PasswordFieldWidget> createState() => _PasswordFieldWidgetState();
+}
+
+class _PasswordFieldWidgetState extends State<_PasswordFieldWidget> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFieldWidget(
+      hintText: widget.hint,
+      controller: widget.controller,
+      obscureText: _obscure,
+      title: widget.label,
+      prefix: Container(
+        margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppThemeData.primary50.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
         ),
-      ],
+        child: Icon(SolarIconsOutline.lockKeyhole, color: AppThemeData.primary50, size: 18),
+      ),
+      suffix: GestureDetector(
+        onTap: () => setState(() => _obscure = !_obscure),
+        child: Icon(
+          _obscure ? SolarIconsOutline.eyeClosed : SolarIconsOutline.eye,
+          color: widget.isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+          size: 18,
+        ),
+      ),
     );
   }
 }

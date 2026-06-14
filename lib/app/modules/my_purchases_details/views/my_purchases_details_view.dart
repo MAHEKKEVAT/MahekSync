@@ -11,6 +11,7 @@ import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import '../controllers/my_purchases_details_controller.dart';
 
 class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
@@ -833,18 +834,11 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
           ),
           spaceH(height: 14),
           if (controller.isEditMode.value)
-            TextField(
+            TextFieldWidget(
+              hintText: 'Describe your purchase...',
               controller: controller.descriptionController,
-              maxLines: 4,
-              style: TextStyle(fontSize: 14, height: 1.5, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-              decoration: InputDecoration(
-                hintText: 'Describe your purchase...',
-                hintStyle: TextStyle(color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
-                filled: true,
-                fillColor: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                contentPadding: const EdgeInsets.all(14),
-              ),
+              onPress: () {},
+              line: 4,
             )
           else
             TextCustom(

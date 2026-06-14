@@ -7,6 +7,7 @@ import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../controllers/subscription_crud_controller.dart';
 
@@ -33,10 +34,15 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
           color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
         ),
         actions: [
-          TextButton(
-            onPressed: controller.saveSubscription,
-            child: TextCustom(title: 'Save', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.primary50),
-          ),
+          Obx(() => controller.isLoading.value
+              ? Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppThemeData.primary50)),
+                )
+              : TextButton(
+                  onPressed: controller.saveSubscription,
+                  child: TextCustom(title: 'Save', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.primary50),
+                )),
         ],
       ),
       body: SingleChildScrollView(
@@ -54,15 +60,56 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
               _buildSectionTitle('Subscription Icon', Icons.image_rounded, isDark),
               spaceH(height: 10),
               _buildIconUploader(isDark),
-              spaceH(height: 20),
+              spaceH(height: 24),
               _buildSectionTitle('Basic Information', Icons.info_outline, isDark),
               spaceH(height: 12),
-              _buildTextField(controller.nameController, 'Netflix, Spotify, Jio...', 'Subscription Name', Icons.subscriptions_rounded, isDark),
+              TextFieldWidget(
+                title: 'Subscription Name',
+                hintText: 'Netflix, Spotify, Jio...',
+                controller: controller.nameController,
+                onPress: () {},
+                prefix: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppThemeData.primary50.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.subscriptions_rounded, color: AppThemeData.primary50, size: 18),
+                ),
+              ),
               spaceH(height: 14),
-              _buildTextField(controller.descriptionController, 'Brief description...', 'Description', Icons.description_outlined, isDark, maxLines: 2),
+              TextFieldWidget(
+                title: 'Description',
+                hintText: 'Brief description...',
+                controller: controller.descriptionController,
+                onPress: () {},
+                line: 2,
+                prefix: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppThemeData.primary50.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.description_outlined, color: AppThemeData.primary50, size: 18),
+                ),
+              ),
               spaceH(height: 14),
-              _buildTextField(controller.priceController, '0.00', 'Price (₹)', Icons.money_rounded, isDark, keyboardType: TextInputType.number),
-              spaceH(height: 20),
+              TextFieldWidget(
+                title: 'Price (₹)',
+                hintText: '0.00',
+                controller: controller.priceController,
+                onPress: () {},
+                textInputType: TextInputType.number,
+                prefix: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppThemeData.primary50.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.money_rounded, color: AppThemeData.primary50, size: 18),
+                ),
+              ),
+              spaceH(height: 24),
               _buildSectionTitle('Category & Billing', Icons.category_rounded, isDark),
               spaceH(height: 12),
               Row(
@@ -74,7 +121,7 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
               ),
               spaceH(height: 14),
               _buildDropdown('Status', controller.selectedStatus, controller.statuses, isDark),
-              spaceH(height: 20),
+              spaceH(height: 24),
               _buildSectionTitle('Dates', Icons.calendar_month_rounded, isDark),
               spaceH(height: 12),
               Row(
@@ -84,12 +131,48 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
                   Expanded(child: _buildDatePicker('Expiry Date', controller.expiryDate, isDark)),
                 ],
               ),
-              spaceH(height: 20),
+              spaceH(height: 24),
               _buildSectionTitle('Gallery Images', Icons.photo_library_rounded, isDark),
               spaceH(height: 12),
               _buildImageUploadSection(isDark),
-              spaceH(height: 20),
-              _buildTextField(controller.notesController, 'Additional notes...', 'Notes', Icons.notes_rounded, isDark, maxLines: 3),
+              spaceH(height: 24),
+              TextFieldWidget(
+                title: 'Notes',
+                hintText: 'Additional notes...',
+                controller: controller.notesController,
+                onPress: () {},
+                line: 3,
+                prefix: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppThemeData.primary50.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.notes_rounded, color: AppThemeData.primary50, size: 18),
+                ),
+              ),
+              spaceH(height: 30),
+              // Save button
+              Obx(() => SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: controller.isLoading.value ? null : controller.saveSubscription,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppThemeData.primary50,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: controller.isLoading.value
+                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                      : TextCustom(
+                          title: controller.isEditMode.value ? 'Update Subscription' : 'Add Subscription',
+                          fontSize: 16,
+                          fontFamily: FontFamily.bold,
+                          color: Colors.white,
+                        ),
+                ),
+              )),
             ],
           ),
         ),
@@ -101,51 +184,13 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
     return Row(
       children: [
         Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(9)),
           child: Icon(icon, color: AppThemeData.primary50, size: 16),
         ),
         spaceW(width: 10),
         TextCustom(title: title, fontSize: 14, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey3 : AppThemeData.grey7),
-      ],
-    );
-  }
-
-  Widget _buildTextField(TextEditingController ctrl, String hint, String label, IconData icon, bool isDark, {int maxLines = 1, TextInputType? keyboardType}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(title: label, fontSize: 11, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-        spaceH(height: 6),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02), blurRadius: 8, offset: const Offset(0, 2))],
-            border: Border.all(color: isDark ? AppThemeData.grey8 : AppThemeData.grey3, width: 0.5),
-          ),
-          child: TextField(
-            controller: ctrl,
-            maxLines: maxLines,
-            keyboardType: keyboardType,
-            style: TextStyle(fontFamily: FontFamily.medium, fontSize: 14, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: 14, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
-              prefixIcon: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                child: Icon(icon, color: AppThemeData.primary50, size: 18),
-              ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide:  BorderSide(color: AppThemeData.primary50, width: 1.5)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              filled: true,
-              fillColor: Colors.transparent,
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -246,8 +291,7 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
             ),
           ),
           Positioned(
-            top: 4,
-            right: 4,
+            top: 4, right: 4,
             child: GestureDetector(
               onTap: controller.pickIcon,
               child: Container(
@@ -290,13 +334,11 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
       children: [
         if (controller.existingImages.isNotEmpty)
           Wrap(
-            spacing: 10,
-            runSpacing: 10,
+            spacing: 10, runSpacing: 10,
             children: controller.existingImages.map((url) => _buildImageTile(isDark, networkUrl: url, onRemove: () => controller.removeExistingImage(url))).toList(),
           ),
         Obx(() => Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: 10, runSpacing: 10,
           children: controller.imageBytes.asMap().entries.map((e) => _buildImageTile(isDark, bytes: e.value, onRemove: () => controller.removeNewImage(e.key))).toList(),
         )),
         spaceH(height: 10),
@@ -309,8 +351,7 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
     return Stack(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 80, height: 80,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: isDark ? AppThemeData.grey7 : AppThemeData.grey3),
@@ -326,8 +367,7 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
         ),
         if (onRemove != null)
           Positioned(
-            top: 4,
-            right: 4,
+            top: 4, right: 4,
             child: GestureDetector(
               onTap: onRemove,
               child: Container(

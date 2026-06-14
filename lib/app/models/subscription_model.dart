@@ -207,6 +207,18 @@ class SubscriptionModel {
     }
   }
 
+  // ─── Next Billing Date ───
+  DateTime? get nextBillingDate {
+    if (expiryDate == null) return null;
+    return expiryDate;
+  }
+
+  String get formattedNextBillingDate {
+    if (nextBillingDate == null) return 'N/A';
+    final months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return '${nextBillingDate!.day.toString().padLeft(2, '0')} ${months[nextBillingDate!.month]} ${nextBillingDate!.year}';
+  }
+
   // ─── Primary Image ───
   String get primaryImageUrl => imageUrls != null && imageUrls!.isNotEmpty
       ? imageUrls!.first

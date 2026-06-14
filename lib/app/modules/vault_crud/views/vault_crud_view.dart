@@ -7,6 +7,7 @@ import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import '../controllers/vault_crud_controller.dart';
 
 class VaultCrudView extends GetView<VaultCrudController> {
@@ -32,12 +33,12 @@ class VaultCrudView extends GetView<VaultCrudController> {
           color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
         )),
         actions: [
-          TextButton(
+          Obx(() => TextButton(
             onPressed: controller.isLoading.value ? null : controller.saveItem,
-            child: Obx(() => controller.isLoading.value
+            child: controller.isLoading.value
                 ?  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppThemeData.primary50))
-                :  TextCustom(title: 'Save', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.primary50)),
-          ),
+                :  TextCustom(title: 'Save', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.primary50),
+          )),
         ],
       ),
       body: SingleChildScrollView(
@@ -66,9 +67,35 @@ class VaultCrudView extends GetView<VaultCrudController> {
 
           _buildSectionTitle('Basic Information', SolarIconsOutline.infoCircle, isDark),
           spaceH(height: 12),
-          _buildTextField(controller.titleController, 'e.g. Gmail Account', 'Title', SolarIconsOutline.lockKeyhole, isDark),
+          TextFieldWidget(
+            title: 'Title',
+            hintText: 'e.g. Gmail Account',
+            controller: controller.titleController,
+            onPress: () {},
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.lockKeyhole, color: AppThemeData.primary50, size: 18),
+            ),
+          ),
           spaceH(height: 14),
-          _buildTextField(controller.websiteController, 'https://...', 'Website / URL', SolarIconsOutline.link, isDark),
+          TextFieldWidget(
+            title: 'Website / URL',
+            hintText: 'https://...',
+            controller: controller.websiteController,
+            onPress: () {},
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.link, color: AppThemeData.primary50, size: 18),
+            ),
+          ),
           spaceH(height: 20),
           _buildSectionTitle('Category', SolarIconsOutline.tag, isDark),
           spaceH(height: 10),
@@ -76,17 +103,99 @@ class VaultCrudView extends GetView<VaultCrudController> {
           spaceH(height: 20),
           _buildSectionTitle('Credentials', SolarIconsOutline.key, isDark),
           spaceH(height: 12),
-          _buildTextField(controller.emailController, 'user@email.com', 'Email', SolarIconsOutline.letter, isDark),
+          TextFieldWidget(
+            title: 'Email',
+            hintText: 'user@email.com',
+            controller: controller.emailController,
+            onPress: () {},
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.letter, color: AppThemeData.primary50, size: 18),
+            ),
+          ),
           spaceH(height: 14),
-          _buildTextField(controller.usernameController, 'Username', 'Username', SolarIconsOutline.user, isDark),
+          TextFieldWidget(
+            title: 'Username',
+            hintText: 'Username',
+            controller: controller.usernameController,
+            onPress: () {},
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.user, color: AppThemeData.primary50, size: 18),
+            ),
+          ),
           spaceH(height: 14),
-          _buildHiddenField(isDark),
+          Obx(() => TextFieldWidget(
+            title: 'Password',
+            hintText: 'Enter password',
+            controller: controller.passwordController,
+            obscureText: controller.obscurePassword.value,
+            onPress: () {},
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.lockKeyhole, color: AppThemeData.primary50, size: 18),
+            ),
+            suffix: GestureDetector(
+              onTap: () => controller.obscurePassword.value = !controller.obscurePassword.value,
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppThemeData.primary50.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  controller.obscurePassword.value ? SolarIconsOutline.eyeClosed : SolarIconsOutline.eye,
+                  color: AppThemeData.primary50,
+                  size: 18,
+                ),
+              ),
+            ),
+          )),
           spaceH(height: 14),
-          _buildTextField(controller.phoneController, '+1 234 567 890', 'Phone', SolarIconsOutline.phone, isDark),
+          TextFieldWidget(
+            title: 'Phone',
+            hintText: '+1 234 567 890',
+            controller: controller.phoneController,
+            onPress: () {},
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.phone, color: AppThemeData.primary50, size: 18),
+            ),
+          ),
           spaceH(height: 20),
           _buildSectionTitle('Notes', SolarIconsOutline.notes, isDark),
           spaceH(height: 10),
-          _buildTextField(controller.notesController, 'Additional notes...', 'Notes', SolarIconsOutline.notes, isDark, maxLines: 3),
+          TextFieldWidget(
+            title: 'Notes',
+            hintText: 'Additional notes...',
+            controller: controller.notesController,
+            onPress: () {},
+            line: 3,
+            prefix: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(SolarIconsOutline.notes, color: AppThemeData.primary50, size: 18),
+            ),
+          ),
           spaceH(height: 20),
           _buildSectionTitle('Tags', SolarIconsOutline.tag, isDark),
           spaceH(height: 10),
@@ -108,89 +217,6 @@ class VaultCrudView extends GetView<VaultCrudController> {
         ),
         spaceW(width: 10),
         TextCustom(title: title, fontSize: 14, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey3 : AppThemeData.grey7),
-      ],
-    );
-  }
-
-  Widget _buildTextField(TextEditingController ctrl, String hint, String label, IconData icon, bool isDark, {int maxLines = 1}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(title: label, fontSize: 11, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-        spaceH(height: 6),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: isDark ? AppThemeData.grey8 : AppThemeData.grey3, width: 0.5),
-          ),
-          child: TextField(
-            controller: ctrl,
-            maxLines: maxLines,
-            style: TextStyle(fontFamily: FontFamily.medium, fontSize: 14, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: 14, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
-              prefixIcon: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                child: Icon(icon, color: AppThemeData.primary50, size: 18),
-              ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide:  BorderSide(color: AppThemeData.primary50, width: 1.5)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              filled: true,
-              fillColor: Colors.transparent,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHiddenField(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(title: 'Password', fontSize: 11, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-        spaceH(height: 6),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppThemeData.primary50.withValues(alpha: 0.2), width: 0.5),
-          ),
-          child: Obx(() => TextField(
-            controller: controller.passwordController,
-            obscureText: controller.obscurePassword.value,
-            style: TextStyle(fontFamily: FontFamily.medium, fontSize: 14, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-            decoration: InputDecoration(
-              hintText: 'Enter password',
-              hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: 14, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
-              prefixIcon: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                child: Icon(SolarIconsOutline.lockKeyhole, color: AppThemeData.primary50, size: 18),
-              ),
-              suffixIcon: GestureDetector(
-                onTap: () => controller.obscurePassword.value = !controller.obscurePassword.value,
-                child: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                  child: Icon(
-                    controller.obscurePassword.value ? SolarIconsOutline.eyeClosed : SolarIconsOutline.eye,
-                    color: AppThemeData.primary50, size: 18,
-                  ),
-                ),
-              ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide:  BorderSide(color: AppThemeData.primary50, width: 1.5)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              filled: true,
-              fillColor: Colors.transparent,
-            ),
-          )),
-        ),
       ],
     );
   }

@@ -9,6 +9,7 @@ import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:solar_icons/solar_icons.dart';
 import '../../auth/controllers/auth_controller.dart';
@@ -637,55 +638,40 @@ class _LoginScreenViewState extends State<LoginScreenView>
   // ── Email field ─────────────────────────────────────────────────────
 
   Widget _buildEmailField(_ResponsiveScale s) {
-    return TextFormField(
+    return TextFieldWidget(
+      hintText: 'name@company.com',
       controller: controller.emailController,
-      style: TextStyle(fontFamily: FontFamily.regular, fontSize: 15, color: AppThemeData.textNeonBlue),
-      decoration: InputDecoration(
-        hintText: 'name@company.com',
-        hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: 15, color: AppThemeData.textNeonBlue.withValues(alpha: 0.25)),
-        filled: true,
-        fillColor: AppThemeData.surfaceMid.withValues(alpha: 0.5),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(s.inputBorderRadius), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(s.inputBorderRadius), borderSide: const BorderSide(color: AppThemeData.surfaceBorder, width: 0.5)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(s.inputBorderRadius), borderSide: const BorderSide(color: AppThemeData.neonBlue, width: 1.5)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        prefixIcon: Container(
-          margin: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: AppThemeData.neonBlue.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(8)),
-          child: Icon(SolarIconsOutline.letter, color: AppThemeData.neonBlue.withValues(alpha: 0.6), size: 16),
-        ),
-      ),
+      onPress: () {},
+      textInputType: TextInputType.emailAddress,
       validator: (v) => (v == null || v.isEmpty) ? 'Email is required' : (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v) ? 'Enter a valid email' : null),
+      prefix: Container(
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: AppThemeData.neonBlue.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(8)),
+        child: Icon(SolarIconsOutline.letter, color: AppThemeData.neonBlue.withValues(alpha: 0.6), size: 16),
+      ),
+      fillColor: AppThemeData.surfaceMid.withValues(alpha: 0.5),
     );
   }
 
   // ── Password field ──────────────────────────────────────────────────
 
   Widget _buildPasswordField(_ResponsiveScale s) {
-    return TextFormField(
+    return TextFieldWidget(
+      hintText: '••••••••',
       controller: controller.passwordController,
+      onPress: () {},
       obscureText: _obscurePassword,
-      style: TextStyle(fontFamily: FontFamily.regular, fontSize: 15, color: AppThemeData.textNeonBlue),
-      decoration: InputDecoration(
-        hintText: '••••••••',
-        hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: 15, color: AppThemeData.textNeonBlue.withValues(alpha: 0.25)),
-        filled: true,
-        fillColor: AppThemeData.surfaceMid.withValues(alpha: 0.5),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(s.inputBorderRadius), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(s.inputBorderRadius), borderSide: const BorderSide(color: AppThemeData.surfaceBorder, width: 0.5)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(s.inputBorderRadius), borderSide: const BorderSide(color: AppThemeData.neonPurple, width: 1.5)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        prefixIcon: Container(
-          margin: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: AppThemeData.neonPurple.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(8)),
-          child: Icon(SolarIconsOutline.lockKeyhole, color: AppThemeData.neonPurple.withValues(alpha: 0.6), size: 16),
-        ),
-        suffixIcon: IconButton(
-          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-          icon: Icon(_obscurePassword ? SolarIconsOutline.eye : SolarIconsOutline.eyeClosed, color: AppThemeData.neonPurple.withValues(alpha: 0.5), size: 18),
-        ),
-      ),
       validator: (v) => (v == null || v.isEmpty) ? 'Password is required' : (v.length < 6 ? 'Minimum 6 characters' : null),
+      prefix: Container(
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: AppThemeData.neonPurple.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(8)),
+        child: Icon(SolarIconsOutline.lockKeyhole, color: AppThemeData.neonPurple.withValues(alpha: 0.6), size: 16),
+      ),
+      suffix: GestureDetector(
+        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+        child: Icon(_obscurePassword ? SolarIconsOutline.eye : SolarIconsOutline.eyeClosed, color: AppThemeData.neonPurple.withValues(alpha: 0.5), size: 18),
+      ),
+      fillColor: AppThemeData.surfaceMid.withValues(alpha: 0.5),
     );
   }
 

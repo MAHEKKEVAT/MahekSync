@@ -15,6 +15,7 @@ class AppThemeData {
   static const Color primary6 = Color(0xff102766);
   static const Color primary7 = Color(0xff00071A);
   static Color primary50 = const Color(0xff5D54F2);
+  static const Color primary300 = Color(0xff7B8FFF);
 
   // ── Secondary (Warm amber-orange) ───────────────────────────────────
   static const Color secondary1 = Color(0xffFEEDE2);

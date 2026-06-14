@@ -7,6 +7,7 @@ import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../controllers/reminder_crud_controller.dart';
 
@@ -70,21 +71,35 @@ class ReminderCrudView extends GetView<ReminderCrudController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTextField(
-                controller.nameController,
-                'e.g. Pay electricity bill',
-                'Reminder Name',
-                Icons.alarm_rounded,
-                isDark,
+              TextFieldWidget(
+                title: 'Reminder Name',
+                hintText: 'e.g. Pay electricity bill',
+                controller: controller.nameController,
+                onPress: () {},
+                prefix: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppThemeData.primary50.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.alarm_rounded, color: AppThemeData.primary50, size: 18),
+                ),
               ),
               spaceH(height: 14),
-              _buildTextField(
-                controller.descriptionController,
-                'Brief description...',
-                'Description (1 line)',
-                Icons.description_outlined,
-                isDark,
-                maxLines: 1,
+              TextFieldWidget(
+                title: 'Description (1 line)',
+                hintText: 'Brief description...',
+                controller: controller.descriptionController,
+                onPress: () {},
+                prefix: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppThemeData.primary50.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.description_outlined, color: AppThemeData.primary50, size: 18),
+                ),
+                line: 1,
               ),
               spaceH(height: 20),
               _buildSectionTitle('Priority', Icons.flag_rounded, isDark),
@@ -160,80 +175,6 @@ class ReminderCrudView extends GetView<ReminderCrudController> {
           fontSize: 14,
           fontFamily: FontFamily.bold,
           color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController ctrl,
-    String hint,
-    String label,
-    IconData icon,
-    bool isDark, {
-    int maxLines = 1,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(
-          title: label,
-          fontSize: 11,
-          fontFamily: FontFamily.medium,
-          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-        ),
-        spaceH(height: 6),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-              width: 0.5,
-            ),
-          ),
-          child: TextField(
-            controller: ctrl,
-            maxLines: maxLines,
-            style: TextStyle(
-              fontFamily: FontFamily.medium,
-              fontSize: 14,
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-            ),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(
-                fontFamily: FontFamily.regular,
-                fontSize: 14,
-                color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-              ),
-              prefixIcon: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppThemeData.primary50.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: AppThemeData.primary50, size: 18),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(
-                  color: AppThemeData.primary50,
-                  width: 1.5,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 12,
-              ),
-              filled: true,
-              fillColor: Colors.transparent,
-            ),
-          ),
         ),
       ],
     );

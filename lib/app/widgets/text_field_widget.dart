@@ -23,7 +23,7 @@ class TextFieldWidget extends StatelessWidget {
   Color? fillColor;
   final int? line;
   final TextEditingController controller;
-  final Function() onPress;
+  final Function()? onPress;
   final Widget? prefix;
   final Widget? suffix;
   final bool? enable;
@@ -44,7 +44,7 @@ class TextFieldWidget extends StatelessWidget {
     this.title,
     required this.hintText,
     required this.controller,
-    required this.onPress,
+    this.onPress,
     this.enabled,
     this.readOnly,
     this.color,
@@ -83,7 +83,7 @@ class TextFieldWidget extends StatelessWidget {
           maxLines: line ?? 1,
           textAlignVertical: TextAlignVertical.center,
           cursorColor: AppThemeData.primary50,
-          onTap: onPress,
+          onTap: onPress != null ? () => onPress!() : null,
           style: TextStyle(
             color: themeChange.isDarkTheme() ? AppThemeData.grey1 : AppThemeData.grey10,
             fontFamily: FontFamily.regular,
@@ -289,7 +289,7 @@ class CustomFieldTextField extends StatelessWidget {
   Color? fillColor;
   final int? line;
   final TextEditingController controller;
-  final Function() onPress;
+  final Function()? onPress;
   final Widget? prefix;
   final Widget? suffix;
   final bool? enable;
@@ -309,7 +309,7 @@ class CustomFieldTextField extends StatelessWidget {
     this.obscureText,
     required this.hintText,
     required this.controller,
-    required this.onPress,
+    this.onPress,
     this.enabled,
     this.readOnly,
     this.color,
@@ -337,7 +337,7 @@ class CustomFieldTextField extends StatelessWidget {
           maxLines: line ?? 1,
           textAlignVertical: TextAlignVertical.center,
           cursorColor: AppThemeData.primary50,
-          onTap: onPress,
+          onTap: onPress != null ? () => onPress!() : null,
           style: TextStyle(
             color: themeChange.isDarkTheme() ? AppThemeData.grey1 : AppThemeData.grey10,
             fontFamily: FontFamily.regular,

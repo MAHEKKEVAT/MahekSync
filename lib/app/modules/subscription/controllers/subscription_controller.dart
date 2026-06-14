@@ -16,8 +16,10 @@ class SubscriptionController extends GetxController {
   final isGridView = true.obs;
   final selectedCategory = 'ALL'.obs;
   final selectedCategories = <String>[].obs;
+  final selectedSortOption = 'Latest'.obs;
 
   final categories = ['ALL', 'ENTERTAINMENT', 'UTILITIES', 'PRODUCTIVITY', 'CLOUD', 'MUSIC', 'VIDEO', 'OTHER'];
+  final sortOptions = ['Latest', 'Oldest', 'Price: Low to High', 'Price: High to Low', 'Name: A to Z', 'Expiry: Soonest'];
 
   String? get ownerId => MahekConstant.ownerModel?.id;
 
@@ -25,6 +27,25 @@ class SubscriptionController extends GetxController {
   double get yearlyProjectedCost => totalMonthlyCost * 12;
   int get activeCount => subscriptions.where((s) => s.status == 'ACTIVE').length;
   int get expiringSoonCount => subscriptions.where((s) => s.isExpiringSoon && s.status == 'ACTIVE').length;
+  int get totalCount => subscriptions.length;
+  int get categoryCount {
+    final cats = subscriptions.map((s) => s.category).whereType<String>().toSet();
+    return cats.length;
+  }
+
+  DateTime? get nextBillingDate {
+    final activeExpiring = subscriptions
+        .where((s) => s.status == 'ACTIVE' && s.expiryDate != null)
+        .toList()
+      ..sort((a, b) => a.expiryDate!.compareTo(b.expiryDate!));
+    return activeExpiring.isNotEmpty ? activeExpiring.first.expiryDate : null;
+  }
+
+  String get formattedNextBilling {
+    if (nextBillingDate == null) return '--';
+    final months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${nextBillingDate!.day.toString().padLeft(2, '0')} ${months[nextBillingDate!.month]} ${nextBillingDate!.year}';
+  }
 
   @override
   void onInit() {
@@ -49,7 +70,36 @@ class SubscriptionController extends GetxController {
     if (selectedCategories.isNotEmpty) {
       result = result.where((s) => selectedCategories.contains(s.category)).toList();
     }
-    filteredSubscriptions.value = result;
+    _applySort(result);
+  }
+
+  void _applySort(List<dynamic> list) {
+    final sorted = List<SubscriptionModel>.from(list);
+    switch (selectedSortOption.value) {
+      case 'Latest':
+        sorted.sort((a, b) => (b.createdAt?.toDate() ?? DateTime(0)).compareTo(a.createdAt?.toDate() ?? DateTime(0)));
+        break;
+      case 'Oldest':
+        sorted.sort((a, b) => (a.createdAt?.toDate() ?? DateTime(0)).compareTo(b.createdAt?.toDate() ?? DateTime(0)));
+        break;
+      case 'Price: Low to High':
+        sorted.sort((a, b) => (a.price ?? 0).compareTo(b.price ?? 0));
+        break;
+      case 'Price: High to Low':
+        sorted.sort((a, b) => (b.price ?? 0).compareTo(a.price ?? 0));
+        break;
+      case 'Name: A to Z':
+        sorted.sort((a, b) => (a.name ?? '').compareTo(b.name ?? ''));
+        break;
+      case 'Expiry: Soonest':
+        sorted.sort((a, b) {
+          if (a.expiryDate == null) return 1;
+          if (b.expiryDate == null) return -1;
+          return a.expiryDate!.compareTo(b.expiryDate!);
+        });
+        break;
+    }
+    filteredSubscriptions.value = sorted;
   }
 
   void updateSearchQuery(String query) {
@@ -63,6 +113,11 @@ class SubscriptionController extends GetxController {
     } else {
       selectedCategories.add(category);
     }
+    _applyFilters();
+  }
+
+  void sortBy(String option) {
+    selectedSortOption.value = option;
     _applyFilters();
   }
 

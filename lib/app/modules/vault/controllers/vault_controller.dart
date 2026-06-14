@@ -99,10 +99,11 @@ class VaultController extends GetxController {
   }
 
   Future<void> deleteItem(VaultModel item) async {
+    final isDark = Theme.of(Get.context!).brightness == Brightness.dark;
     final confirmed = await Get.dialog<bool>(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: AppThemeData.grey10,
+        backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.primaryWhite,
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -114,13 +115,13 @@ class VaultController extends GetxController {
                 child: Icon(SolarIconsOutline.trashBin2, color: AppThemeData.danger300, size: 28),
               ),
               spaceH(height: 16),
-              const Text('Delete Item', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+              Text('Delete Item', style: TextStyle(color: isDark ? Colors.white : AppThemeData.grey10, fontSize: 18, fontWeight: FontWeight.w700)),
               spaceH(height: 8),
-              Text('Delete "${item.title}"?', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14)),
+              Text('Delete "${item.title}"?', style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.6) : AppThemeData.grey6, fontSize: 14)),
               spaceH(height: 24),
               Row(
                 children: [
-                  Expanded(child: OutlinedButton(onPressed: () => Get.back(result: false), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Cancel', style: TextStyle(color: Colors.white70)))),
+                  Expanded(child: OutlinedButton(onPressed: () => Get.back(result: false), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Cancel', style: TextStyle(color: isDark ? Colors.white70 : AppThemeData.grey6)))),
                   spaceW(width: 12),
                   Expanded(child: ElevatedButton(onPressed: () => Get.back(result: true), style: ElevatedButton.styleFrom(backgroundColor: AppThemeData.danger300, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))),
                 ],

@@ -8,6 +8,8 @@ import 'app_colors.dart';
 class Styles {
   static ThemeData themeData(bool isDarkTheme, BuildContext context) {
     return ThemeData(
+        fontFamily: 'SFProDisplayRegular',
+        fontFamilyFallback: const ['NotoSans'],
         scaffoldBackgroundColor: isDarkTheme ? AppThemeData.grey10 : AppThemeData.grey1,
         dialogBackgroundColor: isDarkTheme ? AppThemeData.grey10 : AppThemeData.grey2,
         primaryColor: AppThemeData.primary50,

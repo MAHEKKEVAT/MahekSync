@@ -9,6 +9,7 @@ import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
+import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../../../models/category_model.dart';
 import '../controllers/categories_controller.dart';
@@ -248,27 +249,18 @@ class CategoriesView extends GetView<CategoriesController> {
     int maxLines = 1,
     double fontSize = 15,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02), blurRadius: 8, offset: const Offset(0, 2))],
-        border: Border.all(color: isDark ? AppThemeData.grey8.withValues(alpha: 0.5) : AppThemeData.grey3.withValues(alpha: 0.5)),
-      ),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        style: TextStyle(fontFamily: FontFamily.medium, fontSize: fontSize, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: fontSize, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
-          prefixIcon: Container(margin: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: AppThemeData.primary50, size: 20)),
-          filled: true, fillColor: Colors.transparent,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: AppThemeData.primary50, width: 2)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    return TextFieldWidget(
+      hintText: hintText,
+      controller: controller,
+      onPress: () {},
+      line: maxLines,
+      prefix: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppThemeData.primary50.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
         ),
+        child: Icon(icon, color: AppThemeData.primary50, size: 20),
       ),
     );
   }
