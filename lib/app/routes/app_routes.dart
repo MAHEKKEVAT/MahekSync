@@ -39,6 +39,7 @@ abstract class Routes {
   static const GENERATE_BILL = _Paths.GENERATE_BILL;
   static const GENERATE_BILL_CREATE = _Paths.GENERATE_BILL_CREATE;
   static const GENERATE_BILL_PREVIEW = _Paths.GENERATE_BILL_PREVIEW;
+  static const IMAGE_TO_TEXT = _Paths.IMAGE_TO_TEXT;
 }
 
 abstract class _Paths {
@@ -80,4 +81,5 @@ abstract class _Paths {
   static const GENERATE_BILL = '/generate-bill';
   static const GENERATE_BILL_CREATE = '/generate-bill-create';
   static const GENERATE_BILL_PREVIEW = '/generate-bill-preview';
+  static const IMAGE_TO_TEXT = '/dashboard/image-to-text';
 }

@@ -8,6 +8,8 @@ import 'package:maheksync/app/modules/dues_tracker/controllers/dues_tracker_cont
 import 'package:maheksync/app/modules/dues_tracker/views/dues_tracker_view.dart';
 import 'package:maheksync/app/modules/my_contacts/controllers/my_contacts_controller.dart';
 import 'package:maheksync/app/modules/my_contacts/views/my_contacts_view.dart';
+import 'package:maheksync/app/modules/image_to_text/controllers/image_to_text_controller.dart';
+import 'package:maheksync/app/modules/image_to_text/views/image_to_text_view.dart';
 import 'package:maheksync/app/modules/my_devices/controllers/my_devices_controller.dart';
 import 'package:maheksync/app/modules/my_devices/views/my_devices_view.dart';
 import 'package:maheksync/app/modules/my_purchases/controllers/my_purchases_controller.dart';
@@ -144,6 +146,13 @@ class DashboardController extends GetxController {
           selectedIcon: SolarIconsBold.usersGroupRounded,
           route: '/my-contacts',
         ),
+        NavigationItem(
+          title: 'Image to Text'.tr,
+          icon: Icons.image_outlined,
+          selectedIcon: Icons.image_rounded,
+          svgIcon: 'assets/icons/ic_image_text.svg',
+          route: Routes.IMAGE_TO_TEXT,
+        ),
       ],
     ),
 
@@ -190,7 +199,6 @@ class DashboardController extends GetxController {
 
     // ✅ Safe on all platforms — returns empty stream on Android/iOS
     WebHistory.onPopState.listen((_) {
-      print('🔙 PopState event detected');
       syncIndexFromRoute();
     });
   }
@@ -253,7 +261,6 @@ class DashboardController extends GetxController {
   }
 
   void navigateToRoute(String route) {
-    print('🧭 navigateToRoute: $route');
     final items = allItems;
     for (int i = 0; i < items.length; i++) {
       if (items[i].route == route) {
@@ -276,7 +283,6 @@ class DashboardController extends GetxController {
     if (currentPath.contains(profileRoute) || currentPath.endsWith(profileRoute)) {
       if (selectedIndex.value != -1) {
         selectedIndex.value = -1;
-        print('✅ Synced to profile (index: -1)');
       }
       return;
     }
@@ -285,10 +291,6 @@ class DashboardController extends GetxController {
 
     final sortedItems = items.toList()
       ..sort((a, b) => b.route.length.compareTo(a.route.length));
-
-    for (int i = 0; i < sortedItems.length; i++) {
-      print('   ${sortedItems[i].route}');
-    }
 
     for (int i = 0; i < sortedItems.length; i++) {
       String route = sortedItems[i].route;
@@ -302,26 +304,15 @@ class DashboardController extends GetxController {
       if (isExactMatch || isPathSegmentMatch) {
         if (selectedIndex.value != originalIndex) {
           selectedIndex.value = originalIndex;
-          print('✅ Synced to index: $originalIndex, route: $route');
-        } else {
-          print('ℹ️ Already at correct index: $originalIndex');
         }
         return;
       }
     }
 
-    // If no match found, check if we should default to dashboard
-    print('⚠️ No route match found for: "$currentPath"');
-
-    // Only default to dashboard if we're at the root dashboard URL
-    // On Android, getPathname() returns '' — this ensures we default to dashboard
     if (currentPath == '/' || currentPath == '/dashboard' || currentPath.isEmpty) {
       if (selectedIndex.value != 0) {
         selectedIndex.value = 0;
-        print('✅ Defaulted to dashboard (index: 0)');
       }
-    } else {
-      print('⚠️ Keeping current index: ${selectedIndex.value}');
     }
   }
 
@@ -337,7 +328,6 @@ class DashboardController extends GetxController {
 
     final items = allItems;
     if (index < 0 || index >= items.length) {
-      print('⚠️ Index out of range, returning DashboardHomeView');
       return const DashboardHomeView();
     }
 
@@ -349,13 +339,11 @@ class DashboardController extends GetxController {
       case Routes.MY_DEVICES:
         if (!Get.isRegistered<MyDevicesController>()) {
           Get.put(MyDevicesController());
-          print('📦 Registered MyDevicesController');
         }
         return const MyDevicesView();
       case Routes.PAYEMENT_METHOD:
         if (!Get.isRegistered<PaymentMethodsController>()) {
           Get.put(PaymentMethodsController());
-          print('📦 Registered PaymentMethodsController');
         }
         return const PaymentMethodsView();
       case Routes.CATEGORIES:
@@ -371,7 +359,6 @@ class DashboardController extends GetxController {
       case Routes.SUBSCRIPTION:
         if (!Get.isRegistered<SubscriptionController>()) {
           Get.put(SubscriptionController());
-          print('📦 Registered SubscriptionController');
         }
         return const SubscriptionView();
       case Routes.REMINDER:
@@ -382,7 +369,6 @@ class DashboardController extends GetxController {
       case Routes.DUES_TRACKER:
         if (!Get.isRegistered<DuesTrackerController>()) {
           Get.put(DuesTrackerController());
-          print('📦 Registered DuesTrackerController');
         }
         return const DuesTrackerView();
       case Routes.PERSONAL_TASKS:
@@ -398,7 +384,6 @@ class DashboardController extends GetxController {
       case Routes.AEGIS:
         if (!Get.isRegistered<AegisController>()) {
           Get.put(AegisController());
-          print('📦 Registered AegisController');
         }
         return const AegisView();
 
@@ -407,6 +392,12 @@ class DashboardController extends GetxController {
           Get.put(MyContactsController());
         }
         return const MyContactsView();
+
+      case Routes.IMAGE_TO_TEXT:
+        if (!Get.isRegistered<ImageToTextController>()) {
+          Get.put(ImageToTextController());
+        }
+        return const ImageToTextView();
 
       case Routes.GENERATE_BILL:
         if (!Get.isRegistered<GenerateBillController>()) {
@@ -422,7 +413,6 @@ class DashboardController extends GetxController {
       case Routes.POLICY_SETTINGS:
         return const PolicySettingsView();
       default:
-        print('⚠️ Unknown route: $route, returning DashboardHomeView');
         return const DashboardHomeView();
     }
   }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -405,8 +404,6 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
                     onLogout: () async {
                       await FirebaseAuth.instance.signOut();
                       Get.offAllNamed(Routes.LOGIN_SCREEN);
-                      html.window.history.pushState(
-                          null, '', Routes.LOGIN_SCREEN);
                       ShowToastDialog.showSuccess(
                           "Logged out successfully.".tr);
                     },

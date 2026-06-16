@@ -232,8 +232,8 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
     final isDark = widget.isDark;
 
     return Positioned(
-      bottom: bottomPadding + 20,
-      right: 20,
+      bottom: bottomPadding + 16,
+      right: 16,
       child: SlideTransition(
         position: _slideAnim,
         child: FadeTransition(
@@ -241,17 +241,17 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
           child: GestureDetector(
             onTap: _dismiss,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(16),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                 child: Container(
-                  constraints: const BoxConstraints(maxWidth: 520),
-                  padding: const EdgeInsets.fromLTRB(20, 18, 16, 18),
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.93)
                         : const Color(0xFF1A1A1E).withValues(alpha: 0.92),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isDark
                           ? Colors.black.withValues(alpha: 0.06)
@@ -276,15 +276,15 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                     children: [
                       // ── Icon container ──────────────────────
                       Container(
-                        width: 56,
-                        height: 56,
+                        width: 36,
+                        height: 36,
                         decoration: BoxDecoration(
                           color: widget.accentColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(widget.icon, color: widget.accentColor, size: 30),
+                        child: Icon(widget.icon, color: widget.accentColor, size: 20),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 10),
                       // ── Title + subtitle ────────────────────
                       Expanded(
                         child: Column(
@@ -294,8 +294,8 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                             Text(
                               widget.title,
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
                                 height: 1.2,
                                 color: isDark ? const Color(0xFF1A1A1E) : Colors.white,
                                 decoration: TextDecoration.none,
@@ -321,13 +321,13 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       // ── Close button ────────────────────────
                       GestureDetector(
                         onTap: _dismiss,
                         child: Container(
-                          width: 32,
-                          height: 32,
+                          width: 28,
+                          height: 28,
                           decoration: BoxDecoration(
                             color: isDark
                                 ? Colors.black.withValues(alpha: 0.06)

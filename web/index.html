@@ -16,6 +16,8 @@
     <link rel="manifest" href="manifest.json">
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwI28ucDsERHEx5O6ybrmeKSoBY98tmmA&libraries=places"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 <script src="flutter_bootstrap.js" async></script>
@@ -29,6 +31,96 @@
       }
     }
     setTimeout(initMapFallback, 2000);
+</script>
+
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    var tessWorker = null;
+
+    async function initTesseract(lang) {
+        if (tessWorker && tessWorker._lang === lang) return tessWorker;
+        if (tessWorker) { try { await tessWorker.terminate(); } catch(e) {} }
+        tessWorker = await Tesseract.createWorker(lang, 1, {
+            workerPath: '/tessdata/worker.min.js',
+            corePath: '/tessdata',
+            langPath: '/tessdata',
+            logger: function(m) { console.log('[Tesseract]', m); }
+        });
+        tessWorker._lang = lang;
+        return tessWorker;
+    }
+
+    async function preprocessImage(dataUri) {
+        return new Promise(function(resolve) {
+            var img = new Image();
+            img.onload = function() {
+                var canvas = document.createElement('canvas');
+                var scale = Math.min(2000 / Math.max(img.width, img.height), 2);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var data = imageData.data;
+                for (var i = 0; i < data.length; i += 4) {
+                    var gray = data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114;
+                    var val = ((gray / 255 - 0.5) * 1.4 + 0.5) * 255;
+                    val = Math.max(0, Math.min(255, val));
+                    data[i] = val;
+                    data[i+1] = val;
+                    data[i+2] = val;
+                }
+                ctx.putImageData(imageData, 0, 0);
+                resolve(canvas.toDataURL('image/png'));
+            };
+            img.src = dataUri;
+        });
+    }
+
+    async function ocrImageBase64(base64, lang, mimeType) {
+        var worker = await initTesseract(lang);
+        var dataUri = 'data:' + mimeType + ';base64,' + base64;
+        var processed = await preprocessImage(dataUri);
+        var result = await worker.recognize(processed);
+        return result.data.text;
+    }
+
+    async function ocrPdfPageCount(base64) {
+        var raw = atob(base64);
+        var arr = new Uint8Array(raw.length);
+        for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        var pdf = await pdfjsLib.getDocument({data: arr}).promise;
+        return pdf.numPages;
+    }
+
+    async function ocrRenderPdfPage(base64, pageNum) {
+        var raw = atob(base64);
+        var arr = new Uint8Array(raw.length);
+        for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        var pdf = await pdfjsLib.getDocument({data: arr}).promise;
+        var page = await pdf.getPage(pageNum);
+        var scale = 2;
+        var viewport = page.getViewport({scale: scale});
+        var canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        var ctx = canvas.getContext('2d');
+        await page.render({canvasContext: ctx, viewport: viewport}).promise;
+        return canvas.toDataURL('image/png').split(',')[1];
+    }
+
+    function downloadTextFile(filename, content) {
+        var blob = new Blob([content], {type: 'text/plain'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 </script>
 </body>
 </html>

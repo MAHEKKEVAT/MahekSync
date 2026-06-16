@@ -174,7 +174,7 @@ class _MahekLoaderState extends State<MahekLoader>
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SIRI-STYLE LOADER — Colorful morphing orb with flowing ribbons
+// SIRI-STYLE LOADER — Glass orb with rotating internal light beams
 // ═══════════════════════════════════════════════════════════════
 class _SiriLoader extends StatelessWidget {
   final Animation<double> animation;
@@ -200,166 +200,196 @@ class _SiriPainter extends CustomPainter {
   final bool isDark;
   _SiriPainter({required this.progress, required this.isDark});
 
-  static const _colors = [
-    Color(0xFFBF5AF2), // Purple
-    Color(0xFF5E5CE6), // Blue
-    Color(0xFFFF375F), // Pink
-    Color(0xFFFF9F0A), // Orange
-    Color(0xFFFFD60A), // Yellow
-    Color(0xFF30D158), // Green
-    Color(0xFF64D2FF), // Teal
-    Color(0xFFBF5AF2), // loop back to Purple
+  // Beam colors matching the glass orb image
+  static const _beamColors = [
+    Color(0xFFFF2D78), // Pink/Magenta
+    Color(0xFF00E5CC), // Cyan/Teal
+    Color(0xFF6C5CE7), // Purple/Violet
+    Color(0xFF00D68F), // Green
   ];
 
   @override
   void paint(Canvas canvas, Size size) {
     final cx = size.width / 2;
     final cy = size.height / 2;
-    final maxR = size.width / 2 - 8;
+    final orbR = size.width * 0.38;
+    final breath = (math.sin(progress * 2 * math.pi) + 1) / 2;
 
-    // ── Ambient glow (pulsing) ──
-    final pulseA = (math.sin(progress * 4 * math.pi) + 1) / 2;
-    canvas.drawCircle(
-      Offset(cx, cy),
-      maxR * 0.85 + pulseA * 8,
+    // ── Bottom reflection ──
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(cx, cy + orbR + orbR * 0.35),
+        width: orbR * 1.8,
+        height: orbR * 0.22,
+      ),
       Paint()
         ..shader = RadialGradient(
           colors: [
-            const Color(0xFFBF5AF2).withValues(alpha: 0.12 + pulseA * 0.08),
-            const Color(0xFF5E5CE6).withValues(alpha: 0.06),
+            Colors.white.withValues(alpha: 0.08 + breath * 0.04),
             Colors.transparent,
           ],
         ).createShader(
-            Rect.fromCircle(center: Offset(cx, cy), radius: maxR * 0.9)),
+          Rect.fromCenter(
+            center: Offset(cx, cy + orbR + orbR * 0.35),
+            width: orbR * 1.8,
+            height: orbR * 0.22,
+          ),
+        ),
     );
 
-    // ── Central orb (breathing + color shift) ──
-    final orbScale = 0.55 + pulseA * 0.12;
-    final orbR = maxR * orbScale;
+    // ── Outer ambient glow ──
+    canvas.drawCircle(
+      Offset(cx, cy),
+      orbR + orbR * 0.3,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF6C5CE7).withValues(alpha: 0.10 + breath * 0.05),
+            const Color(0xFF00E5CC).withValues(alpha: 0.04),
+            Colors.transparent,
+          ],
+        ).createShader(
+            Rect.fromCircle(center: Offset(cx, cy), radius: orbR * 1.3)),
+    );
 
-    // Orb gradient rotates with progress
-    final orbAngle = progress * 2 * math.pi;
-    final orbRect = Rect.fromCircle(center: Offset(cx, cy), radius: orbR);
-
+    // ── Glass sphere (translucent) ──
+    // Dark fill for glass effect
     canvas.drawCircle(
       Offset(cx, cy),
       orbR,
       Paint()
-        ..shader = SweepGradient(
-          startAngle: orbAngle,
-          colors: const [
-            Color(0xFFBF5AF2),
-            Color(0xFF5E5CE6),
-            Color(0xFF64D2FF),
-            Color(0xFF30D158),
-            Color(0xFFFFD60A),
-            Color(0xFFFF9F0A),
-            Color(0xFFFF375F),
-            Color(0xFFBF5AF2),
-          ],
-          stops: const [0.0, 0.14, 0.28, 0.42, 0.57, 0.71, 0.85, 1.0],
-        ).createShader(orbRect)
-        ..maskFilter = isDark
-            ? const MaskFilter.blur(BlurStyle.normal, 18)
-            : const MaskFilter.blur(BlurStyle.normal, 10),
-    );
-
-    // Inner bright core
-    canvas.drawCircle(
-      Offset(cx, cy),
-      orbR * 0.55,
-      Paint()
         ..shader = RadialGradient(
+          center: const Alignment(0.1, -0.2),
           colors: [
-            Colors.white.withValues(alpha: 0.35),
-            Colors.white.withValues(alpha: 0.08),
+            Colors.white.withValues(alpha: 0.06),
+            isDark
+                ? Colors.white.withValues(alpha: 0.02)
+                : Colors.white.withValues(alpha: 0.04),
             Colors.transparent,
           ],
           stops: const [0.0, 0.5, 1.0],
         ).createShader(
-            Rect.fromCircle(center: Offset(cx, cy), radius: orbR * 0.55)),
+            Rect.fromCircle(center: Offset(cx, cy), radius: orbR)),
     );
 
-    // ── Flowing ribbons (3 ribbons orbiting the orb) ──
-    for (var ribbon = 0; ribbon < 3; ribbon++) {
-      final ribbonPhase = progress * 2 * math.pi + ribbon * (2 * math.pi / 3);
-      final ribbonLen = math.pi * 1.1;
-      final ribbonR = orbR + 12 + ribbon * 6;
+    // Glass sphere border
+    canvas.drawCircle(
+      Offset(cx, cy),
+      orbR,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.20),
+            Colors.white.withValues(alpha: 0.06),
+            Colors.white.withValues(alpha: 0.15),
+          ],
+        ).createShader(
+            Rect.fromCircle(center: Offset(cx, cy), radius: orbR))
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
 
-      final rect = Rect.fromCircle(center: Offset(cx, cy), radius: ribbonR);
+    // ── Internal rotating light beams (elliptical petals) ──
+    canvas.save();
+    canvas.clipPath(
+      Path()..addOval(Rect.fromCircle(center: Offset(cx, cy), radius: orbR - 2)),
+    );
 
-      // Each ribbon has different color gradient
-      final ribbonStart = ribbonPhase % (2 * math.pi);
-      final ribbonSweep = math.max(0.01, ribbonLen);
+    for (var i = 0; i < _beamColors.length; i++) {
+      final beamAngle = progress * 2 * math.pi + i * (math.pi / _beamColors.length);
+      final beamW = orbR * 0.55;
+      final beamH = orbR * 0.18;
+      final beamAlpha = 0.55 + breath * 0.15;
 
-      final c1 = _colors[ribbon * 2];
-      final c2 = _colors[ribbon * 2 + 1];
+      canvas.save();
+      canvas.translate(cx, cy);
+      canvas.rotate(beamAngle);
 
-      canvas.drawArc(
-        rect,
-        ribbonStart,
-        ribbonSweep,
-        false,
+      // Beam glow (blurred)
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset.zero, width: beamW * 2, height: beamH * 2),
         Paint()
-          ..shader = SweepGradient(
-            startAngle: ribbonStart,
+          ..shader = RadialGradient(
             colors: [
-              c1.withValues(alpha: 0.0),
-              c1.withValues(alpha: 0.9),
-              c2.withValues(alpha: 0.9),
-              c2.withValues(alpha: 0.0),
+              _beamColors[i].withValues(alpha: beamAlpha * 0.7),
+              _beamColors[i].withValues(alpha: beamAlpha * 0.3),
+              _beamColors[i].withValues(alpha: 0.0),
             ],
-            stops: const [0.0, 0.3, 0.7, 1.0],
-          ).createShader(rect)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 5.0 - ribbon * 0.8
-          ..strokeCap = StrokeCap.round
-          ..maskFilter = isDark
-              ? MaskFilter.blur(BlurStyle.normal, 4.0 + ribbon.toDouble())
-              : null,
+            stops: const [0.0, 0.4, 1.0],
+          ).createShader(
+            Rect.fromCenter(center: Offset.zero, width: beamW * 2, height: beamH * 2),
+          )
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
       );
 
-      // Leading dot on each ribbon
-      final dotAngle = ribbonStart + ribbonSweep;
-      final dotPaint = Paint()
-        ..color = c2
-        ..style = PaintingStyle.fill;
-      if (isDark) {
-        dotPaint.maskFilter =
-            const MaskFilter.blur(BlurStyle.normal, 8);
-      }
-      canvas.drawCircle(
-        Offset(cx + ribbonR * math.cos(dotAngle),
-            cy + ribbonR * math.sin(dotAngle)),
-        4.5 - ribbon * 0.5,
-        dotPaint,
+      // Beam core (brighter, sharper)
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset.zero, width: beamW * 1.4, height: beamH * 1.0),
+        Paint()
+          ..shader = LinearGradient(
+            colors: [
+              _beamColors[i].withValues(alpha: 0.0),
+              _beamColors[i].withValues(alpha: beamAlpha),
+              _beamColors[i].withValues(alpha: beamAlpha),
+              _beamColors[i].withValues(alpha: 0.0),
+            ],
+            stops: const [0.0, 0.2, 0.8, 1.0],
+          ).createShader(
+            Rect.fromCenter(center: Offset.zero, width: beamW * 1.4, height: beamH * 1.0),
+          ),
       );
+
+      canvas.restore();
     }
 
-    // ── Orbiting sparkle particles ──
-    for (var p = 0; p < 6; p++) {
-      final orbitAngle =
-          progress * 2 * math.pi * (0.6 + p * 0.25) + p * math.pi / 3;
-      final orbitR = orbR + 28 + p * 4.0;
-      final twinkle =
-          (math.sin(progress * 6 * math.pi + p * 1.3) + 1) / 2;
-      final px = cx + orbitR * math.cos(orbitAngle);
-      final py = cy + orbitR * math.sin(orbitAngle);
+    canvas.restore();
 
-      final sparklePaint = Paint()
-        ..color = _colors[p % _colors.length]
-            .withValues(alpha: 0.3 + twinkle * 0.6)
-        ..style = PaintingStyle.fill;
-      if (isDark) {
-        sparklePaint.maskFilter =
-            MaskFilter.blur(BlurStyle.normal, 3 + twinkle * 4);
-      }
-      canvas.drawCircle(
-        Offset(px, py),
-        2.0 + twinkle * 2.5,
-        sparklePaint,
-      );
-    }
+    // ── Bright white center core ──
+    final corePulse = 0.5 + breath * 0.2;
+    canvas.drawCircle(
+      Offset(cx, cy),
+      orbR * 0.18 * corePulse + orbR * 0.08,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.95),
+            Colors.white.withValues(alpha: 0.5),
+            Colors.white.withValues(alpha: 0.0),
+          ],
+          stops: const [0.0, 0.35, 1.0],
+        ).createShader(
+          Rect.fromCircle(
+            center: Offset(cx, cy),
+            radius: orbR * 0.25,
+          ),
+        ),
+    );
+
+    // ── Top-left glass highlight ──
+    final hlCenter = Offset(cx - orbR * 0.25, cy - orbR * 0.3);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: hlCenter,
+        width: orbR * 0.5,
+        height: orbR * 0.25,
+      ),
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.18),
+            Colors.white.withValues(alpha: 0.0),
+          ],
+        ).createShader(
+          Rect.fromCenter(
+            center: hlCenter,
+            width: orbR * 0.5,
+            height: orbR * 0.25,
+          ),
+        )
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
   }
 
   @override

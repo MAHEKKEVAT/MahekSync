@@ -19,6 +19,7 @@ import '../modules/my_contacts/bindings/my_contacts_binding.dart';
 import '../modules/generate_bill/bindings/generate_bill_binding.dart';
 import '../modules/generate_bill/views/generate_bill_create_view.dart';
 import '../modules/generate_bill/views/generate_bill_preview_view.dart';
+import '../modules/image_to_text/bindings/image_to_text_binding.dart';
 import '../modules/my_devices/bindings/my_devices_binding.dart';
 import '../modules/my_purchases/bindings/my_purchases_binding.dart';
 import '../modules/my_purchases_details/bindings/my_purchases_details_binding.dart';
@@ -147,6 +148,8 @@ class AppPages {
         screenBinding: MyContactsBinding()),
     _dashboardPage(_Paths.GENERATE_BILL,
         screenBinding: GenerateBillBinding()),
+    _dashboardPage(_Paths.IMAGE_TO_TEXT,
+        screenBinding: ImageToTextBinding()),
 
     GetPage(
       name: _Paths.CATEGORIES,
