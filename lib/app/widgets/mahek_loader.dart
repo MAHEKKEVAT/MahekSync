@@ -100,44 +100,6 @@ class _MahekLoaderState extends State<MahekLoader>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (widget.showBranding) ...[
-              ScaleTransition(
-                scale: CurvedAnimation(
-                  parent: _brandingScale,
-                  curve: Curves.elasticOut,
-                ),
-                child: ShaderMask(
-                  blendMode: BlendMode.srcIn,
-                  shaderCallback: (bounds) => const LinearGradient(
-                    colors: [
-                      Color(0xFF06B6D4),
-                      Color(0xFF8B5CF6),
-                      Color(0xFFEC4899),
-                    ],
-                  ).createShader(
-                      Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
-                  child: const Text(
-                    'MahekSync',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 2.0,
-                    ),
-                  ),
-                ),
-              ),
-              spaceH(height: 28),
-            ],
-            if (widget.customWidget != null)
-              widget.customWidget!
-            else
-              SizedBox(
-                height: widget.size,
-                width: widget.size,
-                child: _buildStyle(isDark),
-              ),
-            spaceH(height: 28),
             TextCustom(
               title: widget.message.tr,
               fontSize: widget.textSize,
@@ -146,6 +108,15 @@ class _MahekLoaderState extends State<MahekLoader>
                   ? AppThemeData.textNeonPurple.withValues(alpha: 0.9)
                   : AppThemeData.grey7,
             ),
+            spaceH(height: 28),
+            if (widget.customWidget != null)
+              widget.customWidget!
+            else
+              SizedBox(
+                height: widget.size,
+                width: widget.size,
+                child: _buildStyle(isDark),
+              ),
           ],
         ),
       ),

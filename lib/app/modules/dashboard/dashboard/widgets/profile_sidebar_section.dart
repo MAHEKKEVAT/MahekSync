@@ -146,7 +146,7 @@ class _QuickActionsGrid extends StatelessWidget {
         icon: SolarIconsBold.camera,
         label: 'Scan Document',
         color: AppThemeData.neonTeal,
-        route: Routes.VAULT,
+        route: Routes.AEGIS,
       ),
       _GridAction(
         icon: SolarIconsBold.user,
@@ -158,7 +158,7 @@ class _QuickActionsGrid extends StatelessWidget {
         icon: SolarIconsBold.bolt,
         label: 'Voice Note',
         color: AppThemeData.neonLavender,
-        route: Routes.VAULT,
+        route: Routes.AEGIS,
       ),
     ];
 

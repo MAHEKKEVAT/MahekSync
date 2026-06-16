@@ -27,10 +27,8 @@ import 'package:maheksync/app/modules/subscription/views/subscription_view.dart'
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/modules/settings/views/settings_view.dart';
 import 'package:maheksync/app/modules/settings/controllers/settings_controller.dart';
-import 'package:maheksync/app/modules/sentinel/controllers/sentinel_controller.dart';
-import 'package:maheksync/app/modules/sentinel/views/sentinel_view.dart';
-import 'package:maheksync/app/modules/vault/controllers/vault_controller.dart';
-import 'package:maheksync/app/modules/vault/views/vault_view.dart';
+import 'package:maheksync/app/modules/aegis/controllers/aegis_controller.dart';
+import 'package:maheksync/app/modules/aegis/views/aegis_view.dart';
 import 'package:solar_icons/solar_icons.dart';
 
 import '../../../utils/app_colors.dart';
@@ -171,8 +169,7 @@ class DashboardController extends GetxController {
     NavigationSection(
       title: 'SECURITY'.tr,
       items: [
-        NavigationItem(title: 'Sentinel'.tr, icon: SolarIconsOutline.shieldKeyhole, selectedIcon: SolarIconsBold.shieldKeyhole, route: Routes.SENTINEL),
-        NavigationItem(title: 'Vault'.tr, icon: SolarIconsOutline.lockKeyhole, selectedIcon: SolarIconsBold.lockKeyhole, route: Routes.VAULT),
+        NavigationItem(title: 'Aegis'.tr, icon: SolarIconsOutline.shieldKeyhole, selectedIcon: SolarIconsBold.shieldKeyhole, route: Routes.AEGIS),
       ],
     ),
   ];
@@ -398,18 +395,12 @@ class DashboardController extends GetxController {
           Get.put(SmartMapDashboardController());
         }
         return const SmartMapDashboardView();
-      case Routes.SENTINEL:
-        if (!Get.isRegistered<SentinelController>()) {
-          Get.put(SentinelController());
-          print('📦 Registered SentinelController');
+      case Routes.AEGIS:
+        if (!Get.isRegistered<AegisController>()) {
+          Get.put(AegisController());
+          print('📦 Registered AegisController');
         }
-        return const SentinelView();
-      case Routes.VAULT:
-        if (!Get.isRegistered<VaultController>()) {
-          Get.put(VaultController());
-          print('📦 Registered VaultController');
-        }
-        return const VaultView();
+        return const AegisView();
 
       case '/my-contacts':
         if (!Get.isRegistered<MyContactsController>()) {

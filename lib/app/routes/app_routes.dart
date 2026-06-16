@@ -32,9 +32,8 @@ abstract class Routes {
   static const DUES_TRACKER = _Paths.DUES_TRACKER;
   static const PERSONAL_TASKS = _Paths.PERSONAL_TASKS;
   static const PERSONAL_TASK_CRUD = _Paths.PERSONAL_TASK_CRUD;
-  static const SENTINEL = _Paths.SENTINEL;
-  static const VAULT = _Paths.VAULT;
-  static const VAULT_CRUD = _Paths.VAULT_CRUD;
+  static const AEGIS = _Paths.AEGIS;
+  static const AEGIS_FORM = _Paths.AEGIS_FORM;
   static const SMART_MAP_DASHBOARD = _Paths.SMART_MAP_DASHBOARD;
   static const MY_CONTACTS = _Paths.MY_CONTACTS;
   static const GENERATE_BILL = _Paths.GENERATE_BILL;
@@ -74,9 +73,8 @@ abstract class _Paths {
   static const DUES_TRACKER = '/dues-tracker';
   static const PERSONAL_TASKS = '/dashboard/personal-tasks';
   static const PERSONAL_TASK_CRUD = '/personal-task-crud';
-  static const SENTINEL = '/dashboard/sentinel';
-  static const VAULT = '/dashboard/vault';
-  static const VAULT_CRUD = '/vault-crud';
+  static const AEGIS = '/dashboard/aegis';
+  static const AEGIS_FORM = '/aegis-form';
   static const SMART_MAP_DASHBOARD = '/smart-map-dashboard';
   static const MY_CONTACTS = '/my-contacts';
   static const GENERATE_BILL = '/generate-bill';

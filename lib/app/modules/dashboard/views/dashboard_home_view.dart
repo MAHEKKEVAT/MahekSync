@@ -102,7 +102,7 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
                         isDark: isDark,
                         onDevicesTap: () => _navigateTo(Routes.MY_DEVICES),
                         onSubscriptionsTap: () => _navigateTo(Routes.SUBSCRIPTION),
-                        onVaultTap: () => _navigateTo(Routes.VAULT),
+                        onVaultTap: () => _navigateTo(Routes.AEGIS),
                         onContactsTap: () => _navigateTo(Routes.MY_CONTACTS),
                         onViewAll: () => _navigateTo(Routes.SETTINGS),
                       ),
@@ -129,7 +129,7 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
                       child: SecurityStatusCard(
                         controller: c,
                         isDark: isDark,
-                        onTap: () => _navigateTo(Routes.SENTINEL),
+                        onTap: () => _navigateTo(Routes.AEGIS),
                       ),
                     ),
                   ],
@@ -212,7 +212,7 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
             isDark: isDark,
             onDevicesTap: () => _navigateTo(Routes.MY_DEVICES),
             onSubscriptionsTap: () => _navigateTo(Routes.SUBSCRIPTION),
-            onVaultTap: () => _navigateTo(Routes.VAULT),
+            onVaultTap: () => _navigateTo(Routes.AEGIS),
             onContactsTap: () => _navigateTo(Routes.MY_CONTACTS),
             onViewAll: () => _navigateTo(Routes.SETTINGS),
           ),
@@ -229,7 +229,7 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
           SecurityStatusCard(
             controller: c,
             isDark: isDark,
-            onTap: () => _navigateTo(Routes.SENTINEL),
+            onTap: () => _navigateTo(Routes.AEGIS),
           ),
           spaceH(height: _spacing),
 
@@ -308,7 +308,7 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
                 icon: Icons.document_scanner_rounded,
                 label: 'Scan Document',
                 color: AppThemeData.neonTeal,
-                onTap: () => _navigateTo(Routes.VAULT),
+                onTap: () => _navigateTo(Routes.AEGIS),
                 isDark: isDark,
               ),
               _QuickCircleAction(
@@ -322,7 +322,7 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
                 icon: Icons.mic_rounded,
                 label: 'Voice Note',
                 color: AppThemeData.neonLavender,
-                onTap: () => _navigateTo(Routes.VAULT),
+                onTap: () => _navigateTo(Routes.AEGIS),
                 isDark: isDark,
               ),
             ],

@@ -357,7 +357,20 @@ class GenerateBillPreviewView extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: 90,
+                width: 80,
+                child: Text(
+                  'Price',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    fontFamily: FontFamily.semiBold,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 80,
                 child: Text(
                   'Total',
                   textAlign: TextAlign.right,
@@ -463,31 +476,43 @@ class GenerateBillPreviewView extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(
-                  width: 50,
-                  child: Text(
-                    '${item.qty ?? 0}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppThemeData.grey7,
-                      fontFamily: FontFamily.regular,
-                    ),
+              SizedBox(
+                width: 50,
+                child: Text(
+                  '${item.qty ?? 0}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppThemeData.grey7,
+                    fontFamily: FontFamily.regular,
                   ),
                 ),
-                SizedBox(
-                  width: 90,
-                  child: Text(
-                    '₹${(item.total ?? 0).toStringAsFixed(2)}',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppThemeData.grey10,
-                      fontFamily: FontFamily.semiBold,
-                    ),
+              ),
+              SizedBox(
+                width: 80,
+                child: Text(
+                  '₹${(item.unitPrice ?? 0).toStringAsFixed(2)}',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppThemeData.grey7,
+                    fontFamily: FontFamily.regular,
                   ),
                 ),
+              ),
+              SizedBox(
+                width: 80,
+                child: Text(
+                  '₹${(item.total ?? 0).toStringAsFixed(2)}',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppThemeData.grey10,
+                    fontFamily: FontFamily.semiBold,
+                  ),
+                ),
+              ),
               ],
             ),
           );

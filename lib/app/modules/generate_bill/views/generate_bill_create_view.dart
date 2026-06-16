@@ -29,7 +29,11 @@ class _GenerateBillCreateViewState extends State<GenerateBillCreateView> {
     controller = Get.find<GenerateBillController>();
     final bill = Get.arguments;
     if (bill != null && bill is BillModel) {
-      controller.loadBillForEdit(bill);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          controller.loadBillForEdit(bill);
+        }
+      });
     }
   }
 
@@ -102,12 +106,12 @@ class _GenerateBillCreateViewState extends State<GenerateBillCreateView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextCustom(
-                  title: controller.isEditMode.value ? 'Edit Bill' : 'New Bill',
-                  fontSize: 18,
-                  fontFamily: FontFamily.bold,
-                  color: isDark ? AppThemeData.primaryWhite : AppThemeData.grey10,
-                ),
+                Obx(() => TextCustom(
+                      title: controller.isEditMode.value ? 'Edit Bill' : 'New Bill',
+                      fontSize: 18,
+                      fontFamily: FontFamily.bold,
+                      color: isDark ? AppThemeData.primaryWhite : AppThemeData.grey10,
+                    )),
                 spaceH(height: 2),
                 Obx(() => TextCustom(
                       title: 'Invoice #${controller.invoiceNumber.value}',
@@ -527,7 +531,6 @@ class _GenerateBillCreateViewState extends State<GenerateBillCreateView> {
               GestureDetector(
                 onTap: () {
                   controller.removeItem(index);
-                  setState(() {});
                 },
                 child: Container(
                   padding: const EdgeInsets.all(6),
@@ -551,7 +554,7 @@ class _GenerateBillCreateViewState extends State<GenerateBillCreateView> {
 
   Widget _buildPaymentMethodDropdown(
       int index, bool isDark, BillItemModel item) {
-    return Obx(() => Container(
+    return Container(
           height: 36,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
@@ -645,7 +648,7 @@ class _GenerateBillCreateViewState extends State<GenerateBillCreateView> {
               },
             ),
           ),
-        ));
+        );
   }
 
   Widget _buildAddItemButton(bool isDark) {

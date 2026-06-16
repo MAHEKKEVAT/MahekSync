@@ -9,15 +9,15 @@ class ShowToastDialog {
     ToastService().closeLoader();
   }
 
-  static void showSuccess(String message, {ToastPosition position = ToastPosition.top}) {
-    ToastService().showSuccessToast(message, position: position);
+  static void showSuccess(String message, {String? subtitle, ToastPosition position = ToastPosition.top}) {
+    ToastService().showSuccessToast(message, subtitle: subtitle, position: position);
   }
 
-  static void showError(String message, {ToastPosition position = ToastPosition.top}) {
-    ToastService().showErrorToast(message, position: position);
+  static void showError(String message, {String? subtitle, ToastPosition position = ToastPosition.top}) {
+    ToastService().showErrorToast(message, subtitle: subtitle, position: position);
   }
 
-  static void showWarning(String message, {ToastPosition position = ToastPosition.top}) {
-    ToastService().showWarningToast(message, position: position);
+  static void showWarning(String message, {String? subtitle, ToastPosition position = ToastPosition.top}) {
+    ToastService().showWarningToast(message, subtitle: subtitle, position: position);
   }
 }

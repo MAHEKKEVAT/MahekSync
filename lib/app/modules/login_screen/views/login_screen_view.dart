@@ -768,9 +768,19 @@ class _LoginScreenViewState extends State<LoginScreenView>
                   child: loading
                       ? const MahekLoader(size: 22, showBranding: false)
                       : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    const TextCustom(title: 'Authenticate', fontSize: 15, fontFamily: FontFamily.semiBold, color: Colors.white),
+                    Text(
+                      'Authenticate',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontFamily: FontFamily.semiBold,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1)),
+                        ],
+                      ),
+                    ),
                     spaceW(width: 8),
-                    const Icon(SolarIconsOutline.arrowRight, color: Colors.white, size: 18),
+                    const Icon(SolarIconsOutline.arrowRight, color: Colors.white, size: 18, shadows: [Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1))]),
                   ]),
                 ),
               ],

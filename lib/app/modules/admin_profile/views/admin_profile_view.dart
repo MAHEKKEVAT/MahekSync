@@ -29,30 +29,26 @@ class AdminProfileView extends StatelessWidget {
 
     return Stack(
       children: [
-        Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: isDesktop ? 920 : double.infinity,
-            ),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: ResponsiveWidget.isMobile(context) ? 16 : 32,
-                vertical: 28,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(isDark),
-                  spaceH(height: 28),
-                  if (isDesktop)
-                    _buildDesktopLayout(context, controller, isDark)
-                  else
-                    _buildMobileLayout(context, controller, isDark),
-                  spaceH(height: 28),
-                  _buildSaveButton(controller, isDark),
-                ],
-              ),
-            ),
+        SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            horizontal: ResponsiveWidget.isMobile(context) ? 16 : 40,
+            vertical: 28,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(isDark),
+              spaceH(height: 28),
+              if (isDesktop)
+                _buildDesktopLayout(context, controller, isDark)
+              else
+                _buildMobileLayout(context, controller, isDark),
+              spaceH(height: 28),
+              _buildSaveButton(controller, isDark),
+              spaceH(height: 16),
+              _buildSecurityFooter(isDark),
+              spaceH(height: 20),
+            ],
           ),
         ),
         Obx(() => _buildLoadingOverlay(controller)),
@@ -143,7 +139,7 @@ class AdminProfileView extends StatelessWidget {
       decoration: _cardDecoration(isDark),
       child: Column(
         children: [
-          _buildAvatarCircle(context, controller, isDark, size: 130),
+          _buildAvatarCircle(context, controller, isDark, size: 150),
           spaceH(height: 20),
           ListenableBuilder(
             listenable: controller.fullNameController,
@@ -364,31 +360,38 @@ class AdminProfileView extends StatelessWidget {
         onTap: controller.pickAndCropImage,
         child: Container(
           width: fullWidth ? double.infinity : null,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: AppThemeData.primary50.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(14),
+            color: isDark
+                ? AppThemeData.primaryBlack
+                : AppThemeData.primaryWhite,
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppThemeData.primary50.withValues(alpha: 0.3),
+              color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
               width: 1,
             ),
           ),
-          child: Row(
-            mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
             children: [
               Icon(
-                Icons.camera_alt_rounded,
-                size: 17,
+                Icons.cloud_upload_rounded,
+                size: 24,
                 color: isDark ? AppThemeData.textNeonPurple : AppThemeData.primary50,
               ),
-              spaceW(width: 8),
-              Obx(() => TextCustom(
-                    title: controller.hasImage ? 'Change Photo' : 'Add Photo',
-                    fontSize: 13,
-                    fontFamily: FontFamily.semiBold,
-                    color: isDark ? AppThemeData.textNeonPurple : AppThemeData.primary50,
-                  )),
+              spaceH(height: 6),
+              TextCustom(
+                title: controller.hasImage ? 'Change Photo' : 'Click to change photo',
+                fontSize: 13,
+                fontFamily: FontFamily.semiBold,
+                color: isDark ? AppThemeData.textNeonPurple : AppThemeData.primary50,
+              ),
+              spaceH(height: 2),
+              TextCustom(
+                title: 'JPG, PNG or WEBP. Max size 5MB',
+                fontSize: 10,
+                fontFamily: FontFamily.regular,
+                color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+              ),
             ],
           ),
         ),
@@ -593,50 +596,81 @@ class AdminProfileView extends StatelessWidget {
 
   // ─── Save Button ─────────────────────────────────────────────
   Widget _buildSaveButton(AdminProfileController controller, bool isDark) {
-    return Obx(
-      () => Container(
-        width: double.infinity,
-        height: 52,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          gradient: LinearGradient(
-            colors: [AppThemeData.primary50, AppThemeData.primary4],
+    return Obx(() => MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: controller.isLoading ? () {} : controller.saveProfileChanges,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: double.infinity,
+          height: 54,
+          decoration: BoxDecoration(
+            gradient: controller.isLoading
+                ? LinearGradient(
+                    colors: [
+                      AppThemeData.primary50.withValues(alpha: 0.5),
+                      AppThemeData.primary4.withValues(alpha: 0.5),
+                    ],
+                  )
+                : const LinearGradient(
+                    colors: [
+                      Color(0xFF7C3AED),
+                      Color(0xFF9333EA),
+                      Color(0xFFA855F7),
+                      Color(0xFFC084FC),
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppThemeData.primary50.withValues(alpha: 0.35),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: AppThemeData.primary50.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ElevatedButton(
-          onPressed: controller.isLoading ? null : controller.saveProfileChanges,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            disabledBackgroundColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
+          child: Center(
+            child: controller.isLoading
+                ? const MahekLoader(size: 22, showBranding: false)
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.check_rounded, color: Colors.white, size: 20),
+                      spaceW(width: 8),
+                      const TextCustom(
+                        title: 'Save Changes',
+                        fontSize: 16,
+                        fontFamily: FontFamily.semiBold,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
           ),
-          child: controller.isLoading
-              ? const MahekLoader(size: 22, showBranding: false)
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const TextCustom(
-                      title: 'Save Changes',
-                      fontSize: 15,
-                      fontFamily: FontFamily.semiBold,
-                      color: Colors.white,
-                    ),
-                    spaceW(width: 8),
-                    const Icon(Icons.check_rounded, color: Colors.white, size: 19),
-                  ],
-                ),
         ),
       ),
+    ));
+  }
+
+  // ─── Security Footer ─────────────────────────────────────────
+  Widget _buildSecurityFooter(bool isDark) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.shield_rounded,
+          size: 16,
+          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+        ),
+        spaceW(width: 8),
+        TextCustom(
+          title: 'Your information is encrypted and secure',
+          fontSize: 12,
+          fontFamily: FontFamily.regular,
+          color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+        ),
+      ],
     );
   }
 

@@ -13,52 +13,39 @@ import '../modules/categories/views/categories_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/dues_tracker/bindings/dues_tracker_binding.dart';
-import '../modules/dues_tracker/views/dues_tracker_view.dart';
 import '../modules/login_screen/bindings/login_screen_binding.dart';
 import '../modules/login_screen/views/login_screen_view.dart';
 import '../modules/my_contacts/bindings/my_contacts_binding.dart';
-import '../modules/my_contacts/views/my_contacts_view.dart';
 import '../modules/generate_bill/bindings/generate_bill_binding.dart';
-import '../modules/generate_bill/views/generate_bill_list_view.dart';
 import '../modules/generate_bill/views/generate_bill_create_view.dart';
 import '../modules/generate_bill/views/generate_bill_preview_view.dart';
 import '../modules/my_devices/bindings/my_devices_binding.dart';
 import '../modules/my_purchases/bindings/my_purchases_binding.dart';
-import '../modules/my_purchases/views/my_purchases_view.dart';
 import '../modules/my_purchases_details/bindings/my_purchases_details_binding.dart';
 import '../modules/my_purchases_details/views/my_purchases_details_view.dart';
 import '../modules/payement_method/bindings/payement_method_binding.dart';
-import '../modules/payement_method/views/payement_method_view.dart';
 import '../modules/personal_task_crud/bindings/personal_task_crud_binding.dart';
 import '../modules/personal_task_crud/views/personal_task_crud_view.dart';
 import '../modules/personal_tasks/bindings/personal_tasks_binding.dart';
-import '../modules/personal_tasks/views/personal_tasks_view.dart';
 import '../modules/policy_settings/bindings/policy_settings_binding.dart';
 import '../modules/policy_settings/views/policy_settings_view.dart';
 import '../modules/reminder/bindings/reminder_binding.dart';
-import '../modules/reminder/views/reminder_view.dart';
 import '../modules/reminder_crud/bindings/reminder_crud_binding.dart';
 import '../modules/reminder_crud/views/reminder_crud_view.dart';
-import '../modules/sentinel/bindings/sentinel_binding.dart';
-import '../modules/sentinel/views/sentinel_view.dart';
+import '../modules/aegis/bindings/aegis_binding.dart';
+import '../modules/aegis/views/aegis_item_form_view.dart';
 import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/sign_up/bindings/sign_up_binding.dart';
 import '../modules/sign_up/views/sign_up_view.dart';
 import '../modules/smart_map_dashboard/bindings/smart_map_dashboard_binding.dart';
-import '../modules/smart_map_dashboard/views/smart_map_dashboard_view.dart';
 import '../modules/splash_screen/bindings/splash_screen_binding.dart';
 import '../modules/splash_screen/views/splash_screen_view.dart';
 import '../modules/subscription/bindings/subscription_binding.dart';
-import '../modules/subscription/views/subscription_view.dart';
 import '../modules/subscription_crud/bindings/subscription_crud_binding.dart';
 import '../modules/subscription_crud/views/subscription_crud_view.dart';
 import '../modules/subscription_details/bindings/subscription_details_binding.dart';
 import '../modules/subscription_details/views/subscription_details_view.dart';
-import '../modules/vault/bindings/vault_binding.dart';
-import '../modules/vault/views/vault_view.dart';
-import '../modules/vault_crud/bindings/vault_crud_binding.dart';
-import '../modules/vault_crud/views/vault_crud_view.dart';
 import '../modules/view_devices/bindings/view_devices_binding.dart';
 import '../modules/view_devices/views/view_devices_view.dart';
 import '../utils/auth_middleware.dart';
@@ -153,8 +140,7 @@ class AppPages {
     _dashboardPage(_Paths.REMINDER, screenBinding: ReminderBinding()),
     _dashboardPage(_Paths.PERSONAL_TASKS,
         screenBinding: PersonalTasksBinding()),
-    _dashboardPage(_Paths.SENTINEL, screenBinding: SentinelBinding()),
-    _dashboardPage(_Paths.VAULT, screenBinding: VaultBinding()),
+    _dashboardPage(_Paths.AEGIS, screenBinding: AegisBinding()),
     _dashboardPage(_Paths.SMART_MAP_DASHBOARD,
         screenBinding: SmartMapDashboardBinding()),
     _dashboardPage(_Paths.MY_CONTACTS,
@@ -199,9 +185,9 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
     GetPage(
-      name: _Paths.VAULT_CRUD,
-      page: () => const VaultCrudView(),
-      binding: VaultCrudBinding(),
+      name: _Paths.AEGIS_FORM,
+      page: () => const AegisItemFormView(),
+      binding: AegisBinding(),
     ),
     GetPage(
       name: _Paths.GENERATE_BILL_CREATE,

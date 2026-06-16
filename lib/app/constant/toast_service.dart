@@ -71,31 +71,39 @@ class ToastService {
 
   // ─── Toasts ──────────────────────────────────────────────────
 
-  void showSuccessToast(String message, {ToastPosition position = ToastPosition.top}) {
+  void showSuccessToast(String message, {String? subtitle, ToastPosition position = ToastPosition.top}) {
     _showToast(
-      message,
+      title: message,
+      subtitle: subtitle,
       accentColor: const Color(0xFF34C759),
       icon: Icons.check_circle_rounded,
     );
   }
 
-  void showErrorToast(String message, {ToastPosition position = ToastPosition.top}) {
+  void showErrorToast(String message, {String? subtitle, ToastPosition position = ToastPosition.top}) {
     _showToast(
-      message,
+      title: message,
+      subtitle: subtitle,
       accentColor: const Color(0xFFFF3B30),
       icon: Icons.cancel_rounded,
     );
   }
 
-  void showWarningToast(String message, {ToastPosition position = ToastPosition.top}) {
+  void showWarningToast(String message, {String? subtitle, ToastPosition position = ToastPosition.top}) {
     _showToast(
-      message,
+      title: message,
+      subtitle: subtitle,
       accentColor: const Color(0xFFFF9500),
       icon: Icons.warning_rounded,
     );
   }
 
-  void _showToast(String message, {required Color accentColor, required IconData icon}) {
+  void _showToast({
+    required String title,
+    String? subtitle,
+    required Color accentColor,
+    required IconData icon,
+  }) {
     final oldToast = _currentToast;
     _currentToast = null;
 
@@ -118,7 +126,8 @@ class ToastService {
         late final OverlayEntry entry;
         entry = OverlayEntry(
           builder: (_) => _GlassmorphicToast(
-            message: message,
+            title: title,
+            subtitle: subtitle,
             accentColor: accentColor,
             icon: icon,
             isDark: isDark,
@@ -143,18 +152,20 @@ class ToastService {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// GLASSMORPHIC TOAST — iOS 26/27 style, bottom-right
+// GLASSMORPHIC TOAST — Reference match, bottom-right
 // ═══════════════════════════════════════════════════════════════
 
 class _GlassmorphicToast extends StatefulWidget {
-  final String message;
+  final String title;
+  final String? subtitle;
   final Color accentColor;
   final IconData icon;
   final bool isDark;
   final VoidCallback onDismiss;
 
   const _GlassmorphicToast({
-    required this.message,
+    required this.title,
+    this.subtitle,
     required this.accentColor,
     required this.icon,
     required this.isDark,
@@ -218,6 +229,7 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final isDark = widget.isDark;
 
     return Positioned(
       bottom: bottomPadding + 20,
@@ -229,86 +241,111 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
           child: GestureDetector(
             onTap: _dismiss,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(24),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: widget.isDark
-                          ? Colors.white.withValues(alpha: 0.92)
-                          : const Color(0xFF1C1C1E).withValues(alpha: 0.90),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: widget.isDark
-                            ? Colors.black.withValues(alpha: 0.06)
-                            : Colors.white.withValues(alpha: 0.1),
-                        width: 0.5,
+                filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  padding: const EdgeInsets.fromLTRB(20, 18, 16, 18),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.93)
+                        : const Color(0xFF1A1A1E).withValues(alpha: 0.92),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.06)
+                          : Colors.white.withValues(alpha: 0.08),
+                      width: 0.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: widget.accentColor.withValues(alpha: 0.12),
+                        blurRadius: 28,
+                        offset: const Offset(0, 10),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: widget.accentColor.withValues(alpha: 0.15),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: widget.isDark ? 0.06 : 0.3),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: widget.accentColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Icon(widget.icon, color: widget.accentColor, size: 26),
-                        ),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: Text(
-                            widget.message,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: widget.isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                              decoration: TextDecoration.none,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        GestureDetector(
-                          onTap: _dismiss,
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: widget.isDark
-                                  ? Colors.black.withValues(alpha: 0.06)
-                                  : Colors.white.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              size: 13,
-                              color: widget.isDark
-                                  ? Colors.black.withValues(alpha: 0.35)
-                                  : Colors.white.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.05 : 0.35),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Icon container ──────────────────────
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: widget.accentColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(widget.icon, color: widget.accentColor, size: 30),
+                      ),
+                      const SizedBox(width: 16),
+                      // ── Title + subtitle ────────────────────
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              widget.title,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                height: 1.2,
+                                color: isDark ? const Color(0xFF1A1A1E) : Colors.white,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                            if (widget.subtitle != null && widget.subtitle!.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                widget.subtitle!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.3,
+                                  color: isDark
+                                      ? const Color(0xFF1A1A1E).withValues(alpha: 0.55)
+                                      : Colors.white.withValues(alpha: 0.55),
+                                  decoration: TextDecoration.none,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // ── Close button ────────────────────────
+                      GestureDetector(
+                        onTap: _dismiss,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.06)
+                                : Colors.white.withValues(alpha: 0.08),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.close_rounded,
+                            size: 16,
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.4)
+                                : Colors.white.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

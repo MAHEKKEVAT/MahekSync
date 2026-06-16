@@ -201,6 +201,7 @@ class GenerateBillController extends GetxController {
       itemPriceControllers.add(TextEditingController(text: '${item.unitPrice ?? 0}'));
     }
     _calculateTotals();
+    updateLiveGrandTotal();
   }
 
   void resetForm() {
@@ -679,6 +680,13 @@ class GenerateBillController extends GetxController {
                 ),
               ),
               pw.SizedBox(
+                width: 60,
+                child: pw.Align(
+                  alignment: pw.Alignment.centerRight,
+                  child: pw.Text('Price', style: pw.TextStyle(font: fontBold, fontSize: 9, color: PdfColors.white)),
+                ),
+              ),
+              pw.SizedBox(
                 width: 80,
                 child: pw.Align(
                   alignment: pw.Alignment.centerRight,
@@ -717,6 +725,14 @@ class GenerateBillController extends GetxController {
                   child: pw.Align(
                     alignment: pw.Alignment.center,
                     child: pw.Text('${item.qty ?? 0}', style: pw.TextStyle(font: font, fontSize: 9, color: _dark)),
+                  ),
+                ),
+                pw.SizedBox(
+                  width: 60,
+                  child: pw.Align(
+                    alignment: pw.Alignment.centerRight,
+                    child: pw.Text('\u20B9${(item.unitPrice ?? 0).toStringAsFixed(2)}',
+                        style: pw.TextStyle(font: font, fontSize: 9, color: _grey)),
                   ),
                 ),
                 pw.SizedBox(
