@@ -642,9 +642,31 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
                         ),
                       ),
                     ),
-                    InkWell(
-                      onTap: () => widget.controller.goToProfile(),
-                      borderRadius: BorderRadius.circular(12),
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'edit_profile') {
+                          widget.controller.goToProfile();
+                        } else if (value == 'logout') {
+                          Get.dialog(
+                            LogoutDialog(
+                              onLogout: () async {
+                                await FirebaseAuth.instance.signOut();
+                                Get.offAllNamed(Routes.LOGIN_SCREEN);
+                                ShowToastDialog.showSuccess("Logged out successfully.".tr);
+                              },
+                            ),
+                          );
+                        }
+                      },
+                      offset: const Offset(0, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      color: isDark
+                          ? const Color(0xFF1E1E2E)
+                          : Colors.white,
+                      elevation: 8,
+                      padding: EdgeInsets.zero,
                       child: Row(
                         children: [
                           Container(
@@ -689,9 +711,57 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
+                            spaceW(width: 4),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Colors.white.withValues(alpha: 0.7),
+                              size: 18,
+                            ),
                           ],
                         ],
                       ),
+                      itemBuilder: (context) => [
+                        PopupMenuItem<String>(
+                          value: 'edit_profile',
+                          height: 44,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.person_outline_rounded,
+                                size: 18,
+                                color: isDark ? AppThemeData.grey2 : AppThemeData.grey9,
+                              ),
+                              spaceW(width: 10),
+                              TextCustom(
+                                title: 'Edit Profile',
+                                fontSize: 14,
+                                fontFamily: FontFamily.medium,
+                                color: isDark ? AppThemeData.grey2 : AppThemeData.grey9,
+                              ),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'logout',
+                          height: 44,
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.logout_rounded,
+                                size: 18,
+                                color: AppThemeData.danger400,
+                              ),
+                              spaceW(width: 10),
+                              const TextCustom(
+                                title: 'Log Out',
+                                fontSize: 14,
+                                fontFamily: FontFamily.medium,
+                                color: AppThemeData.danger400,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

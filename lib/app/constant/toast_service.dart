@@ -240,13 +240,12 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
           opacity: _fadeAnim,
           child: GestureDetector(
             onTap: _dismiss,
-            child: ClipRRect(
+              child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 480),
-                  padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.93)
@@ -271,79 +270,105 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                       ),
                     ],
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ── Icon container ──────────────────────
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: widget.accentColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(10),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // ── Left accent bar ───────────────────
+                        Container(
+                          width: 3.5,
+                          decoration: BoxDecoration(
+                            color: widget.accentColor,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              bottomLeft: Radius.circular(16),
+                            ),
+                          ),
                         ),
-                        child: Icon(widget.icon, color: widget.accentColor, size: 20),
-                      ),
-                      const SizedBox(width: 10),
-                      // ── Title + subtitle ────────────────────
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              widget.title,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                height: 1.2,
-                                color: isDark ? const Color(0xFF1A1A1E) : Colors.white,
-                                decoration: TextDecoration.none,
+                        // ── Icon container ──────────────────────
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: widget.accentColor.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(widget.icon, color: widget.accentColor, size: 18),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        // ── Title + subtitle ────────────────────
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  widget.title,
+                                  style: TextStyle(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.2,
+                                    color: isDark ? const Color(0xFF1A1A1E) : Colors.white,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
+                                if (widget.subtitle != null && widget.subtitle!.isNotEmpty) ...[
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    widget.subtitle!,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.3,
+                                      color: isDark
+                                          ? const Color(0xFF1A1A1E).withValues(alpha: 0.55)
+                                          : Colors.white.withValues(alpha: 0.55),
+                                      decoration: TextDecoration.none,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                        // ── Close button ────────────────────────
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                            child: GestureDetector(
+                              onTap: _dismiss,
+                              child: Container(
+                                width: 26,
+                                height: 26,
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.black.withValues(alpha: 0.06)
+                                      : Colors.white.withValues(alpha: 0.08),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 14,
+                                  color: isDark
+                                      ? Colors.black.withValues(alpha: 0.4)
+                                      : Colors.white.withValues(alpha: 0.5),
+                                ),
                               ),
                             ),
-                            if (widget.subtitle != null && widget.subtitle!.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                widget.subtitle!,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.3,
-                                  color: isDark
-                                      ? const Color(0xFF1A1A1E).withValues(alpha: 0.55)
-                                      : Colors.white.withValues(alpha: 0.55),
-                                  decoration: TextDecoration.none,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      // ── Close button ────────────────────────
-                      GestureDetector(
-                        onTap: _dismiss,
-                        child: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.black.withValues(alpha: 0.06)
-                                : Colors.white.withValues(alpha: 0.08),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.close_rounded,
-                            size: 16,
-                            color: isDark
-                                ? Colors.black.withValues(alpha: 0.4)
-                                : Colors.white.withValues(alpha: 0.5),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

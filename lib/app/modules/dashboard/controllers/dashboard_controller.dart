@@ -244,7 +244,7 @@ class DashboardController extends GetxController {
   void goToProfile() {
     if (selectedIndex.value == -1) return;
     selectedIndex.value = -1;
-    WebHistory.pushState(profileRoute); // ✅ Safe on all platforms
+    WebHistory.pushState(profileRoute); 
   }
 
   void changePage(int index) {

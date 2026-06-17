@@ -91,62 +91,66 @@ class DashboardHeroSection extends StatelessWidget {
               child: CustomPaint(painter: _GridPainter(isDark)),
             ),
 
-            // Stars
-            ...List.generate(20, (i) {
-              final rng = math.Random(i);
-              return Positioned(
-                left: rng.nextDouble() * 400 + 50,
-                top: rng.nextDouble() * 120 + 10,
+            // Stars — night only
+            if (hour >= 20 || hour < 6)
+              ...List.generate(20, (i) {
+                final rng = math.Random(i);
+                return Positioned(
+                  left: rng.nextDouble() * 400 + 50,
+                  top: rng.nextDouble() * 120 + 10,
+                  child: Container(
+                    width: rng.nextDouble() * 2 + 1,
+                    height: rng.nextDouble() * 2 + 1,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: rng.nextDouble() * 0.4 + 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                );
+              }),
+
+            // Moon crescent — night only
+            if (hour >= 20 || hour < 6)
+              Positioned(
+                right: 60,
+                top: 20,
+                child: CustomPaint(
+                  size: const Size(80, 80),
+                  painter: _MoonPainter(),
+                ),
+              ),
+
+            // Moon glow — night only
+            if (hour >= 20 || hour < 6)
+              Positioned(
+                right: 30,
+                top: -10,
                 child: Container(
-                  width: rng.nextDouble() * 2 + 1,
-                  height: rng.nextDouble() * 2 + 1,
+                  width: 140,
+                  height: 140,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: rng.nextDouble() * 0.4 + 0.2),
                     shape: BoxShape.circle,
-                  ),
-                ),
-              );
-            }),
-
-            // Moon crescent
-            Positioned(
-              right: 60,
-              top: 20,
-              child: CustomPaint(
-                size: const Size(80, 80),
-                painter: _MoonPainter(),
-              ),
-            ),
-
-            // Moon glow
-            Positioned(
-              right: 30,
-              top: -10,
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFFE8D5B7).withValues(alpha: 0.08),
-                      Colors.transparent,
-                    ],
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xFFE8D5B7).withValues(alpha: 0.08),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // Mountain silhouette
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: CustomPaint(
-                size: Size(MediaQuery.of(context).size.width, 80),
-                painter: _MountainPainter(),
+            // Mountain silhouette — night only
+            if (hour >= 20 || hour < 6)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: CustomPaint(
+                  size: Size(MediaQuery.of(context).size.width, 80),
+                  painter: _MountainPainter(),
+                ),
               ),
-            ),
 
             // Content
             Padding(
