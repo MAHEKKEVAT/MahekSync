@@ -35,8 +35,6 @@ class DashboardView extends GetView<DashboardController> {
     final isTablet = ResponsiveWidget.isTablet(context);
     final isDesktop = ResponsiveWidget.isDesktop(context);
 
-    controller.syncIndexFromRoute();
-
     return _DashboardViewBody(
       isDark: isDark,
       isMobile: isMobile,

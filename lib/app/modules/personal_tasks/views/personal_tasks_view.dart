@@ -7,8 +7,9 @@ import 'package:maheksync/app/utils/responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
-import '../../../models/personal_task_model.dart';
 import '../controllers/personal_tasks_controller.dart';
+import '../widgets/personal_task_card.dart';
+import '../widgets/personal_tasks_sidebar.dart';
 
 class PersonalTasksView extends GetView<PersonalTasksController> {
   const PersonalTasksView({super.key});
@@ -17,6 +18,7 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isMobile = ResponsiveWidget.isMobile(context);
+    final isDesktop = ResponsiveWidget.isDesktop(context);
 
     return Scaffold(
       backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey2,
@@ -29,13 +31,48 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
             ),
           );
         }
-        return _buildContent(context, isDark, isMobile);
+        return isDesktop
+            ? _buildDesktopLayout(context, isDark)
+            : _buildMobileLayout(context, isDark, isMobile);
       }),
-      floatingActionButton: _buildFloatingButton(isDark),
+      floatingActionButton: isMobile ? _buildFAB(isDark) : null,
     );
   }
 
-  Widget _buildContent(BuildContext context, bool isDark, bool isMobile) {
+  Widget _buildDesktopLayout(BuildContext context, bool isDark) {
+    return Row(
+      children: [
+        Expanded(child: _buildMainContent(context, isDark, false)),
+        _buildDivider(isDark),
+        PersonalTasksSidebar(
+          upcomingTasks: controller.upcomingTasks,
+          tasksByCategory: controller.tasksByCategory,
+          aiRecommendations: controller.aiRecommendations,
+          overdueCount: controller.overdueCount,
+          estimatedFocusMinutes: controller.estimatedFocusMinutes,
+          isDark: isDark,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(
+      BuildContext context, bool isDark, bool isMobile) {
+    return _buildMainContent(context, isDark, isMobile);
+  }
+
+  Widget _buildDivider(bool isDark) {
+    return Container(
+      width: 1,
+      height: double.infinity,
+      color: isDark
+          ? AppThemeData.grey8.withValues(alpha: 0.25)
+          : AppThemeData.grey3.withValues(alpha: 0.4),
+    );
+  }
+
+  Widget _buildMainContent(
+      BuildContext context, bool isDark, bool isMobile) {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: isMobile ? 16 : 28,
@@ -44,32 +81,47 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(isDark),
+          _buildHeader(isDark, isMobile),
           spaceH(height: 18),
-          _buildStats(isDark),
+          _buildStats(isDark, isMobile),
           spaceH(height: 18),
           _buildSearchBar(isDark),
           spaceH(height: 14),
-          _buildFilters(isDark),
+          _buildFilterTabs(isDark, isMobile),
           spaceH(height: 16),
           Expanded(
             child: Obx(() {
-              if (controller.filteredTasks.isEmpty) return _buildEmptyState(isDark);
+              if (controller.filteredTasks.isEmpty) {
+                return _buildEmptyState(isDark);
+              }
               return ListView.separated(
-                padding: const EdgeInsets.only(bottom: 80),
+                padding: const EdgeInsets.only(bottom: 120),
                 itemCount: controller.filteredTasks.length,
                 separatorBuilder: (_, _) => spaceH(height: 10),
-                itemBuilder: (ctx, index) =>
-                    _buildTaskCard(controller.filteredTasks[index], isDark),
+                itemBuilder: (ctx, index) {
+                  final task = controller.filteredTasks[index];
+                  return PersonalTaskCard(
+                    task: task,
+                    isDark: isDark,
+                    onTap: () => controller.goToEdit(task),
+                    onToggle: () => controller.toggleTask(task),
+                    onEdit: () => controller.goToEdit(task),
+                    onPin: () => controller.pinTask(task),
+                    onDelete: () => controller.deleteTask(task),
+                  );
+                },
               );
             }),
           ),
+          _buildEndFooter(isDark),
+          spaceH(height: 8),
+          _buildQuoteBar(isDark),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(bool isDark) {
+  Widget _buildHeader(bool isDark, bool isMobile) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -91,7 +143,7 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
                   ),
                 ],
               ),
-              child: Icon(
+              child: const Icon(
                 SolarIconsBold.checklist,
                 color: Colors.white,
                 size: 26,
@@ -108,7 +160,7 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
                   color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                 ),
                 TextCustom(
-                  title: 'Organize your day',
+                  title: 'Organize your day, achieve your goals.',
                   fontSize: 13,
                   fontFamily: FontFamily.regular,
                   color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
@@ -117,57 +169,290 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
             ),
           ],
         ),
-        ElevatedButton.icon(
-          onPressed: controller.goToAdd,
-          icon: Icon(SolarIconsOutline.addCircle, size: 18),
-          label: const TextCustom(
-            title: 'Add Task',
-            fontSize: 13,
-            fontFamily: FontFamily.semiBold,
-            color: Colors.white,
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppThemeData.primary50,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+        if (!isMobile)
+          ElevatedButton.icon(
+            onPressed: controller.goToAdd,
+            icon: const Icon(SolarIconsOutline.addCircle, size: 18),
+            label: const TextCustom(
+              title: 'Add Task',
+              fontSize: 13,
+              fontFamily: FontFamily.semiBold,
+              color: Colors.white,
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppThemeData.primary50,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
           ),
-        ),
       ],
     );
   }
 
-  Widget _buildStats(bool isDark) {
+  Widget _buildStats(bool isDark, bool isMobile) {
     return Obx(() {
       final total = controller.totalTasks;
       final completed = controller.completedCount;
+      final pending = controller.pendingCount;
       final overdue = controller.overdueCount;
       final rate = controller.completionRate;
+
+      if (isMobile) {
+        return SizedBox(
+          height: 170,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              SizedBox(
+                width: 220,
+                child: _buildDailyProgressCard(completed, total, rate, isDark),
+              ),
+              spaceW(width: 10),
+              SizedBox(
+                width: 150,
+                child: _buildStatMiniCard(
+                  icon: SolarIconsBold.document,
+                  value: '$total',
+                  label: 'Total Tasks',
+                  subtitle: 'View all tasks →',
+                  color: AppThemeData.neonBlue,
+                  isDark: isDark,
+                ),
+              ),
+              spaceW(width: 10),
+              SizedBox(
+                width: 150,
+                child: _buildStatMiniCard(
+                  icon: SolarIconsBold.checkCircle,
+                  value: '$completed',
+                  label: 'Completed',
+                  subtitle: completed > 0 ? 'Great job!' : 'Get started',
+                  color: AppThemeData.success400,
+                  isDark: isDark,
+                ),
+              ),
+              spaceW(width: 10),
+              SizedBox(
+                width: 150,
+                child: _buildStatMiniCard(
+                  icon: SolarIconsOutline.clockCircle,
+                  value: '$pending',
+                  label: 'Pending',
+                  subtitle: pending > 0 ? 'Keep going' : 'All clear',
+                  color: AppThemeData.pending400,
+                  isDark: isDark,
+                ),
+              ),
+              spaceW(width: 10),
+              SizedBox(
+                width: 150,
+                child: _buildStatMiniCard(
+                  icon: SolarIconsBold.dangerTriangle,
+                  value: '$overdue',
+                  label: 'Overdue',
+                  subtitle: overdue > 0 ? 'Needs attention' : 'None',
+                  color: AppThemeData.danger300,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
 
       return Row(
         children: [
           Expanded(
-            child: _buildProgressCard(
-              completed,
-              total,
-              rate,
-              isDark,
+            flex: 3,
+            child: _buildDailyProgressCard(completed, total, rate, isDark),
+          ),
+          spaceW(width: 12),
+          Expanded(
+            child: _buildStatMiniCard(
+              icon: SolarIconsBold.document,
+              value: '$total',
+              label: 'Total Tasks',
+              subtitle: 'View all tasks →',
+              color: AppThemeData.neonBlue,
+              isDark: isDark,
             ),
           ),
           spaceW(width: 12),
-          _buildOverdueCard(overdue, isDark),
+          Expanded(
+            child: _buildStatMiniCard(
+              icon: SolarIconsBold.checkCircle,
+              value: '$completed',
+              label: 'Completed',
+              subtitle: completed > 0 ? 'Great job!' : 'Get started',
+              color: AppThemeData.success400,
+              isDark: isDark,
+            ),
+          ),
+          spaceW(width: 12),
+          Expanded(
+            child: _buildStatMiniCard(
+              icon: SolarIconsOutline.clockCircle,
+              value: '$pending',
+              label: 'Pending',
+              subtitle: pending > 0 ? 'Keep going' : 'All clear',
+              color: AppThemeData.pending400,
+              isDark: isDark,
+            ),
+          ),
+          spaceW(width: 12),
+          Expanded(
+            child: _buildStatMiniCard(
+              icon: SolarIconsBold.dangerTriangle,
+              value: '$overdue',
+              label: 'Overdue',
+              subtitle: overdue > 0 ? 'Needs attention' : 'None',
+              color: AppThemeData.danger300,
+              isDark: isDark,
+            ),
+          ),
         ],
       );
     });
   }
 
-  Widget _buildProgressCard(int completed, int total, double rate, bool isDark) {
+  Widget _buildDailyProgressCard(
+      int completed, int total, double rate, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+          width: 0.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            height: 100,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: CircularProgressIndicator(
+                    value: total > 0 ? completed / total : 0,
+                    strokeWidth: 8,
+                    backgroundColor:
+                        isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppThemeData.neonPurple,
+                    ),
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                TextCustom(
+                  title: '${rate.round()}%',
+                  fontSize: 22,
+                  fontFamily: FontFamily.bold,
+                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                ),
+              ],
+            ),
+          ),
+          spaceW(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextCustom(
+                  title: 'Daily Progress',
+                  fontSize: 14,
+                  fontFamily: FontFamily.semiBold,
+                  color: isDark ? AppThemeData.grey2 : AppThemeData.grey9,
+                ),
+                spaceH(height: 2),
+                TextCustom(
+                  title: '$completed of $total tasks completed',
+                  fontSize: 12,
+                  fontFamily: FontFamily.regular,
+                  color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                ),
+                spaceH(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: total > 0 ? completed / total : 0,
+                    minHeight: 6,
+                    backgroundColor:
+                        isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(AppThemeData.neonPurple),
+                  ),
+                ),
+                spaceH(height: 8),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 4,
+                  children: [
+                    _buildProgressDot(AppThemeData.success400, 'Completed $completed'),
+                    _buildProgressDot(AppThemeData.pending400, 'Pending ${controller.pendingCount}'),
+                    _buildProgressDot(AppThemeData.danger300, 'Overdue ${controller.overdueCount}'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressDot(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        spaceW(width: 4),
+        TextCustom(
+          title: label,
+          fontSize: 10,
+          fontFamily: FontFamily.medium,
+          color: AppThemeData.grey5,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatMiniCard({
+    required IconData icon,
+    required String value,
+    required String label,
+    required String subtitle,
+    required Color color,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
           width: 0.5,
@@ -181,107 +466,38 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppThemeData.success400.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  SolarIconsBold.checkCircle,
-                  color: AppThemeData.success400,
-                  size: 18,
-                ),
-              ),
-              spaceW(width: 10),
-              TextCustom(
-                title: '$completed / $total tasks',
-                fontSize: 15,
-                fontFamily: FontFamily.semiBold,
-                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-              ),
-              const Spacer(),
-              TextCustom(
-                title: '${rate.round()}%',
-                fontSize: 20,
-                fontFamily: FontFamily.bold,
-                color: AppThemeData.success400,
-              ),
-            ],
-          ),
-          spaceH(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: total > 0 ? completed / total : 0,
-              minHeight: 6,
-              backgroundColor: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                AppThemeData.success400,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOverdueCard(int overdue, bool isDark) {
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: overdue > 0
-              ? AppThemeData.danger300.withValues(alpha: 0.3)
-              : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
-          width: overdue > 0 ? 1 : 0.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppThemeData.danger300.withValues(alpha: 0.1),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              SolarIconsBold.dangerTriangle,
-              color: AppThemeData.danger300,
-              size: 18,
-            ),
+            child: Icon(icon, size: 18, color: color),
           ),
-          spaceH(height: 10),
+          spaceH(height: 14),
           TextCustom(
-            title: '$overdue',
-            fontSize: 24,
+            title: value,
+            fontSize: 28,
             fontFamily: FontFamily.bold,
-            color: overdue > 0
-                ? AppThemeData.danger300
-                : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
           ),
+          spaceH(height: 2),
           TextCustom(
-            title: 'Overdue',
+            title: label,
             fontSize: 12,
             fontFamily: FontFamily.medium,
-            color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+            color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+          ),
+          spaceH(height: 2),
+          TextCustom(
+            title: subtitle,
+            fontSize: 11,
+            fontFamily: FontFamily.regular,
+            color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
           ),
         ],
       ),
@@ -331,557 +547,236 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
               size: 20,
             ),
           ),
+          suffixIcon: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.black.withValues(alpha: 0.04),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: TextCustom(
+              title: '⌘K',
+              fontSize: 11,
+              fontFamily: FontFamily.medium,
+              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+            ),
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
           ),
           filled: true,
           fillColor: Colors.transparent,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
     );
   }
 
-  Widget _buildFilters(bool isDark) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Obx(
-        () => Row(
-          children: [
-            _buildFilterChip(
-              'Priority',
-              controller.selectedPriority.value,
-              controller.priorities,
-              controller.filterByPriority,
-              isDark,
-            ),
-            spaceW(width: 8),
-            _buildFilterChip(
-              'Status',
-              controller.selectedStatus.value,
-              controller.statuses,
-              controller.filterByStatus,
-              isDark,
-            ),
-            spaceW(width: 8),
-            _buildFilterChip(
-              'Category',
-              controller.selectedCategory.value,
-              controller.categories,
-              controller.filterByCategory,
-              isDark,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildFilterTabs(bool isDark, bool isMobile) {
+    final tabs = [
+      ('ALL', 'All Tasks'),
+      ('HIGH', 'High Priority'),
+      ('PENDING', 'Pending'),
+      ('COMPLETED', 'Completed'),
+      ('OVERDUE', 'Overdue'),
+    ];
 
-  Widget _buildFilterChip(
-    String label,
-    String selected,
-    List<String> items,
-    Function(String) onTap,
-    bool isDark,
-  ) {
-    return GestureDetector(
-      onTap: () => _showFilterSheet(label, selected, items, onTap, isDark),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected != 'ALL'
-              ? AppThemeData.primary50.withValues(alpha: 0.12)
-              : (isDark ? AppThemeData.grey9 : AppThemeData.grey1),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: selected != 'ALL'
-                ? AppThemeData.primary50.withValues(alpha: 0.3)
-                : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
-            width: 0.5,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextCustom(
-              title: selected == 'ALL' ? label : selected,
-              fontSize: 12,
-              fontFamily: FontFamily.medium,
-              color: selected != 'ALL'
-                  ? AppThemeData.primary50
-                  : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-            ),
-            spaceW(width: 4),
-            Icon(
-              SolarIconsOutline.altArrowDown,
-              size: 16,
-              color: selected != 'ALL'
-                  ? AppThemeData.primary50
-                  : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showFilterSheet(
-    String label,
-    String selected,
-    List<String> items,
-    Function(String) onTap,
-    bool isDark,
-  ) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDark ? AppThemeData.grey10 : AppThemeData.primaryWhite,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextCustom(
-              title: 'Filter by $label',
-              fontSize: 16,
-              fontFamily: FontFamily.bold,
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-            ),
-            spaceH(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: items
-                  .map(
-                    (item) => GestureDetector(
-                      onTap: () {
-                        onTap(item);
-                        Get.back();
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: selected == item
-                              ? AppThemeData.primary50.withValues(alpha: 0.15)
-                              : (isDark ? AppThemeData.grey9 : AppThemeData.grey1),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: selected == item
-                                ? AppThemeData.primary50
-                                : (isDark
-                                    ? AppThemeData.grey8
-                                    : AppThemeData.grey3),
-                          ),
-                        ),
-                        child: TextCustom(
-                          title: item,
-                          fontSize: 13,
-                          fontFamily: FontFamily.medium,
-                          color: selected == item
-                              ? AppThemeData.primary50
-                              : (isDark
-                                  ? AppThemeData.grey4
-                                  : AppThemeData.grey7),
-                        ),
-                      ),
+    return SizedBox(
+      height: 42,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: tabs.length + 2,
+        separatorBuilder: (_, _) => spaceW(width: 8),
+        itemBuilder: (ctx, index) {
+          if (index < tabs.length) {
+            final (key, label) = tabs[index];
+            return Obx(() {
+              final isSelected = controller.activeTab.value == key;
+              return GestureDetector(
+                onTap: () => controller.setActiveTab(key),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppThemeData.primary50
+                        : (isDark ? AppThemeData.grey9 : AppThemeData.grey1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppThemeData.primary50
+                          : (isDark
+                              ? AppThemeData.grey8
+                              : AppThemeData.grey3),
+                      width: isSelected ? 1 : 0.5,
                     ),
-                  )
-                  .toList(),
-            ),
-          ],
-        ),
+                  ),
+                  child: TextCustom(
+                    title: label,
+                    fontSize: 12,
+                    fontFamily:
+                        isSelected ? FontFamily.bold : FontFamily.medium,
+                    color: isSelected
+                        ? Colors.white
+                        : (isDark
+                            ? AppThemeData.grey4
+                            : AppThemeData.grey7),
+                  ),
+                ),
+              );
+            });
+          }
+
+          if (index == tabs.length) {
+            return _buildSortButton(isDark);
+          }
+
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
 
-  Widget _buildTaskCard(PersonalTaskModel task, bool isDark) {
-    final priorityColor = task.priorityColor;
+  Widget _buildSortButton(bool isDark) {
+    return Obx(() {
+      final sortLabel = {
+        'DATE': 'Date',
+        'PRIORITY': 'Priority',
+        'NAME': 'Name',
+      }[controller.sortBy.value] ?? 'Date';
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      decoration: BoxDecoration(
-        color: task.isCompleted == true
-            ? (isDark ? AppThemeData.grey9 : AppThemeData.grey1)
-                .withValues(alpha: 0.6)
-            : (isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: task.isPinned == true
-              ? AppThemeData.primary50.withValues(alpha: 0.4)
-              : (isDark ? AppThemeData.grey8 : AppThemeData.grey3)
-                  .withValues(alpha: 0.5),
-          width: task.isPinned == true ? 1.5 : 0.5,
+      return GestureDetector(
+        onTap: controller.cycleSort,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+              width: 0.5,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.sort_rounded,
+                size: 16,
+                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+              ),
+              spaceW(width: 6),
+              TextCustom(
+                title: 'Sort: $sortLabel',
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+              ),
+            ],
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+      );
+    });
+  }
+
+  Widget _buildEndFooter(bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            SolarIconsOutline.star,
+            size: 14,
+            color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+          ),
+          spaceW(width: 8),
+          TextCustom(
+            title: "You've reached the end",
+            fontSize: 12,
+            fontFamily: FontFamily.regular,
+            color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+          ),
+          spaceW(width: 8),
+          Icon(
+            SolarIconsOutline.star,
+            size: 14,
+            color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: () => controller.goToEdit(task),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: Stack(
-              children: [
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 5,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(color: priorityColor),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 16, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => controller.toggleTask(task),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: task.isCompleted == true
-                                    ? AppThemeData.success400
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                border: task.isCompleted == true
-                                    ? null
-                                    : Border.all(
-                                        color: isDark
-                                            ? AppThemeData.grey6
-                                            : AppThemeData.grey5,
-                                        width: 1.5,
-                                      ),
-                              ),
-                              child: task.isCompleted == true
-                                  ? const Icon(
-                                      SolarIconsBold.checkCircle,
-                                      color: Colors.white,
-                                      size: 16,
-                                    )
-                                  : null,
-                            ),
-                          ),
-                          spaceW(width: 12),
-                          if (task.iconUrl != null && task.iconUrl!.isNotEmpty)
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                task.iconUrl!,
-                                width: 52,
-                                height: 52,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  width: 52,
-                                  height: 52,
-                                  decoration: BoxDecoration(
-                                    color: AppThemeData.primary50.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(SolarIconsOutline.gallery, size: 16, color: AppThemeData.primary50),
-                                ),
-                              ),
-                            ),
-                          if (task.iconUrl != null && task.iconUrl!.isNotEmpty)
-                            spaceW(width: 8),
-                          Expanded(
-                            child: TextCustom(
-                              title: task.title ?? '',
-                              fontSize: 16,
-                              fontFamily: FontFamily.semiBold,
-                              color: task.isCompleted == true
-                                  ? (isDark
-                                      ? AppThemeData.grey6
-                                      : AppThemeData.grey5)
-                                  : (isDark
-                                      ? AppThemeData.grey1
-                                      : AppThemeData.grey10),
-                              maxLine: 1,
-                            ),
-                          ),
-                          if (task.isPinned == true)
-                            Icon(
-                              SolarIconsBold.pin,
-                              size: 16,
-                              color: AppThemeData.primary50,
-                            ),
-                          spaceW(width: 8),
-                          _buildCardMenu(task, isDark),
-                        ],
-                      ),
-                      if (task.description != null &&
-                          task.description!.isNotEmpty) ...[
-                        spaceH(height: 8),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 36),
-                          child: TextCustom(
-                            title: task.description ?? '',
-                            fontSize: 13,
-                            fontFamily: FontFamily.regular,
-                            color: isDark
-                                ? AppThemeData.grey5
-                                : AppThemeData.grey6,
-                            maxLine: 2,
-                          ),
-                        ),
-                      ],
-                      spaceH(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 36),
-                        child: Row(
-                          children: [
-                            _buildBadge(
-                              task.priorityLabel,
-                              task.priorityColor,
-                              isDark,
-                            ),
-                            spaceW(width: 6),
-                            _buildBadge(
-                              task.statusLabel,
-                              task.statusColor,
-                              isDark,
-                            ),
-                            const Spacer(),
-                            if (task.isOverdue)
-                              _buildBadge('Overdue', AppThemeData.danger300, isDark)
-                            else if (task.isDueSoon)
-                              _buildBadge(
-                                '${task.daysUntilDue}d left',
-                                AppThemeData.pending400,
-                                isDark,
-                              )
-                            else if (task.dueDate != null)
-                              Row(
-                                children: [
-                                  Icon(
-                                    SolarIconsOutline.calendar,
-                                    size: 14,
-                                    color: isDark
-                                        ? AppThemeData.grey6
-                                        : AppThemeData.grey5,
-                                  ),
-                                  spaceW(width: 4),
-                                  TextCustom(
-                                    title: task.formattedDueDate,
-                                    fontSize: 11,
-                                    fontFamily: FontFamily.medium,
-                                    color: isDark
-                                        ? AppThemeData.grey5
-                                        : AppThemeData.grey6,
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      ),
-                      if (task.tags != null && task.tags!.isNotEmpty) ...[
-                        spaceH(height: 8),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 36),
-                          child: Wrap(
-                            spacing: 4,
-                            runSpacing: 4,
-                            children: task.tags!
-                                .take(3)
-                                .map(
-                                  (tag) => Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 3,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppThemeData.primary50
-                                          .withValues(alpha: 0.08),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: TextCustom(
-                                      title: '#$tag',
-                                      fontSize: 10,
-                                      fontFamily: FontFamily.medium,
-                                      color: AppThemeData.primary50,
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
+    );
+  }
+
+  Widget _buildQuoteBar(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+          width: 0.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextCustom(
+              title:
+                  'Discipline is the bridge between goals and accomplishment.',
+              fontSize: 12,
+              fontFamily: FontFamily.regular,
+              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
             ),
           ),
-        ),
+          Icon(
+            SolarIconsBold.heart,
+            size: 16,
+            color: AppThemeData.primary50.withValues(alpha: 0.6),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCardMenu(PersonalTaskModel task, bool isDark) {
+  Widget _buildFAB(bool isDark) {
     return GestureDetector(
-      onTap: () => _showTaskMenu(task, isDark),
+      onTap: controller.goToAdd,
       child: Container(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
-          color: (isDark ? AppThemeData.grey9 : AppThemeData.grey1)
-              .withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          SolarIconsOutline.menuDots,
-          size: 16,
-          color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-        ),
-      ),
-    );
-  }
-
-  void _showTaskMenu(PersonalTaskModel task, bool isDark) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDark ? AppThemeData.grey10 : AppThemeData.primaryWhite,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-                borderRadius: BorderRadius.circular(2),
-              ),
+          gradient: LinearGradient(
+            colors: [AppThemeData.primary50, AppThemeData.primary4],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppThemeData.primary50.withValues(alpha: 0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
-            spaceH(height: 16),
-            TextCustom(
-              title: task.title ?? '',
-              fontSize: 16,
-              fontFamily: FontFamily.bold,
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-              maxLine: 1,
-            ),
-            spaceH(height: 16),
-            _buildMenuItem(
-              SolarIconsOutline.penNewRound,
-              'Edit',
-              () {
-                Get.back();
-                controller.goToEdit(task);
-              },
-              isDark,
-            ),
-            _buildMenuItem(
-              task.isCompleted == true
-                  ? SolarIconsOutline.undoLeftRound
-                  : SolarIconsBold.checkCircle,
-              task.isCompleted == true ? 'Reopen' : 'Mark Complete',
-              () {
-                Get.back();
-                controller.toggleTask(task);
-              },
-              isDark,
-              color: AppThemeData.success400,
-            ),
-            _buildMenuItem(
-              task.isPinned == true ? SolarIconsOutline.pin : SolarIconsBold.pin,
-              task.isPinned == true ? 'Unpin' : 'Pin',
-              () {
-                Get.back();
-                controller.pinTask(task);
-              },
-              isDark,
-              color: AppThemeData.primary50,
-            ),
-            _buildMenuItem(
-              SolarIconsOutline.trashBin2,
-              'Delete',
-              () {
-                Get.back();
-                controller.deleteTask(task);
-              },
-              isDark,
-              color: AppThemeData.danger300,
-            ),
-            spaceH(height: 8),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuItem(
-    IconData icon,
-    String title,
-    VoidCallback onTap,
-    bool isDark, {
-    Color? color,
-  }) {
-    final itemColor = color ?? (isDark ? AppThemeData.grey3 : AppThemeData.grey7);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        margin: const EdgeInsets.only(bottom: 4),
-        decoration: BoxDecoration(
-          color: (isDark ? AppThemeData.grey9 : AppThemeData.grey1)
-              .withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 20, color: itemColor),
-            spaceW(width: 12),
-            TextCustom(
-              title: title,
+            const Icon(SolarIconsOutline.addCircle,
+                color: Colors.white, size: 20),
+            spaceW(width: 8),
+            const TextCustom(
+              title: 'Add New Task',
               fontSize: 14,
-              fontFamily: FontFamily.medium,
-              color: itemColor,
+              fontFamily: FontFamily.semiBold,
+              color: Colors.white,
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBadge(String label, Color color, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: TextCustom(
-        title: label,
-        fontSize: 10,
-        fontFamily: FontFamily.bold,
-        color: color,
       ),
     );
   }
@@ -945,15 +840,6 @@ class PersonalTasksView extends GetView<PersonalTasksController> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildFloatingButton(bool isDark) {
-    return FloatingActionButton(
-      onPressed: controller.goToAdd,
-      backgroundColor: AppThemeData.primary50,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Icon(SolarIconsOutline.addCircle, color: Colors.white, size: 28),
     );
   }
 }

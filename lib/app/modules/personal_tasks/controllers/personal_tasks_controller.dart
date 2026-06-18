@@ -17,6 +17,10 @@ class PersonalTasksController extends GetxController {
   final selectedStatus = 'ALL'.obs;
   final selectedCategory = 'ALL'.obs;
 
+  final activeTab = 'ALL'.obs;
+  final sortBy = 'DATE'.obs;
+  final sortAscending = true.obs;
+
   final priorities = ['ALL', 'HIGH', 'MEDIUM', 'LOW'];
   final statuses = ['ALL', 'PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
   final categories = [
@@ -48,13 +52,60 @@ class PersonalTasksController extends GetxController {
   double get completionRate =>
       tasks.isEmpty ? 0 : (completedCount / totalTasks * 100);
 
+  double get dailyProgress =>
+      tasks.isEmpty ? 0 : (completedCount / totalTasks * 100);
+
+  int get estimatedFocusMinutes =>
+      tasks.where((t) => t.status != 'COMPLETED').length * 25;
+
+  List<PersonalTaskModel> get upcomingTasks {
+    final upcoming = tasks
+        .where((t) =>
+            (t.isOverdue || t.isDueSoon) &&
+            t.status != 'COMPLETED')
+        .toList()
+      ..sort((a, b) {
+        if (a.dueDate == null) return 1;
+        if (b.dueDate == null) return -1;
+        return a.dueDate!.compareTo(b.dueDate!);
+      });
+    return upcoming.take(5).toList();
+  }
+
+  Map<String, int> get tasksByCategory {
+    final map = <String, int>{};
+    for (final t in tasks) {
+      final cat = t.category ?? 'GENERAL';
+      map[cat] = (map[cat] ?? 0) + 1;
+    }
+    return map;
+  }
+
+  List<String> get aiRecommendations {
+    final recs = <String>[];
+    if (overdueCount > 0) {
+      final overdueTask = tasks.firstWhere(
+        (t) => t.isOverdue,
+        orElse: () => tasks.first,
+      );
+      recs.add('Finish "${overdueTask.title}"');
+    }
+    final pending = tasks.where((t) => t.status == 'PENDING').toList();
+    if (pending.isNotEmpty) {
+      recs.add('Work on "${pending.first.title}"');
+    }
+    if (recs.isEmpty) {
+      recs.add('All caught up! Great work.');
+    }
+    return recs;
+  }
+
   @override
   void onInit() {
     super.onInit();
     loadTasks();
   }
 
-  // ✅ AFTER:
   void loadTasks() {
     if (ownerId == null) {
       isLoading.value = false;
@@ -75,36 +126,89 @@ class PersonalTasksController extends GetxController {
 
   void _applyFilters() {
     var result = tasks.toList();
+
     if (searchQuery.isNotEmpty) {
+      final q = searchQuery.value.toLowerCase();
       result = result
-          .where(
-            (t) =>
-                (t.title ?? '').toLowerCase().contains(
-                  searchQuery.value.toLowerCase(),
-                ) ||
-                (t.description ?? '').toLowerCase().contains(
-                  searchQuery.value.toLowerCase(),
-                ) ||
-                (t.notes ?? '').toLowerCase().contains(
-                  searchQuery.value.toLowerCase(),
-                ),
-          )
+          .where((t) =>
+              (t.title ?? '').toLowerCase().contains(q) ||
+              (t.description ?? '').toLowerCase().contains(q) ||
+              (t.notes ?? '').toLowerCase().contains(q))
           .toList();
     }
-    if (selectedPriority.value != 'ALL') {
-      result = result
-          .where((t) => t.priority == selectedPriority.value)
-          .toList();
+
+    switch (activeTab.value) {
+      case 'HIGH':
+        result = result.where((t) => t.priority == 'HIGH').toList();
+        break;
+      case 'PENDING':
+        result = result.where((t) => t.status == 'PENDING').toList();
+        break;
+      case 'COMPLETED':
+        result = result.where((t) => t.status == 'COMPLETED').toList();
+        break;
+      case 'OVERDUE':
+        result = result.where((t) => t.isOverdue).toList();
+        break;
     }
-    if (selectedStatus.value != 'ALL') {
-      result = result.where((t) => t.status == selectedStatus.value).toList();
-    }
+
     if (selectedCategory.value != 'ALL') {
       result = result
           .where((t) => t.category == selectedCategory.value)
           .toList();
     }
+
+    switch (sortBy.value) {
+      case 'DATE':
+        result.sort((a, b) {
+          if (a.dueDate == null && b.dueDate == null) return 0;
+          if (a.dueDate == null) return 1;
+          if (b.dueDate == null) return -1;
+          return sortAscending.value
+              ? a.dueDate!.compareTo(b.dueDate!)
+              : b.dueDate!.compareTo(a.dueDate!);
+        });
+        break;
+      case 'PRIORITY':
+        final order = {'HIGH': 0, 'MEDIUM': 1, 'LOW': 2};
+        result.sort((a, b) {
+          final ai = order[a.priority] ?? 1;
+          final bi = order[b.priority] ?? 1;
+          return sortAscending.value
+              ? ai.compareTo(bi)
+              : bi.compareTo(ai);
+        });
+        break;
+      case 'NAME':
+        result.sort((a, b) {
+          final cmp = (a.title ?? '').compareTo(b.title ?? '');
+          return sortAscending.value ? cmp : -cmp;
+        });
+        break;
+    }
+
+    final pinned = result.where((t) => t.isPinned == true).toList();
+    final unpinned = result.where((t) => t.isPinned != true).toList();
+    result = [...pinned, ...unpinned];
+
     filteredTasks.value = result;
+  }
+
+  void setActiveTab(String tab) {
+    activeTab.value = tab;
+    _applyFilters();
+  }
+
+  void cycleSort() {
+    final modes = ['DATE', 'PRIORITY', 'NAME'];
+    final idx = modes.indexOf(sortBy.value);
+    if (idx < modes.length - 1) {
+      sortBy.value = modes[idx + 1];
+    } else {
+      sortBy.value = modes[0];
+      sortAscending.value = !sortAscending.value;
+    }
+    _applyFilters();
   }
 
   void updateSearchQuery(String query) {
