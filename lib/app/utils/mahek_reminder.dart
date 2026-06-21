@@ -154,7 +154,7 @@ class MahekReminderController extends GetxController {
 }
 
 /// ===============================
-/// TOAST UI
+/// TOAST UI — Apple-style notification
 /// ===============================
 class _ReminderToast extends StatefulWidget {
   final ReminderData reminder;
@@ -167,15 +167,30 @@ class _ReminderToast extends StatefulWidget {
 }
 
 class _ReminderToastState extends State<_ReminderToast> with SingleTickerProviderStateMixin {
+  static const _totalSeconds = 6;
   late AnimationController _pc;
   late Animation<double> _slide, _fade;
+  int _remainingSeconds = _totalSeconds;
 
   @override
   void initState() {
     super.initState();
-    _pc = AnimationController(vsync: this, duration: const Duration(seconds: 6))..forward();
-    _slide = Tween<double>(begin: 80, end: 0).animate(CurvedAnimation(parent: _pc, curve: const Interval(0.0, 0.2, curve: Curves.easeOutCubic)));
+    _pc = AnimationController(vsync: this, duration: const Duration(seconds: _totalSeconds))..forward();
+    _slide = Tween<double>(begin: 40, end: 0).animate(CurvedAnimation(parent: _pc, curve: const Interval(0.0, 0.25, curve: Curves.easeOutCubic)));
     _fade = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _pc, curve: const Interval(0.0, 0.2, curve: Curves.easeOut)));
+
+    _startCountdown();
+  }
+
+  void _startCountdown() {
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return false;
+      setState(() {
+        _remainingSeconds = (_remainingSeconds - 1).clamp(0, _totalSeconds);
+      });
+      return _remainingSeconds > 0;
+    });
   }
 
   @override
@@ -188,7 +203,7 @@ class _ReminderToastState extends State<_ReminderToast> with SingleTickerProvide
   Widget build(BuildContext context) {
     final r = widget.reminder;
     final isDark = widget.isDark;
-    final accent = r.isExpiringSoon ? AppThemeData.danger300 : AppThemeData.primary50;
+    final accent = isDark ? AppThemeData.neonPurple : AppThemeData.neonBlue;
 
     return AnimatedBuilder(
       animation: _pc,
@@ -198,62 +213,166 @@ class _ReminderToastState extends State<_ReminderToast> with SingleTickerProvide
           child: Transform.translate(
             offset: Offset(0, _slide.value),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(20),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
                   width: 340,
-                  padding: const EdgeInsets.all(18),
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    gradient: LinearGradient(colors: isDark ? [AppThemeData.primaryBlack.withValues(alpha: 0.95), AppThemeData.grey9.withValues(alpha: 0.95)] : [Colors.white.withValues(alpha: 0.95), AppThemeData.grey1.withValues(alpha: 0.95)]),
-                    border: Border.all(color: accent.withValues(alpha: 0.3), width: 1.5),
-                    boxShadow: [BoxShadow(color: accent.withValues(alpha: 0.15), blurRadius: 30, offset: const Offset(0, 8)), BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 20, offset: const Offset(0, 4))],
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDark
+                          ? [AppThemeData.surfaceDeep.withValues(alpha: 0.96), AppThemeData.surfaceMid.withValues(alpha: 0.96)]
+                          : [Colors.white.withValues(alpha: 0.97), AppThemeData.grey1.withValues(alpha: 0.97)],
+                    ),
+                    border: Border.all(
+                      color: isDark
+                          ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                          : AppThemeData.grey3.withValues(alpha: 0.6),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08), blurRadius: 24, offset: const Offset(0, 8)),
+                      if (!isDark) BoxShadow(color: accent.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, 4)),
+                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // ── Row 1: Icon + Title + Actions ──────────────
                       Row(
                         children: [
+                          // ── Icon ─────────────────────────────────
                           Container(
                             width: 48, height: 48,
-                            decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [accent.withValues(alpha: 0.3), accent.withValues(alpha: 0.1)]), border: Border.all(color: accent.withValues(alpha: 0.4), width: 2)),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark
+                                  ? AppThemeData.neonPurple.withValues(alpha: 0.15)
+                                  : AppThemeData.neonBlue.withValues(alpha: 0.1),
+                              border: Border.all(
+                                color: isDark
+                                    ? AppThemeData.neonPurple.withValues(alpha: 0.25)
+                                    : AppThemeData.neonBlue.withValues(alpha: 0.15),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accent.withValues(alpha: isDark ? 0.15 : 0.08),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
                             child: ClipOval(
                               child: r.iconUrl != null && r.iconUrl!.isNotEmpty
-                                  ? Image.network(r.iconUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(Icons.alarm_rounded, color: accent, size: 24))
-                                  : Icon(Icons.alarm_rounded, color: accent, size: 24),
+                                  ? Image.network(
+                                      r.iconUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Icon(
+                                        Icons.notifications_rounded,
+                                        color: accent,
+                                        size: 24,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.notifications_rounded,
+                                      color: accent,
+                                      size: 24,
+                                    ),
                             ),
                           ),
                           spaceW(width: 12),
+
+                          // ── Title + Subtitle + Countdown ────────
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(r.name ?? 'Reminder', style: TextStyle(fontFamily: FontFamily.bold, fontSize: 16, color: isDark ? Colors.white : AppThemeData.grey10), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                if (r.expiryDate != null) ...[
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.calendar_today_rounded, size: 12, color: r.isExpiringSoon ? AppThemeData.danger300 : AppThemeData.grey5),
-                                      spaceW(width: 4),
-                                      Text('Due: ${r.formattedExpiryDate}', style: TextStyle(fontFamily: FontFamily.medium, fontSize: 12, color: r.isExpiringSoon ? AppThemeData.danger300 : AppThemeData.grey5)),
-                                      if (r.daysRemaining > 0) ...[
-                                        spaceW(width: 6),
-                                        Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: r.isExpiringSoon ? AppThemeData.danger300.withValues(alpha: 0.15) : AppThemeData.success400.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)), child: Text('${r.daysRemaining}d left', style: TextStyle(fontFamily: FontFamily.bold, fontSize: 10, color: r.isExpiringSoon ? AppThemeData.danger300 : AppThemeData.success400))),
-                                      ],
-                                    ],
+                                Text(
+                                  r.name ?? 'Reminder',
+                                  style: TextStyle(
+                                    fontFamily: FontFamily.bold,
+                                    fontSize: 15,
+                                    color: isDark ? Colors.white : AppThemeData.grey10,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (r.description != null && r.description!.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    r.description!,
+                                    style: TextStyle(
+                                      fontFamily: FontFamily.regular,
+                                      fontSize: 12,
+                                      color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
+                                const SizedBox(height: 4),
+                                RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      fontFamily: FontFamily.regular,
+                                      fontSize: 12,
+                                      color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
+                                    ),
+                                    children: [
+                                      const TextSpan(text: 'Next reminder in '),
+                                      TextSpan(
+                                        text: '$_remainingSeconds',
+                                        style: TextStyle(
+                                          fontFamily: FontFamily.bold,
+                                          fontSize: 12,
+                                          color: accent,
+                                        ),
+                                      ),
+                                      const TextSpan(text: ' seconds.'),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                          GestureDetector(onTap: widget.onClose, child: Container(width: 32, height: 32, decoration: BoxDecoration(shape: BoxShape.circle, color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1)), child: Icon(Icons.close_rounded, size: 18, color: isDark ? AppThemeData.grey4 : AppThemeData.grey6))),
+
+                          // ── Action buttons ──────────────────────
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildActionCircle(
+                                Icons.keyboard_arrow_down_rounded,
+                                isDark,
+                                () {},
+                              ),
+                              spaceW(width: 6),
+                              _buildActionCircle(
+                                Icons.close_rounded,
+                                isDark,
+                                widget.onClose,
+                              ),
+                            ],
+                          ),
                         ],
                       ),
-                      if (r.description != null && r.description!.isNotEmpty) ...[const SizedBox(height: 10), Text(r.description!, style: TextStyle(fontFamily: FontFamily.regular, fontSize: 13, color: isDark ? AppThemeData.grey4 : AppThemeData.grey7), maxLines: 2, overflow: TextOverflow.ellipsis)],
-                      const SizedBox(height: 14),
-                      ClipRRect(borderRadius: BorderRadius.circular(100), child: LinearProgressIndicator(value: 1.0 - _pc.value, minHeight: 4, backgroundColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08), valueColor: AlwaysStoppedAnimation<Color>(accent))),
+
+                      // ── Progress bar ─────────────────────────────
+                      const SizedBox(height: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: LinearProgressIndicator(
+                          value: _remainingSeconds / _totalSeconds,
+                          minHeight: 3,
+                          backgroundColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.06),
+                          valueColor: AlwaysStoppedAnimation<Color>(accent),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -262,6 +381,24 @@ class _ReminderToastState extends State<_ReminderToast> with SingleTickerProvide
           ),
         );
       },
+    );
+  }
+
+  Widget _buildActionCircle(IconData icon, bool isDark, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 28, height: 28,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
+        ),
+        child: Icon(
+          icon,
+          size: 16,
+          color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
+        ),
+      ),
     );
   }
 }

@@ -1,5 +1,7 @@
 // lib/app/modules/generate_bill/views/generate_bill_preview_view.dart
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:io';
+import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -7,32 +9,44 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
-import 'package:image/image.dart' as img;
 import 'package:intl/intl.dart';
 import 'package:maheksync/app/models/bill_model.dart';
 import 'package:maheksync/app/modules/generate_bill/controllers/generate_bill_controller.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
-
-class GenerateBillPreviewView extends StatelessWidget {
+class GenerateBillPreviewView extends StatefulWidget {
   const GenerateBillPreviewView({super.key});
+
+  @override
+  State<GenerateBillPreviewView> createState() => _GenerateBillPreviewViewState();
+}
+
+class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
+  final GlobalKey _previewKey = GlobalKey();
+  final GenerateBillController _controller = Get.find<GenerateBillController>();
+
+  final Map<String, bool> _visibleColumns = {
+    'index': true,
+    'name': true,
+    'payment': true,
+    'qty': true,
+    'price': true,
+    'total': true,
+  };
 
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     final isDark = themeChange.isDarkTheme();
-    final controller = Get.find<GenerateBillController>();
     final BillModel bill = Get.arguments;
-    final GlobalKey previewKey = GlobalKey();
 
     return Scaffold(
       backgroundColor: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
@@ -46,12 +60,11 @@ class GenerateBillPreviewView extends StatelessWidget {
                 child: Column(
                   children: [
                     RepaintBoundary(
-                      key: previewKey,
+                      key: _previewKey,
                       child: _buildInvoicePreview(isDark, bill),
                     ),
                     spaceH(height: 24),
-                    _buildExportButtons(
-                        context, isDark, controller, previewKey, bill),
+                    _buildExportSection(context, isDark, bill),
                     spaceH(height: 20),
                   ],
                 ),
@@ -62,6 +75,8 @@ class GenerateBillPreviewView extends StatelessWidget {
       ),
     );
   }
+
+  // ── Header ──────────────────────────────────────────────────────────
 
   Widget _buildHeader(BuildContext context, bool isDark, BillModel bill) {
     return Container(
@@ -117,6 +132,8 @@ class GenerateBillPreviewView extends StatelessWidget {
       ),
     );
   }
+
+  // ── Invoice Preview ─────────────────────────────────────────────────
 
   Widget _buildInvoicePreview(bool isDark, BillModel bill) {
     final formattedDate = bill.billDate != null
@@ -232,10 +249,7 @@ class GenerateBillPreviewView extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppThemeData.grey1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppThemeData.grey3,
-          width: 0.5,
-        ),
+        border: Border.all(color: AppThemeData.grey3, width: 0.5),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,223 +310,179 @@ class GenerateBillPreviewView extends StatelessWidget {
     );
   }
 
+  // ── Items Table (conditionally renders columns) ─────────────────────
+
   Widget _buildItemsTable(BillModel bill) {
+    final isMobile = MahekResponsive.isMobile(context);
+    final indexW = isMobile ? 30.0 : 40.0;
+    final qtyW = isMobile ? 40.0 : 50.0;
+    final priceW = isMobile ? 65.0 : 80.0;
+    final totalW = isMobile ? 65.0 : 80.0;
+    final headerFontSize = isMobile ? 10.0 : 11.0;
+    final rowFontSize = isMobile ? 11.0 : 13.0;
+
+    final showIndex = _visibleColumns['index'] == true;
+    final showName = _visibleColumns['name'] == true;
+    final showPayment = _visibleColumns['payment'] == true && !isMobile;
+    final showQty = _visibleColumns['qty'] == true;
+    final showPrice = _visibleColumns['price'] == true;
+    final showTotal = _visibleColumns['total'] == true;
+
     return Column(
       children: [
+        // Header row
         Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: EdgeInsets.symmetric(
+            vertical: isMobile ? 8 : 12,
+            horizontal: isMobile ? 10 : 16,
+          ),
           decoration: BoxDecoration(
             color: AppThemeData.primary50,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           ),
           child: Row(
             children: [
-              SizedBox(
-                width: 40,
-                child: Text(
-                  '#',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontFamily: FontFamily.semiBold,
-                  ),
+              if (showIndex)
+                SizedBox(
+                  width: indexW,
+                  child: Text('#', style: TextStyle(fontSize: headerFontSize, fontWeight: FontWeight.w600, color: Colors.white, fontFamily: FontFamily.semiBold)),
                 ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  'Item Name',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontFamily: FontFamily.semiBold,
-                  ),
+              if (showName)
+                Expanded(
+                  flex: 3,
+                  child: Text('Item Name', style: TextStyle(fontSize: headerFontSize, fontWeight: FontWeight.w600, color: Colors.white, fontFamily: FontFamily.semiBold)),
                 ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Text(
-                  'Payment Method',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontFamily: FontFamily.semiBold,
-                  ),
+              if (showPayment)
+                Expanded(
+                  flex: 2,
+                  child: Text('Payment Method', style: TextStyle(fontSize: headerFontSize, fontWeight: FontWeight.w600, color: Colors.white, fontFamily: FontFamily.semiBold)),
                 ),
-              ),
-              SizedBox(
-                width: 50,
-                child: Text(
-                  'Qty',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontFamily: FontFamily.semiBold,
-                  ),
+              if (showQty)
+                SizedBox(
+                  width: qtyW,
+                  child: Text('Qty', textAlign: TextAlign.center, style: TextStyle(fontSize: headerFontSize, fontWeight: FontWeight.w600, color: Colors.white, fontFamily: FontFamily.semiBold)),
                 ),
-              ),
-              SizedBox(
-                width: 80,
-                child: Text(
-                  'Price',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontFamily: FontFamily.semiBold,
-                  ),
+              if (showPrice)
+                SizedBox(
+                  width: priceW,
+                  child: Text('Price', textAlign: TextAlign.right, style: TextStyle(fontSize: headerFontSize, fontWeight: FontWeight.w600, color: Colors.white, fontFamily: FontFamily.semiBold)),
                 ),
-              ),
-              SizedBox(
-                width: 80,
-                child: Text(
-                  'Total',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontFamily: FontFamily.semiBold,
-                  ),
+              if (showTotal)
+                SizedBox(
+                  width: totalW,
+                  child: Text('Total', textAlign: TextAlign.right, style: TextStyle(fontSize: headerFontSize, fontWeight: FontWeight.w600, color: Colors.white, fontFamily: FontFamily.semiBold)),
                 ),
-              ),
             ],
           ),
         ),
+        // Data rows
         ...(bill.items ?? []).asMap().entries.map((entry) {
           final index = entry.key;
           final item = entry.value;
           final isEven = index % 2 == 0;
 
           return Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            padding: EdgeInsets.symmetric(
+              vertical: isMobile ? 8 : 12,
+              horizontal: isMobile ? 10 : 16,
+            ),
             decoration: BoxDecoration(
               color: isEven ? AppThemeData.grey1 : AppThemeData.primaryWhite,
-              border: Border(
-                bottom: BorderSide(color: AppThemeData.grey3, width: 0.5),
-              ),
+              border: Border(bottom: BorderSide(color: AppThemeData.grey3, width: 0.5)),
             ),
             child: Row(
               children: [
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    '${index + 1}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppThemeData.primary50,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: FontFamily.semiBold,
+                if (showIndex)
+                  SizedBox(
+                    width: indexW,
+                    child: Text(
+                      '${index + 1}',
+                      style: TextStyle(fontSize: rowFontSize, color: AppThemeData.primary50, fontWeight: FontWeight.w600, fontFamily: FontFamily.semiBold),
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    item.itemName ?? 'N/A',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppThemeData.grey10,
-                      fontFamily: FontFamily.regular,
+                if (showName)
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      item.itemName ?? 'N/A',
+                      style: TextStyle(fontSize: rowFontSize, color: AppThemeData.grey10, fontFamily: FontFamily.regular),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Row(
-                    children: [
-                      if (item.paymentMethodIcon != null &&
-                          item.paymentMethodIcon!.isNotEmpty)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: Image.network(
-                            item.paymentMethodIcon!,
+                if (showPayment)
+                  Expanded(
+                    flex: 2,
+                    child: Row(
+                      children: [
+                        if (item.paymentMethodIcon != null && item.paymentMethodIcon!.isNotEmpty)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: Image.network(
+                              item.paymentMethodIcon!,
+                              width: 18,
+                              height: 18,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 18,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    color: AppThemeData.primary300.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Icon(Icons.payment_rounded, size: 12, color: AppThemeData.primary300),
+                                );
+                              },
+                            ),
+                          )
+                        else
+                          Container(
                             width: 18,
                             height: 18,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: 18,
-                                height: 18,
-                                decoration: BoxDecoration(
-                                  color: AppThemeData.primary300.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Icon(Icons.payment_rounded,
-                                    size: 12, color: AppThemeData.primary300),
-                              );
-                            },
+                            decoration: BoxDecoration(
+                              color: AppThemeData.primary300.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Icon(Icons.payment_rounded, size: 12, color: AppThemeData.primary300),
                           ),
-                        )
-                      else
-                        Container(
-                          width: 18,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: AppThemeData.primary300.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
+                        spaceW(width: 6),
+                        Expanded(
+                          child: Text(
+                            item.paymentMethodName ?? 'N/A',
+                            style: TextStyle(fontSize: isMobile ? 11 : 12, color: AppThemeData.grey7, fontFamily: FontFamily.regular),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          child: Icon(Icons.payment_rounded,
-                              size: 12, color: AppThemeData.primary300),
                         ),
-                      spaceW(width: 6),
-                      Expanded(
-                        child: Text(
-                          item.paymentMethodName ?? 'N/A',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppThemeData.grey7,
-                            fontFamily: FontFamily.regular,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              SizedBox(
-                width: 50,
-                child: Text(
-                  '${item.qty ?? 0}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppThemeData.grey7,
-                    fontFamily: FontFamily.regular,
+                if (showQty)
+                  SizedBox(
+                    width: qtyW,
+                    child: Text(
+                      '${item.qty ?? 0}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: rowFontSize, color: AppThemeData.grey7, fontFamily: FontFamily.regular),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(
-                width: 80,
-                child: Text(
-                  '₹${(item.unitPrice ?? 0).toStringAsFixed(2)}',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppThemeData.grey7,
-                    fontFamily: FontFamily.regular,
+                if (showPrice)
+                  SizedBox(
+                    width: priceW,
+                    child: Text(
+                      '\u20B9${(item.unitPrice ?? 0).toStringAsFixed(2)}',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: rowFontSize, color: AppThemeData.grey7, fontFamily: FontFamily.regular),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(
-                width: 80,
-                child: Text(
-                  '₹${(item.total ?? 0).toStringAsFixed(2)}',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppThemeData.grey10,
-                    fontFamily: FontFamily.semiBold,
+                if (showTotal)
+                  SizedBox(
+                    width: totalW,
+                    child: Text(
+                      '\u20B9${(item.total ?? 0).toStringAsFixed(2)}',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: rowFontSize, fontWeight: FontWeight.w600, color: AppThemeData.grey10, fontFamily: FontFamily.semiBold),
+                    ),
                   ),
-                ),
-              ),
               ],
             ),
           );
@@ -520,6 +490,8 @@ class GenerateBillPreviewView extends StatelessWidget {
       ],
     );
   }
+
+  // ── Notes ───────────────────────────────────────────────────────────
 
   Widget _buildNotesSection(BillModel bill) {
     return Container(
@@ -557,6 +529,8 @@ class GenerateBillPreviewView extends StatelessWidget {
     );
   }
 
+  // ── Total Section ───────────────────────────────────────────────────
+
   Widget _buildTotalSection(BillModel bill) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -566,10 +540,7 @@ class GenerateBillPreviewView extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                AppThemeData.primary50,
-                AppThemeData.neonBlue,
-              ],
+              colors: [AppThemeData.primary50, AppThemeData.neonBlue],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -595,7 +566,7 @@ class GenerateBillPreviewView extends StatelessWidget {
                 ),
               ),
               Text(
-                '₹${(bill.totalAmount ?? 0).toStringAsFixed(2)}',
+                '\u20B9${(bill.totalAmount ?? 0).toStringAsFixed(2)}',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -609,6 +580,8 @@ class GenerateBillPreviewView extends StatelessWidget {
       ],
     );
   }
+
+  // ── Footer ──────────────────────────────────────────────────────────
 
   Widget _buildFooter(BillModel bill) {
     return Row(
@@ -675,18 +648,12 @@ class GenerateBillPreviewView extends StatelessWidget {
                   width: 120,
                   height: 60,
                   decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: AppThemeData.grey4, width: 1),
-                    ),
+                    border: Border(bottom: BorderSide(color: AppThemeData.grey4, width: 1)),
                   ),
                   child: Center(
                     child: Text(
                       'Signature',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppThemeData.grey5,
-                        fontFamily: FontFamily.regular,
-                      ),
+                      style: TextStyle(fontSize: 10, color: AppThemeData.grey5, fontFamily: FontFamily.regular),
                     ),
                   ),
                 );
@@ -695,11 +662,7 @@ class GenerateBillPreviewView extends StatelessWidget {
             spaceH(height: 4),
             Text(
               'Authorized Signature',
-              style: TextStyle(
-                fontSize: 10,
-                color: AppThemeData.grey5,
-                fontFamily: FontFamily.regular,
-              ),
+              style: TextStyle(fontSize: 10, color: AppThemeData.grey5, fontFamily: FontFamily.regular),
             ),
           ],
         ),
@@ -707,15 +670,235 @@ class GenerateBillPreviewView extends StatelessWidget {
     );
   }
 
-  Widget _buildExportButtons(
-    BuildContext context,
-    bool isDark,
-    GenerateBillController controller,
-    GlobalKey previewKey,
-    BillModel bill,
-  ) {
+  // ── Column Picker Dialog ────────────────────────────────────────────
+
+  static const _columnLabels = {
+    'index': '#',
+    'name': 'Item Name',
+    'payment': 'Payment',
+    'qty': 'Qty',
+    'price': 'Price',
+    'total': 'Total',
+  };
+
+  Future<Map<String, bool>?> _showColumnPickerDialog(bool isDark) async {
+    final selections = Map<String, bool>.from(_visibleColumns);
+
+    final result = await showModalBottomSheet<Map<String, bool>>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(ctx).size.height * 0.45,
+              ),
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isDark ? AppThemeData.surfaceDark : AppThemeData.primaryWhite,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3,
+                  width: 0.5,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.view_column_rounded, size: 18, color: AppThemeData.primary50),
+                      spaceW(width: 8),
+                      Text(
+                        'Select Columns',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? AppThemeData.primaryWhite : AppThemeData.grey10,
+                          fontFamily: FontFamily.semiBold,
+                        ),
+                      ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(ctx),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppThemeData.surfaceElevated : AppThemeData.grey2,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.close_rounded, size: 16, color: AppThemeData.grey5),
+                        ),
+                      ),
+                    ],
+                  ),
+                  spaceH(height: 16),
+                  ...selections.entries.map((entry) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () {
+                            setModalState(() {
+                              selections[entry.key] = !selections[entry.key]!;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                            child: Row(
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 22,
+                                  height: 22,
+                                  decoration: BoxDecoration(
+                                    color: entry.value
+                                        ? AppThemeData.primary50
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: entry.value
+                                          ? AppThemeData.primary50
+                                          : (isDark ? AppThemeData.grey4 : AppThemeData.grey4),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: entry.value
+                                      ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+                                      : null,
+                                ),
+                                spaceW(width: 12),
+                                Text(
+                                  _columnLabels[entry.key] ?? entry.key,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark ? AppThemeData.primaryWhite : AppThemeData.grey10,
+                                    fontFamily: FontFamily.medium,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                  spaceH(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setModalState(() {
+                              for (final key in selections.keys) {
+                                selections[key] = true;
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: AppThemeData.primary50.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppThemeData.primary50.withValues(alpha: 0.3)),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Select All',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppThemeData.primary50,
+                                  fontFamily: FontFamily.semiBold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      spaceW(width: 10),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setModalState(() {
+                              for (final key in selections.keys) {
+                                selections[key] = false;
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: AppThemeData.neonRed.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppThemeData.neonRed.withValues(alpha: 0.3)),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Deselect All',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppThemeData.neonRed,
+                                  fontFamily: FontFamily.semiBold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  spaceH(height: 12),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(ctx, selections),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppThemeData.primary50, AppThemeData.neonBlue],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Apply & Export',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontFamily: FontFamily.semiBold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    return result;
+  }
+
+  // ── Export Section (compact responsive) ──────────────────────────────
+
+  Widget _buildExportSection(BuildContext context, bool isDark, BillModel bill) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
         borderRadius: BorderRadius.circular(16),
@@ -729,112 +912,105 @@ class GenerateBillPreviewView extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.file_download_outlined,
-                  size: 18, color: AppThemeData.primary50),
-              spaceW(width: 8),
+              Icon(Icons.file_download_outlined, size: 16, color: AppThemeData.primary50),
+              spaceW(width: 6),
               TextCustom(
-                title: 'EXPORT OPTIONS',
-                fontSize: 11,
+                title: 'EXPORT',
+                fontSize: 10,
                 fontFamily: FontFamily.medium,
                 color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
               ),
             ],
           ),
-          spaceH(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildExportButton(
-                  isDark,
-                  Icons.picture_as_pdf_rounded,
-                  'Download PDF',
-                  AppThemeData.neonRed,
-                  () => _exportPdf(controller, bill),
-                ),
-              ),
-              spaceW(width: 12),
-              Expanded(
-                child: _buildExportButton(
-                  isDark,
-                  Icons.share_rounded,
-                  'Share PDF',
-                  AppThemeData.neonBlue,
-                  () => _sharePdf(controller, bill),
-                ),
-              ),
-            ],
-          ),
           spaceH(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildExportButton(
-                  isDark,
-                  Icons.print_rounded,
-                  'Print',
-                  AppThemeData.neonOrange,
-                  () => _printPdf(controller, bill),
-                ),
-              ),
-              spaceW(width: 12),
-              Expanded(
-                child: _buildExportButton(
-                  isDark,
-                  Icons.image_rounded,
-                  'Save PNG',
-                  AppThemeData.primary300,
-                  () => _savePng(previewKey, bill),
-                ),
-              ),
-              spaceW(width: 12),
-              Expanded(
-                child: _buildExportButton(
-                  isDark,
-                  Icons.photo_rounded,
-                  'Save JPEG',
-                  AppThemeData.neonPurple,
-                  () => _saveJpeg(previewKey, bill),
-                ),
-              ),
-            ],
-          ),
+          _buildExportButtons(context, isDark, bill),
         ],
       ),
     );
   }
 
-  Widget _buildExportButton(
-    bool isDark,
-    IconData icon,
-    String label,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: color.withValues(alpha: 0.3),
-            width: 1,
+  Widget _buildExportButtons(BuildContext context, bool isDark, BillModel bill) {
+    final width = MahekResponsive.screenWidth(context);
+    final isMobile = width < 600;
+    final isTablet = width >= 600 && width < 1200;
+
+    final buttons = <_ExportButtonData>[
+      _ExportButtonData(Icons.picture_as_pdf_rounded, 'PDF', AppThemeData.neonRed, () => _onExportPdf(bill)),
+      _ExportButtonData(Icons.share_rounded, 'Share', AppThemeData.neonBlue, () => _onSharePdf(bill)),
+      _ExportButtonData(Icons.print_rounded, 'Print', AppThemeData.neonOrange, () => _onPrintPdf(bill)),
+      _ExportButtonData(Icons.image_rounded, 'PNG', AppThemeData.primary300, () => _onSavePng(bill)),
+      _ExportButtonData(Icons.photo_rounded, 'JPEG', AppThemeData.neonPurple, () => _onSaveJpeg(bill)),
+    ];
+
+    if (isMobile) {
+      return Column(
+        children: [
+          for (int i = 0; i < buttons.length; i++) ...[
+            if (i > 0) spaceH(height: 8),
+            _buildCompactExportButton(isDark, buttons[i]),
+          ],
+        ],
+      );
+    }
+
+    if (isTablet) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              for (int i = 0; i < 3; i++) ...[
+                if (i > 0) spaceW(width: 8),
+                Expanded(child: _buildCompactExportButton(isDark, buttons[i])),
+              ],
+            ],
           ),
+          spaceH(height: 8),
+          Row(
+            children: [
+              for (int i = 3; i < 5; i++) ...[
+                if (i > 3) spaceW(width: 8),
+                Expanded(child: _buildCompactExportButton(isDark, buttons[i])),
+              ],
+            ],
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        for (int i = 0; i < buttons.length; i++) ...[
+          if (i > 0) spaceW(width: 8),
+          Expanded(child: _buildCompactExportButton(isDark, buttons[i])),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCompactExportButton(bool isDark, _ExportButtonData data) {
+    return GestureDetector(
+      onTap: data.onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: data.color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: data.color.withValues(alpha: 0.25), width: 0.8),
         ),
-        child: Column(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 24, color: color),
-            spaceH(height: 6),
+            Icon(data.icon, size: 16, color: data.color),
+            spaceW(width: 6),
             Text(
-              label,
+              data.label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: color,
+                color: data.color,
                 fontFamily: FontFamily.semiBold,
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -842,37 +1018,45 @@ class GenerateBillPreviewView extends StatelessWidget {
     );
   }
 
-  Future<void> _exportPdf(GenerateBillController controller, BillModel bill) async {
-    await controller.exportBillAsPdf(bill);
+  // ── Export Actions ──────────────────────────────────────────────────
+
+  Future<void> _onExportPdf(BillModel bill) async {
+    final cols = await _showColumnPickerDialog(
+      Provider.of<DarkThemeProvider>(context, listen: false).isDarkTheme(),
+    );
+    if (cols == null) return;
+    await _controller.exportBillAsPdf(bill, visibleColumns: cols);
   }
 
-  Future<void> _sharePdf(GenerateBillController controller, BillModel bill) async {
-    await controller.shareBillAsPdf(bill);
+  Future<void> _onSharePdf(BillModel bill) async {
+    final cols = await _showColumnPickerDialog(
+      Provider.of<DarkThemeProvider>(context, listen: false).isDarkTheme(),
+    );
+    if (cols == null) return;
+    await _controller.shareBillAsPdf(bill, visibleColumns: cols);
   }
 
-  Future<void> _printPdf(GenerateBillController controller, BillModel bill) async {
-    await controller.printBillAsPdf(bill);
+  Future<void> _onPrintPdf(BillModel bill) async {
+    final cols = await _showColumnPickerDialog(
+      Provider.of<DarkThemeProvider>(context, listen: false).isDarkTheme(),
+    );
+    if (cols == null) return;
+    await _controller.printBillAsPdf(bill, visibleColumns: cols);
   }
 
-  Future<Uint8List?> _capturePngBytes(GlobalKey previewKey) async {
+  Future<void> _onSavePng(BillModel bill) async {
+    final cols = await _showColumnPickerDialog(
+      Provider.of<DarkThemeProvider>(context, listen: false).isDarkTheme(),
+    );
+    if (cols == null) return;
+
+    final prevCols = Map<String, bool>.from(_visibleColumns);
+    setState(() => _visibleColumns.addAll(cols));
+    await WidgetsBinding.instance.endOfFrame;
+    await Future.delayed(const Duration(milliseconds: 50));
+
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      final ctx = previewKey.currentContext;
-      if (ctx == null) return null;
-      final boundary = ctx.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) return null;
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      return byteData?.buffer.asUint8List();
-    } catch (e) {
-      debugPrint('Capture error: $e');
-      return null;
-    }
-  }
-
-  Future<void> _savePng(GlobalKey previewKey, BillModel bill) async {
-    try {
-      final image = await _capturePngBytes(previewKey);
+      final image = await _capturePngBytes();
       if (image == null) {
         _showSnack('Failed to capture invoice', isError: true);
         return;
@@ -894,42 +1078,78 @@ class GenerateBillPreviewView extends StatelessWidget {
       _showSnack('PNG exported successfully');
     } catch (e) {
       _showSnack('Failed to save PNG', isError: true);
+    } finally {
+      setState(() => _visibleColumns.addAll(prevCols));
     }
   }
 
-  Future<void> _saveJpeg(GlobalKey previewKey, BillModel bill) async {
+  Future<void> _onSaveJpeg(BillModel bill) async {
+    final cols = await _showColumnPickerDialog(
+      Provider.of<DarkThemeProvider>(context, listen: false).isDarkTheme(),
+    );
+    if (cols == null) return;
+
+    final prevCols = Map<String, bool>.from(_visibleColumns);
+    setState(() => _visibleColumns.addAll(cols));
+    await WidgetsBinding.instance.endOfFrame;
+    await Future.delayed(const Duration(milliseconds: 50));
+
     try {
-      final pngBytes = await _capturePngBytes(previewKey);
+      final pngBytes = await _capturePngBytes();
       if (pngBytes == null) {
         _showSnack('Failed to capture invoice', isError: true);
         return;
       }
 
-      final decoded = img.decodeImage(pngBytes);
-      if (decoded == null) {
-        _showSnack('Failed to process image', isError: true);
-        return;
-      }
-
-      final jpegBytes = img.encodeJpg(decoded, quality: 90);
       if (kIsWeb) {
-        final blob = html.Blob([jpegBytes], 'image/jpeg');
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        html.AnchorElement(href: url)
+        final pngBlob = html.Blob([pngBytes], 'image/png');
+        final pngUrl = html.Url.createObjectUrlFromBlob(pngBlob);
+        final imgElement = html.ImageElement(src: pngUrl);
+        await imgElement.onLoad.first;
+
+        final canvas = html.CanvasElement(
+          width: imgElement.naturalWidth,
+          height: imgElement.naturalHeight,
+        );
+        canvas.context2D.drawImage(imgElement, 0, 0);
+        final jpegBlob = await canvas.toBlob('image/jpeg', 0.9);
+        final jpegUrl = html.Url.createObjectUrlFromBlob(jpegBlob);
+        html.AnchorElement(href: jpegUrl)
           ..setAttribute('download', '${bill.formattedInvoiceNumber}.jpg')
           ..click();
-        html.Url.revokeObjectUrl(url);
+        html.Url.revokeObjectUrl(pngUrl);
+        html.Url.revokeObjectUrl(jpegUrl);
       } else {
         final dir = await getTemporaryDirectory();
         final file = File('${dir.path}/bill_${bill.formattedInvoiceNumber}.jpg');
-        await file.writeAsBytes(jpegBytes);
+        await file.writeAsBytes(pngBytes);
         await Share.shareXFiles([XFile(file.path)], text: 'Bill ${bill.formattedInvoiceNumber}');
       }
       _showSnack('JPEG exported successfully');
     } catch (e) {
       _showSnack('Failed to save JPEG', isError: true);
+    } finally {
+      setState(() => _visibleColumns.addAll(prevCols));
     }
   }
+
+  // ── Capture ─────────────────────────────────────────────────────────
+
+  Future<Uint8List?> _capturePngBytes() async {
+    try {
+      final boundary = _previewKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return null;
+      if (!mounted) return null;
+      final image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      debugPrint('Capture error: $e');
+      return null;
+    }
+  }
+
+  // ── Snack ───────────────────────────────────────────────────────────
 
   void _showSnack(String message, {bool isError = false}) {
     Get.snackbar(
@@ -951,4 +1171,12 @@ class GenerateBillPreviewView extends StatelessWidget {
       duration: const Duration(seconds: 3),
     );
   }
+}
+
+class _ExportButtonData {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _ExportButtonData(this.icon, this.label, this.color, this.onTap);
 }

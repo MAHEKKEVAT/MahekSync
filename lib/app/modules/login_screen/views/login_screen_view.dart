@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:maheksync/app/widgets/mahek_loader.dart' hide AnimatedBuilder;
+
 import 'package:get/get.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:provider/provider.dart';
@@ -601,10 +601,6 @@ class _LoginScreenViewState extends State<LoginScreenView>
                     ),
                     SizedBox(height: s.sectionGap * 0.75),
 
-                    // ── Quick access card ────────────────────────────
-                    _buildQuickAccessCard(),
-                    SizedBox(height: s.sectionGap * 0.6),
-
                     // ── Sign up + M circle ───────────────────────────
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -723,7 +719,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
             height: s.buttonHeight,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(s.buttonBorderRadius),
-              gradient: AppThemeData.appleIntelligenceGradient,
+              gradient: AppThemeData.appleIntelligenceGradientCool,
               boxShadow: [
                 ...AppThemeData.neonGlow(AppThemeData.neonPurple, blur: 32, opacity: loading ? 0.08 : _glowCtrl.value * 0.4),
                 BoxShadow(color: AppThemeData.neonPink.withValues(alpha: 0.12), blurRadius: 24, offset: const Offset(0, 6)),
@@ -750,38 +746,51 @@ class _LoginScreenViewState extends State<LoginScreenView>
                     ),
                   ),
                 // ── Button content ─────────────────────────────────
-                ElevatedButton(
-                  onPressed: loading ? null : () {
-                    if (_formKey.currentState!.validate()) {
-                      controller.signInWithEmailAndPassword(
-                        email: controller.emailController.text.trim(),
-                        password: controller.passwordController.text.trim(),
-                        rememberMe: _rememberMe,
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent, shadowColor: Colors.transparent,
-                    disabledBackgroundColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(s.buttonBorderRadius)),
-                  ),
-                  child: loading
-                      ? const MahekLoader(size: 22, showBranding: false)
-                      : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Text(
-                      'Authenticate',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontFamily: FontFamily.semiBold,
-                        color: Colors.white,
-                        shadows: const [
-                          Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1)),
-                        ],
-                      ),
+                SizedBox(
+                  height: s.buttonHeight,
+                  child: ElevatedButton(
+                    onPressed: loading ? null : () {
+                      if (_formKey.currentState!.validate()) {
+                        controller.signInWithEmailAndPassword(
+                          email: controller.emailController.text.trim(),
+                          password: controller.passwordController.text.trim(),
+                          rememberMe: _rememberMe,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      disabledBackgroundColor: Colors.transparent,
+                      disabledForegroundColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      alignment: Alignment.center,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(s.buttonBorderRadius)),
                     ),
-                    spaceW(width: 8),
-                    const Icon(SolarIconsOutline.arrowRight, color: Colors.white, size: 18, shadows: [Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1))]),
-                  ]),
+                    child: loading
+                        ? const SizedBox(
+                            width: 22, height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Text(
+                        'Authenticate',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontFamily: FontFamily.semiBold,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1)),
+                          ],
+                        ),
+                      ),
+                      spaceW(width: 8),
+                      const Icon(SolarIconsOutline.arrowRight, color: Colors.white, size: 18, shadows: [Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1))]),
+                    ]),
+                  ),
                 ),
               ],
             ),
@@ -789,60 +798,6 @@ class _LoginScreenViewState extends State<LoginScreenView>
         },
       );
     });
-  }
-
-  // ── Quick access card ───────────────────────────────────────────────
-
-  Widget _buildQuickAccessCard() {
-    return GestureDetector(
-      onTap: () {
-        controller.emailController.text = 'mahekjkevat@gmail.com';
-        controller.passwordController.text = 'Mahek@6561';
-        Get.snackbar('Ready!', 'Credentials filled', snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: AppThemeData.neonMint.withValues(alpha: 0.9), colorText: AppThemeData.surfaceVoid,
-            duration: const Duration(seconds: 2), margin: const EdgeInsets.all(16), borderRadius: 14,
-            icon: Icon(SolarIconsBold.checkCircle, color: AppThemeData.surfaceVoid));
-      },
-      child: AnimatedBuilder(
-        animation: _glowCtrl,
-        builder: (context, _) {
-          return Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppThemeData.surfaceMid.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppThemeData.neonMint.withValues(alpha: 0.12 + _glowCtrl.value * 0.06)),
-            ),
-            child: Row(children: [
-              Container(
-                width: 38, height: 38,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: AppThemeData.appleIntelligenceGradient,
-                  boxShadow: AppThemeData.neonGlow(AppThemeData.neonPink, blur: 10, opacity: 0.2),
-                ),
-                child: const Center(child: Text('M', style: TextStyle(fontFamily: FontFamily.bold, fontSize: 17, color: Colors.white))),
-              ),
-              spaceW(width: 12),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Mahek Kevat', style: TextStyle(fontFamily: FontFamily.semiBold, fontSize: 13, color: AppThemeData.textNeonMint)),
-                spaceH(height: 1),
-                Text('Super Admin', style: TextStyle(fontFamily: FontFamily.regular, fontSize: 10, color: AppThemeData.textNeonMint.withValues(alpha: 0.4))),
-              ])),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: AppThemeData.neonMint.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8), border: Border.all(color: AppThemeData.neonMint.withValues(alpha: 0.15))),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(SolarIconsOutline.handStars, color: AppThemeData.neonMint, size: 12),
-                  spaceW(width: 3),
-                  Text('Tap', style: TextStyle(fontFamily: FontFamily.medium, fontSize: 10, color: AppThemeData.neonMint)),
-                ]),
-              ),
-            ]),
-          );
-        },
-      ),
-    );
   }
 
   // ── Sign up link ────────────────────────────────────────────────────
@@ -868,16 +823,33 @@ class _LoginScreenViewState extends State<LoginScreenView>
       animation: _glowCtrl,
       builder: (context, _) {
         return Tooltip(
-          message: 'Mahek Kevat — Owner',
-          preferBelow: false,
-          child: Container(
-            width: 28, height: 28,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: AppThemeData.appleIntelligenceGradientCool,
-              boxShadow: AppThemeData.neonGlow(AppThemeData.neonPurple, blur: 12, opacity: _glowCtrl.value * 0.2),
+          message: 'Tap to fill credentials',
+          preferBelow: true,
+          child: GestureDetector(
+            onTap: () {
+              controller.emailController.text = 'mahekjkevat@gmail.com';
+              controller.passwordController.text = 'Mahek@6561';
+              Get.snackbar(
+                'Ready!',
+                'Credentials filled',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: AppThemeData.neonMint.withValues(alpha: 0.9),
+                colorText: AppThemeData.surfaceVoid,
+                duration: const Duration(seconds: 2),
+                margin: const EdgeInsets.all(16),
+                borderRadius: 14,
+                icon: Icon(SolarIconsBold.checkCircle, color: AppThemeData.surfaceVoid),
+              );
+            },
+            child: Container(
+              width: 32, height: 32,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: AppThemeData.appleIntelligenceGradientCool,
+                boxShadow: AppThemeData.neonGlow(AppThemeData.neonPurple, blur: 12, opacity: _glowCtrl.value * 0.2),
+              ),
+              child: const Center(child: Text('M', style: TextStyle(fontFamily: FontFamily.bold, fontSize: 13, color: Colors.white))),
             ),
-            child: const Center(child: Text('M', style: TextStyle(fontFamily: FontFamily.bold, fontSize: 12, color: Colors.white))),
           ),
         );
       },
@@ -928,8 +900,6 @@ class _LoginScreenViewState extends State<LoginScreenView>
                 ),
               ),
             ),
-            spaceH(height: 16),
-            _buildQuickAccessCard(),
             spaceH(height: 16),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [_buildSignUpLink(), _buildOwnerCircle()]),
           ]),
