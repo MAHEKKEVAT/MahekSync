@@ -48,7 +48,6 @@ class MahekConstant {
 
   static  int pageSize = 10;
 
-
   static String? selectedMap;
 
   static String jsonFileURL = "";

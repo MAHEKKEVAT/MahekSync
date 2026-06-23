@@ -51,9 +51,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                 spaceH(height: 24),
                 _buildStatsRow(isDark),
                 spaceH(height: 24),
-                _buildFilterBar(isDark),
-                spaceH(height: 20),
-                _buildSearchAndViewToggle(isDark),
+                _buildFilterSearchRow(isDark),
                 spaceH(height: 20),
                 Expanded(child: _buildDevicesContent(isDark)),
               ],
@@ -267,9 +265,9 @@ class MyDevicesView extends GetView<MyDevicesController> {
     );
   }
 
-  Widget _buildFilterBar(bool isDark) {
+  Widget _buildFilterSearchRow(bool isDark) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
         borderRadius: BorderRadius.circular(18),
@@ -285,14 +283,24 @@ class MyDevicesView extends GetView<MyDevicesController> {
         children: [
           // Category Filter
           Expanded(
+            flex: 2,
             child: _buildCategoryFilter(isDark),
           ),
-          spaceW(width: 16),
+          spaceW(width: 14),
           // Payment Method Filter
           Expanded(
+            flex: 2,
             child: _buildPaymentMethodFilter(isDark),
           ),
-          spaceW(width: 12),
+          spaceW(width: 14),
+          // Search Bar
+          Expanded(
+            flex: 4,
+            child: _buildSearchFilter(isDark),
+          ),
+          spaceW(width: 10),
+          // View Toggle
+          _buildViewToggleContainer(isDark),
           // Clear Filters Button
           Obx(() {
             final hasFilters = controller.selectedCategory.value != null ||
@@ -319,6 +327,129 @@ class MyDevicesView extends GetView<MyDevicesController> {
           }),
         ],
       ),
+    );
+  }
+
+  Widget _buildSearchFilter(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: AppThemeData.primary50.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.search_rounded,
+                color: AppThemeData.primary50,
+                size: 14,
+              ),
+            ),
+            spaceW(width: 8),
+            TextCustom(
+              title: 'Search',
+              fontSize: 12,
+              fontFamily: FontFamily.medium,
+              color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+            ),
+          ],
+        ),
+        spaceH(height: 8),
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+              width: 0.5,
+            ),
+          ),
+          child: TextField(
+            onChanged: controller.updateSearchQuery,
+            style: TextStyle(
+              fontFamily: FontFamily.medium,
+              fontSize: 13,
+              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Search by name, brand, store...',
+              hintStyle: TextStyle(
+                fontFamily: FontFamily.regular,
+                fontSize: 13,
+                color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+              ),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: AppThemeData.primary50,
+                size: 18,
+              ),
+              filled: true,
+              fillColor: Colors.transparent,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: AppThemeData.primary50,
+                  width: 1.5,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 12,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildViewToggleContainer(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 22 + 12), // Match label + spaceH(height: 8) height
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+              width: 0.5,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildViewToggle(
+                icon: Icons.grid_view_rounded,
+                isSelected: controller.isGridView.value,
+                onTap: () => controller.isGridView.value = true,
+                isDark: isDark,
+              ),
+              _buildViewToggle(
+                icon: Icons.list_rounded,
+                isSelected: !controller.isGridView.value,
+                onTap: () => controller.isGridView.value = false,
+                isDark: isDark,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -596,108 +727,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
     );
   }
 
-  Widget _buildSearchAndViewToggle(bool isDark) {
-    return Row(
-      children: [
-        // Search Bar
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: TextField(
-              onChanged: controller.updateSearchQuery,
-              style: TextStyle(
-                fontFamily: FontFamily.medium,
-                fontSize: 14,
-                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Quick search by name, brand, store...',
-                hintStyle: TextStyle(
-                  fontFamily: FontFamily.regular,
-                  fontSize: 14,
-                  color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-                ),
-                prefixIcon: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppThemeData.primary50.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.search_rounded,
-                    color: AppThemeData.primary50,
-                    size: 20,
-                  ),
-                ),
-                filled: true,
-                fillColor: Colors.transparent,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: AppThemeData.primary50,
-                    width: 1.5,
-                  ),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-              ),
-            ),
-          ),
-        ),
-        spaceW(width: 12),
-        // View Toggle
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              _buildViewToggle(
-                icon: Icons.grid_view_rounded,
-                isSelected: controller.isGridView.value,
-                onTap: () => controller.isGridView.value = true,
-                isDark: isDark,
-              ),
-              _buildViewToggle(
-                icon: Icons.list_rounded,
-                isSelected: !controller.isGridView.value,
-                onTap: () => controller.isGridView.value = false,
-                isDark: isDark,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildViewToggle({
     required IconData icon,

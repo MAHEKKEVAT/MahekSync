@@ -14,6 +14,7 @@ class DeviceModel {
   DateTime? purchaseDate;
   DateTime? warrantyEndDate;
   String? paymentMethod;
+  String? warrantyPeriod;
   List<String>? deviceImageUrls;
   String? notes;
   Timestamp? createdAt;
@@ -32,6 +33,7 @@ class DeviceModel {
     this.purchaseDate,
     this.warrantyEndDate,
     this.paymentMethod,
+    this.warrantyPeriod,
     this.deviceImageUrls,
     this.notes,
     this.createdAt,
@@ -51,6 +53,7 @@ class DeviceModel {
     purchaseDate = json['purchaseDate']?.toDate();
     warrantyEndDate = json['warrantyEndDate']?.toDate();
     paymentMethod = json['paymentMethod'];
+    warrantyPeriod = json['warrantyPeriod'];
     deviceImageUrls = json['deviceImageUrls'] != null
         ? List<String>.from(json['deviceImageUrls'])
         : [];
@@ -73,6 +76,7 @@ class DeviceModel {
     data['purchaseDate'] = purchaseDate;
     data['warrantyEndDate'] = warrantyEndDate;
     data['paymentMethod'] = paymentMethod;
+    data['warrantyPeriod'] = warrantyPeriod;
     data['deviceImageUrls'] = deviceImageUrls ?? [];
     data['notes'] = notes;
     data['createdAt'] = createdAt ?? Timestamp.now();

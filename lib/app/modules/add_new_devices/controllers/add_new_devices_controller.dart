@@ -26,6 +26,7 @@ class AddNewDevicesController extends GetxController {
   final selectedCategory = Rxn<CategoryModel>();
   final selectedPaymentMethod = Rxn<PaymentMethodModel>();
   final selectedCondition = 'NEW'.obs;
+  final selectedWarrantyPeriod = Rxn<String>();
   final purchaseDate = Rxn<DateTime>();
 
   final deviceImages = <XFile>[].obs;
@@ -37,6 +38,7 @@ class AddNewDevicesController extends GetxController {
   final totalValue = 0.0.obs;
 
   final conditions = ['NEW', 'USED', 'REFURB', 'MINT', 'FACTORY NEW'];
+  final warrantyPeriods = ['No Warranty', '3 Months', '6 Months', '1 Year', '2 Years', '3 Years', '5 Years'];
 
   DeviceModel? _editingDevice;
   bool get isEditMode => _editingDevice != null;
@@ -60,6 +62,7 @@ class AddNewDevicesController extends GetxController {
       priceController.text = (device.price ?? 0.0).toString();
       storeNameController.text = device.storeName ?? '';
       selectedCondition.value = device.condition ?? 'NEW';
+      selectedWarrantyPeriod.value = device.warrantyPeriod;
       purchaseDate.value = device.purchaseDate;
       warrantyEndDate.value = device.warrantyEndDate;
     }
@@ -106,8 +109,8 @@ class AddNewDevicesController extends GetxController {
 
       if (images.isNotEmpty) {
         for (var img in images) {
-          deviceImages.add(img);
           final bytes = await img.readAsBytes();
+          deviceImages.add(img);
           imageBytes.add(bytes);
         }
       }
@@ -158,6 +161,7 @@ class AddNewDevicesController extends GetxController {
         description: descriptionController.text.trim(),
         purchaseDate: purchaseDate.value,
         warrantyEndDate: warrantyEndDate.value,
+        warrantyPeriod: selectedWarrantyPeriod.value,
         paymentMethod: selectedPaymentMethod.value?.pName,
         deviceImageUrls: uploadedUrls,
       );
@@ -176,6 +180,7 @@ class AddNewDevicesController extends GetxController {
           description: descriptionController.text.trim(),
           purchaseDate: purchaseDate.value,
           warrantyEndDate: warrantyEndDate.value,
+          warrantyPeriod: selectedWarrantyPeriod.value,
           paymentMethod: selectedPaymentMethod.value?.pName,
           deviceImageUrls: _editingDevice!.deviceImageUrls,
           notes: _editingDevice!.notes,

@@ -100,7 +100,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                               color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                             ),
                             TextCustom(
-                              title: controller.isEditMode ? 'Update device details' : 'Add a new device to your inventory',
+                              title: controller.isEditMode ? 'Update device details' : 'Fill in the details below to add a new device',
                               fontSize: 13,
                               fontFamily: FontFamily.regular,
                               color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
@@ -241,14 +241,14 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                     _buildPaymentMethodDropdown(isDark),
                     spaceH(height: 28),
 
-                    // Warranty & Dates
-                    _buildSectionTitle('WARRANTY & DATES', Icons.calendar_month_outlined, isDark),
+                    // Warranty & Gifts
+                    _buildSectionTitle('WARRANTY & GIFTS', Icons.card_giftcard_outlined, isDark),
                     spaceH(height: 16),
                     Row(
                       children: [
                         Expanded(child: _buildDatePicker(isDark, context: context)),
                         spaceW(width: 16),
-                        Expanded(child: _buildWarrantyDatePicker(isDark, context: context)),
+                        Expanded(child: _buildWarrantyPeriodDropdown(isDark)),
                       ],
                     ),
                   ],
@@ -259,7 +259,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
 
           // Right Panel
           Container(
-            width: 380,
+            width: 420,
             decoration: BoxDecoration(
               color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
               border: Border(
@@ -727,63 +727,112 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
     );
   }
 
-  Widget _buildWarrantyDatePicker(bool isDark, {required BuildContext context}) {
+  Widget _buildWarrantyPeriodDropdown(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextCustom(
-          title: 'WARRANTY ENDS',
+          title: 'WARRANTY PERIOD',
           fontSize: 11,
           fontFamily: FontFamily.medium,
           color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
         ),
         spaceH(height: 8),
-        Obx(() => GestureDetector(
-          onTap: () async {
-            final selected = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now().add(const Duration(days: 365)),
-              firstDate: DateTime.now(),
-              lastDate: DateTime(2030),
-            );
-            if (selected != null) controller.setWarrantyEndDate(selected);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            decoration: BoxDecoration(
-              color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-                width: 0.5,
+        Obx(() => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
+            ],
+            border: Border.all(
+              color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+              width: 0.5,
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AppThemeData.primary50.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.verified_outlined,
-                    size: 16,
-                    color: AppThemeData.primary50,
-                  ),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: controller.selectedWarrantyPeriod.value,
+              isExpanded: true,
+              dropdownColor: isDark ? AppThemeData.grey9 : AppThemeData.primaryWhite,
+              icon: Container(
+                margin: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppThemeData.primary50.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                spaceW(width: 12),
-                TextCustom(
-                  title: controller.warrantyEndDate.value != null
-                      ? DateFormat('MM/dd/yyyy').format(controller.warrantyEndDate.value!)
-                      : 'Select date',
-                  fontSize: 14,
-                  fontFamily: FontFamily.medium,
-                  color: controller.warrantyEndDate.value != null
-                      ? (isDark ? AppThemeData.grey1 : AppThemeData.grey10)
-                      : (isDark ? AppThemeData.grey6 : AppThemeData.grey5),
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: AppThemeData.primary50,
+                  size: 18,
                 ),
-              ],
+              ),
+              style: TextStyle(
+                fontFamily: FontFamily.medium,
+                fontSize: 14,
+                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+              ),
+              hint: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppThemeData.primary50.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.verified_outlined,
+                      size: 16,
+                      color: AppThemeData.primary50,
+                    ),
+                  ),
+                  spaceW(width: 12),
+                  TextCustom(
+                    title: 'Select period',
+                    fontSize: 14,
+                    fontFamily: FontFamily.regular,
+                    color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+                  ),
+                ],
+              ),
+              items: controller.warrantyPeriods.map((period) {
+                return DropdownMenuItem<String>(
+                  value: period,
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppThemeData.primary50.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.verified_outlined,
+                          size: 16,
+                          color: AppThemeData.primary50,
+                        ),
+                      ),
+                      spaceW(width: 12),
+                      Text(
+                        period,
+                        style: TextStyle(
+                          fontFamily: FontFamily.medium,
+                          fontSize: 14,
+                          color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                controller.selectedWarrantyPeriod.value = value;
+              },
             ),
           ),
         )),
@@ -801,21 +850,20 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppThemeData.primary50.withValues(alpha: isDark ? 0.2 : 0.08),
-              AppThemeData.primary4.withValues(alpha: isDark ? 0.1 : 0.04),
+              AppThemeData.primary50.withValues(alpha: isDark ? 0.25 : 0.15),
+              AppThemeData.primary4.withValues(alpha: isDark ? 0.15 : 0.08),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: AppThemeData.primary50.withValues(alpha: 0.15),
+            color: AppThemeData.primary50.withValues(alpha: 0.2),
           ),
         ),
         child: Stack(
           children: [
-            // Background hint image with low opacity
             Positioned.fill(
               child: Opacity(
-                opacity: 0.15,
+                opacity: 0.12,
                 child: Image.asset(
                   'assets/images/add.png',
                   fit: BoxFit.contain,
@@ -825,21 +873,20 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                 ),
               ),
             ),
-            // Content
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 64,
-                    height: 64,
+                    width: 72,
+                    height: 72,
                     decoration: BoxDecoration(
-                      color: AppThemeData.primary50.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(18),
+                      color: AppThemeData.primary50.withValues(alpha: 0.25),
+                      shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.add_photo_alternate_outlined,
-                      size: 32,
+                      Icons.add_rounded,
+                      size: 36,
                       color: AppThemeData.primary50,
                     ),
                   ),
@@ -852,7 +899,7 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
                   ),
                   spaceH(height: 4),
                   TextCustom(
-                    title: 'Upload product images',
+                    title: 'Upload device image',
                     fontSize: 13,
                     fontFamily: FontFamily.regular,
                     color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
@@ -995,6 +1042,11 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
               _buildStatRow(
                 'Payment',
                 controller.selectedPaymentMethod.value?.pName ?? '—',
+                isDark,
+              ),
+              _buildStatRow(
+                'Warranty',
+                controller.selectedWarrantyPeriod.value ?? '—',
                 isDark,
               ),
               _buildStatRow(
