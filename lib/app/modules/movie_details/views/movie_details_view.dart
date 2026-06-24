@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/models/movie_model.dart';
@@ -38,7 +39,14 @@ class MovieDetailsView extends GetView<MovieDetailsController> {
         }),
         centerTitle: false,
         actions: [
-          IconButton(onPressed: controller.editMovie, icon: Icon(Icons.edit_rounded, color: isDark ? AppThemeData.grey4 : AppThemeData.grey7, size: 20)),
+          IconButton(
+            onPressed: controller.editMovie,
+            icon: SvgPicture.asset(
+              'assets/icons/ic_edit.svg',
+              width: 20, height: 20,
+              colorFilter: ColorFilter.mode(isDark ? AppThemeData.grey4 : AppThemeData.grey7, BlendMode.srcIn),
+            ),
+          ),
           IconButton(onPressed: () => _showDeleteDialog(context, isDark), icon: Icon(Icons.delete_outline_rounded, color: AppThemeData.danger300, size: 20)),
         ],
       ),
@@ -190,18 +198,16 @@ class MovieDetailsView extends GetView<MovieDetailsController> {
   Widget _buildInfoCardsRow(MovieModel movie, bool isDark) {
     final cards = <Widget>[];
     if (movie.year != null && movie.year!.isNotEmpty) {
-      cards.add(Expanded(child: _accentCard('YEAR', movie.year!, Icons.calendar_today_outlined, AppThemeData.neonOrange, isDark)));
-      cards.add(spaceW(width: 12));
+      cards.add(_accentCard('YEAR', movie.year!, Icons.calendar_today_outlined, AppThemeData.neonOrange, isDark));
     }
     if (movie.director != null && movie.director!.isNotEmpty) {
-      cards.add(Expanded(child: _accentCard('DIRECTOR', movie.director!, Icons.person_outline_rounded, AppThemeData.neonBlue, isDark)));
-      cards.add(spaceW(width: 12));
+      cards.add(_accentCard('DIRECTOR', movie.director!, Icons.person_outline_rounded, AppThemeData.neonBlue, isDark));
     }
     if (movie.rating != null) {
-      cards.add(Expanded(child: _accentCard('RATING', '${movie.rating!.toStringAsFixed(1)}/10', Icons.star_outline_rounded, AppThemeData.neonYellow, isDark)));
+      cards.add(_accentCard('RATING', '${movie.rating!.toStringAsFixed(1)}/10', Icons.star_outline_rounded, AppThemeData.neonYellow, isDark));
     }
     if (cards.isEmpty) return const SizedBox.shrink();
-    return Row(children: cards);
+    return Wrap(spacing: 12, runSpacing: 12, children: cards);
   }
 
   Widget _accentCard(String label, String value, IconData icon, Color accent, bool isDark) {

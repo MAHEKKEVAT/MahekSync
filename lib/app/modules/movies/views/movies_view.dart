@@ -97,8 +97,11 @@ class MoviesView extends GetView<MoviesController> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.15)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
       ),
       child: Row(
         children: [
@@ -144,7 +147,10 @@ class MoviesView extends GetView<MoviesController> {
             decoration: BoxDecoration(
               color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppThemeData.neonBlue.withValues(alpha: 0.2)),
+              border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04), blurRadius: 10, offset: const Offset(0, 3)),
+              ],
             ),
             child: Row(
               children: [
@@ -153,7 +159,18 @@ class MoviesView extends GetView<MoviesController> {
                   child: SizedBox(
                     width: 100, height: 148,
                     child: movie.posterUrl != null && movie.posterUrl!.isNotEmpty
-                        ? NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0)
+                        ? Stack(fit: StackFit.expand, children: [
+                            NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0),
+                            Positioned(
+                              bottom: 0, left: 0, right: 0,
+                              child: Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)]),
+                                ),
+                              ),
+                            ),
+                          ])
                         : Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -260,19 +277,33 @@ class MoviesView extends GetView<MoviesController> {
       child: Container(
         decoration: BoxDecoration(
           color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04), blurRadius: 10, offset: const Offset(0, 3)),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
               child: SizedBox(
                 width: double.infinity,
-                height: 140,
+                height: 350,
                 child: movie.posterUrl != null && movie.posterUrl!.isNotEmpty
-                    ? NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0)
+                    ? Stack(fit: StackFit.expand, children: [
+                        NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0),
+                        Positioned(
+                          bottom: 0, left: 0, right: 0,
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withValues(alpha: 0.4)]),
+                            ),
+                          ),
+                        ),
+                      ])
                     : Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -286,7 +317,7 @@ class MoviesView extends GetView<MoviesController> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
