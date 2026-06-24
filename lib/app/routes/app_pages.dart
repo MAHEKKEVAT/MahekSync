@@ -35,6 +35,13 @@ import '../modules/reminder_crud/bindings/reminder_crud_binding.dart';
 import '../modules/reminder_crud/views/reminder_crud_view.dart';
 import '../modules/aegis/bindings/aegis_binding.dart';
 import '../modules/aegis/views/aegis_item_form_view.dart';
+import '../modules/all_movies/bindings/all_movies_binding.dart';
+import '../modules/all_movies/views/all_movies_view.dart';
+import '../modules/movies/bindings/movies_binding.dart';
+import '../modules/movie_crud/bindings/movie_crud_binding.dart';
+import '../modules/movie_crud/views/movie_crud_view.dart';
+import '../modules/movie_details/bindings/movie_details_binding.dart';
+import '../modules/movie_details/views/movie_details_view.dart';
 import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/sign_up/bindings/sign_up_binding.dart';
@@ -150,6 +157,8 @@ class AppPages {
         screenBinding: GenerateBillBinding()),
     _dashboardPage(_Paths.IMAGE_TO_TEXT,
         screenBinding: ImageToTextBinding()),
+    _dashboardPage(_Paths.MOVIES,
+        screenBinding: MoviesBinding()),
 
     GetPage(
       name: _Paths.CATEGORIES,
@@ -191,6 +200,24 @@ class AppPages {
       name: _Paths.AEGIS_FORM,
       page: () => const AegisItemFormView(),
       binding: AegisBinding(),
+    ),
+    GetPage(
+      name: _Paths.MOVIE_CRUD,
+      page: () => const MovieCrudView(),
+      binding: MovieCrudBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: _Paths.ALL_MOVIES,
+      page: () => const AllMoviesView(),
+      binding: AllMoviesBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: _Paths.MOVIE_DETAILS,
+      page: () => const MovieDetailsView(),
+      binding: MovieDetailsBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: _Paths.GENERATE_BILL_CREATE,

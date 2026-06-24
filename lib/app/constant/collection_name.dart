@@ -21,4 +21,6 @@ class CollectionName {
   static const String duesTracker = "dues_tracker";
   static const String sentinelAccess = 'sentinel_access';
   static const String myContacts = "my_contacts";
+  static const String policySettings = "policy_settings";
+  static const String movies = "movies";
 }

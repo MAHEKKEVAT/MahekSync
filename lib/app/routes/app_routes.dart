@@ -40,6 +40,10 @@ abstract class Routes {
   static const GENERATE_BILL_CREATE = _Paths.GENERATE_BILL_CREATE;
   static const GENERATE_BILL_PREVIEW = _Paths.GENERATE_BILL_PREVIEW;
   static const IMAGE_TO_TEXT = _Paths.IMAGE_TO_TEXT;
+  static const MOVIES = _Paths.MOVIES;
+  static const ALL_MOVIES = _Paths.ALL_MOVIES;
+  static const MOVIE_CRUD = _Paths.MOVIE_CRUD;
+  static const MOVIE_DETAILS = _Paths.MOVIE_DETAILS;
 }
 
 abstract class _Paths {
@@ -82,4 +86,8 @@ abstract class _Paths {
   static const GENERATE_BILL_CREATE = '/generate-bill-create';
   static const GENERATE_BILL_PREVIEW = '/generate-bill-preview';
   static const IMAGE_TO_TEXT = '/dashboard/image-to-text';
+  static const MOVIES = '/dashboard/movies';
+  static const ALL_MOVIES = '/all-movies';
+  static const MOVIE_CRUD = '/movie-crud';
+  static const MOVIE_DETAILS = '/movie-details';
 }

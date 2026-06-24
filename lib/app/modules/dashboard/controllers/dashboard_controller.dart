@@ -31,6 +31,8 @@ import 'package:maheksync/app/modules/settings/views/settings_view.dart';
 import 'package:maheksync/app/modules/settings/controllers/settings_controller.dart';
 import 'package:maheksync/app/modules/aegis/controllers/aegis_controller.dart';
 import 'package:maheksync/app/modules/aegis/views/aegis_view.dart';
+import 'package:maheksync/app/modules/movies/controllers/movies_controller.dart';
+import 'package:maheksync/app/modules/movies/views/movies_view.dart';
 import 'package:solar_icons/solar_icons.dart';
 
 import '../../../utils/app_colors.dart';
@@ -121,6 +123,12 @@ class DashboardController extends GetxController {
           selectedIcon: Icons.receipt_long_rounded,
           route: Routes.GENERATE_BILL,
           svgIcon: 'assets/icons/ic_bill.svg',
+        ),
+        NavigationItem(
+          title: 'Movies'.tr,
+          icon: Icons.movie_outlined,
+          selectedIcon: Icons.movie_rounded,
+          route: Routes.MOVIES,
         ),
       ],
     ),
@@ -404,6 +412,12 @@ class DashboardController extends GetxController {
           Get.put(GenerateBillController());
         }
         return const GenerateBillListView();
+
+      case Routes.MOVIES:
+        if (!Get.isRegistered<MoviesController>()) {
+          Get.put(MoviesController());
+        }
+        return const MoviesView();
 
       case Routes.SETTINGS:
         if (!Get.isRegistered<SettingsController>()) {
