@@ -20,6 +20,18 @@ class MoviesView extends GetView<MoviesController> {
 
     return Scaffold(
       backgroundColor: isDark ? AppThemeData.surfaceVoid : AppThemeData.grey2,
+      floatingActionButton: Container(
+        width: 56, height: 56,
+        decoration: BoxDecoration(
+          gradient: AppThemeData.appleIntelligenceGradientCool,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
+        ),
+        child: IconButton(
+          onPressed: () => Get.toNamed(Routes.MOVIE_CRUD),
+          icon: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+        ),
+      ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: MahekLoader(message: 'Loading Movies...', size: 50, textSize: 16));
