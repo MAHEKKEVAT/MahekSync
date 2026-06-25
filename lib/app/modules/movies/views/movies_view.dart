@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
@@ -282,63 +283,277 @@ class MoviesView extends GetView<MoviesController> {
 
   // ── STATS ROW ──
 
+  double _progressFor(String type) {
+    final total = controller.totalMovies;
+    if (total == 0) return 0;
+    switch (type) {
+      case 'total':
+        final allTotal = controller.movies.fold<int>(0, (sum, m) => sum + (m.totalDuration ?? 0));
+        final allWatched = controller.movies.fold<int>(0, (sum, m) => sum + (m.watchedDuration ?? 0));
+        if (allTotal == 0) return 0;
+        return allWatched / allTotal;
+      case 'watching':
+        final watching = controller.watchingMovies;
+        if (watching.isEmpty) return 0;
+        final wTotal = watching.fold<int>(0, (sum, m) => sum + (m.totalDuration ?? 0));
+        final wWatched = watching.fold<int>(0, (sum, m) => sum + (m.watchedDuration ?? 0));
+        if (wTotal == 0) return 0;
+        return wWatched / wTotal;
+      case 'completed':
+        return controller.completedCount / total;
+      case 'notStarted':
+        return controller.notStartedCount / total;
+      default:
+        return 0;
+    }
+  }
+
   Widget _buildStatsRow(BuildContext context, bool isDark) {
-    return Row(
-      children: [
-        Expanded(child: _buildStatCard(isDark, 'Movies tracked', controller.totalMovies.toString(), Icons.movie_rounded, AppThemeData.neonPurpleBlueGradient)),
-        spaceW(width: 12),
-        Expanded(child: _buildStatCard(isDark, 'In progress', controller.watchingCount.toString(), Icons.play_circle_outline_rounded, AppThemeData.neonBlueTealGradient)),
-        spaceW(width: 12),
-        Expanded(child: _buildStatCard(isDark, 'Movies finished', controller.completedCount.toString(), Icons.check_circle_outline_rounded, AppThemeData.neonCyanMintGradient)),
-        spaceW(width: 12),
-        Expanded(child: _buildStatCard(isDark, 'Plan to watch', controller.notStartedCount.toString(), Icons.pause_circle_outline_rounded, AppThemeData.neonPinkOrangeGradient)),
-      ],
+    return SizedBox(
+      height: 270,
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildStatCard(
+              isDark: isDark,
+              label: 'Total',
+              subtitle: 'Movies tracked',
+              value: controller.totalMovies.toString(),
+              icon: Icons.movie_rounded,
+              accentColor: AppThemeData.primary50,
+              progress: _progressFor('total'),
+              bgAsset: 'assets/icons/ic_clapperboard.svg',
+            ),
+          ),
+          spaceW(width: 14),
+          Expanded(
+            child: _buildStatCard(
+              isDark: isDark,
+              label: 'Watching',
+              subtitle: 'Currently in progress',
+              value: controller.watchingCount.toString(),
+              icon: Icons.play_circle_outline_rounded,
+              accentColor: AppThemeData.neonBlue,
+              progress: _progressFor('watching'),
+              bgAsset: 'assets/icons/ic_popcorn.svg',
+            ),
+          ),
+          spaceW(width: 14),
+          Expanded(
+            child: _buildStatCard(
+              isDark: isDark,
+              label: 'Completed',
+              subtitle: 'Movies finished',
+              value: controller.completedCount.toString(),
+              icon: Icons.check_circle_outline_rounded,
+              accentColor: AppThemeData.neonCyan,
+              progress: _progressFor('completed'),
+              bgAsset: 'assets/icons/ic_theater_seats.svg',
+            ),
+          ),
+          spaceW(width: 14),
+          Expanded(
+            child: _buildStatCard(
+              isDark: isDark,
+              label: 'Not Started',
+              subtitle: 'Plan to watch',
+              value: controller.notStartedCount.toString(),
+              icon: Icons.pause_circle_outline_rounded,
+              accentColor: AppThemeData.neonOrange,
+              progress: _progressFor('notStarted'),
+              bgAsset: 'assets/icons/ic_movie_ticket.svg',
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildStatCard(bool isDark, String subtitle, String value, IconData icon, Gradient gradient) {
+  Widget _buildStatCard({
+    required bool isDark,
+    required String label,
+    required String subtitle,
+    required String value,
+    required IconData icon,
+    required Color accentColor,
+    required double progress,
+    required String bgAsset,
+  }) {
+    final percent = (progress * 100).toInt();
+
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
       decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: AppThemeData.surfaceVoid.withValues(alpha: isDark ? 0.2 : 0.08), blurRadius: 10, offset: const Offset(0, 3)),
+          BoxShadow(
+            color: accentColor.withValues(alpha: 0.25),
+            blurRadius: 20,
+            spreadRadius: -2,
+          ),
+          BoxShadow(
+            color: accentColor.withValues(alpha: 0.12),
+            blurRadius: 36,
+            spreadRadius: -4,
+          ),
         ],
       ),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Stack(
+          children: [
+            // Base bg
+            Container(
               decoration: BoxDecoration(
-                color: AppThemeData.surfaceVoid.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(16),
+                color: isDark ? AppThemeData.surfaceElevated : AppThemeData.grey1,
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Row(
-              children: [
-                Container(
-                  width: 44, height: 44,
-                  decoration: BoxDecoration(color: AppThemeData.primaryWhite.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-                  child: Icon(icon, color: AppThemeData.grey1, size: 22),
+            // Colored gradient tint
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    accentColor.withValues(alpha: isDark ? 0.12 : 0.08),
+                    accentColor.withValues(alpha: isDark ? 0.04 : 0.02),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                spaceW(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextCustom(title: value, fontSize: 20, fontFamily: FontFamily.bold, color: AppThemeData.grey1),
-                      spaceH(height: 2),
-                      TextCustom(title: subtitle, fontSize: 11, fontFamily: FontFamily.regular, color: AppThemeData.grey2),
-                    ],
-                  ),
+              ),
+            ),
+            // Background illustration watermark
+            Positioned(
+              right: 10,
+              bottom: 16,
+              child: Opacity(
+                opacity: isDark ? 0.18 : 0.12,
+                child: SvgPicture.asset(
+                  bgAsset,
+                  width: 180,
+                  height: 180,
+                  colorFilter: ColorFilter.mode(accentColor, BlendMode.srcIn),
+                ),
+              ),
+            ),
+            // Content
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top row: Icon + Arrow
+                Row(
+                  children: [
+                    // Icon circle with glow ring
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: accentColor.withValues(alpha: 0.35),
+                          width: 2.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: accentColor.withValues(alpha: 0.30),
+                            blurRadius: 14,
+                            spreadRadius: -1,
+                          ),
+                        ],
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: accentColor.withValues(alpha: 0.20),
+                        ),
+                        child: Icon(icon, color: accentColor, size: 26),
+                      ),
+                    ),
+                    const Spacer(),
+                    // Arrow icon
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? AppThemeData.grey10.withValues(alpha: 0.12)
+                            : AppThemeData.grey1.withValues(alpha: 0.10),
+                      ),
+                      child: Icon(
+                        Icons.arrow_forward_rounded,
+                        color: isDark
+                            ? AppThemeData.grey10.withValues(alpha: 0.70)
+                            : AppThemeData.grey1.withValues(alpha: 0.60),
+                        size: 17,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                // Large number
+                TextCustom(
+                  title: value,
+                  fontSize: 44,
+                  fontFamily: FontFamily.bold,
+                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                ),
+                spaceH(height: 2),
+                // Colored label
+                TextCustom(
+                  title: label,
+                  fontSize: 16,
+                  fontFamily: FontFamily.bold,
+                  color: accentColor,
+                ),
+                spaceH(height: 2),
+                // Grey subtitle
+                TextCustom(
+                  title: subtitle,
+                  fontSize: 11,
+                  fontFamily: FontFamily.regular,
+                  color: AppThemeData.grey6,
+                ),
+                const Spacer(),
+                // Gradient progress bar + percentage
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: ShaderMask(
+                          shaderCallback: (Rect bounds) {
+                            return LinearGradient(
+                              colors: [
+                                accentColor.withValues(alpha: 0.4),
+                                accentColor,
+                              ],
+                            ).createShader(bounds);
+                          },
+                          blendMode: BlendMode.src,
+                          child: LinearProgressIndicator(
+                            value: progress.clamp(0.0, 1.0),
+                            minHeight: 10,
+                            backgroundColor: isDark
+                                ? AppThemeData.surfaceDark
+                                : AppThemeData.grey3,
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                    spaceW(width: 8),
+                    TextCustom(
+                      title: '$percent%',
+                      fontSize: 12,
+                      fontFamily: FontFamily.bold,
+                      color: accentColor,
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Bucket body (trapezoid) -->
+  <path d="M52 90 L68 185 L132 185 L148 90 Z" fill="currentColor" opacity="0.5"/>
+  <!-- Bucket rim -->
+  <rect x="44" y="82" width="112" height="14" rx="4" fill="currentColor" opacity="0.7"/>
+  <!-- Bucket stripes -->
+  <path d="M60 90 L72 185" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
+  <path d="M80 90 L86 185" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
+  <path d="M100 90 L100 185" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
+  <path d="M120 90 L114 185" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
+  <path d="M140 90 L128 185" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
+  <!-- Popcorn pieces (round blobs on top) -->
+  <circle cx="65" cy="70" r="16" fill="currentColor" opacity="0.65"/>
+  <circle cx="90" cy="58" r="18" fill="currentColor" opacity="0.75"/>
+  <circle cx="115" cy="62" r="17" fill="currentColor" opacity="0.7"/>
+  <circle cx="138" cy="72" r="15" fill="currentColor" opacity="0.6"/>
+  <circle cx="78" cy="50" r="14" fill="currentColor" opacity="0.55"/>
+  <circle cx="105" cy="46" r="15" fill="currentColor" opacity="0.6"/>
+  <circle cx="128" cy="52" r="13" fill="currentColor" opacity="0.5"/>
+  <circle cx="55" cy="58" r="12" fill="currentColor" opacity="0.45"/>
+  <circle cx="145" cy="62" r="12" fill="currentColor" opacity="0.45"/>
+  <!-- Small highlight dots -->
+  <circle cx="88" cy="52" r="4" fill="currentColor" opacity="0.3"/>
+  <circle cx="112" cy="56" r="3" fill="currentColor" opacity="0.25"/>
+</svg>

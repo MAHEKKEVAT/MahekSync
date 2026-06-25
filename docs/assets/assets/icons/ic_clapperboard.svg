@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Clapperboard base -->
+  <rect x="28" y="80" width="144" height="92" rx="8" fill="currentColor" opacity="0.6"/>
+  <!-- Clapperboard top (hinged part) -->
+  <rect x="28" y="60" width="144" height="30" rx="6" fill="currentColor" opacity="0.8"/>
+  <!-- Diagonal stripes on top -->
+  <path d="M28 60 L58 90" stroke="currentColor" stroke-width="6" opacity="0.3"/>
+  <path d="M58 60 L88 90" stroke="currentColor" stroke-width="6" opacity="0.3"/>
+  <path d="M88 60 L118 90" stroke="currentColor" stroke-width="6" opacity="0.3"/>
+  <path d="M118 60 L148 90" stroke="currentColor" stroke-width="6" opacity="0.3"/>
+  <path d="M148 60 L172 84" stroke="currentColor" stroke-width="6" opacity="0.3"/>
+  <!-- Hinge circle -->
+  <circle cx="44" cy="75" r="6" fill="currentColor" opacity="0.4"/>
+  <!-- Inner lines on base -->
+  <line x1="48" y1="110" x2="152" y2="110" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+  <line x1="48" y1="130" x2="152" y2="130" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+  <line x1="48" y1="150" x2="152" y2="150" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+  <!-- Small rectangle details -->
+  <rect x="48" y="95" width="30" height="10" rx="2" fill="currentColor" opacity="0.2"/>
+  <rect x="85" y="95" width="30" height="10" rx="2" fill="currentColor" opacity="0.2"/>
+  <rect x="122" y="95" width="30" height="10" rx="2" fill="currentColor" opacity="0.2"/>
+</svg>
