@@ -25,7 +25,14 @@ class MoviesController extends GetxController {
   List<MovieModel> get latestMovies {
     final sorted = movies.toList()
       ..sort((a, b) => (b.createdAt ?? Timestamp(0, 0)).compareTo(a.createdAt ?? Timestamp(0, 0)));
-    return sorted.take(4).toList();
+    if (searchQuery.isEmpty) {
+      return sorted.take(4).toList();
+    }
+    final query = searchQuery.toLowerCase();
+    return sorted
+        .where((m) => (m.movieName ?? '').toLowerCase().contains(query) || (m.year ?? '').toLowerCase().contains(query) || (m.genre ?? '').toLowerCase().contains(query))
+        .take(4)
+        .toList();
   }
 
   @override

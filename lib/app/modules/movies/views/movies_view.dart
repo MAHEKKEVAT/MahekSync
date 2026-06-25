@@ -11,6 +11,66 @@ import 'package:maheksync/app/widgets/text_widget.dart';
 import '../../../models/movie_model.dart';
 import '../controllers/movies_controller.dart';
 
+// ── HOVERABLE CARD WRAPPER ──
+
+class _HoverableCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _HoverableCard({required this.child, this.onTap});
+
+  @override
+  State<_HoverableCard> createState() => _HoverableCardState();
+}
+
+class _HoverableCardState extends State<_HoverableCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _isHovered ? 1.04 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              boxShadow: _isHovered
+                  ? [
+                      BoxShadow(
+                        color: AppThemeData.neonMint.withValues(alpha: 0.15),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: AppThemeData.neonMint.withValues(alpha: 0.08),
+                        blurRadius: 40,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: AppThemeData.black.withValues(alpha: 0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+            ),
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class MoviesView extends GetView<MoviesController> {
   const MoviesView({super.key});
 
@@ -20,18 +80,6 @@ class MoviesView extends GetView<MoviesController> {
 
     return Scaffold(
       backgroundColor: isDark ? AppThemeData.surfaceVoid : AppThemeData.grey2,
-      floatingActionButton: Container(
-        width: 56, height: 56,
-        decoration: BoxDecoration(
-          gradient: AppThemeData.appleIntelligenceGradientCool,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
-        ),
-        child: IconButton(
-          onPressed: () => Get.toNamed(Routes.MOVIE_CRUD),
-          icon: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
-        ),
-      ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: MahekLoader(message: 'Loading Movies...', size: 50, textSize: 16));
@@ -62,256 +110,288 @@ class MoviesView extends GetView<MoviesController> {
     );
   }
 
+  // ── HEADER ──
+
   Widget _buildHeader(BuildContext context, bool isDark) {
     return Row(
       children: [
-        Container(
-          width: 50, height: 50,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppThemeData.primary50, AppThemeData.primary4],
-            ),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
-          ),
-          child: const Icon(Icons.movie_rounded, color: Colors.white, size: 24),
-        ),
-        spaceW(width: 14),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextCustom(title: 'Movies', fontSize: 22, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-            TextCustom(title: '${controller.totalMovies} movies tracked', fontSize: 13, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+            TextCustom(
+              title: 'Movies',
+              fontSize: 22,
+              fontFamily: FontFamily.bold,
+              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+            ),
+            spaceH(height: 2),
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(text: 'Track. ', style: TextStyle(fontSize: 13, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
+                  TextSpan(text: 'Watch. ', style: TextStyle(fontSize: 13, fontFamily: FontFamily.bold, color: AppThemeData.primary50)),
+                  TextSpan(text: 'Enjoy.', style: TextStyle(fontSize: 13, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
+                ],
+              ),
+            ),
           ],
         ),
+        const Spacer(),
+        _buildSearchButton(isDark),
+        spaceW(width: 10),
+        _buildAddButton(isDark),
       ],
     );
   }
+
+  Widget _buildSearchButton(bool isDark) {
+    return GestureDetector(
+      onTap: () => _showSearchSheet(Get.context!),
+      child: Container(
+        width: 42, height: 42,
+        decoration: BoxDecoration(
+          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+        ),
+        child: Icon(Icons.search_rounded, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, size: 20),
+      ),
+    );
+  }
+
+  Widget _buildAddButton(bool isDark) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(Routes.MOVIE_CRUD),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        decoration: BoxDecoration(
+          gradient: AppThemeData.appleIntelligenceGradientCool,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.add_rounded, color: Colors.white, size: 18),
+            spaceW(width: 6),
+            TextCustom(title: 'Add Movie', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSearchSheet(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final searchCtrl = TextEditingController(text: controller.searchQuery.value);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Container(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              decoration: BoxDecoration(
+                color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppThemeData.grey4, borderRadius: BorderRadius.circular(2))),
+                  ),
+                  spaceH(height: 16),
+                  TextCustom(title: 'Search Movies', fontSize: 18, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+                  spaceH(height: 12),
+                  TextField(
+                    controller: searchCtrl,
+                    autofocus: true,
+                    style: TextStyle(fontSize: 14, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+                    decoration: InputDecoration(
+                      hintText: 'Search by name, year, or genre...',
+                      hintStyle: TextStyle(fontSize: 13, fontFamily: FontFamily.regular, color: AppThemeData.grey4),
+                      prefixIcon: Icon(Icons.search_rounded, color: AppThemeData.grey4, size: 20),
+                      suffixIcon: searchCtrl.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear_rounded, color: AppThemeData.grey4, size: 18),
+                              onPressed: () {
+                                searchCtrl.clear();
+                                controller.updateSearch('');
+                                setSheetState(() {});
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: isDark ? AppThemeData.surfaceDark : AppThemeData.grey2,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: AppThemeData.primary50),
+                      ),
+                    ),
+                    onChanged: (val) {
+                      controller.updateSearch(val);
+                      setSheetState(() {});
+                    },
+                  ),
+                  spaceH(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppThemeData.primary50,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const TextCustom(title: 'Done', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(() {
+      searchCtrl.dispose();
+    });
+  }
+
+  // ── STATS ROW ──
 
   Widget _buildStatsRow(BuildContext context, bool isDark) {
     return Row(
       children: [
-        Expanded(child: _buildStatCard(isDark, 'Total', controller.totalMovies.toString(), Icons.movie_rounded, AppThemeData.primary50)),
+        Expanded(child: _buildStatCard(isDark, 'Movies tracked', controller.totalMovies.toString(), Icons.movie_rounded, AppThemeData.neonPurpleBlueGradient)),
         spaceW(width: 12),
-        Expanded(child: _buildStatCard(isDark, 'Watching', controller.watchingCount.toString(), Icons.play_circle_outline_rounded, AppThemeData.neonBlue)),
+        Expanded(child: _buildStatCard(isDark, 'In progress', controller.watchingCount.toString(), Icons.play_circle_outline_rounded, AppThemeData.neonBlueTealGradient)),
         spaceW(width: 12),
-        Expanded(child: _buildStatCard(isDark, 'Completed', controller.completedCount.toString(), Icons.check_circle_outline_rounded, AppThemeData.success300)),
+        Expanded(child: _buildStatCard(isDark, 'Movies finished', controller.completedCount.toString(), Icons.check_circle_outline_rounded, AppThemeData.neonCyanMintGradient)),
         spaceW(width: 12),
-        Expanded(child: _buildStatCard(isDark, 'Not Started', controller.notStartedCount.toString(), Icons.pause_circle_outline_rounded, AppThemeData.pending300)),
+        Expanded(child: _buildStatCard(isDark, 'Plan to watch', controller.notStartedCount.toString(), Icons.pause_circle_outline_rounded, AppThemeData.neonPinkOrangeGradient)),
       ],
     );
   }
 
-  Widget _buildStatCard(bool isDark, String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(bool isDark, String subtitle, String value, IconData icon, Gradient gradient) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+        gradient: gradient,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(color: AppThemeData.surfaceVoid.withValues(alpha: isDark ? 0.2 : 0.08), blurRadius: 10, offset: const Offset(0, 3)),
         ],
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Container(
-            width: 38, height: 38,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          spaceW(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextCustom(title: value, fontSize: 16, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-              TextCustom(title: title, fontSize: 10, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── WATCHING SECTION (1 card) ──
-
-  Widget _buildWatchingSection(BuildContext context, bool isDark) {
-    final movie = controller.watchingMovies.first;
-    final progress = movie.progressPercent.clamp(0.0, 100.0);
-    final remaining = (movie.totalDuration ?? 0) - (movie.watchedDuration ?? 0);
-    final remainingH = remaining ~/ 60;
-    final remainingM = remaining % 60;
-    final remainingText = remainingH > 0 ? '$remainingH hrs $remainingM mins left' : '$remainingM mins left';
-    final cardWidth = MahekResponsive.responsiveWidth(context, mobile: 320, tablet: 380, laptop: 420, desktop: 450);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextCustom(title: 'Watching', fontSize: 20, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-        spaceH(height: 14),
-        GestureDetector(
-          onTap: () => Get.toNamed(Routes.MOVIE_DETAILS, arguments: movie),
-          child: Container(
-            width: cardWidth,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04), blurRadius: 10, offset: const Offset(0, 3)),
-              ],
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppThemeData.surfaceVoid.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    width: 100, height: 148,
-                    child: movie.posterUrl != null && movie.posterUrl!.isNotEmpty
-                        ? Stack(fit: StackFit.expand, children: [
-                            NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0),
-                            Positioned(
-                              bottom: 0, left: 0, right: 0,
-                              child: Container(
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)]),
-                                ),
-                              ),
-                            ),
-                          ])
-                        : Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [AppThemeData.primary50.withValues(alpha: 0.2), AppThemeData.primary4.withValues(alpha: 0.1)],
-                              ),
-                            ),
-                            child: Icon(Icons.movie_rounded, color: AppThemeData.primary50, size: 30),
-                          ),
-                  ),
+                Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(color: AppThemeData.primaryWhite.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                  child: Icon(icon, color: AppThemeData.grey1, size: 22),
                 ),
-                spaceW(width: 14),
+                spaceW(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: AppThemeData.neonBlue.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
-                        child: TextCustom(title: 'WATCHING', fontSize: 9, fontFamily: FontFamily.bold, color: AppThemeData.neonBlue),
-                      ),
-                      spaceH(height: 8),
-                      TextCustom(title: movie.movieName ?? 'Untitled', fontSize: 15, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10, maxLine: 1, textOverflow: TextOverflow.ellipsis),
-                      spaceH(height: 4),
-                      TextCustom(title: remainingText, fontSize: 12, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                      spaceH(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextCustom(title: '${progress.toInt()}% Complete', fontSize: 11, fontFamily: FontFamily.bold, color: AppThemeData.primary50),
-                          TextCustom(title: movie.formattedTotalDuration, fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                        ],
-                      ),
-                      spaceH(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: LinearProgressIndicator(
-                          value: progress / 100,
-                          minHeight: 5,
-                          backgroundColor: isDark ? AppThemeData.surfaceDark : AppThemeData.grey3,
-                          valueColor:  AlwaysStoppedAnimation<Color>(AppThemeData.primary50),
-                        ),
-                      ),
+                      TextCustom(title: value, fontSize: 20, fontFamily: FontFamily.bold, color: AppThemeData.grey1),
+                      spaceH(height: 2),
+                      TextCustom(title: subtitle, fontSize: 11, fontFamily: FontFamily.regular, color: AppThemeData.grey2),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  // ── LATEST MOVIES (4 cards) ──
+  // ── CONTINUE WATCHING SECTION ──
 
-  Widget _buildLatestMoviesSection(BuildContext context, bool isDark) {
-    final latest = controller.latestMovies;
+  Widget _buildWatchingSection(BuildContext context, bool isDark) {
+    final watching = controller.watchingMovies;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
-          onTap: () => Get.toNamed(Routes.ALL_MOVIES),
-          child: Row(
-            children: [
-              TextCustom(title: 'All Movies', fontSize: 20, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-              const Spacer(),
-              TextCustom(title: 'View All', fontSize: 13, fontFamily: FontFamily.medium, color: AppThemeData.primary50),
-              spaceW(width: 6),
-              Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppThemeData.primary50),
-            ],
-          ),
-        ),
+        TextCustom(title: 'Continue Watching', fontSize: 18, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
         spaceH(height: 14),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final maxWidth = constraints.maxWidth;
-            final cardCount = latest.length;
-            final spacing = 12.0;
-            final totalSpacing = cardCount > 1 ? (cardCount - 1) * spacing : 0.0;
-            final availablePerCard = (maxWidth - totalSpacing) / cardCount;
-            final cardWidth = availablePerCard > 260 ? 260.0 : availablePerCard;
-
-            return Wrap(
-              spacing: spacing,
-              runSpacing: spacing,
-              children: latest.map((movie) {
-                return SizedBox(
-                  width: cardWidth,
-                  child: _buildCompactCard(movie, isDark),
-                );
-              }).toList(),
-            );
-          },
+        SizedBox(
+          height: 175,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: watching.length,
+            separatorBuilder: (a, b) => spaceW(width: 12),
+            itemBuilder: (ctx, i) => SizedBox(
+              width: 400,
+              child: _buildContinueWatchingCard(watching[i], isDark),
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildCompactCard(MovieModel movie, bool isDark) {
-    return GestureDetector(
+  Widget _buildContinueWatchingCard(MovieModel movie, bool isDark) {
+    final progress = movie.progressPercent.clamp(0.0, 100.0);
+    final remaining = (movie.totalDuration ?? 0) - (movie.watchedDuration ?? 0);
+    final remainingH = remaining ~/ 60;
+    final remainingM = remaining % 60;
+    final remainingText = remainingH > 0 ? '$remainingH hrs $remainingM mins left' : '$remainingM mins left';
+
+    return _HoverableCard(
       onTap: () => Get.toNamed(Routes.MOVIE_DETAILS, arguments: movie),
       child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04), blurRadius: 10, offset: const Offset(0, 3)),
-          ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+              borderRadius: BorderRadius.circular(12),
               child: SizedBox(
-                width: double.infinity,
-                height: 350,
+                width: 100, height: 148,
                 child: movie.posterUrl != null && movie.posterUrl!.isNotEmpty
                     ? Stack(fit: StackFit.expand, children: [
                         NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0),
                         Positioned(
                           bottom: 0, left: 0, right: 0,
                           child: Container(
-                            height: 50,
+                            height: 40,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withValues(alpha: 0.4)]),
+                              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, AppThemeData.primaryBlack.withValues(alpha: 0.5)]),
                             ),
                           ),
                         ),
@@ -324,30 +404,159 @@ class MoviesView extends GetView<MoviesController> {
                             colors: [AppThemeData.primary50.withValues(alpha: 0.2), AppThemeData.primary4.withValues(alpha: 0.1)],
                           ),
                         ),
-                        child: Icon(Icons.movie_rounded, color: AppThemeData.primary50, size: 28),
+                        child: Icon(Icons.movie_rounded, color: AppThemeData.primary50, size: 30),
                       ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            spaceW(width: 14),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextCustom(
-                    title: movie.movieName ?? 'Untitled',
-                    fontSize: 13,
-                    fontFamily: FontFamily.bold,
-                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                    maxLine: 1,
-                    textOverflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(color: AppThemeData.neonMint.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(6)),
+                        child: TextCustom(title: 'WATCHING', fontSize: 9, fontFamily: FontFamily.bold, color: AppThemeData.neonMint),
+                      ),
+                      const Spacer(),
+                      Icon(Icons.more_vert_rounded, color: AppThemeData.grey4, size: 18),
+                    ],
                   ),
+                  spaceH(height: 8),
+                  TextCustom(title: movie.movieName ?? 'Untitled', fontSize: 15, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10, maxLine: 1, textOverflow: TextOverflow.ellipsis),
+                  spaceH(height: 4),
+                  TextCustom(title: remainingText, fontSize: 12, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                  spaceH(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextCustom(title: '${progress.toInt()}% Complete', fontSize: 11, fontFamily: FontFamily.bold, color: AppThemeData.neonMint),
+                      TextCustom(title: movie.formattedTotalDuration, fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                    ],
+                  ),
+                  spaceH(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: LinearProgressIndicator(
+                      value: progress / 100,
+                      minHeight: 5,
+                      backgroundColor: isDark ? AppThemeData.surfaceLight : AppThemeData.grey3,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppThemeData.neonMint),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── ALL MOVIES SECTION ──
+
+  Widget _buildLatestMoviesSection(BuildContext context, bool isDark) {
+    final latest = controller.latestMovies;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            TextCustom(title: 'All Movies', fontSize: 18, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => Get.toNamed(Routes.ALL_MOVIES),
+              child: Row(
+                children: [
+                  TextCustom(title: 'View All', fontSize: 13, fontFamily: FontFamily.medium, color: AppThemeData.primary50),
+                  spaceW(width: 6),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppThemeData.primary50),
+                ],
+              ),
+            ),
+          ],
+        ),
+        spaceH(height: 14),
+        SizedBox(
+          height: 175,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: latest.length,
+            separatorBuilder: (a, b) => spaceW(width: 12),
+            itemBuilder: (ctx, i) => SizedBox(
+              width: 400,
+              child: _buildAllMovieCard(latest[i], isDark),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAllMovieCard(MovieModel movie, bool isDark) {
+    return _HoverableCard(
+      onTap: () => Get.toNamed(Routes.MOVIE_DETAILS, arguments: movie),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                width: 100, height: 148,
+                child: movie.posterUrl != null && movie.posterUrl!.isNotEmpty
+                    ? Stack(fit: StackFit.expand, children: [
+                        NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0),
+                        Positioned(
+                          bottom: 0, left: 0, right: 0,
+                          child: Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, AppThemeData.primaryBlack.withValues(alpha: 0.5)]),
+                            ),
+                          ),
+                        ),
+                      ])
+                    : Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [AppThemeData.primary50.withValues(alpha: 0.2), AppThemeData.primary4.withValues(alpha: 0.1)],
+                          ),
+                        ),
+                        child: Icon(Icons.movie_rounded, color: AppThemeData.primary50, size: 30),
+                      ),
+              ),
+            ),
+            spaceW(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.bookmark_border_rounded, color: AppThemeData.grey4, size: 18),
+                      const Spacer(),
+                      Icon(Icons.more_vert_rounded, color: AppThemeData.grey4, size: 18),
+                    ],
+                  ),
+                  spaceH(height: 4),
+                  TextCustom(title: movie.movieName ?? 'Untitled', fontSize: 15, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10, maxLine: 1, textOverflow: TextOverflow.ellipsis),
                   spaceH(height: 4),
                   Row(
                     children: [
                       if (movie.year != null && movie.year!.isNotEmpty)
                         TextCustom(title: movie.year!, fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
                       if (movie.year != null && movie.year!.isNotEmpty && movie.genreTags.isNotEmpty)
-                        TextCustom(title: ' • ', fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                        TextCustom(title: ' \u2022 ', fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
                       if (movie.genreTags.isNotEmpty)
                         Expanded(
                           child: TextCustom(
@@ -361,8 +570,12 @@ class MoviesView extends GetView<MoviesController> {
                         ),
                     ],
                   ),
-                  spaceH(height: 6),
+                  spaceH(height: 8),
                   _buildStatusBadge(movie.status),
+                  if (movie.rating != null && movie.rating! > 0) ...[
+                    spaceH(height: 6),
+                    _buildRatingStars(movie.rating!),
+                  ],
                 ],
               ),
             ),
@@ -379,22 +592,22 @@ class MoviesView extends GetView<MoviesController> {
 
     switch (status) {
       case 'WATCHING':
-        bgColor = AppThemeData.neonBlue.withValues(alpha: 0.12);
-        textColor = AppThemeData.neonBlue;
+        bgColor = AppThemeData.neonMint.withValues(alpha: 0.2);
+        textColor = AppThemeData.neonMint;
         label = 'WATCHING';
         break;
       case 'COMPLETED':
-        bgColor = AppThemeData.success300.withValues(alpha: 0.12);
+        bgColor = AppThemeData.success300.withValues(alpha: 0.2);
         textColor = AppThemeData.success300;
         label = 'COMPLETED';
         break;
       case 'NOT_STARTED':
-        bgColor = AppThemeData.pending300.withValues(alpha: 0.12);
+        bgColor = AppThemeData.pending300.withValues(alpha: 0.2);
         textColor = AppThemeData.pending300;
         label = 'NOT STARTED';
         break;
       default:
-        bgColor = AppThemeData.pending300.withValues(alpha: 0.12);
+        bgColor = AppThemeData.pending300.withValues(alpha: 0.2);
         textColor = AppThemeData.pending300;
         label = 'NOT STARTED';
     }
@@ -403,6 +616,24 @@ class MoviesView extends GetView<MoviesController> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(6)),
       child: TextCustom(title: label, fontSize: 9, fontFamily: FontFamily.bold, color: textColor),
+    );
+  }
+
+  Widget _buildRatingStars(double rating) {
+    final fullStars = rating.floor();
+    final hasHalf = (rating - fullStars) >= 0.5;
+    final emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < fullStars; i++)
+          Icon(Icons.star_rounded, color: AppThemeData.pending300, size: 14),
+        if (hasHalf)
+          Icon(Icons.star_half_rounded, color: AppThemeData.pending300, size: 14),
+        for (var i = 0; i < emptyStars; i++)
+          Icon(Icons.star_border_rounded, color: AppThemeData.grey4, size: 14),
+      ],
     );
   }
 }
