@@ -1,22 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
-  <!-- Clapperboard base -->
-  <rect x="28" y="80" width="144" height="92" rx="8" fill="currentColor" opacity="0.6"/>
-  <!-- Clapperboard top (hinged part) -->
-  <rect x="28" y="60" width="144" height="30" rx="6" fill="currentColor" opacity="0.8"/>
-  <!-- Diagonal stripes on top -->
-  <path d="M28 60 L58 90" stroke="currentColor" stroke-width="6" opacity="0.3"/>
-  <path d="M58 60 L88 90" stroke="currentColor" stroke-width="6" opacity="0.3"/>
-  <path d="M88 60 L118 90" stroke="currentColor" stroke-width="6" opacity="0.3"/>
-  <path d="M118 60 L148 90" stroke="currentColor" stroke-width="6" opacity="0.3"/>
-  <path d="M148 60 L172 84" stroke="currentColor" stroke-width="6" opacity="0.3"/>
-  <!-- Hinge circle -->
-  <circle cx="44" cy="75" r="6" fill="currentColor" opacity="0.4"/>
-  <!-- Inner lines on base -->
-  <line x1="48" y1="110" x2="152" y2="110" stroke="currentColor" stroke-width="3" opacity="0.25"/>
-  <line x1="48" y1="130" x2="152" y2="130" stroke="currentColor" stroke-width="3" opacity="0.25"/>
-  <line x1="48" y1="150" x2="152" y2="150" stroke="currentColor" stroke-width="3" opacity="0.25"/>
-  <!-- Small rectangle details -->
-  <rect x="48" y="95" width="30" height="10" rx="2" fill="currentColor" opacity="0.2"/>
-  <rect x="85" y="95" width="30" height="10" rx="2" fill="currentColor" opacity="0.2"/>
-  <rect x="122" y="95" width="30" height="10" rx="2" fill="currentColor" opacity="0.2"/>
+  <!-- Main board body -->
+  <rect x="30" y="85" width="140" height="85" rx="6" fill="currentColor" opacity="0.55"/>
+  <!-- Top clapper arm -->
+  <path d="M28 62 L172 62 L170 88 L30 88 Z" fill="currentColor" opacity="0.7" rx="4"/>
+  <!-- Clapper hinge bolt left -->
+  <circle cx="46" cy="75" r="7" fill="currentColor" opacity="0.4"/>
+  <circle cx="46" cy="75" r="3" fill="currentColor" opacity="0.25"/>
+  <!-- Clapper hinge bolt right -->
+  <circle cx="154" cy="75" r="7" fill="currentColor" opacity="0.4"/>
+  <circle cx="154" cy="75" r="3" fill="currentColor" opacity="0.25"/>
+  <!-- Diagonal stripes on clapper arm -->
+  <path d="M60 62 L78 88" stroke="currentColor" stroke-width="8" opacity="0.3" stroke-linecap="round"/>
+  <path d="M92 62 L110 88" stroke="currentColor" stroke-width="8" opacity="0.3" stroke-linecap="round"/>
+  <path d="M124 62 L142 88" stroke="currentColor" stroke-width="8" opacity="0.3" stroke-linecap="round"/>
+  <!-- Board surface lines -->
+  <line x1="48" y1="108" x2="152" y2="108" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
+  <line x1="48" y1="128" x2="152" y2="128" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
+  <line x1="48" y1="148" x2="152" y2="148" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
+  <!-- Small text placeholder lines -->
+  <rect x="48" y="95" width="40" height="5" rx="2" fill="currentColor" opacity="0.18"/>
+  <rect x="96" y="95" width="56" height="5" rx="2" fill="currentColor" opacity="0.12"/>
+  <!-- Film reel circles on board -->
+  <circle cx="60" cy="138" r="8" stroke="currentColor" stroke-width="2" opacity="0.15" fill="none"/>
+  <circle cx="60" cy="138" r="3" fill="currentColor" opacity="0.12"/>
 </svg>

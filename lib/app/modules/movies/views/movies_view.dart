@@ -12,6 +12,68 @@ import 'package:maheksync/app/widgets/text_widget.dart';
 import '../../../models/movie_model.dart';
 import '../controllers/movies_controller.dart';
 
+// ── HOVERABLE STAT CARD WRAPPER ──
+
+class _HoverableStatCard extends StatefulWidget {
+  final Widget child;
+  final Color accentColor;
+
+  const _HoverableStatCard({required this.child, required this.accentColor});
+
+  @override
+  State<_HoverableStatCard> createState() => _HoverableStatCardState();
+}
+
+class _HoverableStatCardState extends State<_HoverableStatCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedScale(
+        scale: _isHovered ? 1.03 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: widget.accentColor.withValues(alpha: 0.35),
+                      blurRadius: 24,
+                      spreadRadius: -2,
+                    ),
+                    BoxShadow(
+                      color: widget.accentColor.withValues(alpha: 0.18),
+                      blurRadius: 40,
+                      spreadRadius: -4,
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: widget.accentColor.withValues(alpha: 0.25),
+                      blurRadius: 20,
+                      spreadRadius: -2,
+                    ),
+                    BoxShadow(
+                      color: widget.accentColor.withValues(alpha: 0.12),
+                      blurRadius: 36,
+                      spreadRadius: -4,
+                    ),
+                  ],
+          ),
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
 // ── HOVERABLE CARD WRAPPER ──
 
 class _HoverableCard extends StatefulWidget {
@@ -55,7 +117,7 @@ class _HoverableCardState extends State<_HoverableCard> {
                       BoxShadow(
                         color: AppThemeData.neonMint.withValues(alpha: 0.10),
                         blurRadius: 40,
-                        offset: const Offset(0, 2),
+                        offset: const Offset(0, 2)
                       ),
                     ]
                   : [
@@ -310,58 +372,70 @@ class MoviesView extends GetView<MoviesController> {
 
   Widget _buildStatsRow(BuildContext context, bool isDark) {
     return SizedBox(
-      height: 270,
+      height: 290,
       child: Row(
         children: [
           Expanded(
-            child: _buildStatCard(
-              isDark: isDark,
-              label: 'Total',
-              subtitle: 'Movies tracked',
-              value: controller.totalMovies.toString(),
-              icon: Icons.movie_rounded,
+            child: _HoverableStatCard(
               accentColor: AppThemeData.primary50,
-              progress: _progressFor('total'),
-              bgAsset: 'assets/icons/ic_clapperboard.svg',
+              child: _buildStatCard(
+                isDark: isDark,
+                label: 'Total',
+                subtitle: 'Movies tracked',
+                value: controller.totalMovies.toString(),
+                icon: Icons.movie_rounded,
+                accentColor: AppThemeData.primary50,
+                progress: _progressFor('total'),
+                bgAsset: 'assets/icons/ic_clapperboard.svg',
+              ),
             ),
           ),
           spaceW(width: 14),
           Expanded(
-            child: _buildStatCard(
-              isDark: isDark,
-              label: 'Watching',
-              subtitle: 'Currently in progress',
-              value: controller.watchingCount.toString(),
-              icon: Icons.play_circle_outline_rounded,
+            child: _HoverableStatCard(
               accentColor: AppThemeData.neonBlue,
-              progress: _progressFor('watching'),
-              bgAsset: 'assets/icons/ic_popcorn.svg',
+              child: _buildStatCard(
+                isDark: isDark,
+                label: 'Watching',
+                subtitle: 'Currently in progress',
+                value: controller.watchingCount.toString(),
+                icon: Icons.play_circle_outline_rounded,
+                accentColor: AppThemeData.neonBlue,
+                progress: _progressFor('watching'),
+                bgAsset: 'assets/icons/ic_popcorn.svg',
+              ),
             ),
           ),
           spaceW(width: 14),
           Expanded(
-            child: _buildStatCard(
-              isDark: isDark,
-              label: 'Completed',
-              subtitle: 'Movies finished',
-              value: controller.completedCount.toString(),
-              icon: Icons.check_circle_outline_rounded,
+            child: _HoverableStatCard(
               accentColor: AppThemeData.neonCyan,
-              progress: _progressFor('completed'),
-              bgAsset: 'assets/icons/ic_theater_seats.svg',
+              child: _buildStatCard(
+                isDark: isDark,
+                label: 'Completed',
+                subtitle: 'Movies finished',
+                value: controller.completedCount.toString(),
+                icon: Icons.check_circle_outline_rounded,
+                accentColor: AppThemeData.neonCyan,
+                progress: _progressFor('completed'),
+                bgAsset: 'assets/icons/ic_theater_seats.svg',
+              ),
             ),
           ),
           spaceW(width: 14),
           Expanded(
-            child: _buildStatCard(
-              isDark: isDark,
-              label: 'Not Started',
-              subtitle: 'Plan to watch',
-              value: controller.notStartedCount.toString(),
-              icon: Icons.pause_circle_outline_rounded,
+            child: _HoverableStatCard(
               accentColor: AppThemeData.neonOrange,
-              progress: _progressFor('notStarted'),
-              bgAsset: 'assets/icons/ic_movie_ticket.svg',
+              child: _buildStatCard(
+                isDark: isDark,
+                label: 'Not Started',
+                subtitle: 'Plan to watch',
+                value: controller.notStartedCount.toString(),
+                icon: Icons.pause_circle_outline_rounded,
+                accentColor: AppThemeData.neonOrange,
+                progress: _progressFor('notStarted'),
+                bgAsset: 'assets/icons/ic_movie_ticket.svg',
+              ),
             ),
           ),
         ],
@@ -382,23 +456,11 @@ class MoviesView extends GetView<MoviesController> {
     final percent = (progress * 100).toInt();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: accentColor.withValues(alpha: 0.25),
-            blurRadius: 20,
-            spreadRadius: -2,
-          ),
-          BoxShadow(
-            color: accentColor.withValues(alpha: 0.12),
-            blurRadius: 36,
-            spreadRadius: -4,
-          ),
-        ],
       ),
       child: ClipRRect(
+
         borderRadius: BorderRadius.circular(18),
         child: Stack(
           children: [
@@ -423,135 +485,139 @@ class MoviesView extends GetView<MoviesController> {
             ),
             // Background illustration watermark
             Positioned(
-              right: 10,
+              right: 8,
               bottom: 16,
               child: Opacity(
-                opacity: isDark ? 0.18 : 0.12,
+                opacity: isDark ? 0.22 : 0.14,
                 child: SvgPicture.asset(
                   bgAsset,
-                  width: 180,
-                  height: 180,
+                  width: 190,
+                  height: 190,
                   colorFilter: ColorFilter.mode(accentColor, BlendMode.srcIn),
                 ),
               ),
             ),
             // Content
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top row: Icon + Arrow
-                Row(
-                  children: [
-                    // Icon circle with glow ring
-                    Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: accentColor.withValues(alpha: 0.35),
-                          width: 2.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: accentColor.withValues(alpha: 0.30),
-                            blurRadius: 14,
-                            spreadRadius: -1,
-                          ),
-                        ],
-                      ),
-                      child: Container(
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  // Top row: Icon + Arrow
+                  Row(
+                    children: [
+                      // Icon circle with glow ring
+                      Container(
+                        width: 68,
+                        height: 68,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: accentColor.withValues(alpha: 0.20),
+                          border: Border.all(
+                            color: accentColor.withValues(alpha: 0.35),
+                            width: 2.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accentColor.withValues(alpha: 0.40),
+                              blurRadius: 16,
+                              spreadRadius: -1,
+                            ),
+                          ],
                         ),
-                        child: Icon(icon, color: accentColor, size: 26),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: accentColor.withValues(alpha: 0.22),
+                          ),
+                          child: Icon(icon, color: accentColor, size: 28),
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    // Arrow icon
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isDark
-                            ? AppThemeData.grey10.withValues(alpha: 0.12)
-                            : AppThemeData.grey1.withValues(alpha: 0.10),
+                      const Spacer(),
+                      // Arrow icon
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isDark
+                              ? AppThemeData.grey10.withValues(alpha: 0.18)
+                              : AppThemeData.grey1.withValues(alpha: 0.14),
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_rounded,
+                          color: isDark
+                              ? AppThemeData.grey10.withValues(alpha: 0.85)
+                              : AppThemeData.grey1.withValues(alpha: 0.70),
+                          size: 18,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.arrow_forward_rounded,
-                        color: isDark
-                            ? AppThemeData.grey10.withValues(alpha: 0.70)
-                            : AppThemeData.grey1.withValues(alpha: 0.60),
-                        size: 17,
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                // Large number
-                TextCustom(
-                  title: value,
-                  fontSize: 44,
-                  fontFamily: FontFamily.bold,
-                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                ),
-                spaceH(height: 2),
-                // Colored label
-                TextCustom(
-                  title: label,
-                  fontSize: 16,
-                  fontFamily: FontFamily.bold,
-                  color: accentColor,
-                ),
-                spaceH(height: 2),
-                // Grey subtitle
-                TextCustom(
-                  title: subtitle,
-                  fontSize: 11,
-                  fontFamily: FontFamily.regular,
-                  color: AppThemeData.grey6,
-                ),
-                const Spacer(),
-                // Gradient progress bar + percentage
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: ShaderMask(
-                          shaderCallback: (Rect bounds) {
-                            return LinearGradient(
-                              colors: [
-                                accentColor.withValues(alpha: 0.4),
-                                accentColor,
-                              ],
-                            ).createShader(bounds);
-                          },
-                          blendMode: BlendMode.src,
-                          child: LinearProgressIndicator(
-                            value: progress.clamp(0.0, 1.0),
-                            minHeight: 10,
-                            backgroundColor: isDark
-                                ? AppThemeData.surfaceDark
-                                : AppThemeData.grey3,
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    ],
+                  ),
+                  const Spacer(),
+                  // Large number
+                  TextCustom(
+                    title: value,
+                    fontSize: 44,
+                    fontFamily: FontFamily.bold,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  ),
+                  spaceH(height: 2),
+                  // Colored label
+                  TextCustom(
+                    title: label,
+                    fontSize: 16,
+                    fontFamily: FontFamily.bold,
+                    color: accentColor,
+                  ),
+                  spaceH(height: 2),
+                  // Grey subtitle
+                  TextCustom(
+                    title: subtitle,
+                    fontSize: 11,
+                    fontFamily: FontFamily.regular,
+                    color: AppThemeData.grey6,
+                  ),
+                  const Spacer(),
+                  // Gradient progress bar + percentage
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(5),
+                          child: ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return LinearGradient(
+                                colors: [
+                                  accentColor.withValues(alpha: 0.4),
+                                  accentColor,
+                                ],
+                              ).createShader(bounds);
+                            },
+                            blendMode: BlendMode.src,
+                            child: LinearProgressIndicator(
+                              value: progress.clamp(0.0, 1.0),
+                              minHeight: 10,
+                              backgroundColor: isDark
+                                  ? AppThemeData.surfaceDark
+                                  : AppThemeData.grey3,
+                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    spaceW(width: 8),
-                    TextCustom(
-                      title: '$percent%',
-                      fontSize: 12,
-                      fontFamily: FontFamily.bold,
-                      color: accentColor,
-                    ),
+                      spaceW(width: 8),
+                      TextCustom(
+                        title: '$percent%',
+                        fontSize: 12,
+                        fontFamily: FontFamily.bold,
+                        color: accentColor,
+                      ),
+                    ],
+                  ),
                   ],
                 ),
-              ],
-            ),
+              ),
           ],
         ),
       ),
