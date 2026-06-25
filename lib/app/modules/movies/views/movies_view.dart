@@ -28,6 +28,8 @@ class _HoverableCardState extends State<_HoverableCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -45,21 +47,26 @@ class _HoverableCardState extends State<_HoverableCard> {
               boxShadow: _isHovered
                   ? [
                       BoxShadow(
-                        color: AppThemeData.neonMint.withValues(alpha: 0.15),
+                        color: AppThemeData.neonMint.withValues(alpha: 0.18),
                         blurRadius: 20,
                         offset: const Offset(0, 4),
                       ),
                       BoxShadow(
-                        color: AppThemeData.neonMint.withValues(alpha: 0.08),
+                        color: AppThemeData.neonMint.withValues(alpha: 0.10),
                         blurRadius: 40,
                         offset: const Offset(0, 2),
                       ),
                     ]
                   : [
                       BoxShadow(
-                        color: AppThemeData.black.withValues(alpha: 0.15),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
+                        color: AppThemeData.primaryBlack.withValues(alpha: isDark ? 0.25 : 0.06),
+                        blurRadius: isDark ? 12 : 16,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: AppThemeData.primaryBlack.withValues(alpha: isDark ? 0.10 : 0.03),
+                        blurRadius: isDark ? 24 : 32,
+                        offset: const Offset(0, 2),
                       ),
                     ],
             ),
@@ -152,9 +159,9 @@ class MoviesView extends GetView<MoviesController> {
         decoration: BoxDecoration(
           color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+          border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey4),
         ),
-        child: Icon(Icons.search_rounded, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, size: 20),
+        child: Icon(Icons.search_rounded, color: isDark ? AppThemeData.grey5 : AppThemeData.grey7, size: 20),
       ),
     );
   }
@@ -373,9 +380,9 @@ class MoviesView extends GetView<MoviesController> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.grey1,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+          border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey4),
         ),
         child: Row(
           children: [
@@ -417,23 +424,31 @@ class MoviesView extends GetView<MoviesController> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: AppThemeData.neonMint.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(6)),
-                        child: TextCustom(title: 'WATCHING', fontSize: 9, fontFamily: FontFamily.bold, color: AppThemeData.neonMint),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppThemeData.neonMint.withValues(alpha: 0.20) : AppThemeData.success300.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: TextCustom(
+                          title: 'WATCHING',
+                          fontSize: 9,
+                          fontFamily: FontFamily.bold,
+                          color: isDark ? AppThemeData.neonMint : AppThemeData.success500,
+                        ),
                       ),
                       const Spacer(),
-                      Icon(Icons.more_vert_rounded, color: AppThemeData.grey4, size: 18),
+                      Icon(Icons.more_vert_rounded, color: isDark ? AppThemeData.grey4 : AppThemeData.grey6, size: 18),
                     ],
                   ),
                   spaceH(height: 8),
                   TextCustom(title: movie.movieName ?? 'Untitled', fontSize: 15, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10, maxLine: 1, textOverflow: TextOverflow.ellipsis),
                   spaceH(height: 4),
-                  TextCustom(title: remainingText, fontSize: 12, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                  TextCustom(title: remainingText, fontSize: 12, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey7),
                   spaceH(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextCustom(title: '${progress.toInt()}% Complete', fontSize: 11, fontFamily: FontFamily.bold, color: AppThemeData.neonMint),
-                      TextCustom(title: movie.formattedTotalDuration, fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                      TextCustom(title: '${progress.toInt()}% Complete', fontSize: 11, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.neonMint : AppThemeData.success400),
+                      TextCustom(title: movie.formattedTotalDuration, fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey7),
                     ],
                   ),
                   spaceH(height: 6),
@@ -443,7 +458,7 @@ class MoviesView extends GetView<MoviesController> {
                       value: progress / 100,
                       minHeight: 5,
                       backgroundColor: isDark ? AppThemeData.surfaceLight : AppThemeData.grey3,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppThemeData.neonMint),
+                      valueColor: AlwaysStoppedAnimation<Color>(isDark ? AppThemeData.neonMint : AppThemeData.success400),
                     ),
                   ),
                 ],
@@ -501,9 +516,9 @@ class MoviesView extends GetView<MoviesController> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.grey1,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+          border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey4),
         ),
         child: Row(
           children: [
@@ -543,9 +558,9 @@ class MoviesView extends GetView<MoviesController> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.bookmark_border_rounded, color: AppThemeData.grey4, size: 18),
+                      Icon(Icons.bookmark_border_rounded, color: isDark ? AppThemeData.grey4 : AppThemeData.grey6, size: 18),
                       const Spacer(),
-                      Icon(Icons.more_vert_rounded, color: AppThemeData.grey4, size: 18),
+                      Icon(Icons.more_vert_rounded, color: isDark ? AppThemeData.grey4 : AppThemeData.grey6, size: 18),
                     ],
                   ),
                   spaceH(height: 4),
@@ -554,16 +569,16 @@ class MoviesView extends GetView<MoviesController> {
                   Row(
                     children: [
                       if (movie.year != null && movie.year!.isNotEmpty)
-                        TextCustom(title: movie.year!, fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                        TextCustom(title: movie.year!, fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey7),
                       if (movie.year != null && movie.year!.isNotEmpty && movie.genreTags.isNotEmpty)
-                        TextCustom(title: ' \u2022 ', fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                        TextCustom(title: ' \u2022 ', fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey7),
                       if (movie.genreTags.isNotEmpty)
                         Expanded(
                           child: TextCustom(
                             title: movie.genreTags.first,
                             fontSize: 11,
                             fontFamily: FontFamily.regular,
-                            color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                            color: isDark ? AppThemeData.grey5 : AppThemeData.grey7,
                             maxLine: 1,
                             textOverflow: TextOverflow.ellipsis,
                           ),
@@ -571,7 +586,7 @@ class MoviesView extends GetView<MoviesController> {
                     ],
                   ),
                   spaceH(height: 8),
-                  _buildStatusBadge(movie.status),
+                  _buildStatusBadge(movie.status, isDark: isDark),
                   if (movie.rating != null && movie.rating! > 0) ...[
                     spaceH(height: 6),
                     _buildRatingStars(movie.rating!),
@@ -585,30 +600,30 @@ class MoviesView extends GetView<MoviesController> {
     );
   }
 
-  Widget _buildStatusBadge(String? status) {
+  Widget _buildStatusBadge(String? status, {bool isDark = true}) {
     Color bgColor;
     Color textColor;
     String label;
 
     switch (status) {
       case 'WATCHING':
-        bgColor = AppThemeData.neonMint.withValues(alpha: 0.2);
-        textColor = AppThemeData.neonMint;
+        bgColor = isDark ? AppThemeData.neonMint.withValues(alpha: 0.20) : AppThemeData.success300.withValues(alpha: 0.12);
+        textColor = isDark ? AppThemeData.neonMint : AppThemeData.success500;
         label = 'WATCHING';
         break;
       case 'COMPLETED':
-        bgColor = AppThemeData.success300.withValues(alpha: 0.2);
-        textColor = AppThemeData.success300;
+        bgColor = isDark ? AppThemeData.success300.withValues(alpha: 0.20) : AppThemeData.success300.withValues(alpha: 0.12);
+        textColor = isDark ? AppThemeData.success300 : AppThemeData.success500;
         label = 'COMPLETED';
         break;
       case 'NOT_STARTED':
-        bgColor = AppThemeData.pending300.withValues(alpha: 0.2);
-        textColor = AppThemeData.pending300;
+        bgColor = isDark ? AppThemeData.pending300.withValues(alpha: 0.20) : AppThemeData.pending400.withValues(alpha: 0.12);
+        textColor = isDark ? AppThemeData.pending300 : AppThemeData.pending500;
         label = 'NOT STARTED';
         break;
       default:
-        bgColor = AppThemeData.pending300.withValues(alpha: 0.2);
-        textColor = AppThemeData.pending300;
+        bgColor = isDark ? AppThemeData.pending300.withValues(alpha: 0.20) : AppThemeData.pending400.withValues(alpha: 0.12);
+        textColor = isDark ? AppThemeData.pending300 : AppThemeData.pending500;
         label = 'NOT STARTED';
     }
 

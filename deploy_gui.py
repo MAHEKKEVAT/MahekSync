@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    MAHEKSYNC DEPLOYER v3.3                                   ║
-║              ⚡ HACKER-STYLE DEPLOYMENT PIPELINE ⚡                           ║
+║                    MAHEKSYNC DEPLOYER v4.0                                   ║
+║              Premium Deployment Dashboard                                    ║
 ║                        Made by Mahek                                          ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
@@ -11,7 +11,6 @@ import flet as ft
 import subprocess
 import threading
 import time
-import random
 import math
 import os
 import sys
@@ -30,7 +29,6 @@ class StepStatus(Enum):
     RUNNING = auto()
     SUCCESS = auto()
     FAILED = auto()
-    SKIPPED = auto()
 
 
 @dataclass
@@ -45,37 +43,13 @@ class DeployStep:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CYBERPUNK COLOR PALETTE
+# HARD-CODED PROJECT PATH
 # ═══════════════════════════════════════════════════════════════════════════════
 
-BG_PRIMARY = "#050505"
-BG_SECONDARY = "#0a0a0f"
-BG_TERTIARY = "#111118"
-BG_CARD = "#0d1117"
-BORDER = "#1a1a2e"
-TEXT_PRIMARY = "#e0e0e0"
-TEXT_SECONDARY = "#8b949e"
-TEXT_MUTED = "#484f58"
-ACCENT_GREEN = "#00ff41"
-ACCENT_CYAN = "#00f0ff"
-ACCENT_RED = "#ff0040"
-ACCENT_YELLOW = "#ffee00"
-ACCENT_PURPLE = "#bd00ff"
-
-GLOW_GREEN = "#00ff4126"
-GLOW_CYAN = "#00f0ff1a"
-GLOW_RED = "#ff004026"
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# HARD-CODED PROJECT PATH — CHANGE THIS TO YOUR FLUTTER PROJECT LOCATION
-# ═══════════════════════════════════════════════════════════════════════════════
-
-PROJECT_DIR = r"F:\MahekSync\MahekSync"
+PROJECT_DIR = r"F:\\MahekSync\\MahekSync"
 
 
 def get_resource_path(relative_path):
-    """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
         base_path = sys._MEIPASS
     except Exception:
@@ -84,266 +58,240 @@ def get_resource_path(relative_path):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# GLITCH TEXT EFFECT
+# THEME SYSTEM - Professional Color Palette
 # ═══════════════════════════════════════════════════════════════════════════════
 
-class GlitchText(ft.Text):
-    def __init__(self, text: str, size: int = 20, color: str = ACCENT_GREEN,
-                 weight=ft.FontWeight.BOLD):
-        self._original_text = text
-        self._glitch_chars = "!@#$%^&*()_+-=[]{}|;:,.<>?"
-        super().__init__(
-            value=text,
-            size=size,
-            color=color,
-            weight=weight,
-            font_family="Consolas",
-        )
-        self._running = False
-        self._glitch_thread = None
+class Theme:
+    def __init__(self, is_dark: bool = True):
+        self.is_dark = is_dark
+        if is_dark:
+            # Dark Theme - GitHub Desktop / Docker Desktop inspired
+            self.bg = "#0B0F19"
+            self.bg_secondary = "#111827"
+            self.card = "#151D2D"
+            self.card_hover = "#1A2335"
+            self.border = "#273449"
+            self.border_hover = "#374A64"
+            self.text = "#F8FAFC"
+            self.text_secondary = "#94A3B8"
+            self.text_muted = "#64748B"
+            self.accent = "#3B82F6"          # Blue primary
+            self.accent_hover = "#2563EB"
+            self.success = "#22C55E"
+            self.warning = "#F59E0B"
+            self.error = "#EF4444"
+            self.terminal_bg = "#090B11"
+            self.terminal_border = "#1E293B"
+            self.button_bg = "#1E293B"
+            self.button_hover = "#334155"
+        else:
+            # Light Theme - Notion / GitHub Desktop Light inspired
+            self.bg = "#F5F7FA"
+            self.bg_secondary = "#E5E7EB"
+            self.card = "#FFFFFF"
+            self.card_hover = "#F8FAFC"
+            self.border = "#E5E7EB"
+            self.border_hover = "#D1D5DB"
+            self.text = "#111827"
+            self.text_secondary = "#6B7280"
+            self.text_muted = "#9CA3AF"
+            self.accent = "#2563EB"
+            self.accent_hover = "#1D4ED8"
+            self.success = "#16A34A"
+            self.warning = "#D97706"
+            self.error = "#DC2626"
+            self.terminal_bg = "#F8FAFC"
+            self.terminal_border = "#E5E7EB"
+            self.button_bg = "#F1F5F9"
+            self.button_hover = "#E2E8F0"
 
-    def start_glitch(self):
-        if self._running:
-            return
-        self._running = True
-        self._glitch_thread = threading.Thread(target=self._glitch_loop, daemon=True)
-        self._glitch_thread.start()
 
-    def _glitch_loop(self):
-        while self._running:
-            if random.random() < 0.3:
-                glitched = list(self._original_text)
-                for _ in range(random.randint(1, 3)):
-                    idx = random.randint(0, len(glitched)-1)
-                    glitched[idx] = random.choice(self._glitch_chars)
-                self.value = "".join(glitched)
-                try:
-                    self.update()
-                except:
-                    pass
-                time.sleep(0.1)
-                self.value = self._original_text
-                try:
-                    self.update()
-                except:
-                    pass
-            time.sleep(random.uniform(0.5, 2.0))
-
-    def stop(self):
-        self._running = False
+# Global theme instance
+current_theme = Theme(is_dark=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CUSTOM WIDGETS
+# COMPACT STEP ITEM (VSCode-style)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-class StepCard(ft.Container):
-    """Cyberpunk step card with glow effects"""
+class StepItem(ft.Container):
+    """Compact 55px height step item like VSCode"""
 
-    def __init__(self, step: DeployStep, index: int):
+    def __init__(self, step: DeployStep, index: int, theme: Theme):
         self.step = step
         self.index = index
-        self.status_icon = ft.Text("○", size=24, color=TEXT_MUTED,
-                                   weight=ft.FontWeight.BOLD)
-        self.status_ring = ft.ProgressRing(
-            width=28, height=28, stroke_width=2,
-            color=ACCENT_GREEN, visible=False
+        self._theme = theme
+
+        self.status_icon = ft.Icon(
+            ft.Icons.CIRCLE_OUTLINED,
+            size=16,
+            color=theme.text_muted,
         )
-        self.duration_text = ft.Text("", size=11, color=TEXT_MUTED,
-                                     font_family="Consolas")
-        self.output_preview = ft.Text(
-            "", size=10, color=TEXT_SECONDARY,
-            max_lines=1,
-            overflow="ellipsis",
-            font_family="Consolas"
+        self.name_text = ft.Text(
+            step.name,
+            size=13,
+            weight=ft.FontWeight.W_500,
+            color=theme.text,
+            font_family="Segoe UI",
+        )
+        self.desc_text = ft.Text(
+            step.description,
+            size=11,
+            color=theme.text_secondary,
+            font_family="Segoe UI",
+        )
+        self.duration_text = ft.Text(
+            "",
+            size=11,
+            color=theme.text_muted,
+            font_family="Segoe UI",
+        )
+        self.spinner = ft.ProgressRing(
+            width=14,
+            height=14,
+            stroke_width=2,
+            color=theme.accent,
+            visible=False,
         )
 
         super().__init__(
             content=ft.Row([
                 ft.Container(
                     content=ft.Stack([
-                        self.status_ring,
-                        ft.Container(
-                            content=self.status_icon,
-                            alignment=ft.Alignment(0, 0),
-                            width=28, height=28,
-                        )
+                        self.spinner,
+                        self.status_icon,
                     ]),
-                    width=44, height=44,
+                    width=28,
+                    height=28,
+                    alignment=ft.alignment.center,
                 ),
                 ft.Column([
-                    ft.Row([
-                        ft.Text(
-                            f"[{index:02d}]",
-                            size=11,
-                            weight=ft.FontWeight.BOLD,
-                            color=ACCENT_CYAN,
-                            font_family="Consolas"
-                        ),
-                        ft.Container(width=8),
-                        ft.Text(
-                            step.name.upper(),
-                            size=13,
-                            weight=ft.FontWeight.BOLD,
-                            color=TEXT_PRIMARY,
-                            font_family="Consolas"
-                        ),
-                    ], spacing=0),
-                    ft.Text(
-                        step.description,
-                        size=11,
-                        color=TEXT_SECONDARY,
-                        font_family="Consolas"
-                    ),
-                    ft.Row([
-                        self.duration_text,
-                        ft.Container(width=10),
-                        self.output_preview,
-                    ], spacing=0),
-                ], spacing=3, expand=True),
+                    self.name_text,
+                    self.desc_text,
+                ], spacing=2, expand=True),
                 ft.Container(
-                    content=ft.Text(
-                        f"> {step.command[:25]}..." if len(step.command) > 25 else f"> {step.command}",
-                        size=9,
-                        color=ACCENT_GREEN,
-                        font_family="Consolas",
-                        opacity=0.7
-                    ),
-                    bgcolor=BG_TERTIARY,
-                    border_radius=4,
-                    padding=ft.padding.symmetric(horizontal=10, vertical=4),
-                    border=ft.border.all(1, BORDER),
+                    content=self.duration_text,
+                    alignment=ft.alignment.center_right,
+                    width=60,
                 ),
-            ], spacing=12),
-            bgcolor=BG_CARD,
-            border=ft.border.all(1, BORDER),
-            border_radius=12,
-            padding=16,
-            shadow=ft.BoxShadow(
-                spread_radius=0,
-                blur_radius=20,
-                color="transparent",
-                offset=ft.Offset(0, 0),
-            ),
+            ], spacing=12, alignment=ft.MainAxisAlignment.START),
+            bgcolor=theme.card,
+            border=ft.border.all(1, theme.border),
+            border_radius=8,
+            padding=ft.padding.symmetric(horizontal=16, vertical=10),
+            height=55,
+            animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
         )
 
-    def update_status(self, status: StepStatus, duration: float = 0, output: str = ""):
+    def update_status(self, status: StepStatus, duration: float = 0):
         self.step.status = status
         self.step.duration = duration
-        self.step.output = output
 
-        icons_map = {
-            StepStatus.PENDING: ("○", TEXT_MUTED),
-            StepStatus.RUNNING: ("▶", ACCENT_CYAN),
-            StepStatus.SUCCESS: ("◉", ACCENT_GREEN),
-            StepStatus.FAILED: ("✖", ACCENT_RED),
-            StepStatus.SKIPPED: ("⊘", TEXT_MUTED),
-        }
-
-        icon, color = icons_map[status]
-        self.status_icon.value = icon
-        self.status_icon.color = color
-        self.status_ring.visible = (status == StepStatus.RUNNING)
+        if status == StepStatus.PENDING:
+            self.status_icon.name = ft.Icons.CIRCLE_OUTLINED
+            self.status_icon.color = self._theme.text_muted
+            self.spinner.visible = False
+            self.name_text.color = self._theme.text
+        elif status == StepStatus.RUNNING:
+            self.status_icon.name = ft.Icons.CIRCLE_OUTLINED
+            self.status_icon.color = "transparent"
+            self.spinner.visible = True
+            self.name_text.color = self._theme.accent
+            self.bgcolor = self._theme.card_hover
+            self.border = ft.border.all(1, self._theme.accent)
+        elif status == StepStatus.SUCCESS:
+            self.status_icon.name = ft.Icons.CHECK_CIRCLE
+            self.status_icon.color = self._theme.success
+            self.spinner.visible = False
+            self.name_text.color = self._theme.text
+            self.bgcolor = self._theme.card
+            self.border = ft.border.all(1, self._theme.border)
+        elif status == StepStatus.FAILED:
+            self.status_icon.name = ft.Icons.ERROR
+            self.status_icon.color = self._theme.error
+            self.spinner.visible = False
+            self.name_text.color = self._theme.error
+            self.bgcolor = self._theme.card
+            self.border = ft.border.all(1, self._theme.error)
 
         if duration > 0:
-            self.duration_text.value = f"⏱ {duration:.1f}s"
-
-        if output:
-            preview = output.strip().split("\n")[-1]
-            self.output_preview.value = preview[:50]
-
-        border_colors = {
-            StepStatus.PENDING: BORDER,
-            StepStatus.RUNNING: ACCENT_CYAN,
-            StepStatus.SUCCESS: ACCENT_GREEN,
-            StepStatus.FAILED: ACCENT_RED,
-            StepStatus.SKIPPED: TEXT_MUTED,
-        }
-
-        glow_colors = {
-            StepStatus.PENDING: "transparent",
-            StepStatus.RUNNING: GLOW_CYAN,
-            StepStatus.SUCCESS: GLOW_GREEN,
-            StepStatus.FAILED: GLOW_RED,
-            StepStatus.SKIPPED: "transparent",
-        }
-
-        self.border = ft.border.all(1, border_colors[status])
-        self.shadow = ft.BoxShadow(
-            spread_radius=0,
-            blur_radius=30 if status == StepStatus.RUNNING else 15,
-            color=glow_colors[status],
-            offset=ft.Offset(0, 0),
-        )
-
-        if status == StepStatus.RUNNING:
-            self.bgcolor = "#0a1f1a"
-        elif status == StepStatus.SUCCESS:
-            self.bgcolor = "#0a1a0f"
-        elif status == StepStatus.FAILED:
-            self.bgcolor = "#1a0a0f"
-        else:
-            self.bgcolor = BG_CARD
+            self.duration_text.value = f"{duration:.1f}s"
 
         self.update()
 
 
-class TerminalOutput(ft.Column):
-    """Hacker-style terminal with auto-scroll"""
+# ═══════════════════════════════════════════════════════════════════════════════
+# MODERN TERMINAL PANEL
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    def __init__(self):
+class ModernTerminal(ft.Column):
+    """Clean, searchable terminal with modern styling"""
+
+    def __init__(self, theme: Theme):
+        self._theme = theme
         self.scroll_container = ft.ListView(
             expand=True,
-            spacing=1,
+            spacing=0,
             auto_scroll=True,
         )
-        self._line_count = 0
+        self.search_field = ft.TextField(
+            hint_text="Search logs...",
+            height=36,
+            border_radius=6,
+            bgcolor=theme.terminal_bg,
+            border_color=theme.terminal_border,
+            focused_border_color=theme.accent,
+            text_size=12,
+            color=theme.text,
+            prefix_icon=ft.Icons.SEARCH,
+            on_change=self._on_search,
+        )
 
         super().__init__(
             controls=[
+                # Terminal header with search
                 ft.Container(
                     content=ft.Row([
                         ft.Row([
-                            ft.Container(width=12, height=12,
-                                       bgcolor=ACCENT_RED, border_radius=6),
-                            ft.Container(width=12, height=12,
-                                       bgcolor=ACCENT_YELLOW, border_radius=6),
-                            ft.Container(width=12, height=12,
-                                       bgcolor=ACCENT_GREEN, border_radius=6),
-                        ], spacing=8),
-                        ft.Container(width=20),
-                        ft.Text("root@mahek-sync:~# deploy_pipeline",
-                               size=11, color=TEXT_MUTED, font_family="Consolas"),
+                            ft.Container(width=10, height=10,
+                                       bgcolor=theme.error, border_radius=5),
+                            ft.Container(width=10, height=10,
+                                       bgcolor=theme.warning, border_radius=5),
+                            ft.Container(width=10, height=10,
+                                       bgcolor=theme.success, border_radius=5),
+                        ], spacing=6),
+                        ft.Container(width=12),
+                        ft.Text("Terminal", size=12, weight=ft.FontWeight.W_600,
+                               color=theme.text_secondary, font_family="Segoe UI"),
                         ft.Container(expand=True),
-                        ft.Text("● LIVE", size=10, color=ACCENT_GREEN,
-                               weight=ft.FontWeight.BOLD, font_family="Consolas"),
-                    ], spacing=6),
-                    bgcolor=BG_TERTIARY,
-                    padding=ft.padding.symmetric(horizontal=16, vertical=10),
-                    border_radius=10,
-                    border=ft.border.only(bottom=ft.BorderSide(1, BORDER)),
+                        self.search_field,
+                    ], spacing=0),
+                    bgcolor=theme.terminal_bg,
+                    padding=ft.padding.symmetric(horizontal=12, vertical=8),
+                    border_radius=ft.border_radius.only(top_left=8, top_right=8),
+                    border=ft.border.only(bottom=ft.BorderSide(1, theme.terminal_border)),
                 ),
+                # Terminal body
                 ft.Container(
                     content=self.scroll_container,
-                    bgcolor="#000000",
-                    border=ft.border.all(1, BORDER),
-                    border_radius=10,
-                    padding=ft.padding.symmetric(horizontal=12, vertical=8),
+                    bgcolor=theme.terminal_bg,
+                    border=ft.border.all(1, theme.terminal_border),
+                    border_radius=ft.border_radius.only(bottom_left=8, bottom_right=8),
+                    padding=12,
                     expand=True,
-                    shadow=ft.BoxShadow(
-                        spread_radius=0,
-                        blur_radius=30,
-                        color="#00ff410d",
-                        offset=ft.Offset(0, 0),
-                    ),
                 ),
             ],
             spacing=0,
             expand=True,
         )
 
-    def add_line(self, text: str, color: str = TEXT_SECONDARY,
-                 prefix: str = "", bold: bool = False):
+    def _on_search(self, e):
+        # Simple search highlight could be added here
+        pass
+
+    def add_line(self, text: str, color: str = None, prefix: str = "", bold: bool = False):
+        if color is None:
+            color = self._theme.text_secondary
         timestamp = datetime.now().strftime("%H:%M:%S")
         line = ft.Text(
             f"[{timestamp}] {prefix}{text}",
@@ -359,84 +307,112 @@ class TerminalOutput(ft.Column):
             self.scroll_container.controls.pop(0)
 
     def add_command(self, cmd: str):
-        self.add_line(f"$ {cmd}", ACCENT_CYAN, bold=True)
+        self.add_line(f"$ {cmd}", self._theme.accent, bold=True)
 
     def add_output(self, text: str):
         if text.strip():
-            self.add_line(text, TEXT_SECONDARY, "  ")
+            self.add_line(text, self._theme.text_secondary, "  ")
 
     def add_success(self, text: str):
-        self.add_line(f"[OK] {text}", ACCENT_GREEN, bold=True)
+        self.add_line(f"✓ {text}", self._theme.success, bold=True)
 
     def add_error(self, text: str):
-        self.add_line(f"[ERR] {text}", ACCENT_RED, bold=True)
-
-    def add_warning(self, text: str):
-        self.add_line(f"[WARN] {text}", ACCENT_YELLOW, bold=True)
+        self.add_line(f"✗ {text}", self._theme.error, bold=True)
 
     def add_separator(self):
-        self.add_line("═" * 70, BORDER)
-
-    def add_hacker_banner(self, text: str):
-        self.add_line("", BORDER)
-        self.add_line(f"  >>> {text} <<<", ACCENT_GREEN, bold=True)
-        self.add_line("", BORDER)
+        self.add_line("─" * 60, self._theme.border)
 
     def clear(self):
         self.scroll_container.controls.clear()
-        self._line_count = 0
 
 
-class StatsPanel(ft.Container):
-    """Cyberpunk stats dashboard"""
+# ═══════════════════════════════════════════════════════════════════════════════
+# MODERN STATS PANEL
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    def __init__(self):
-        self.total_time = ft.Text("00.0s", size=28, weight=ft.FontWeight.BOLD,
-                                  color=ACCENT_CYAN, font_family="Consolas")
-        self.steps_completed = ft.Text("00/05", size=28, weight=ft.FontWeight.BOLD,
-                                       color=ACCENT_PURPLE, font_family="Consolas")
-        self.success_rate = ft.Text("000%", size=28, weight=ft.FontWeight.BOLD,
-                                    color=ACCENT_GREEN, font_family="Consolas")
+class ModernStats(ft.Row):
+    """Clean metric cards like Docker Desktop"""
+
+    def __init__(self, theme: Theme):
+        self._theme = theme
+        self.time_value = ft.Text("0.0s", size=24, weight=ft.FontWeight.BOLD,
+                                  color=theme.text, font_family="Segoe UI")
+        self.steps_value = ft.Text("0/5", size=24, weight=ft.FontWeight.BOLD,
+                                   color=theme.text, font_family="Segoe UI")
+        self.branch_value = ft.Text("main", size=24, weight=ft.FontWeight.BOLD,
+                                    color=theme.text, font_family="Segoe UI")
+        self.status_value = ft.Text("Ready", size=24, weight=ft.FontWeight.BOLD,
+                                    color=theme.success, font_family="Segoe UI")
 
         super().__init__(
-            content=ft.Row([
-                self._stat_box("◉ TOTAL TIME", self.total_time, ACCENT_CYAN),
-                ft.VerticalDivider(color=BORDER, width=1, thickness=1),
-                self._stat_box("◉ STEPS DONE", self.steps_completed, ACCENT_PURPLE),
-                ft.VerticalDivider(color=BORDER, width=1, thickness=1),
-                self._stat_box("◉ SUCCESS", self.success_rate, ACCENT_GREEN),
-            ], spacing=20, alignment=ft.MainAxisAlignment.SPACE_EVENLY),
-            bgcolor=BG_CARD,
-            border=ft.border.all(1, BORDER),
-            border_radius=12,
-            padding=20,
+            controls=[
+                self._stat_card("Deployment Time", self.time_value, theme.accent),
+                self._stat_card("Completed", self.steps_value, theme.accent),
+                self._stat_card("Branch", self.branch_value, theme.text_muted),
+                self._stat_card("Status", self.status_value, theme.success),
+            ],
+            spacing=12,
+            alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+        )
+
+    def _stat_card(self, label: str, value: ft.Text, accent_color: str):
+        return ft.Container(
+            content=ft.Column([
+                ft.Text(label, size=11, color=self._theme.text_muted,
+                       font_family="Segoe UI", weight=ft.FontWeight.W_500),
+                ft.Container(height=4),
+                value,
+            ], spacing=0),
+            bgcolor=self._theme.card,
+            border=ft.border.all(1, self._theme.border),
+            border_radius=10,
+            padding=16,
+            expand=True,
             shadow=ft.BoxShadow(
                 spread_radius=0,
-                blur_radius=20,
-                color="#00f0ff0d",
-                offset=ft.Offset(0, 0),
+                blur_radius=8,
+                color="#0000001a" if self._theme.is_dark else "#0000000d",
+                offset=ft.Offset(0, 2),
             ),
         )
 
-    def _stat_box(self, label: str, value: ft.Text, color: str):
-        return ft.Column([
-            ft.Text(label, size=9, weight=ft.FontWeight.BOLD,
-                   color=TEXT_MUTED, font_family="Consolas"),
-            ft.Container(height=4),
-            value,
-        ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0)
-
-    def update_stats(self, total_time: float, completed: int, total: int, success: int):
-        self.total_time.value = f"{total_time:05.1f}s"
-        self.steps_completed.value = f"{completed:02d}/{total:02d}"
-        rate = int(success / total * 100) if total > 0 else 0
-        self.success_rate.value = f"{rate:03d}%"
-        self.success_rate.color = ACCENT_GREEN if rate == 100 else ACCENT_YELLOW
+    def update_stats(self, total_time: float, completed: int, total: int, success: bool):
+        self.time_value.value = f"{total_time:.1f}s"
+        self.steps_value.value = f"{completed}/{total}"
+        self.status_value.value = "Success" if success else "Failed"
+        self.status_value.color = self._theme.success if success else self._theme.error
         self.update()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# MAIN APPLICATION
+# THEME TOGGLE BUTTON
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class ThemeToggle(ft.IconButton):
+    def __init__(self, on_toggle: Callable):
+        self.is_dark = True
+        self.on_toggle = on_toggle
+        super().__init__(
+            icon=ft.Icons.DARK_MODE,
+            icon_color="#94A3B8",
+            icon_size=20,
+            tooltip="Toggle Theme",
+            on_click=self._toggle,
+            style=ft.ButtonStyle(
+                bgcolor="transparent",
+                overlay_color="#3B82F626",
+            ),
+        )
+
+    def _toggle(self, e):
+        self.is_dark = not self.is_dark
+        self.icon = ft.Icons.LIGHT_MODE if self.is_dark else ft.Icons.DARK_MODE
+        self.on_toggle(self.is_dark)
+        self.update()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MAIN APPLICATION - Premium Dashboard
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class MahekSyncDeployer:
@@ -444,235 +420,223 @@ class MahekSyncDeployer:
         self.page = page
         self.is_deploying = False
         self.start_time = 0.0
-        self.step_cards: List[StepCard] = []
-        self.current_step_index = 0
+        self.step_items: List[StepItem] = []
+        self.current_theme = current_theme
 
         self._setup_page()
         self._build_ui()
 
     def _setup_page(self):
-        self.page.title = "⚡ MahekSync Deployer v3.3 // HACKER MODE"
+        self.page.title = "MahekSync Deploy"
         self.page.theme_mode = ft.ThemeMode.DARK
-        self.page.window_maximized = True
+        self.page.window_width = 1200
+        self.page.window_height = 800
+        self.page.window_min_width = 900
+        self.page.window_min_height = 600
         self.page.padding = 0
-        self.page.bgcolor = BG_PRIMARY
-        self.page.update()
+        self.page.bgcolor = self.current_theme.bg
+        self.page.fonts = {
+            "Segoe UI": "Segoe UI",
+            "Consolas": "Consolas",
+        }
 
     def _build_ui(self):
-        self.title_glitch = GlitchText("MAHEKSYNC", size=26, color=ACCENT_GREEN)
-        self.title_glitch.start_glitch()
+        theme = self.current_theme
 
-        # FIX: Use hardcoded PROJECT_DIR for image path
+        # Profile image
         img_path = os.path.join(PROJECT_DIR, "assets", "images", "cropped_circle_image.png")
-
         if os.path.exists(img_path):
-            profile_content = ft.Image(
-                src=img_path,
-                width=50,
-                height=50,
-                fit=ft.ImageFit.COVER,
-                border_radius=25,
+            avatar = ft.Container(
+                content=ft.Image(
+                    src=img_path,
+                    width=40,
+                    height=40,
+                    fit=ft.ImageFit.COVER,
+                    border_radius=20,
+                ),
+                width=40,
+                height=40,
+                border_radius=20,
+                border=ft.border.all(2, theme.border),
             )
         else:
-            profile_content = ft.Text(
-                "M",
-                size=24,
-                weight=ft.FontWeight.BOLD,
-                color=ACCENT_GREEN,
-                font_family="Consolas",
+            avatar = ft.Container(
+                content=ft.Text("M", size=18, weight=ft.FontWeight.BOLD,
+                               color=theme.accent, font_family="Segoe UI"),
+                width=40,
+                height=40,
+                border_radius=20,
+                bgcolor=theme.card,
+                border=ft.border.all(2, theme.border),
+                alignment=ft.alignment.center,
             )
 
-        profile_image = ft.Container(
-            content=profile_content,
-            width=50,
-            height=50,
-            border_radius=25,
-            border=ft.border.all(2, ACCENT_GREEN),
-            bgcolor=BG_CARD if not os.path.exists(img_path) else None,
-            alignment=ft.Alignment(0, 0),
-            shadow=ft.BoxShadow(
-                spread_radius=0,
-                blur_radius=15,
-                color="#00ff4140",
-                offset=ft.Offset(0, 0),
-            ),
-            tooltip="Made by Mahek",
-        )
+        # Theme toggle
+        self.theme_toggle = ThemeToggle(self._on_theme_change)
 
+        # Header
         header = ft.Container(
             content=ft.Row([
                 ft.Row([
-                    profile_image,
+                    avatar,
                     ft.Container(width=12),
                     ft.Column([
-                        self.title_glitch,
-                        ft.Text("DEPLOYMENT_PROTOCOL_v3.3",
-                               size=9, color=ACCENT_CYAN,
-                               font_family="Consolas",
-                               weight=ft.FontWeight.BOLD),
-                    ], spacing=0),
+                        ft.Text("MahekSync Deploy", size=18, weight=ft.FontWeight.BOLD,
+                               color=theme.text, font_family="Segoe UI"),
+                        ft.Text("Deploy Flutter Web to GitHub Pages", size=12,
+                               color=theme.text_secondary, font_family="Segoe UI"),
+                    ], spacing=2),
                 ], spacing=0),
                 ft.Container(expand=True),
                 ft.Container(
                     content=ft.Row([
-                        ft.Text("◉", size=10, color=ACCENT_GREEN),
-                        ft.Text("SYSTEM_READY", size=10,
-                               color=ACCENT_GREEN,
-                               font_family="Consolas",
-                               weight=ft.FontWeight.BOLD),
-                    ], spacing=6),
-                    bgcolor=BG_TERTIARY,
-                    border_radius=4,
-                    padding=ft.padding.symmetric(horizontal=16, vertical=8),
-                    border=ft.border.all(1, ACCENT_GREEN),
-                    shadow=ft.BoxShadow(
-                        spread_radius=0,
-                        blur_radius=15,
-                        color="#00ff4133",
-                        offset=ft.Offset(0, 0),
-                    ),
+                        ft.Container(
+                            width=8,
+                            height=8,
+                            border_radius=4,
+                            bgcolor=theme.success,
+                        ),
+                        ft.Container(width=6),
+                        ft.Text("Ready", size=12, color=theme.success,
+                               font_family="Segoe UI", weight=ft.FontWeight.W_500),
+                    ], spacing=0),
+                    bgcolor=theme.card,
+                    border_radius=20,
+                    padding=ft.padding.symmetric(horizontal=12, vertical=6),
+                    border=ft.border.all(1, theme.border),
                 ),
+                ft.Container(width=12),
+                self.theme_toggle,
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            bgcolor=BG_SECONDARY,
-            border=ft.border.only(bottom=ft.BorderSide(1, BORDER)),
+            bgcolor=theme.bg_secondary,
+            border=ft.border.only(bottom=ft.BorderSide(1, theme.border)),
             padding=ft.padding.symmetric(horizontal=24, vertical=14),
         )
 
-        # FIX: Hardcoded project directory for all commands
-        project_dir = PROJECT_DIR
-
+        # Step definitions
         self.steps = [
-            DeployStep(
-                "FLUTTER_BUILD",
-                f'cd /d "{project_dir}" && flutter build web --base-href "/MahekSync/"',
-                "Compile Flutter app for web deployment"
-            ),
-            DeployStep(
-                "COPY_ASSETS",
-                f'cd /d "{project_dir}" && xcopy "build\web\*" "docs\" /E /H /Y /I',
-                "Mirror build output to docs directory"
-            ),
-            DeployStep(
-                "GIT_STAGE",
-                f'cd /d "{project_dir}" && git add .',
-                "Stage all modified files for commit"
-            ),
-            DeployStep(
-                "GIT_COMMIT",
-                f'cd /d "{project_dir}" && git commit -m "Add"',
-                "Create commit with message"
-            ),
-            DeployStep(
-                "GIT_PUSH",
-                f'cd /d "{project_dir}" && git push origin main',
-                "Deploy to origin/main branch"
-            ),
+            DeployStep("Flutter Build",
+                      f'cd /d "{PROJECT_DIR}" && flutter build web --base-href "/MahekSync/"',
+                      "Compile Flutter app for web"),
+            DeployStep("Copy Assets",
+                      f'cd /d "{PROJECT_DIR}" && xcopy "build\\web\\*" "docs\\" /E /H /Y /I',
+                      "Mirror build to docs directory"),
+            DeployStep("Git Stage",
+                      f'cd /d "{PROJECT_DIR}" && git add .',
+                      "Stage all changes"),
+            DeployStep("Git Commit",
+                      f'cd /d "{PROJECT_DIR}" && git commit -m "Add"',
+                      "Create commit"),
+            DeployStep("Git Push",
+                      f'cd /d "{PROJECT_DIR}" && git push origin main',
+                      "Deploy to origin/main"),
         ]
 
-        self.step_cards = [StepCard(step, i+1) for i, step in enumerate(self.steps)]
-        steps_column = ft.Column(self.step_cards, spacing=10)
-
+        # Progress bar
         self.progress_bar = ft.ProgressBar(
             value=0,
-            bgcolor="#001100",
-            color=ACCENT_GREEN,
+            bgcolor=theme.border,
+            color=theme.accent,
             height=4,
             border_radius=2,
         )
 
-        self.progress_label = ft.Text(
-            "IDLE // WAITING FOR INPUT",
-            size=10,
-            color=TEXT_MUTED,
-            font_family="Consolas",
-            weight=ft.FontWeight.BOLD
-        )
+        # Step items (compact)
+        self.step_items = [StepItem(step, i+1, theme) for i, step in enumerate(self.steps)]
+        steps_column = ft.Column(self.step_items, spacing=8)
 
-        self.terminal = TerminalOutput()
-        self.stats = StatsPanel()
+        # Stats panel
+        self.stats = ModernStats(theme)
 
+        # Terminal
+        self.terminal = ModernTerminal(theme)
+
+        # Deploy button (floating action style)
         self.deploy_btn = ft.ElevatedButton(
-            "▶ EXECUTE_PIPELINE",
-            icon=ft.Icons.PLAY_ARROW,
+            "Deploy",
+            icon=ft.Icons.ROCKET_LAUNCH,
             on_click=self._on_deploy,
             style=ft.ButtonStyle(
-                color={
-                    ft.ControlState.DEFAULT: "black",
-                    ft.ControlState.DISABLED: TEXT_MUTED,
-                },
+                color="white",
                 bgcolor={
-                    ft.ControlState.DEFAULT: ACCENT_GREEN,
-                    ft.ControlState.DISABLED: "#1a1a1a",
-                    ft.ControlState.HOVERED: "#3dd660",
+                    ft.ControlState.DEFAULT: theme.accent,
+                    ft.ControlState.HOVERED: theme.accent_hover,
+                    ft.ControlState.DISABLED: theme.border,
                 },
-                padding=ft.padding.symmetric(horizontal=30, vertical=18),
-                shape=ft.RoundedRectangleBorder(radius=6),
+                padding=ft.padding.symmetric(horizontal=32, vertical=16),
+                shape=ft.RoundedRectangleBorder(radius=8),
                 text_style=ft.TextStyle(
-                    font_family="Consolas",
-                    weight=ft.FontWeight.BOLD,
+                    font_family="Segoe UI",
+                    weight=ft.FontWeight.W_600,
+                    size=14,
+                ),
+                elevation={
+                    ft.ControlState.DEFAULT: 2,
+                    ft.ControlState.HOVERED: 4,
+                },
+                animation_duration=200,
+            ),
+            width=160,
+            height=48,
+        )
+
+        # Secondary buttons
+        self.stop_btn = ft.ElevatedButton(
+            "Stop",
+            icon=ft.Icons.STOP,
+            on_click=self._on_stop,
+            disabled=True,
+            style=ft.ButtonStyle(
+                color=theme.text,
+                bgcolor=theme.button_bg,
+                padding=ft.padding.symmetric(horizontal=20, vertical=14),
+                shape=ft.RoundedRectangleBorder(radius=8),
+                text_style=ft.TextStyle(
+                    font_family="Segoe UI",
                     size=13,
                 ),
             ),
-            width=260,
-            height=52,
+            width=120,
+            height=42,
         )
 
         self.clear_btn = ft.ElevatedButton(
-            "⊘ CLEAR_LOGS",
-            icon=ft.Icons.DELETE_SWEEP,
+            "Clear",
+            icon=ft.Icons.CLEAR_ALL,
             on_click=self._on_clear,
             style=ft.ButtonStyle(
-                color=TEXT_SECONDARY,
-                bgcolor=BG_TERTIARY,
-                padding=ft.padding.symmetric(horizontal=20, vertical=18),
-                shape=ft.RoundedRectangleBorder(radius=6),
+                color=theme.text_secondary,
+                bgcolor=theme.button_bg,
+                padding=ft.padding.symmetric(horizontal=20, vertical=14),
+                shape=ft.RoundedRectangleBorder(radius=8),
                 text_style=ft.TextStyle(
-                    font_family="Consolas",
-                    size=12,
+                    font_family="Segoe UI",
+                    size=13,
                 ),
             ),
-        )
-
-        self.save_log_btn = ft.ElevatedButton(
-            "💾 EXPORT_LOG",
-            icon=ft.Icons.SAVE,
-            on_click=self._on_save_log,
-            style=ft.ButtonStyle(
-                color=TEXT_SECONDARY,
-                bgcolor=BG_TERTIARY,
-                padding=ft.padding.symmetric(horizontal=20, vertical=18),
-                shape=ft.RoundedRectangleBorder(radius=6),
-                text_style=ft.TextStyle(
-                    font_family="Consolas",
-                    size=12,
-                ),
-            ),
+            width=120,
+            height=42,
         )
 
         button_row = ft.Row([
             self.deploy_btn,
-            ft.Container(width=16),
+            ft.Container(width=12),
+            self.stop_btn,
+            ft.Container(width=12),
             self.clear_btn,
-            ft.Container(width=16),
-            self.save_log_btn,
         ], alignment=ft.MainAxisAlignment.CENTER)
 
-        left_header = ft.Container(
-            content=ft.Text("◈ PIPELINE_STEPS", size=11, weight=ft.FontWeight.BOLD,
-                           color=ACCENT_CYAN, font_family="Consolas"),
-            padding=ft.padding.only(bottom=12),
-        )
-
+        # Main content layout
         left_panel = ft.Container(
             content=ft.Column([
-                left_header,
-                steps_column,
-                ft.Container(height=12),
-                self.progress_label,
-                ft.Container(height=6),
+                ft.Text("Build Progress", size=14, weight=ft.FontWeight.W_600,
+                       color=theme.text, font_family="Segoe UI"),
+                ft.Container(height=8),
                 self.progress_bar,
+                ft.Container(height=16),
+                steps_column,
             ], spacing=0),
-            width=420,
+            width=380,
             padding=24,
         )
 
@@ -680,8 +644,8 @@ class MahekSyncDeployer:
             content=ft.Column([
                 self.stats,
                 ft.Container(height=16),
-                ft.Text("◈ LIVE_OUTPUT_STREAM", size=11, weight=ft.FontWeight.BOLD,
-                       color=ACCENT_CYAN, font_family="Consolas"),
+                ft.Text("Logs", size=14, weight=ft.FontWeight.W_600,
+                       color=theme.text, font_family="Segoe UI"),
                 ft.Container(height=8),
                 self.terminal,
                 ft.Container(height=16),
@@ -692,25 +656,22 @@ class MahekSyncDeployer:
         )
 
         main_content = ft.Row([
-            ft.Container(
-                content=left_panel,
-                border=ft.border.only(right=ft.BorderSide(1, BORDER)),
-            ),
+            left_panel,
+            ft.VerticalDivider(width=1, color=theme.border),
             right_panel,
         ], expand=True, spacing=0)
 
+        # Footer
         footer = ft.Container(
             content=ft.Row([
-                ft.Text("MahekSync Deployer v3.3 // Made by Mahek",
-                       size=10, color=TEXT_MUTED, font_family="Consolas"),
+                ft.Text("MahekSync Deployer v4.0", size=11,
+                       color=theme.text_muted, font_family="Segoe UI"),
                 ft.Container(expand=True),
-                ft.Text("⚡ HACKER_MODE_ENABLED",
-                       size=10, color=ACCENT_GREEN,
-                       font_family="Consolas",
-                       weight=ft.FontWeight.BOLD),
+                ft.Text("Made by Mahek", size=11,
+                       color=theme.text_muted, font_family="Segoe UI"),
             ]),
-            bgcolor=BG_SECONDARY,
-            border=ft.border.only(top=ft.BorderSide(1, BORDER)),
+            bgcolor=theme.bg_secondary,
+            border=ft.border.only(top=ft.BorderSide(1, theme.border)),
             padding=ft.padding.symmetric(horizontal=24, vertical=10),
         )
 
@@ -722,63 +683,51 @@ class MahekSyncDeployer:
             ], spacing=0, expand=True)
         )
 
+    def _on_theme_change(self, is_dark: bool):
+        self.current_theme = Theme(is_dark=is_dark)
+        self.page.theme_mode = ft.ThemeMode.DARK if is_dark else ft.ThemeMode.LIGHT
+        self.page.bgcolor = self.current_theme.bg
+        # Rebuild UI with new theme
+        self.page.controls.clear()
+        self._build_ui()
+        self.page.update()
+
     def _on_deploy(self, e):
         if self.is_deploying:
             return
 
         self.is_deploying = True
         self.start_time = time.time()
-        self.current_step_index = 0
 
-        for card in self.step_cards:
-            card.update_status(StepStatus.PENDING)
-            card.step.output = ""
-            card.step.duration = 0
+        for item in self.step_items:
+            item.update_status(StepStatus.PENDING)
+            item.step.output = ""
+            item.step.duration = 0
 
         self.terminal.clear()
         self.progress_bar.value = 0
-        self.progress_bar.color = ACCENT_GREEN
-        self.progress_label.value = "EXECUTING // IN PROGRESS"
-        self.progress_label.color = ACCENT_CYAN
+        self.progress_bar.color = self.current_theme.accent
 
         self.deploy_btn.disabled = True
-        self.deploy_btn.text = "◉ EXECUTING..."
-        self.deploy_btn.icon = ft.Icons.PLAY_CIRCLE
+        self.deploy_btn.text = "Deploying..."
+        self.stop_btn.disabled = False
 
         self.page.update()
 
         thread = threading.Thread(target=self._run_pipeline, daemon=True)
         thread.start()
 
-    def _on_clear(self, e):
-        self.terminal.clear()
-        self.terminal.add_line("> Logs cleared. System ready.", TEXT_MUTED)
+    def _on_stop(self, e):
+        # Stop functionality would require process termination
+        self.is_deploying = False
+        self.deploy_btn.disabled = False
+        self.deploy_btn.text = "Deploy"
+        self.stop_btn.disabled = True
         self.page.update()
 
-    def _on_save_log(self, e):
-        try:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"mahek_deploy_log_{timestamp}.txt"
-
-            log_content = []
-            for line in self.terminal.scroll_container.controls:
-                if isinstance(line, ft.Text):
-                    log_content.append(line.value)
-
-            with open(filename, "w", encoding="utf-8") as f:
-                f.write("╔══════════════════════════════════════════════════════════════╗\n")
-                f.write("║        MAHEKSYNC DEPLOYER v3.3 - DEPLOYMENT LOG              ║\n")
-                f.write("╚══════════════════════════════════════════════════════════════╝\n")
-                f.write(f"Generated: {datetime.now()}\n")
-                f.write(f"Made by: Mahek\n")
-                f.write("═" * 70 + "\n\n")
-                f.write("\n".join(log_content))
-
-            self.terminal.add_success(f"Log exported: {filename}")
-            self.page.update()
-        except Exception as ex:
-            self.terminal.add_error(f"Export failed: {ex}")
-            self.page.update()
+    def _on_clear(self, e):
+        self.terminal.clear()
+        self.page.update()
 
     def _run_pipeline(self):
         total_steps = len(self.steps)
@@ -787,23 +736,25 @@ class MahekSyncDeployer:
 
         self._safe_terminal_call(
             lambda: (
-                self.terminal.add_hacker_banner("INITIATING DEPLOYMENT SEQUENCE"),
-                self.terminal.add_line(f"Target: MahekSync Repository", ACCENT_CYAN, bold=True),
-                self.terminal.add_line(f"Total Steps: {total_steps}", TEXT_SECONDARY),
-                self.terminal.add_line(f"Timestamp: {datetime.now()}", TEXT_SECONDARY),
+                self.terminal.add_separator(),
+                self.terminal.add_line("Starting deployment pipeline", self.current_theme.accent, bold=True),
+                self.terminal.add_line(f"Project: {PROJECT_DIR}", self.current_theme.text_secondary),
+                self.terminal.add_line(f"Steps: {total_steps}", self.current_theme.text_secondary),
                 self.terminal.add_separator(),
             )
         )
 
         for i, step in enumerate(self.steps):
-            self.current_step_index = i
+            if not self.is_deploying:
+                break
+
             step_start = time.time()
 
-            self._update_step_card(i, StepStatus.RUNNING)
+            self._update_step_item(i, StepStatus.RUNNING)
             self._safe_terminal_call(
                 lambda s=step: (
                     self.terminal.add_separator(),
-                    self.terminal.add_line(f"[EXEC] {s.name}", ACCENT_CYAN, bold=True),
+                    self.terminal.add_line(f"Step {i+1}: {s.name}", self.current_theme.accent, bold=True),
                     self.terminal.add_command(s.command),
                 )
             )
@@ -835,18 +786,18 @@ class MahekSyncDeployer:
                 if process.returncode == 0:
                     step.status = StepStatus.SUCCESS
                     success_count += 1
-                    self._update_step_card(i, StepStatus.SUCCESS, duration, step.output)
+                    self._update_step_item(i, StepStatus.SUCCESS, duration)
                     self._safe_terminal_call(
                         lambda d=duration: self.terminal.add_success(
-                            f"Completed in {d:.2f}s | Exit: 0"
+                            f"Completed in {d:.2f}s"
                         )
                     )
                 else:
                     step.status = StepStatus.FAILED
-                    self._update_step_card(i, StepStatus.FAILED, duration, step.output)
+                    self._update_step_item(i, StepStatus.FAILED, duration)
                     self._safe_terminal_call(
                         lambda d=duration, c=process.returncode: self.terminal.add_error(
-                            f"Failed in {d:.2f}s | Exit: {c}"
+                            f"Failed in {d:.2f}s (exit {c})"
                         )
                     )
                     break
@@ -854,24 +805,23 @@ class MahekSyncDeployer:
             except Exception as ex:
                 step.status = StepStatus.FAILED
                 duration = time.time() - step_start
-                self._update_step_card(i, StepStatus.FAILED, duration, str(ex))
+                self._update_step_item(i, StepStatus.FAILED, duration)
                 self._safe_terminal_call(
-                    lambda e=ex: self.terminal.add_error(f"System Error: {e}")
+                    lambda e=ex: self.terminal.add_error(f"Error: {e}")
                 )
                 break
 
             completed += 1
             self._update_progress(completed / total_steps)
-            self._update_stats(completed, total_steps, success_count)
+            self._update_stats(completed, total_steps, success_count == total_steps)
 
         total_duration = time.time() - self.start_time
-        self._finish_pipeline(completed == total_steps and success_count == total_steps, 
+        self._finish_pipeline(completed == total_steps and success_count == total_steps,
                              total_duration)
 
-    def _update_step_card(self, index: int, status: StepStatus, duration: float = 0, 
-                          output: str = ""):
+    def _update_step_item(self, index: int, status: StepStatus, duration: float = 0):
         def update():
-            self.step_cards[index].update_status(status, duration, output)
+            self.step_items[index].update_status(status, duration)
         self._safe_call(update)
 
     def _update_progress(self, value: float):
@@ -880,7 +830,7 @@ class MahekSyncDeployer:
             self.page.update()
         self._safe_call(update)
 
-    def _update_stats(self, completed: int, total: int, success: int):
+    def _update_stats(self, completed: int, total: int, success: bool):
         def update():
             self.stats.update_stats(
                 time.time() - self.start_time,
@@ -892,45 +842,35 @@ class MahekSyncDeployer:
         def finish():
             self.is_deploying = False
             self.progress_bar.value = 1.0
-            self.progress_bar.color = ACCENT_GREEN if all_success else ACCENT_RED
-            self.progress_label.value = "COMPLETED" if all_success else "FAILED"
-            self.progress_label.color = ACCENT_GREEN if all_success else ACCENT_RED
+            self.progress_bar.color = self.current_theme.success if all_success else self.current_theme.error
 
             self.terminal.add_separator()
             if all_success:
-                self.terminal.add_hacker_banner("DEPLOYMENT SUCCESSFUL")
                 self.terminal.add_line(
-                    f"All systems operational. Deployed in {duration:.2f}s",
-                    ACCENT_GREEN, bold=True
+                    f"Deployment successful! ({duration:.2f}s)",
+                    self.current_theme.success, bold=True
                 )
                 self.page.snack_bar = ft.SnackBar(
-                    content=ft.Text("◉ DEPLOYMENT SUCCESSFUL", 
-                                   color="black", size=14,
-                                   weight=ft.FontWeight.BOLD,
-                                   font_family="Consolas"),
-                    bgcolor=ACCENT_GREEN,
-                    action="DISMISS",
+                    content=ft.Text("Deployment Successful", color="white", size=14,
+                                   weight=ft.FontWeight.W_600, font_family="Segoe UI"),
+                    bgcolor=self.current_theme.success,
                 )
             else:
-                self.terminal.add_hacker_banner("DEPLOYMENT FAILED")
                 self.terminal.add_line(
-                    f"Pipeline terminated after {duration:.2f}s",
-                    ACCENT_RED, bold=True
+                    f"Deployment failed after {duration:.2f}s",
+                    self.current_theme.error, bold=True
                 )
                 self.page.snack_bar = ft.SnackBar(
-                    content=ft.Text("◉ DEPLOYMENT FAILED", 
-                                   color="white", size=14,
-                                   weight=ft.FontWeight.BOLD,
-                                   font_family="Consolas"),
-                    bgcolor=ACCENT_RED,
-                    action="DISMISS",
+                    content=ft.Text("Deployment Failed", color="white", size=14,
+                                   weight=ft.FontWeight.W_600, font_family="Segoe UI"),
+                    bgcolor=self.current_theme.error,
                 )
 
             self.page.snack_bar.open = True
 
             self.deploy_btn.disabled = False
-            self.deploy_btn.text = "▶ EXECUTE_PIPELINE"
-            self.deploy_btn.icon = ft.Icons.PLAY_ARROW
+            self.deploy_btn.text = "Deploy"
+            self.stop_btn.disabled = True
 
             self.page.update()
 

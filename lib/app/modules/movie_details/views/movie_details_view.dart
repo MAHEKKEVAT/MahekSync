@@ -1,16 +1,23 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/round_shape_button.dart';
+import 'package:maheksync/app/constant/show_toast.dart';
 import 'package:maheksync/app/models/movie_model.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/utils/mahek_responsive.dart';
+import 'package:maheksync/app/widgets/full_screen_image.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../controllers/movie_details_controller.dart';
+
+// Conditional import for web URL
+import 'dart:html' as html;
 
 class MovieDetailsView extends GetView<MovieDetailsController> {
   const MovieDetailsView({super.key});
@@ -103,30 +110,59 @@ class MovieDetailsView extends GetView<MovieDetailsController> {
   }
 
   Widget _buildPosterCard(MovieModel movie, bool isDark, {required double height, required double width}) {
-    return Container(
-      height: height, width: width,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: movie.posterUrl != null && movie.posterUrl!.isNotEmpty
-            ? Stack(fit: StackFit.expand, children: [
-                NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0),
-                Positioned(
-                  bottom: 12, left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(8)),
-                    child: TextCustom(title: movie.formattedTotalDuration, fontSize: 12, fontFamily: FontFamily.bold, color: Colors.white),
+    return GestureDetector(
+      onTap: () {
+        if (movie.posterUrl != null && movie.posterUrl!.isNotEmpty) {
+          Get.to(() => FullScreenImageViewer(
+            imageUrl: movie.posterUrl!,
+            heroTag: 'movie_poster_${movie.id}',
+          ));
+        }
+      },
+      child: Container(
+        height: height, width: width,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Hero(
+            tag: 'movie_poster_${movie.id}',
+            child: movie.posterUrl != null && movie.posterUrl!.isNotEmpty
+                ? Stack(fit: StackFit.expand, children: [
+                    NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0),
+                    Positioned(
+                      bottom: 12, left: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(8)),
+                        child: TextCustom(title: movie.formattedTotalDuration, fontSize: 12, fontFamily: FontFamily.bold, color: Colors.white),
+                      ),
+                    ),
+                    // Tap to view hint
+                    Positioned(
+                      top: 12, right: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(8)),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.fullscreen_rounded, size: 12, color: Colors.white.withValues(alpha: 0.8)),
+                            spaceW(width: 4),
+                            TextCustom(title: 'View', fontSize: 9, fontFamily: FontFamily.medium, color: Colors.white.withValues(alpha: 0.8)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ])
+                : Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? AppThemeData.surfaceElevated : AppThemeData.grey2,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(child: Icon(Icons.movie_rounded, size: 64, color: AppThemeData.primary50)),
                   ),
-                ),
-              ])
-            : Container(
-                decoration: BoxDecoration(
-                  color: isDark ? AppThemeData.surfaceElevated : AppThemeData.grey2,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Center(child: Icon(Icons.movie_rounded, size: 64, color: AppThemeData.primary50)),
-              ),
+          ),
+        ),
       ),
     );
   }
@@ -135,7 +171,26 @@ class MovieDetailsView extends GetView<MovieDetailsController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextCustom(title: movie.movieName ?? 'Untitled', fontSize: 28, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+        Row(
+          children: [
+            Expanded(
+              child: TextCustom(title: movie.movieName ?? 'Untitled', fontSize: 28, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+            ),
+            spaceW(width: 8),
+            GestureDetector(
+              onTap: () => _copyMovieLink(movie),
+              child: Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(
+                  color: isDark ? AppThemeData.surfaceLight : AppThemeData.grey2,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+                ),
+                child: Icon(Icons.copy_rounded, size: 16, color: isDark ? AppThemeData.grey4 : AppThemeData.grey6),
+              ),
+            ),
+          ],
+        ),
         spaceH(height: 10),
         _buildTagsRow(movie, isDark),
         spaceH(height: 14),
@@ -419,6 +474,14 @@ class MovieDetailsView extends GetView<MovieDetailsController> {
   }
 
   // ── HELPERS ──
+
+  void _copyMovieLink(MovieModel movie) {
+    if (kIsWeb) {
+      final url = '${html.window.location.origin}/movie-details';
+      Clipboard.setData(ClipboardData(text: url));
+    }
+    ShowToastDialog.showSuccess('Movie link copied!');
+  }
 
   BoxDecoration _cardDeco(bool isDark, {Color? accent}) {
     return BoxDecoration(
