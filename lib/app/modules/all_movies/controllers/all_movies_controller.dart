@@ -119,6 +119,13 @@ class AllMoviesController extends GetxController {
     selectedGenre.value = genre;
   }
 
+  void clearFilters() {
+    selectedStatus.value = 'ALL';
+    selectedGenre.value = 'ALL';
+  }
+
+  bool get hasActiveFilters => selectedStatus.value != 'ALL' || selectedGenre.value != 'ALL';
+
   void toggleView() {
     isGridView.value = !isGridView.value;
   }

@@ -151,12 +151,7 @@ class MovieCrudView extends GetView<MovieCrudController> {
             ],
           ),
           spaceH(height: 16),
-          TextFieldWidget(
-            title: 'GENRE',
-            hintText: 'e.g. Action, Sci-Fi, Drama',
-            controller: controller.genreController,
-            prefix: Icon(Icons.theater_comedy_outlined, size: 20, color: AppThemeData.primary50),
-          ),
+          _buildGenreDropdown(isDark),
           spaceH(height: 16),
           TextFieldWidget(
             title: 'DIRECTOR',
@@ -165,13 +160,7 @@ class MovieCrudView extends GetView<MovieCrudController> {
             prefix: Icon(Icons.person_outline_rounded, size: 20, color: AppThemeData.primary50),
           ),
           spaceH(height: 16),
-          TextFieldWidget(
-            title: 'RATING (0-10)',
-            hintText: 'e.g. 8.5',
-            controller: controller.ratingController,
-            prefix: Icon(Icons.star_outline_rounded, size: 20, color: AppThemeData.primary50),
-            textInputType: const TextInputType.numberWithOptions(decimal: true),
-          ),
+          _buildRatingWidget(isDark),
           spaceH(height: 16),
           TextFieldWidget(
             title: 'DESCRIPTION',
@@ -290,6 +279,135 @@ class MovieCrudView extends GetView<MovieCrudController> {
               },
             ),
           )),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGenreDropdown(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextCustom(
+          title: 'GENRE',
+          fontSize: 12,
+          fontFamily: FontFamily.bold,
+          color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+        ),
+        spaceH(height: 8),
+        Container(
+          height: 50,
+          decoration: BoxDecoration(
+            color: isDark ? AppThemeData.grey8 : AppThemeData.primaryWhite,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? AppThemeData.grey7 : AppThemeData.grey3,
+            ),
+          ),
+          child: Obx(() => DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: controller.selectedGenre.value,
+              isExpanded: true,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+              ),
+              items: controller.genreOptions.map((String genre) {
+                final label = genre == 'ALL' ? 'All Genres' : genre[0] + genre.substring(1).toLowerCase();
+                return DropdownMenuItem<String>(
+                  value: genre,
+                  child: TextCustom(
+                    title: label,
+                    fontSize: 14,
+                    fontFamily: FontFamily.regular,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  controller.selectedGenre.value = newValue;
+                }
+              },
+            ),
+          )),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRatingWidget(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextCustom(
+          title: 'RATING',
+          fontSize: 12,
+          fontFamily: FontFamily.bold,
+          color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+        ),
+        spaceH(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? AppThemeData.grey8 : AppThemeData.primaryWhite,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? AppThemeData.grey7 : AppThemeData.grey3,
+            ),
+          ),
+          child: Obx(() {
+            final rating = controller.selectedRating.value;
+            return Row(
+              children: [
+                ...List.generate(10, (index) {
+                  final starIndex = index ~/ 2;
+                  final isLeftHalf = index.isEven;
+                  final filled = isLeftHalf
+                      ? rating >= (starIndex * 2 + 1).toDouble()
+                      : rating >= (starIndex * 2 + 2).toDouble();
+                  final halfFilled = isLeftHalf
+                      ? false
+                      : rating >= (starIndex * 2 + 1).toDouble() && rating < (starIndex * 2 + 2).toDouble();
+
+                  return GestureDetector(
+                    onTap: () {
+                      final newRating = isLeftHalf
+                          ? (starIndex * 2 + 1).toDouble()
+                          : (starIndex * 2 + 2).toDouble();
+                      controller.selectedRating.value =
+                          controller.selectedRating.value == newRating ? 0.0 : newRating;
+                    },
+                    child: SizedBox(
+                      width: 24,
+                      height: 28,
+                      child: Icon(
+                        filled
+                            ? Icons.star_rounded
+                            : halfFilled
+                                ? Icons.star_half_rounded
+                                : Icons.star_outline_rounded,
+                        size: 24,
+                        color: (filled || halfFilled)
+                            ? AppThemeData.neonOrange
+                            : (isDark ? AppThemeData.grey6 : AppThemeData.grey5),
+                      ),
+                    ),
+                  );
+                }),
+                const Spacer(),
+                TextCustom(
+                  title: '${rating.toInt()} / 10',
+                  fontSize: 14,
+                  fontFamily: FontFamily.bold,
+                  color: rating > 0
+                      ? AppThemeData.neonOrange
+                      : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                ),
+              ],
+            );
+          }),
         ),
       ],
     );

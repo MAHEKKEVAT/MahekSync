@@ -76,6 +76,7 @@ class _HoverableStatCardState extends State<_HoverableStatCard> {
 
 // ── HOVERABLE CARD WRAPPER ──
 
+
 class _HoverableCard extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -207,24 +208,32 @@ class MoviesView extends GetView<MoviesController> {
           ],
         ),
         const Spacer(),
-        _buildSearchButton(isDark),
+        _buildSearchField(isDark),
         spaceW(width: 10),
         _buildAddButton(isDark),
       ],
     );
   }
 
-  Widget _buildSearchButton(bool isDark) {
-    return GestureDetector(
-      onTap: () => _showSearchSheet(Get.context!),
-      child: Container(
-        width: 42, height: 42,
-        decoration: BoxDecoration(
-          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey4),
+  Widget _buildSearchField(bool isDark) {
+    return Container(
+      width: 240,
+      height: 42,
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+      ),
+      child: TextField(
+        onChanged: controller.updateSearch,
+        style: TextStyle(color: isDark ? AppThemeData.grey1 : AppThemeData.grey10, fontSize: 13),
+        decoration: InputDecoration(
+          hintText: 'Search movies...',
+          hintStyle: TextStyle(color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, fontSize: 13),
+          prefixIcon: Icon(Icons.search_rounded, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, size: 18),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         ),
-        child: Icon(Icons.search_rounded, color: isDark ? AppThemeData.grey5 : AppThemeData.grey7, size: 20),
       ),
     );
   }
@@ -251,98 +260,6 @@ class MoviesView extends GetView<MoviesController> {
     );
   }
 
-  void _showSearchSheet(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final searchCtrl = TextEditingController(text: controller.searchQuery.value);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setSheetState) {
-            return Container(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-              decoration: BoxDecoration(
-                color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppThemeData.grey4, borderRadius: BorderRadius.circular(2))),
-                  ),
-                  spaceH(height: 16),
-                  TextCustom(title: 'Search Movies', fontSize: 18, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-                  spaceH(height: 12),
-                  TextField(
-                    controller: searchCtrl,
-                    autofocus: true,
-                    style: TextStyle(fontSize: 14, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-                    decoration: InputDecoration(
-                      hintText: 'Search by name, year, or genre...',
-                      hintStyle: TextStyle(fontSize: 13, fontFamily: FontFamily.regular, color: AppThemeData.grey4),
-                      prefixIcon: Icon(Icons.search_rounded, color: AppThemeData.grey4, size: 20),
-                      suffixIcon: searchCtrl.text.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(Icons.clear_rounded, color: AppThemeData.grey4, size: 18),
-                              onPressed: () {
-                                searchCtrl.clear();
-                                controller.updateSearch('');
-                                setSheetState(() {});
-                              },
-                            )
-                          : null,
-                      filled: true,
-                      fillColor: isDark ? AppThemeData.surfaceDark : AppThemeData.grey2,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppThemeData.primary50),
-                      ),
-                    ),
-                    onChanged: (val) {
-                      controller.updateSearch(val);
-                      setSheetState(() {});
-                    },
-                  ),
-                  spaceH(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppThemeData.primary50,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const TextCustom(title: 'Done', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    ).whenComplete(() {
-      searchCtrl.dispose();
-    });
-  }
-
   // ── STATS ROW ──
 
   double _progressFor(String type) {
@@ -350,10 +267,7 @@ class MoviesView extends GetView<MoviesController> {
     if (total == 0) return 0;
     switch (type) {
       case 'total':
-        final allTotal = controller.movies.fold<int>(0, (sum, m) => sum + (m.totalDuration ?? 0));
-        final allWatched = controller.movies.fold<int>(0, (sum, m) => sum + (m.watchedDuration ?? 0));
-        if (allTotal == 0) return 0;
-        return allWatched / allTotal;
+        return controller.completedCount / total;
       case 'watching':
         final watching = controller.watchingMovies;
         if (watching.isEmpty) return 0;
@@ -362,83 +276,70 @@ class MoviesView extends GetView<MoviesController> {
         if (wTotal == 0) return 0;
         return wWatched / wTotal;
       case 'completed':
-        return controller.completedCount / total;
-      case 'notStarted':
-        return controller.notStartedCount / total;
+        return 1.0;
       default:
         return 0;
     }
   }
 
   Widget _buildStatsRow(BuildContext context, bool isDark) {
-    return SizedBox(
-      height: 290,
-      child: Row(
-        children: [
-          Expanded(
-            child: _HoverableStatCard(
-              accentColor: AppThemeData.primary50,
-              child: _buildStatCard(
-                isDark: isDark,
-                label: 'Total',
-                subtitle: 'Movies tracked',
-                value: controller.totalMovies.toString(),
-                icon: Icons.movie_rounded,
-                accentColor: AppThemeData.primary50,
-                progress: _progressFor('total'),
-                bgAsset: 'assets/icons/ic_clapperboard.svg',
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1400),
+        child: SizedBox(
+          height: 260,
+          child: Row(
+            children: [
+              Expanded(
+                child: _HoverableStatCard(
+                  accentColor: AppThemeData.primary50,
+                  child: _buildStatCard(
+                    isDark: isDark,
+                    label: 'Total',
+                    subtitle: 'Movies tracked',
+                    value: controller.totalMovies.toString(),
+                    icon: Icons.movie_rounded,
+                    accentColor: AppThemeData.primary50,
+                    progress: _progressFor('total'),
+                    bgAsset: 'assets/icons/ic_clapperboard.svg',
+                  ),
+                ),
               ),
-            ),
-          ),
-          spaceW(width: 14),
-          Expanded(
-            child: _HoverableStatCard(
-              accentColor: AppThemeData.neonBlue,
-              child: _buildStatCard(
-                isDark: isDark,
-                label: 'Watching',
-                subtitle: 'Currently in progress',
-                value: controller.watchingCount.toString(),
-                icon: Icons.play_circle_outline_rounded,
-                accentColor: AppThemeData.neonBlue,
-                progress: _progressFor('watching'),
-                bgAsset: 'assets/icons/ic_popcorn.svg',
+              spaceW(width: 14),
+              Expanded(
+                child: _HoverableStatCard(
+                  accentColor: AppThemeData.neonTeal,
+                  child: _buildStatCard(
+                    isDark: isDark,
+                    label: 'Watching',
+                    subtitle: 'Currently in progress',
+                    value: controller.watchingCount.toString(),
+                    icon: Icons.play_circle_outline_rounded,
+                    accentColor: AppThemeData.neonTeal,
+                    progress: _progressFor('watching'),
+                    bgAsset: 'assets/icons/ic_popcorn.svg',
+                  ),
+                ),
               ),
-            ),
-          ),
-          spaceW(width: 14),
-          Expanded(
-            child: _HoverableStatCard(
-              accentColor: AppThemeData.neonCyan,
-              child: _buildStatCard(
-                isDark: isDark,
-                label: 'Completed',
-                subtitle: 'Movies finished',
-                value: controller.completedCount.toString(),
-                icon: Icons.check_circle_outline_rounded,
-                accentColor: AppThemeData.neonCyan,
-                progress: _progressFor('completed'),
-                bgAsset: 'assets/icons/ic_theater_seats.svg',
+              spaceW(width: 14),
+              Expanded(
+                child: _HoverableStatCard(
+                  accentColor: AppThemeData.neonCyan,
+                  child: _buildStatCard(
+                    isDark: isDark,
+                    label: 'Completed',
+                    subtitle: 'Movies finished',
+                    value: controller.completedCount.toString(),
+                    icon: Icons.check_circle_outline_rounded,
+                    accentColor: AppThemeData.neonCyan,
+                    progress: _progressFor('completed'),
+                    bgAsset: 'assets/icons/ic_theater_seats.svg',
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-          spaceW(width: 14),
-          Expanded(
-            child: _HoverableStatCard(
-              accentColor: AppThemeData.neonOrange,
-              child: _buildStatCard(
-                isDark: isDark,
-                label: 'Not Started',
-                subtitle: 'Plan to watch',
-                value: controller.notStartedCount.toString(),
-                icon: Icons.pause_circle_outline_rounded,
-                accentColor: AppThemeData.neonOrange,
-                progress: _progressFor('notStarted'),
-                bgAsset: 'assets/icons/ic_movie_ticket.svg',
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -475,8 +376,8 @@ class MoviesView extends GetView<MoviesController> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    accentColor.withValues(alpha: isDark ? 0.12 : 0.08),
-                    accentColor.withValues(alpha: isDark ? 0.04 : 0.02),
+                    accentColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                    accentColor.withValues(alpha: isDark ? 0.06 : 0.03),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -764,12 +665,21 @@ class MoviesView extends GetView<MoviesController> {
             const Spacer(),
             GestureDetector(
               onTap: () => Get.toNamed(Routes.ALL_MOVIES),
-              child: Row(
-                children: [
-                  TextCustom(title: 'View All', fontSize: 13, fontFamily: FontFamily.medium, color: AppThemeData.primary50),
-                  spaceW(width: 6),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppThemeData.primary50),
-                ],
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: AppThemeData.appleIntelligenceGradientCool,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextCustom(title: 'View All', fontSize: 12, fontFamily: FontFamily.semiBold, color: Colors.white),
+                    spaceW(width: 6),
+                    Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.white),
+                  ],
+                ),
               ),
             ),
           ],

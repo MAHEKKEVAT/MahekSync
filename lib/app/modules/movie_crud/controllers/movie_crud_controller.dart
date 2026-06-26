@@ -11,10 +11,8 @@ import 'package:maheksync/app/constant/show_toast.dart';
 class MovieCrudController extends GetxController {
   final movieNameController = TextEditingController();
   final yearController = TextEditingController();
-  final genreController = TextEditingController();
   final descriptionController = TextEditingController();
   final directorController = TextEditingController();
-  final ratingController = TextEditingController();
 
   final totalHours = 0.obs;
   final totalMinutes = 0.obs;
@@ -22,6 +20,8 @@ class MovieCrudController extends GetxController {
   final watchedMinutes = 0.obs;
 
   final selectedStatus = 'NOT_STARTED'.obs;
+  final selectedGenre = 'ALL'.obs;
+  final selectedRating = 0.0.obs;
   final posterUrl = ''.obs;
   final isEditMode = false.obs;
   final isSaving = false.obs;
@@ -32,6 +32,9 @@ class MovieCrudController extends GetxController {
   MovieModel? _existingMovie;
 
   final statusOptions = ['NOT_STARTED', 'WATCHING', 'COMPLETED'];
+  final genreOptions = [
+    'ALL', 'ACTION', 'COMEDY', 'DRAMA', 'THRILLER', 'ROMANCE',
+  ];
   final ImagePicker _picker = ImagePicker();
 
   void incTotalHours() { if (totalHours.value < 23) totalHours.value++; }
@@ -58,10 +61,10 @@ class MovieCrudController extends GetxController {
   void _populateFields(MovieModel movie) {
     movieNameController.text = movie.movieName ?? '';
     yearController.text = movie.year ?? '';
-    genreController.text = movie.genre ?? '';
     descriptionController.text = movie.description ?? '';
     directorController.text = movie.director ?? '';
-    ratingController.text = movie.rating?.toString() ?? '';
+    selectedGenre.value = movie.genre ?? 'ALL';
+    selectedRating.value = movie.rating ?? 0.0;
     selectedStatus.value = movie.status ?? 'NOT_STARTED';
     posterUrl.value = movie.posterUrl ?? '';
 
@@ -104,8 +107,6 @@ class MovieCrudController extends GetxController {
       );
     }
 
-    final double? ratingValue = double.tryParse(ratingController.text.trim());
-
     final movie = MovieModel(
       id: _existingMovie?.id,
       ownerId: ownerId,
@@ -115,10 +116,10 @@ class MovieCrudController extends GetxController {
       watchedDuration: (watchedHours.value * 60) + watchedMinutes.value,
       posterUrl: imageUrl,
       status: selectedStatus.value,
-      genre: genreController.text.trim(),
+      genre: selectedGenre.value == 'ALL' ? '' : selectedGenre.value,
       description: descriptionController.text.trim(),
       director: directorController.text.trim(),
-      rating: ratingValue,
+      rating: selectedRating.value == 0 ? null : selectedRating.value,
       createdAt: _existingMovie?.createdAt,
     );
 
@@ -142,15 +143,15 @@ class MovieCrudController extends GetxController {
   void clearForm() {
     movieNameController.clear();
     yearController.clear();
-    genreController.clear();
     descriptionController.clear();
     directorController.clear();
-    ratingController.clear();
     totalHours.value = 0;
     totalMinutes.value = 0;
     watchedHours.value = 0;
     watchedMinutes.value = 0;
     selectedStatus.value = 'NOT_STARTED';
+    selectedGenre.value = 'ALL';
+    selectedRating.value = 0.0;
     posterUrl.value = '';
     posterFile.value = null;
     posterBytes.value = null;
@@ -160,10 +161,8 @@ class MovieCrudController extends GetxController {
   void onClose() {
     movieNameController.dispose();
     yearController.dispose();
-    genreController.dispose();
     descriptionController.dispose();
     directorController.dispose();
-    ratingController.dispose();
     super.onClose();
   }
 }
