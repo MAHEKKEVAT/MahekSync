@@ -500,22 +500,19 @@ class GenerateBillController extends GetxController {
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 36),
         build: (context) => [
-          _buildTopDecoration(),
           _buildPdfHeader(bill, regular, bold, medium),
-          pw.SizedBox(height: 16),
+          pw.SizedBox(height: 24),
           _buildPdfCustomerInfo(bill, regular, bold, medium),
-          pw.SizedBox(height: 18),
+          pw.SizedBox(height: 20),
           _buildPdfItemTable(bill, regular, bold, medium, visibleColumns: visibleColumns),
-          pw.SizedBox(height: 14),
+          pw.SizedBox(height: 20),
           if (bill.notes != null && bill.notes!.isNotEmpty) ...[
             _buildPdfNotes(bill, regular, bold),
-            pw.SizedBox(height: 14),
+            pw.SizedBox(height: 20),
           ],
           _buildPdfTotal(bill, regular, bold),
-          pw.SizedBox(height: 28),
+          pw.SizedBox(height: 32),
           _buildPdfFooter(bill, regular, bold, medium, signatureImage),
-          pw.SizedBox(height: 10),
-          _buildBottomDecoration(),
         ],
       ),
     );
@@ -544,103 +541,6 @@ class GenerateBillController extends GetxController {
   static const PdfColor _grey = PdfColor(0.604, 0.604, 0.604);
   static const PdfColor _lightGrey = PdfColor(0.90, 0.90, 0.92);
 
-  // ── Top corner decoration ─────────────────────────────────────────
-
-  pw.Widget _buildTopDecoration() {
-    return pw.CustomPaint(
-      size: const PdfPoint(520, 70),
-      painter: (PdfGraphics graphics, PdfPoint size) {
-        // Top-left large purple circle
-        graphics
-          ..setColor(_primary)
-          ..setFillColor(PdfColor(0.42, 0.40, 0.95))
-          ..drawEllipse(0, 70, 65, 65);
-        graphics.fillPath();
-
-        // Top-left smaller blue circle overlapping
-        graphics
-          ..setColor(_primaryLight)
-          ..setFillColor(PdfColor(0.50, 0.58, 1.0))
-          ..drawEllipse(35, 55, 40, 40);
-        graphics.fillPath();
-
-        // Top-right dot grid pattern
-        graphics.setColor(PdfColor(0.82, 0.84, 0.96));
-        for (int row = 0; row < 4; row++) {
-          for (int col = 0; col < 5; col++) {
-            graphics.drawEllipse(size.x - 80 + col * 14.0, 8 + row * 14.0, 2, 2);
-          }
-        }
-        graphics.fillPath();
-      },
-    );
-  }
-
-  // ── Bottom corner decoration ──────────────────────────────────────
-
-  pw.Widget _buildBottomDecoration() {
-    return pw.CustomPaint(
-      size: const PdfPoint(520, 50),
-      painter: (PdfGraphics graphics, PdfPoint size) {
-        // Bottom-right large purple circle
-        graphics
-          ..setColor(_primary)
-          ..setFillColor(PdfColor(0.42, 0.40, 0.95))
-          ..drawEllipse(size.x, 0, 55, 55);
-        graphics.fillPath();
-
-        // Bottom-right smaller blue circle overlapping
-        graphics
-          ..setColor(_primaryLight)
-          ..setFillColor(PdfColor(0.50, 0.58, 1.0))
-          ..drawEllipse(size.x - 30, 10, 35, 35);
-        graphics.fillPath();
-      },
-    );
-  }
-
-  // ── Icon circle helper ────────────────────────────────────────────
-
-  pw.Widget _buildIconCircle(String label, {double size = 30}) {
-    return pw.Container(
-      width: size,
-      height: size,
-      decoration: pw.BoxDecoration(
-        color: _primary,
-        shape: pw.BoxShape.circle,
-      ),
-      child: pw.Center(
-        child: pw.Text(
-          label,
-          style: pw.TextStyle(
-            fontSize: size * 0.38,
-            color: PdfColors.white,
-            fontWeight: pw.FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Dashed line helper ────────────────────────────────────────────
-
-  pw.Widget _buildDashedLine() {
-    return pw.CustomPaint(
-      size: const PdfPoint(520, 6),
-      painter: (PdfGraphics graphics, PdfPoint size) {
-        graphics.setColor(PdfColor(0.82, 0.84, 0.92));
-        graphics.setLineWidth(0.6);
-        double x = 0;
-        while (x < size.x) {
-          graphics.moveTo(x, 3);
-          graphics.lineTo(x + 6, 3);
-          x += 12;
-        }
-        graphics.strokePath();
-      },
-    );
-  }
-
   // ── Redesigned Header ─────────────────────────────────────────────
 
   pw.Widget _buildPdfHeader(BillModel bill, pw.Font font, pw.Font fontBold, pw.Font fontMedium) {
@@ -658,18 +558,18 @@ class GenerateBillController extends GetxController {
                   'MahekSync',
                   style: pw.TextStyle(
                     font: fontBold,
-                    fontSize: 30,
+                    fontSize: 32,
                     color: _primary,
                   ),
                 ),
-                pw.SizedBox(height: 2),
+                pw.SizedBox(height: 4),
                 pw.Text(
                   'INVOICE',
                   style: pw.TextStyle(
-                    font: font,
-                    fontSize: 11,
+                    font: fontMedium,
+                    fontSize: 14,
                     color: _grey,
-                    letterSpacing: 3,
+                    letterSpacing: 2,
                   ),
                 ),
               ],
@@ -677,39 +577,36 @@ class GenerateBillController extends GetxController {
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Text(
-                  'Invoice #',
-                  style: pw.TextStyle(font: font, fontSize: 9, color: _grey),
-                ),
-                pw.SizedBox(height: 1),
-                pw.Text(
-                  '${bill.invoiceNumber ?? 'N/A'}',
-                  style: pw.TextStyle(font: fontBold, fontSize: 13, color: _dark),
+                pw.Row(
+                  mainAxisSize: pw.MainAxisSize.min,
+                  children: [
+                    pw.Text(
+                      'Invoice #: ',
+                      style: pw.TextStyle(font: font, fontSize: 12, color: _grey),
+                    ),
+                    pw.Text(
+                      '${bill.invoiceNumber ?? 'N/A'}',
+                      style: pw.TextStyle(font: fontBold, fontSize: 12, color: _dark),
+                    ),
+                  ],
                 ),
                 pw.SizedBox(height: 6),
-                pw.Text(
-                  'Date:',
-                  style: pw.TextStyle(font: font, fontSize: 9, color: _grey),
-                ),
-                pw.SizedBox(height: 1),
-                pw.Text(
-                  bill.formattedBillDate,
-                  style: pw.TextStyle(font: fontMedium, fontSize: 12, color: _dark),
+                pw.Row(
+                  mainAxisSize: pw.MainAxisSize.min,
+                  children: [
+                    pw.Text(
+                      'Date: ',
+                      style: pw.TextStyle(font: font, fontSize: 12, color: _grey),
+                    ),
+                    pw.Text(
+                      bill.formattedBillDate,
+                      style: pw.TextStyle(font: fontBold, fontSize: 12, color: _dark),
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
-        ),
-        pw.SizedBox(height: 10),
-        pw.Container(
-          height: 2,
-          decoration: pw.BoxDecoration(
-            gradient: pw.LinearGradient(
-              colors: [_primary, _primaryLight, PdfColors.white],
-              begin: pw.Alignment.centerLeft,
-              end: pw.Alignment.centerRight,
-            ),
-          ),
         ),
       ],
     );
@@ -717,58 +614,38 @@ class GenerateBillController extends GetxController {
 
   pw.Widget _buildPdfCustomerInfo(BillModel bill, pw.Font font, pw.Font fontBold, pw.Font fontMedium) {
     return pw.Container(
-      padding: const pw.EdgeInsets.all(18),
+      width: double.infinity,
+      padding: const pw.EdgeInsets.all(20),
       decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: _lightGrey, width: 0.8),
-        borderRadius: pw.BorderRadius.circular(10),
+        color: _lightGrey,
+        borderRadius: pw.BorderRadius.circular(12),
+        border: pw.Border.all(color: _lightGrey, width: 0.5),
       ),
-      child: pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          // Bill To
-          _buildIconCircle('B', size: 34),
-          pw.SizedBox(width: 12),
-          pw.Expanded(
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  'BILL TO',
-                  style: pw.TextStyle(font: font, fontSize: 8, color: _grey, letterSpacing: 1.5),
-                ),
-                pw.SizedBox(height: 3),
-                pw.Text(
-                  bill.toName ?? 'N/A',
-                  style: pw.TextStyle(font: fontBold, fontSize: 15, color: _dark),
-                ),
-              ],
-            ),
+          pw.Text(
+            'BILL TO',
+            style: pw.TextStyle(font: font, fontSize: 10, color: _grey, letterSpacing: 1),
           ),
-          // Vertical divider
+          pw.SizedBox(height: 6),
+          pw.Text(
+            bill.toName ?? 'N/A',
+            style: pw.TextStyle(font: fontBold, fontSize: 18, color: _dark),
+          ),
           pw.Container(
-            width: 0.8,
-            height: 40,
+            margin: const pw.EdgeInsets.symmetric(vertical: 14),
+            height: 0.5,
             color: _lightGrey,
           ),
-          pw.SizedBox(width: 16),
-          // Payment Info
-          _buildIconCircle('P', size: 34),
-          pw.SizedBox(width: 12),
-          pw.Expanded(
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  'PAYMENT INFO',
-                  style: pw.TextStyle(font: font, fontSize: 8, color: _grey, letterSpacing: 1.5),
-                ),
-                pw.SizedBox(height: 3),
-                pw.Text(
-                  bill.paymentInfo ?? 'N/A',
-                  style: pw.TextStyle(font: fontMedium, fontSize: 12, color: _dark),
-                ),
-              ],
-            ),
+          pw.Text(
+            'PAYMENT INFO',
+            style: pw.TextStyle(font: font, fontSize: 10, color: _grey, letterSpacing: 1),
+          ),
+          pw.SizedBox(height: 6),
+          pw.Text(
+            bill.paymentInfo ?? 'N/A',
+            style: pw.TextStyle(font: fontMedium, fontSize: 13, color: PdfColor(0.45, 0.45, 0.45)),
           ),
         ],
       ),
@@ -787,117 +664,121 @@ class GenerateBillController extends GetxController {
     return pw.Column(
       children: [
         pw.Container(
-          padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 12),
           decoration: pw.BoxDecoration(
-            gradient: pw.LinearGradient(
-              colors: [_primary, _primaryLight],
-              begin: pw.Alignment.topLeft,
-              end: pw.Alignment.bottomRight,
+            color: _primary,
+            borderRadius: const pw.BorderRadius.only(
+              topLeft: pw.Radius.circular(12),
+              topRight: pw.Radius.circular(12),
             ),
-            borderRadius: pw.BorderRadius.circular(8),
           ),
           child: pw.Row(
             children: [
               if (showIndex)
                 pw.SizedBox(
-                  width: 32,
-                  child: pw.Text('#', style: pw.TextStyle(font: fontBold, fontSize: 9, color: PdfColors.white)),
+                  width: 36,
+                  child: pw.Text('#', style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.white)),
                 ),
               if (showName)
                 pw.Expanded(
-                  flex: 3,
-                  child: pw.Text('Item Name', style: pw.TextStyle(font: fontBold, fontSize: 9, color: PdfColors.white)),
+                  flex: 4,
+                  child: pw.Text('Item Name', style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.white)),
                 ),
               if (showPayment)
                 pw.Expanded(
-                  flex: 2,
-                  child: pw.Text('Payment', style: pw.TextStyle(font: fontBold, fontSize: 9, color: PdfColors.white)),
+                  flex: 3,
+                  child: pw.Text('Payment Method', style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.white)),
                 ),
               if (showQty)
                 pw.SizedBox(
-                  width: 40,
+                  width: 44,
                   child: pw.Align(
                     alignment: pw.Alignment.center,
-                    child: pw.Text('Qty', style: pw.TextStyle(font: fontBold, fontSize: 9, color: PdfColors.white)),
+                    child: pw.Text('Qty', style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.white)),
                   ),
                 ),
               if (showPrice)
                 pw.SizedBox(
-                  width: 60,
+                  width: 72,
                   child: pw.Align(
                     alignment: pw.Alignment.centerRight,
-                    child: pw.Text('Price', style: pw.TextStyle(font: fontBold, fontSize: 9, color: PdfColors.white)),
+                    child: pw.Text('Price', style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.white)),
                   ),
                 ),
               if (showTotal)
                 pw.SizedBox(
-                  width: 80,
+                  width: 76,
                   child: pw.Align(
                     alignment: pw.Alignment.centerRight,
-                    child: pw.Text('Total', style: pw.TextStyle(font: fontBold, fontSize: 9, color: PdfColors.white)),
+                    child: pw.Text('Total', style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.white)),
                   ),
                 ),
             ],
           ),
         ),
         ...items.asMap().entries.map((entry) {
-          final index = entry.key + 1;
+          final index = entry.key;
           final item = entry.value;
-          final isOdd = index % 2 == 1;
+          final isEven = index % 2 == 0;
 
           return pw.Container(
-            padding: const pw.EdgeInsets.symmetric(vertical: 9, horizontal: 4),
-            decoration: isOdd
-                ? null
-                : pw.BoxDecoration(color: _primaryBg, borderRadius: pw.BorderRadius.circular(4)),
+            padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            decoration: pw.BoxDecoration(
+              color: isEven ? _primaryBg : PdfColors.white,
+              border: pw.Border(
+                bottom: pw.BorderSide(color: _lightGrey, width: 0.5),
+              ),
+            ),
             child: pw.Row(
               children: [
                 if (showIndex)
                   pw.SizedBox(
-                    width: 32,
-                    child: pw.Text('$index', style: pw.TextStyle(font: font, fontSize: 9, color: _grey)),
+                    width: 36,
+                    child: pw.Text(
+                      '${index + 1}',
+                      style: pw.TextStyle(font: fontBold, fontSize: 12, color: _primary),
+                    ),
                   ),
                 if (showName)
                   pw.Expanded(
-                    flex: 3,
-                    child: pw.Text(item.itemName ?? 'N/A', style: pw.TextStyle(font: fontMedium, fontSize: 9, color: _dark)),
+                    flex: 4,
+                    child: pw.Text(item.itemName ?? 'N/A', style: pw.TextStyle(font: fontMedium, fontSize: 12, color: _dark)),
                   ),
                 if (showPayment)
                   pw.Expanded(
-                    flex: 2,
-                    child: pw.Text(item.paymentMethodName ?? 'N/A', style: pw.TextStyle(font: font, fontSize: 9, color: _grey)),
+                    flex: 3,
+                    child: pw.Text(item.paymentMethodName ?? 'N/A', style: pw.TextStyle(font: font, fontSize: 11, color: PdfColor(0.45, 0.45, 0.45))),
                   ),
                 if (showQty)
                   pw.SizedBox(
-                    width: 40,
+                    width: 44,
                     child: pw.Align(
                       alignment: pw.Alignment.center,
-                      child: pw.Text('${item.qty ?? 0}', style: pw.TextStyle(font: font, fontSize: 9, color: _dark)),
+                      child: pw.Text('${item.qty ?? 0}', style: pw.TextStyle(font: font, fontSize: 12, color: PdfColor(0.45, 0.45, 0.45))),
                     ),
                   ),
                 if (showPrice)
                   pw.SizedBox(
-                    width: 60,
+                    width: 72,
                     child: pw.Align(
                       alignment: pw.Alignment.centerRight,
                       child: pw.Text('\u20B9${(item.unitPrice ?? 0).toStringAsFixed(2)}',
-                          style: pw.TextStyle(font: font, fontSize: 9, color: _grey)),
+                          style: pw.TextStyle(font: font, fontSize: 12, color: PdfColor(0.45, 0.45, 0.45))),
                     ),
                   ),
                 if (showTotal)
                   pw.SizedBox(
-                    width: 80,
+                    width: 76,
                     child: pw.Align(
                       alignment: pw.Alignment.centerRight,
                       child: pw.Text('\u20B9${(item.total ?? 0).toStringAsFixed(2)}',
-                          style: pw.TextStyle(font: fontMedium, fontSize: 9, color: _dark)),
+                          style: pw.TextStyle(font: fontBold, fontSize: 12, color: _dark)),
                     ),
                   ),
               ],
             ),
           );
         }),
-        pw.Container(height: 0.5, color: _primaryLight),
       ],
     );
   }
@@ -905,20 +786,21 @@ class GenerateBillController extends GetxController {
   pw.Widget _buildPdfNotes(BillModel bill, pw.Font font, pw.Font fontBold) {
     return pw.Container(
       width: double.infinity,
-      padding: const pw.EdgeInsets.all(12),
+      padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
-        color: _primaryBg,
-        borderRadius: pw.BorderRadius.circular(8),
+        color: _lightGrey,
+        borderRadius: pw.BorderRadius.circular(12),
+        border: pw.Border.all(color: _lightGrey, width: 0.5),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'NOTES',
-            style: pw.TextStyle(font: fontBold, fontSize: 8, color: _primary, letterSpacing: 1.5),
+            'Notes',
+            style: pw.TextStyle(font: fontBold, fontSize: 11, color: _grey, letterSpacing: 1),
           ),
-          pw.SizedBox(height: 4),
-          pw.Text(bill.notes ?? '', style: pw.TextStyle(font: font, fontSize: 9, color: _dark)),
+          pw.SizedBox(height: 6),
+          pw.Text(bill.notes ?? '', style: pw.TextStyle(font: font, fontSize: 13, color: PdfColor(0.45, 0.45, 0.45))),
         ],
       ),
     );
@@ -929,7 +811,7 @@ class GenerateBillController extends GetxController {
       mainAxisAlignment: pw.MainAxisAlignment.end,
       children: [
         pw.Container(
-          width: 260,
+          width: 240,
           padding: const pw.EdgeInsets.symmetric(vertical: 14, horizontal: 20),
           decoration: pw.BoxDecoration(
             gradient: pw.LinearGradient(
@@ -937,18 +819,18 @@ class GenerateBillController extends GetxController {
               begin: pw.Alignment.topLeft,
               end: pw.Alignment.bottomRight,
             ),
-            borderRadius: pw.BorderRadius.circular(8),
+            borderRadius: pw.BorderRadius.circular(12),
           ),
           child: pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
                 'Grand Total',
-                style: pw.TextStyle(font: fontBold, fontSize: 12, color: PdfColors.white),
+                style: pw.TextStyle(font: fontBold, fontSize: 14, color: PdfColors.white),
               ),
               pw.Text(
                 '\u20B9${(bill.totalAmount ?? 0).toStringAsFixed(2)}',
-                style: pw.TextStyle(font: fontBold, fontSize: 18, color: PdfColors.white),
+                style: pw.TextStyle(font: fontBold, fontSize: 20, color: PdfColors.white),
               ),
             ],
           ),
@@ -958,67 +840,53 @@ class GenerateBillController extends GetxController {
   }
 
   pw.Widget _buildPdfFooter(BillModel bill, pw.Font font, pw.Font fontBold, pw.Font fontMedium, pw.MemoryImage? signatureImage) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
-        // Payment Information section
-        pw.Row(
-          children: [
-            _buildIconCircle('W', size: 26),
-            pw.SizedBox(width: 10),
-            pw.Text(
-              'PAYMENT INFORMATION',
-              style: pw.TextStyle(font: fontBold, fontSize: 9, color: _primary, letterSpacing: 1.5),
-            ),
-          ],
+        pw.Expanded(
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'PAYMENT INFORMATION',
+                style: pw.TextStyle(font: fontBold, fontSize: 10, color: _grey, letterSpacing: 1),
+              ),
+              pw.SizedBox(height: 6),
+              pw.Text(
+                bill.paymentInfo ?? 'N/A',
+                style: pw.TextStyle(font: font, fontSize: 13, color: PdfColor(0.45, 0.45, 0.45)),
+              ),
+              pw.SizedBox(height: 16),
+              pw.Text(
+                'My Name',
+                style: pw.TextStyle(font: fontBold, fontSize: 10, color: _grey, letterSpacing: 1),
+              ),
+              pw.SizedBox(height: 6),
+              pw.Text(
+                bill.myName ?? 'MahekSync',
+                style: pw.TextStyle(font: fontBold, fontSize: 14, color: _dark),
+              ),
+            ],
+          ),
         ),
-        pw.SizedBox(height: 6),
-        pw.Text(
-          bill.paymentInfo ?? 'N/A',
-          style: pw.TextStyle(font: font, fontSize: 10, color: _dark),
-        ),
-        pw.SizedBox(height: 12),
-        // Dashed divider
-        _buildDashedLine(),
-        pw.SizedBox(height: 14),
-        // Name + Signature row
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.end,
           children: [
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  'My Name',
-                  style: pw.TextStyle(font: font, fontSize: 8, color: _grey, letterSpacing: 1),
+            if (signatureImage != null)
+              pw.Image(signatureImage, height: 60, width: 120)
+            else
+              pw.Container(
+                width: 120,
+                height: 1,
+                decoration: pw.BoxDecoration(
+                  border: pw.Border(bottom: pw.BorderSide(color: _lightGrey, width: 1)),
                 ),
-                pw.SizedBox(height: 3),
-                pw.Text(
-                  bill.myName ?? 'MahekSync',
-                  style: pw.TextStyle(font: fontBold, fontSize: 14, color: _dark),
-                ),
-              ],
-            ),
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                if (signatureImage != null)
-                  pw.Image(signatureImage, height: 40, width: 140)
-                else
-                  pw.Container(
-                    width: 140,
-                    height: 1,
-                    decoration: pw.BoxDecoration(
-                      border: pw.Border(bottom: pw.BorderSide(color: _primary, width: 0.8)),
-                    ),
-                  ),
-                pw.SizedBox(height: 4),
-                pw.Text(
-                  'Authorized Signature',
-                  style: pw.TextStyle(font: font, fontSize: 8, color: _grey),
-                ),
-              ],
+              ),
+            pw.SizedBox(height: 4),
+            pw.Text(
+              'Authorized Signature',
+              style: pw.TextStyle(font: font, fontSize: 10, color: _grey),
             ),
           ],
         ),

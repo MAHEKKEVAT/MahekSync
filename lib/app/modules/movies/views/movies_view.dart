@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -142,6 +143,147 @@ class _HoverableCardState extends State<_HoverableCard> {
   }
 }
 
+// ── SCROLLABLE HORIZONTAL LIST WITH ARROWS ──
+
+class _ScrollableHorizontalList extends StatefulWidget {
+  final double height;
+  final double cardWidth;
+  final int itemCount;
+  final Widget Function(BuildContext, int) itemBuilder;
+
+  const _ScrollableHorizontalList({
+    required this.height,
+    required this.cardWidth,
+    required this.itemCount,
+    required this.itemBuilder,
+  });
+
+  @override
+  State<_ScrollableHorizontalList> createState() => _ScrollableHorizontalListState();
+}
+
+class _ScrollableHorizontalListState extends State<_ScrollableHorizontalList> {
+  late final ScrollController _scrollCtrl;
+  bool _canScrollLeft = false;
+  bool _canScrollRight = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl = ScrollController();
+    _scrollCtrl.addListener(_updateScrollState);
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.removeListener(_updateScrollState);
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  void _updateScrollState() {
+    if (!_scrollCtrl.hasClients) return;
+    final max = _scrollCtrl.position.maxScrollExtent;
+    final offset = _scrollCtrl.offset;
+    final atStart = offset <= 0;
+    final atEnd = offset >= max - 1;
+    if (_canScrollLeft == atStart && _canScrollRight == !atEnd) return;
+    setState(() {
+      _canScrollLeft = !atStart;
+      _canScrollRight = !atEnd;
+    });
+  }
+
+  void _scrollLeft() {
+    final step = widget.cardWidth + 12;
+    _scrollCtrl.animateTo(
+      (_scrollCtrl.offset - step).clamp(0.0, _scrollCtrl.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void _scrollRight() {
+    final step = widget.cardWidth + 12;
+    _scrollCtrl.animateTo(
+      (_scrollCtrl.offset + step).clamp(0.0, _scrollCtrl.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return SizedBox(
+      height: widget.height,
+      child: Row(
+        children: [
+          if (_canScrollLeft)
+            GestureDetector(
+              onTap: _scrollLeft,
+              child: Container(
+                width: 36,
+                height: 36,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark
+                      ? AppThemeData.grey10.withValues(alpha: 0.18)
+                      : AppThemeData.grey1.withValues(alpha: 0.14),
+                  border: Border.all(
+                    color: isDark
+                        ? AppThemeData.surfaceBorder
+                        : AppThemeData.grey4,
+                  ),
+                ),
+                child: Icon(
+                  Icons.chevron_left_rounded,
+                  color: isDark ? AppThemeData.grey2 : AppThemeData.grey8,
+                  size: 20,
+                ),
+              ),
+            ),
+          Expanded(
+            child: ListView.separated(
+              controller: _scrollCtrl,
+              scrollDirection: Axis.horizontal,
+              itemCount: widget.itemCount,
+              separatorBuilder: (a, b) => spaceW(width: 12),
+              itemBuilder: widget.itemBuilder,
+            ),
+          ),
+          if (_canScrollRight)
+            GestureDetector(
+              onTap: _scrollRight,
+              child: Container(
+                width: 36,
+                height: 36,
+                margin: const EdgeInsets.only(left: 8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark
+                      ? AppThemeData.grey10.withValues(alpha: 0.18)
+                      : AppThemeData.grey1.withValues(alpha: 0.14),
+                  border: Border.all(
+                    color: isDark
+                        ? AppThemeData.surfaceBorder
+                        : AppThemeData.grey4,
+                  ),
+                ),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDark ? AppThemeData.grey2 : AppThemeData.grey8,
+                  size: 20,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class MoviesView extends GetView<MoviesController> {
   const MoviesView({super.key});
 
@@ -277,70 +419,94 @@ class MoviesView extends GetView<MoviesController> {
         return wWatched / wTotal;
       case 'completed':
         return 1.0;
+      case 'not_started':
+        return 0.0;
       default:
         return 0;
     }
   }
 
   Widget _buildStatsRow(BuildContext context, bool isDark) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1400),
-        child: SizedBox(
-          height: 260,
-          child: Row(
-            children: [
-              Expanded(
-                child: _HoverableStatCard(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = constraints.maxWidth > 1100
+            ? min((constraints.maxWidth - 42) / 4, 500.0)
+            : min((constraints.maxWidth - 14) / 2, 500.0);
+        return Wrap(
+          spacing: 14,
+          runSpacing: 14,
+          children: [
+            SizedBox(
+              width: cardWidth,
+              height: 260,
+              child: _HoverableStatCard(
+                accentColor: AppThemeData.primary50,
+                child: _buildStatCard(
+                  isDark: isDark,
+                  label: 'Total',
+                  subtitle: 'Movies tracked',
+                  value: controller.totalMovies.toString(),
+                  icon: Icons.movie_rounded,
                   accentColor: AppThemeData.primary50,
-                  child: _buildStatCard(
-                    isDark: isDark,
-                    label: 'Total',
-                    subtitle: 'Movies tracked',
-                    value: controller.totalMovies.toString(),
-                    icon: Icons.movie_rounded,
-                    accentColor: AppThemeData.primary50,
-                    progress: _progressFor('total'),
-                    bgAsset: 'assets/icons/ic_clapperboard.svg',
-                  ),
+                  progress: _progressFor('total'),
+                  bgAsset: 'assets/icons/ic_clapperboard.svg',
                 ),
               ),
-              spaceW(width: 14),
-              Expanded(
-                child: _HoverableStatCard(
+            ),
+            SizedBox(
+              width: cardWidth,
+              height: 260,
+              child: _HoverableStatCard(
+                accentColor: AppThemeData.neonTeal,
+                child: _buildStatCard(
+                  isDark: isDark,
+                  label: 'Watching',
+                  subtitle: 'Currently in progress',
+                  value: controller.watchingCount.toString(),
+                  icon: Icons.play_circle_outline_rounded,
                   accentColor: AppThemeData.neonTeal,
-                  child: _buildStatCard(
-                    isDark: isDark,
-                    label: 'Watching',
-                    subtitle: 'Currently in progress',
-                    value: controller.watchingCount.toString(),
-                    icon: Icons.play_circle_outline_rounded,
-                    accentColor: AppThemeData.neonTeal,
-                    progress: _progressFor('watching'),
-                    bgAsset: 'assets/icons/ic_popcorn.svg',
-                  ),
+                  progress: _progressFor('watching'),
+                  bgAsset: 'assets/icons/ic_popcorn.svg',
                 ),
               ),
-              spaceW(width: 14),
-              Expanded(
-                child: _HoverableStatCard(
+            ),
+            SizedBox(
+              width: cardWidth,
+              height: 260,
+              child: _HoverableStatCard(
+                accentColor: AppThemeData.neonCyan,
+                child: _buildStatCard(
+                  isDark: isDark,
+                  label: 'Completed',
+                  subtitle: 'Movies finished',
+                  value: controller.completedCount.toString(),
+                  icon: Icons.check_circle_outline_rounded,
                   accentColor: AppThemeData.neonCyan,
-                  child: _buildStatCard(
-                    isDark: isDark,
-                    label: 'Completed',
-                    subtitle: 'Movies finished',
-                    value: controller.completedCount.toString(),
-                    icon: Icons.check_circle_outline_rounded,
-                    accentColor: AppThemeData.neonCyan,
-                    progress: _progressFor('completed'),
-                    bgAsset: 'assets/icons/ic_theater_seats.svg',
-                  ),
+                  progress: _progressFor('completed'),
+                  bgAsset: 'assets/icons/ic_theater_seats.svg',
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              height: 260,
+              child: _HoverableStatCard(
+                accentColor: AppThemeData.neonOrange,
+                child: _buildStatCard(
+                  isDark: isDark,
+                  label: 'Not Started',
+                  subtitle: 'Movies pending',
+                  value: controller.notStartedCount.toString(),
+                  icon: Icons.pause_circle_outline_rounded,
+                  accentColor: AppThemeData.neonOrange,
+                  progress: _progressFor('not_started'),
+                  bgAsset: 'assets/icons/ic_movie_ticket.svg',
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -534,16 +700,13 @@ class MoviesView extends GetView<MoviesController> {
       children: [
         TextCustom(title: 'Continue Watching', fontSize: 18, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
         spaceH(height: 14),
-        SizedBox(
+        _ScrollableHorizontalList(
           height: 175,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: watching.length,
-            separatorBuilder: (a, b) => spaceW(width: 12),
-            itemBuilder: (ctx, i) => SizedBox(
-              width: 400,
-              child: _buildContinueWatchingCard(watching[i], isDark),
-            ),
+          cardWidth: 400,
+          itemCount: watching.length,
+          itemBuilder: (ctx, i) => SizedBox(
+            width: 400,
+            child: _buildContinueWatchingCard(watching[i], isDark),
           ),
         ),
       ],
@@ -685,16 +848,13 @@ class MoviesView extends GetView<MoviesController> {
           ],
         ),
         spaceH(height: 14),
-        SizedBox(
+        _ScrollableHorizontalList(
           height: 175,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: latest.length,
-            separatorBuilder: (a, b) => spaceW(width: 12),
-            itemBuilder: (ctx, i) => SizedBox(
-              width: 400,
-              child: _buildAllMovieCard(latest[i], isDark),
-            ),
+          cardWidth: 400,
+          itemCount: latest.length,
+          itemBuilder: (ctx, i) => SizedBox(
+            width: 400,
+            child: _buildAllMovieCard(latest[i], isDark),
           ),
         ),
       ],

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -341,70 +342,94 @@ class AllMoviesView extends GetView<AllMoviesController> {
         return wWatched / wTotal;
       case 'completed':
         return 1.0;
+      case 'not_started':
+        return 0.0;
       default:
         return 0;
     }
   }
 
   Widget _buildStatsRow(BuildContext context, bool isDark) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1400),
-        child: SizedBox(
-          height: 260,
-          child: Row(
-            children: [
-              Expanded(
-                child: _HoverableStatCard(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = constraints.maxWidth > 1100
+            ? min((constraints.maxWidth - 42) / 4, 500.0)
+            : min((constraints.maxWidth - 14) / 2, 500.0);
+        return Wrap(
+          spacing: 14,
+          runSpacing: 14,
+          children: [
+            SizedBox(
+              width: cardWidth,
+              height: 260,
+              child: _HoverableStatCard(
+                accentColor: AppThemeData.primary50,
+                child: _buildStatCard(
+                  isDark: isDark,
+                  label: 'Total',
+                  subtitle: 'Movies tracked',
+                  value: controller.totalMovies.toString(),
+                  icon: Icons.movie_rounded,
                   accentColor: AppThemeData.primary50,
-                  child: _buildStatCard(
-                    isDark: isDark,
-                    label: 'Total',
-                    subtitle: 'Movies tracked',
-                    value: controller.totalMovies.toString(),
-                    icon: Icons.movie_rounded,
-                    accentColor: AppThemeData.primary50,
-                    progress: _progressFor('total'),
-                    bgAsset: 'assets/icons/ic_clapperboard.svg',
-                  ),
+                  progress: _progressFor('total'),
+                  bgAsset: 'assets/icons/ic_clapperboard.svg',
                 ),
               ),
-              spaceW(width: 14),
-              Expanded(
-                child: _HoverableStatCard(
+            ),
+            SizedBox(
+              width: cardWidth,
+              height: 260,
+              child: _HoverableStatCard(
+                accentColor: AppThemeData.neonTeal,
+                child: _buildStatCard(
+                  isDark: isDark,
+                  label: 'Watching',
+                  subtitle: 'Currently in progress',
+                  value: controller.watchingCount.toString(),
+                  icon: Icons.play_circle_outline_rounded,
                   accentColor: AppThemeData.neonTeal,
-                  child: _buildStatCard(
-                    isDark: isDark,
-                    label: 'Watching',
-                    subtitle: 'Currently in progress',
-                    value: controller.watchingCount.toString(),
-                    icon: Icons.play_circle_outline_rounded,
-                    accentColor: AppThemeData.neonTeal,
-                    progress: _progressFor('watching'),
-                    bgAsset: 'assets/icons/ic_popcorn.svg',
-                  ),
+                  progress: _progressFor('watching'),
+                  bgAsset: 'assets/icons/ic_popcorn.svg',
                 ),
               ),
-              spaceW(width: 14),
-              Expanded(
-                child: _HoverableStatCard(
+            ),
+            SizedBox(
+              width: cardWidth,
+              height: 260,
+              child: _HoverableStatCard(
+                accentColor: AppThemeData.neonCyan,
+                child: _buildStatCard(
+                  isDark: isDark,
+                  label: 'Completed',
+                  subtitle: 'Movies finished',
+                  value: controller.completedCount.toString(),
+                  icon: Icons.check_circle_outline_rounded,
                   accentColor: AppThemeData.neonCyan,
-                  child: _buildStatCard(
-                    isDark: isDark,
-                    label: 'Completed',
-                    subtitle: 'Movies finished',
-                    value: controller.completedCount.toString(),
-                    icon: Icons.check_circle_outline_rounded,
-                    accentColor: AppThemeData.neonCyan,
-                    progress: _progressFor('completed'),
-                    bgAsset: 'assets/icons/ic_theater_seats.svg',
-                  ),
+                  progress: _progressFor('completed'),
+                  bgAsset: 'assets/icons/ic_theater_seats.svg',
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              height: 260,
+              child: _HoverableStatCard(
+                accentColor: AppThemeData.neonOrange,
+                child: _buildStatCard(
+                  isDark: isDark,
+                  label: 'Not Started',
+                  subtitle: 'Movies pending',
+                  value: controller.notStartedCount.toString(),
+                  icon: Icons.pause_circle_outline_rounded,
+                  accentColor: AppThemeData.neonOrange,
+                  progress: _progressFor('not_started'),
+                  bgAsset: 'assets/icons/ic_movie_ticket.svg',
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -564,66 +589,117 @@ class AllMoviesView extends GetView<AllMoviesController> {
     final genres = controller.availableGenres;
     final showGenreFilter = genres.length > 1;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header row
-        Row(
-          children: [
-            TextCustom(
-              title: 'Filter Movies',
-              fontSize: 13,
-              fontFamily: FontFamily.bold,
-              color: isDark ? AppThemeData.grey3 : AppThemeData.grey8,
-            ),
-            const Spacer(),
-            Obx(() => controller.hasActiveFilters
-                ? GestureDetector(
-                    onTap: () => controller.clearFilters(),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.close_rounded, size: 14, color: AppThemeData.primary50),
-                        spaceW(width: 4),
-                        TextCustom(
-                          title: 'Clear All',
-                          fontSize: 11,
-                          fontFamily: FontFamily.medium,
-                          color: AppThemeData.primary50,
-                        ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink()),
-          ],
-        ),
-        spaceH(height: 8),
-        // Chips row
-        Row(
-          children: [
-            // Status section
-            _buildFilterLabel('Status', isDark),
-            spaceW(width: 8),
-            ..._buildStatusChips(isDark),
-            if (showGenreFilter) ...[
-              spaceW(width: 16),
-              _buildFilterLabel('Genre', isDark),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            children: [
+              Icon(Icons.tune_rounded, size: 16, color: isDark ? AppThemeData.grey3 : AppThemeData.grey8),
               spaceW(width: 8),
-              ..._buildGenreChips(isDark).take(4),
-              if (genres.length > 6)
-                _buildMoreGenresChip(isDark, genres.skip(5).toList()),
+              TextCustom(
+                title: 'Filter Movies',
+                fontSize: 13,
+                fontFamily: FontFamily.bold,
+                color: isDark ? AppThemeData.grey3 : AppThemeData.grey8,
+              ),
+              const Spacer(),
+              Obx(() => controller.hasActiveFilters
+                  ? GestureDetector(
+                      onTap: () => controller.clearFilters(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: AppThemeData.primary50.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.close_rounded, size: 13, color: AppThemeData.primary50),
+                            spaceW(width: 4),
+                            TextCustom(
+                              title: 'Clear All',
+                              fontSize: 11,
+                              fontFamily: FontFamily.medium,
+                              color: AppThemeData.primary50,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink()),
             ],
-          ],
-        ),
-      ],
+          ),
+          spaceH(height: 12),
+          // Split row: Status left | Divider | Genre right
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── STATUS (left) ──
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildFilterLabel('Status', isDark),
+                    spaceH(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: _buildStatusChips(isDark),
+                    ),
+                  ],
+                ),
+              ),
+              // ── VERTICAL DIVIDER ──
+              if (showGenreFilter) ...[
+                Container(
+                  width: 1,
+                  height: 52,
+                  margin: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey4,
+                  ),
+                ),
+                // ── GENRE (right) ──
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildFilterLabel('Genre', isDark),
+                      spaceH(height: 6),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          ..._buildGenreChips(isDark).take(4),
+                          if (genres.length > 6)
+                            _buildMoreGenresChip(isDark, genres.skip(5).toList()),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildFilterLabel(String text, bool isDark) {
     return TextCustom(
       title: text,
-      fontSize: 10,
-      fontFamily: FontFamily.bold,
+      fontSize: 11,
+      fontFamily: FontFamily.semiBold,
       color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
     );
   }
@@ -632,9 +708,9 @@ class AllMoviesView extends GetView<AllMoviesController> {
     return GestureDetector(
       onTap: () => _showMoreGenresPopup(isDark, moreGenres),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+          color: AppThemeData.primaryBlack.withValues(alpha: 0),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
         ),
@@ -647,8 +723,8 @@ class AllMoviesView extends GetView<AllMoviesController> {
               fontFamily: FontFamily.medium,
               color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
             ),
-            spaceW(width: 2),
-            Icon(Icons.keyboard_arrow_down_rounded, size: 12, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+            spaceW(width: 3),
+            Icon(Icons.keyboard_arrow_down_rounded, size: 13, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
           ],
         ),
       ),
@@ -721,17 +797,17 @@ class AllMoviesView extends GetView<AllMoviesController> {
       return GestureDetector(
         onTap: () => controller.updateStatusFilter(label),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isActive ? color.withValues(alpha: 0.15) : (isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite),
+            color: isActive ? color.withValues(alpha: 0.15) : AppThemeData.primaryBlack.withValues(alpha: 0),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: isActive ? color : (isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 12, color: isActive ? color : (isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
-              const SizedBox(width: 4),
+              Icon(icon, size: 13, color: isActive ? color : (isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
+              const SizedBox(width: 5),
               TextCustom(
                 title: label,
                 fontSize: 11,
@@ -755,17 +831,17 @@ class AllMoviesView extends GetView<AllMoviesController> {
       return GestureDetector(
         onTap: () => controller.updateGenreFilter(g),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isActive ? color.withValues(alpha: 0.15) : (isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite),
+            color: isActive ? color.withValues(alpha: 0.15) : AppThemeData.primaryBlack.withValues(alpha: 0),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: isActive ? color : (isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(genreIcon, size: 12, color: isActive ? color : (isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
-              const SizedBox(width: 4),
+              Icon(genreIcon, size: 13, color: isActive ? color : (isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
+              const SizedBox(width: 5),
               TextCustom(
                 title: g[0] + g.substring(1).toLowerCase(),
                 fontSize: 11,

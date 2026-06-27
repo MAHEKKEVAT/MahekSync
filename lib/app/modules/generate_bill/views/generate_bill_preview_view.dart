@@ -57,12 +57,9 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: Column(
+                  child: Column(
                   children: [
-                    RepaintBoundary(
-                      key: _previewKey,
-                      child: _buildInvoicePreview(isDark, bill),
-                    ),
+                    _buildInvoicePreview(isDark, bill),
                     spaceH(height: 24),
                     _buildExportSection(context, isDark, bill),
                     spaceH(height: 20),
@@ -139,7 +136,34 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
     final formattedDate = bill.billDate != null
         ? DateFormat('dd/MM/yyyy').format(bill.billDate!)
         : 'N/A';
+    final screenWidth = MediaQuery.of(context).size.width;
+    final a4Width = 595.0;
+    final needsScale = screenWidth < a4Width + 64;
 
+    return Center(
+      child: SizedBox(
+        width: a4Width,
+        child: needsScale
+            ? FittedBox(
+                alignment: Alignment.topCenter,
+                fit: BoxFit.scaleDown,
+                child: SizedBox(
+                  width: a4Width,
+                  child: RepaintBoundary(
+                    key: _previewKey,
+                    child: _buildInvoiceContent(isDark, bill, formattedDate),
+                  ),
+                ),
+              )
+            : RepaintBoundary(
+                key: _previewKey,
+                child: _buildInvoiceContent(isDark, bill, formattedDate),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildInvoiceContent(bool isDark, BillModel bill, String formattedDate) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -159,17 +183,17 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInvoiceHeader(formattedDate, bill),
-            spaceH(height: 32),
-            _buildCustomerInfo(bill),
-            spaceH(height: 28),
-            _buildItemsTable(bill),
             spaceH(height: 24),
+            _buildCustomerInfo(bill),
+            spaceH(height: 20),
+            _buildItemsTable(bill),
+            spaceH(height: 20),
             if (bill.notes != null && bill.notes!.isNotEmpty) ...[
               _buildNotesSection(bill),
-              spaceH(height: 24),
+              spaceH(height: 20),
             ],
             _buildTotalSection(bill),
-            spaceH(height: 40),
+            spaceH(height: 32),
             _buildFooter(bill),
           ],
         ),
@@ -251,58 +275,52 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppThemeData.grey3, width: 0.5),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'BILL TO',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AppThemeData.grey5,
-                    fontFamily: FontFamily.medium,
-                    letterSpacing: 1,
-                  ),
-                ),
-                spaceH(height: 6),
-                Text(
-                  bill.toName ?? 'N/A',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppThemeData.grey10,
-                    fontFamily: FontFamily.bold,
-                  ),
-                ),
-              ],
+          // Bill To
+          Text(
+            'BILL TO',
+            style: TextStyle(
+              fontSize: 10,
+              color: AppThemeData.grey5,
+              fontFamily: FontFamily.medium,
+              letterSpacing: 1,
             ),
           ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'PAYMENT INFO',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AppThemeData.grey5,
-                    fontFamily: FontFamily.medium,
-                    letterSpacing: 1,
-                  ),
-                ),
-                spaceH(height: 6),
-                Text(
-                  bill.paymentInfo ?? 'N/A',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppThemeData.grey7,
-                    fontFamily: FontFamily.regular,
-                  ),
-                ),
-              ],
+          spaceH(height: 6),
+          Text(
+            bill.toName ?? 'N/A',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppThemeData.grey10,
+              fontFamily: FontFamily.bold,
+            ),
+          ),
+          // Divider
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 14),
+            height: 0.5,
+            color: AppThemeData.grey3,
+          ),
+          // Payment Info
+          Text(
+            'PAYMENT INFO',
+            style: TextStyle(
+              fontSize: 10,
+              color: AppThemeData.grey5,
+              fontFamily: FontFamily.medium,
+              letterSpacing: 1,
+            ),
+          ),
+          spaceH(height: 6),
+          Text(
+            bill.paymentInfo ?? 'N/A',
+            style: TextStyle(
+              fontSize: 13,
+              color: AppThemeData.grey7,
+              fontFamily: FontFamily.regular,
             ),
           ),
         ],
@@ -313,17 +331,16 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
   // ── Items Table (conditionally renders columns) ─────────────────────
 
   Widget _buildItemsTable(BillModel bill) {
-    final isMobile = MahekResponsive.isMobile(context);
-    final indexW = isMobile ? 30.0 : 40.0;
-    final qtyW = isMobile ? 40.0 : 50.0;
-    final priceW = isMobile ? 65.0 : 80.0;
-    final totalW = isMobile ? 65.0 : 80.0;
-    final headerFontSize = isMobile ? 10.0 : 11.0;
-    final rowFontSize = isMobile ? 11.0 : 13.0;
+    final indexW = 36.0;
+    final qtyW = 44.0;
+    final priceW = 72.0;
+    final totalW = 76.0;
+    const headerFontSize = 10.0;
+    const rowFontSize = 12.0;
 
     final showIndex = _visibleColumns['index'] == true;
     final showName = _visibleColumns['name'] == true;
-    final showPayment = _visibleColumns['payment'] == true && !isMobile;
+    final showPayment = _visibleColumns['payment'] == true;
     final showQty = _visibleColumns['qty'] == true;
     final showPrice = _visibleColumns['price'] == true;
     final showTotal = _visibleColumns['total'] == true;
@@ -332,10 +349,7 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
       children: [
         // Header row
         Container(
-          padding: EdgeInsets.symmetric(
-            vertical: isMobile ? 8 : 12,
-            horizontal: isMobile ? 10 : 16,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
           decoration: BoxDecoration(
             color: AppThemeData.primary50,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
@@ -349,12 +363,12 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
                 ),
               if (showName)
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: Text('Item Name', style: TextStyle(fontSize: headerFontSize, fontWeight: FontWeight.w600, color: Colors.white, fontFamily: FontFamily.semiBold)),
                 ),
               if (showPayment)
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Text('Payment Method', style: TextStyle(fontSize: headerFontSize, fontWeight: FontWeight.w600, color: Colors.white, fontFamily: FontFamily.semiBold)),
                 ),
               if (showQty)
@@ -382,10 +396,7 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
           final isEven = index % 2 == 0;
 
           return Container(
-            padding: EdgeInsets.symmetric(
-              vertical: isMobile ? 8 : 12,
-              horizontal: isMobile ? 10 : 16,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             decoration: BoxDecoration(
               color: isEven ? AppThemeData.grey1 : AppThemeData.primaryWhite,
               border: Border(bottom: BorderSide(color: AppThemeData.grey3, width: 0.5)),
@@ -402,7 +413,7 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
                   ),
                 if (showName)
                   Expanded(
-                    flex: 3,
+                    flex: 4,
                     child: Text(
                       item.itemName ?? 'N/A',
                       style: TextStyle(fontSize: rowFontSize, color: AppThemeData.grey10, fontFamily: FontFamily.regular),
@@ -411,7 +422,7 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
                   ),
                 if (showPayment)
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Row(
                       children: [
                         if (item.paymentMethodIcon != null && item.paymentMethodIcon!.isNotEmpty)
@@ -449,7 +460,7 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
                         Expanded(
                           child: Text(
                             item.paymentMethodName ?? 'N/A',
-                            style: TextStyle(fontSize: isMobile ? 11 : 12, color: AppThemeData.grey7, fontFamily: FontFamily.regular),
+                            style: TextStyle(fontSize: 11, color: AppThemeData.grey7, fontFamily: FontFamily.regular),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -536,15 +547,15 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Container(
-          width: 280,
-          padding: const EdgeInsets.all(20),
+          width: 240,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [AppThemeData.primary50, AppThemeData.neonBlue],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
                 color: AppThemeData.primary50.withValues(alpha: 0.3),
@@ -559,7 +570,7 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
               Text(
                 'Grand Total',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: Colors.white.withValues(alpha: 0.9),
                   fontFamily: FontFamily.semiBold,
@@ -568,7 +579,7 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
               Text(
                 '\u20B9${(bill.totalAmount ?? 0).toStringAsFixed(2)}',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   fontFamily: FontFamily.bold,

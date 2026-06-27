@@ -1,40 +1,72 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Floor shadow -->
+  <ellipse cx="100" cy="172" rx="72" ry="5" fill="currentColor" opacity="0.1"/>
   <!-- Left seat back -->
-  <rect x="16" y="70" width="48" height="55" rx="10" fill="currentColor" opacity="0.5"/>
+  <rect x="16" y="68" width="48" height="56" rx="10" fill="currentColor" opacity="0.5"/>
   <!-- Left seat cushion -->
-  <rect x="14" y="120" width="52" height="22" rx="6" fill="currentColor" opacity="0.6"/>
+  <rect x="14" y="118" width="52" height="24" rx="7" fill="currentColor" opacity="0.6"/>
+  <!-- Left cushion highlight -->
+  <rect x="20" y="122" width="40" height="8" rx="4" fill="currentColor" opacity="0.08"/>
   <!-- Left armrest -->
-  <rect x="10" y="95" width="10" height="40" rx="5" fill="currentColor" opacity="0.4"/>
+  <rect x="10" y="92" width="10" height="42" rx="5" fill="currentColor" opacity="0.42"/>
+  <!-- Left armrest top knob -->
+  <circle cx="15" cy="92" r="6" fill="currentColor" opacity="0.35"/>
   <!-- Left legs -->
-  <rect x="22" y="142" width="5" height="22" rx="2" fill="currentColor" opacity="0.3"/>
-  <rect x="52" y="142" width="5" height="22" rx="2" fill="currentColor" opacity="0.3"/>
-
+  <rect x="22" y="142" width="5" height="26" rx="2" fill="currentColor" opacity="0.3"/>
+  <rect x="52" y="142" width="5" height="26" rx="2" fill="currentColor" opacity="0.3"/>
+  <!-- Left leg caps -->
+  <rect x="20" y="166" width="9" height="4" rx="2" fill="currentColor" opacity="0.25"/>
+  <rect x="50" y="166" width="9" height="4" rx="2" fill="currentColor" opacity="0.25"/>
   <!-- Center seat back (slightly taller) -->
-  <rect x="74" y="62" width="52" height="60" rx="10" fill="currentColor" opacity="0.55"/>
+  <rect x="74" y="60" width="52" height="62" rx="10" fill="currentColor" opacity="0.55"/>
   <!-- Center seat cushion -->
-  <rect x="72" y="116" width="56" height="24" rx="6" fill="currentColor" opacity="0.65"/>
+  <rect x="72" y="116" width="56" height="26" rx="7" fill="currentColor" opacity="0.65"/>
+  <!-- Center cushion highlight -->
+  <rect x="78" y="120" width="44" height="8" rx="4" fill="currentColor" opacity="0.08"/>
   <!-- Center armrests -->
-  <rect x="68" y="88" width="10" height="42" rx="5" fill="currentColor" opacity="0.45"/>
-  <rect x="122" y="88" width="10" height="42" rx="5" fill="currentColor" opacity="0.45"/>
+  <rect x="68" y="86" width="10" height="44" rx="5" fill="currentColor" opacity="0.45"/>
+  <rect x="122" y="86" width="10" height="44" rx="5" fill="currentColor" opacity="0.45"/>
+  <!-- Center armrest top knobs -->
+  <circle cx="73" cy="86" r="6" fill="currentColor" opacity="0.38"/>
+  <circle cx="127" cy="86" r="6" fill="currentColor" opacity="0.38"/>
   <!-- Center legs -->
-  <rect x="82" y="140" width="5" height="24" rx="2" fill="currentColor" opacity="0.35"/>
-  <rect x="112" y="140" width="5" height="24" rx="2" fill="currentColor" opacity="0.35"/>
-
+  <rect x="82" y="142" width="5" height="26" rx="2" fill="currentColor" opacity="0.35"/>
+  <rect x="112" y="142" width="5" height="26" rx="2" fill="currentColor" opacity="0.35"/>
+  <!-- Center leg caps -->
+  <rect x="80" y="166" width="9" height="4" rx="2" fill="currentColor" opacity="0.28"/>
+  <rect x="110" y="166" width="9" height="4" rx="2" fill="currentColor" opacity="0.28"/>
   <!-- Right seat back -->
-  <rect x="136" y="70" width="48" height="55" rx="10" fill="currentColor" opacity="0.5"/>
+  <rect x="136" y="68" width="48" height="56" rx="10" fill="currentColor" opacity="0.5"/>
   <!-- Right seat cushion -->
-  <rect x="134" y="120" width="52" height="22" rx="6" fill="currentColor" opacity="0.6"/>
+  <rect x="134" y="118" width="52" height="24" rx="7" fill="currentColor" opacity="0.6"/>
+  <!-- Right cushion highlight -->
+  <rect x="140" y="122" width="40" height="8" rx="4" fill="currentColor" opacity="0.08"/>
   <!-- Right armrest -->
-  <rect x="180" y="95" width="10" height="40" rx="5" fill="currentColor" opacity="0.4"/>
+  <rect x="180" y="92" width="10" height="42" rx="5" fill="currentColor" opacity="0.42"/>
+  <!-- Right armrest top knob -->
+  <circle cx="185" cy="92" r="6" fill="currentColor" opacity="0.35"/>
   <!-- Right legs -->
-  <rect x="142" y="142" width="5" height="22" rx="2" fill="currentColor" opacity="0.3"/>
-  <rect x="172" y="142" width="5" height="22" rx="2" fill="currentColor" opacity="0.3"/>
-
-  <!-- Seat back stitching lines -->
-  <line x1="30" y1="82" x2="50" y2="82" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
-  <line x1="30" y1="96" x2="50" y2="96" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
-  <line x1="88" y1="76" x2="112" y2="76" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
-  <line x1="88" y1="90" x2="112" y2="90" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
-  <line x1="150" y1="82" x2="170" y2="82" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
-  <line x1="150" y1="96" x2="170" y2="96" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <rect x="142" y="142" width="5" height="26" rx="2" fill="currentColor" opacity="0.3"/>
+  <rect x="172" y="142" width="5" height="26" rx="2" fill="currentColor" opacity="0.3"/>
+  <!-- Right leg caps -->
+  <rect x="140" y="166" width="9" height="4" rx="2" fill="currentColor" opacity="0.25"/>
+  <rect x="170" y="166" width="9" height="4" rx="2" fill="currentColor" opacity="0.25"/>
+  <!-- Seat back quilting pattern (left) -->
+  <line x1="30" y1="80" x2="50" y2="80" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <line x1="30" y1="94" x2="50" y2="94" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <line x1="30" y1="108" x2="50" y2="108" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <line x1="38" y1="72" x2="38" y2="120" stroke="currentColor" stroke-width="1" opacity="0.08"/>
+  <line x1="46" y1="72" x2="46" y2="120" stroke="currentColor" stroke-width="1" opacity="0.08"/>
+  <!-- Seat back quilting pattern (center) -->
+  <line x1="88" y1="74" x2="112" y2="74" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <line x1="88" y1="88" x2="112" y2="88" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <line x1="88" y1="102" x2="112" y2="102" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <line x1="96" y1="66" x2="96" y2="118" stroke="currentColor" stroke-width="1" opacity="0.08"/>
+  <line x1="104" y1="66" x2="104" y2="118" stroke="currentColor" stroke-width="1" opacity="0.08"/>
+  <!-- Seat back quilting pattern (right) -->
+  <line x1="150" y1="80" x2="170" y2="80" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <line x1="150" y1="94" x2="170" y2="94" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <line x1="150" y1="108" x2="170" y2="108" stroke="currentColor" stroke-width="1.5" opacity="0.15"/>
+  <line x1="158" y1="72" x2="158" y2="120" stroke="currentColor" stroke-width="1" opacity="0.08"/>
+  <line x1="166" y1="72" x2="166" y2="120" stroke="currentColor" stroke-width="1" opacity="0.08"/>
 </svg>

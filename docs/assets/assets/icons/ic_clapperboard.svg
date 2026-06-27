@@ -1,26 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Shadow under board -->
+  <rect x="36" y="174" width="128" height="6" rx="3" fill="currentColor" opacity="0.12"/>
   <!-- Main board body -->
   <rect x="30" y="85" width="140" height="85" rx="6" fill="currentColor" opacity="0.55"/>
+  <!-- Board inner edge highlight -->
+  <rect x="30" y="85" width="140" height="85" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.12"/>
   <!-- Top clapper arm -->
-  <path d="M28 62 L172 62 L170 88 L30 88 Z" fill="currentColor" opacity="0.7" rx="4"/>
+  <path d="M28 60 L172 60 L170 88 L30 88 Z" fill="currentColor" opacity="0.7"/>
+  <!-- Clapper arm edge line -->
+  <line x1="30" y1="88" x2="170" y2="88" stroke="currentColor" stroke-width="1.5" opacity="0.18"/>
   <!-- Clapper hinge bolt left -->
-  <circle cx="46" cy="75" r="7" fill="currentColor" opacity="0.4"/>
-  <circle cx="46" cy="75" r="3" fill="currentColor" opacity="0.25"/>
+  <circle cx="44" cy="74" r="8" fill="currentColor" opacity="0.4"/>
+  <circle cx="44" cy="74" r="4" fill="currentColor" opacity="0.25"/>
+  <circle cx="44" cy="74" r="1.5" fill="currentColor" opacity="0.15"/>
   <!-- Clapper hinge bolt right -->
-  <circle cx="154" cy="75" r="7" fill="currentColor" opacity="0.4"/>
-  <circle cx="154" cy="75" r="3" fill="currentColor" opacity="0.25"/>
+  <circle cx="156" cy="74" r="8" fill="currentColor" opacity="0.4"/>
+  <circle cx="156" cy="74" r="4" fill="currentColor" opacity="0.25"/>
+  <circle cx="156" cy="74" r="1.5" fill="currentColor" opacity="0.15"/>
   <!-- Diagonal stripes on clapper arm -->
-  <path d="M60 62 L78 88" stroke="currentColor" stroke-width="8" opacity="0.3" stroke-linecap="round"/>
-  <path d="M92 62 L110 88" stroke="currentColor" stroke-width="8" opacity="0.3" stroke-linecap="round"/>
-  <path d="M124 62 L142 88" stroke="currentColor" stroke-width="8" opacity="0.3" stroke-linecap="round"/>
+  <path d="M58 60 L76 88" stroke="currentColor" stroke-width="9" opacity="0.28" stroke-linecap="round"/>
+  <path d="M90 60 L108 88" stroke="currentColor" stroke-width="9" opacity="0.28" stroke-linecap="round"/>
+  <path d="M122 60 L140 88" stroke="currentColor" stroke-width="9" opacity="0.28" stroke-linecap="round"/>
+  <!-- Film strip perforations (left side) -->
+  <rect x="22" y="92" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="22" y="104" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="22" y="116" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="22" y="128" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="22" y="140" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="22" y="152" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <!-- Film strip perforations (right side) -->
+  <rect x="172" y="92" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="172" y="104" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="172" y="116" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="172" y="128" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="172" y="140" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
+  <rect x="172" y="152" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
   <!-- Board surface lines -->
-  <line x1="48" y1="108" x2="152" y2="108" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
-  <line x1="48" y1="128" x2="152" y2="128" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
-  <line x1="48" y1="148" x2="152" y2="148" stroke="currentColor" stroke-width="2.5" opacity="0.2"/>
-  <!-- Small text placeholder lines -->
-  <rect x="48" y="95" width="40" height="5" rx="2" fill="currentColor" opacity="0.18"/>
-  <rect x="96" y="95" width="56" height="5" rx="2" fill="currentColor" opacity="0.12"/>
-  <!-- Film reel circles on board -->
-  <circle cx="60" cy="138" r="8" stroke="currentColor" stroke-width="2" opacity="0.15" fill="none"/>
-  <circle cx="60" cy="138" r="3" fill="currentColor" opacity="0.12"/>
+  <line x1="44" y1="106" x2="156" y2="106" stroke="currentColor" stroke-width="2" opacity="0.18"/>
+  <line x1="44" y1="126" x2="156" y2="126" stroke="currentColor" stroke-width="2" opacity="0.18"/>
+  <line x1="44" y1="146" x2="156" y2="146" stroke="currentColor" stroke-width="2" opacity="0.18"/>
+  <!-- Text placeholder lines on board -->
+  <rect x="48" y="94" width="36" height="5" rx="2.5" fill="currentColor" opacity="0.18"/>
+  <rect x="92" y="94" width="54" height="5" rx="2.5" fill="currentColor" opacity="0.12"/>
+  <!-- Film reel circle on board -->
+  <circle cx="62" cy="136" r="10" stroke="currentColor" stroke-width="2" opacity="0.18" fill="none"/>
+  <circle cx="62" cy="136" r="4" fill="currentColor" opacity="0.14"/>
+  <!-- Small film frame rectangles -->
+  <rect x="84" y="130" width="18" height="14" rx="2" fill="currentColor" opacity="0.08"/>
+  <rect x="108" y="130" width="18" height="14" rx="2" fill="currentColor" opacity="0.08"/>
+  <rect x="132" y="130" width="18" height="14" rx="2" fill="currentColor" opacity="0.08"/>
 </svg>
