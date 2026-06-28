@@ -620,6 +620,73 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
       children: [
         _searchBar(isDark),
         spaceH(height: 12),
+        GestureDetector(
+          onTap: controller.recenterMap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppThemeData.success400.withValues(alpha: 0.10),
+                  AppThemeData.success400.withValues(alpha: 0.04),
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppThemeData.success400.withValues(alpha: 0.20),
+                width: 0.5,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: AppThemeData.success400.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    SolarIconsBold.gps,
+                    size: 16,
+                    color: AppThemeData.success400,
+                  ),
+                ),
+                spaceW(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextCustom(
+                        title: 'Go to current location',
+                        fontSize: 12,
+                        fontFamily: FontFamily.semiBold,
+                        color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                      ),
+                      TextCustom(
+                        title: controller.currentAddress.value.isEmpty
+                            ? 'Center map on your position'
+                            : controller.currentAddress.value,
+                        fontSize: 10,
+                        fontFamily: FontFamily.regular,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                        maxLine: 1,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  SolarIconsOutline.altArrowRight,
+                  size: 16,
+                  color: AppThemeData.success400,
+                ),
+              ],
+            ),
+          ),
+        ),
+        spaceH(height: 12),
         Obx(() {
           if (controller.isSearching.value) {
             return Center(

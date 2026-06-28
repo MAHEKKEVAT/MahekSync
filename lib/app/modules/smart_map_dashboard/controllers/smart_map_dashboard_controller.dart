@@ -35,6 +35,8 @@ class SmartMapDashboardController extends GetxController {
   final selectedTabIndex = 0.obs;
 
   GoogleMapController? _mapController;
+  bool? _isDisposed;
+  Timer? _searchDebounce;
   final mapKeyCounter = 0.obs; // increments on theme change to force rebuild
 
   final isDarkMode = false.obs;
@@ -200,16 +202,22 @@ class SmartMapDashboardController extends GetxController {
     _positionSubscription =
         Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position position) {
-            currentPosition.value = position;
-            latitude.value = position.latitude;
-            longitude.value = position.longitude;
+            try {
+              if (_isDisposed == true) return;
+              currentPosition.value = position;
+              latitude.value = position.latitude;
+              longitude.value = position.longitude;
 
-            _updateAddress(position);
+              _updateAddress(position);
 
-            if (_mapController != null) {
-              _animateCamera(position.latitude, position.longitude);
+              if (_isDisposed != true && _mapController != null) {
+                _animateCamera(position.latitude, position.longitude);
+              }
+            } catch (_) {
+              // Hot reload can temporarily null out fields — ignore.
             }
           },
+          onError: (_) {},
         );
   }
 
@@ -357,9 +365,14 @@ class SmartMapDashboardController extends GetxController {
   }
 
   void _animateCamera(double lat, double lng) {
-    _mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(LatLng(lat, lng), currentZoom.value),
-    );
+    if (_isDisposed == true || _mapController == null) return;
+    try {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(LatLng(lat, lng), currentZoom.value),
+      );
+    } catch (_) {
+      _mapController = null;
+    }
   }
 
   void onMapCreated(GoogleMapController controller, bool isDark) {
@@ -374,7 +387,11 @@ class SmartMapDashboardController extends GetxController {
   void applyMapStyle(bool isDark) {
     isDarkMode.value = isDark;
     if (_mapController == null) return;
-    _mapController!.setMapStyle(isDark ? darkMapStyle : null);
+    try {
+      _mapController!.setMapStyle(isDark ? darkMapStyle : null);
+    } catch (_) {
+      _mapController = null;
+    }
   }
 
   void togglePanel() => panelExpanded.value = !panelExpanded.value;
@@ -451,27 +468,53 @@ class SmartMapDashboardController extends GetxController {
   Future<void> searchPlace(String query) async {
     final q = query.trim();
     searchQuery.value = q;
+    _searchDebounce?.cancel();
     if (q.isEmpty) {
       searchResults.clear();
       return;
     }
-    isSearching.value = true;
-    try {
-      final locations = await locationFromAddress(q);
-      searchResults.clear();
-      for (final item in locations) {
-        searchResults.add({
-          "lat": item.latitude,
-          "lng": item.longitude,
-          "address": q,
-        });
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () async {
+      isSearching.value = true;
+      try {
+        final apiKey = MahekConstant.googleMapKey;
+        if (apiKey.isEmpty) {
+          searchResults.clear();
+          isSearching.value = false;
+          return;
+        }
+        final url =
+            'https://maps.googleapis.com/maps/api/geocode/json'
+            '?address=${Uri.encodeComponent(q)}'
+            '&key=$apiKey';
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode != 200) {
+          searchResults.clear();
+          isSearching.value = false;
+          return;
+        }
+        final data = json.decode(response.body);
+        if (data['status'] != 'OK') {
+          searchResults.clear();
+          isSearching.value = false;
+          return;
+        }
+        final results = data['results'] as List? ?? [];
+        searchResults.clear();
+        for (final item in results) {
+          final loc = item['geometry']['location'];
+          searchResults.add({
+            "lat": loc['lat'] as double,
+            "lng": loc['lng'] as double,
+            "address": item['formatted_address'] ?? q,
+          });
+        }
+      } catch (e) {
+        debugPrint("SEARCH ERROR => $e");
+        searchResults.clear();
+      } finally {
+        isSearching.value = false;
       }
-    } catch (e) {
-      debugPrint("SEARCH ERROR => $e");
-      searchResults.clear();
-    } finally {
-      isSearching.value = false;
-    }
+    });
   }
 
   void goToSearchResult(Map<String, dynamic> result) {
@@ -518,9 +561,12 @@ class SmartMapDashboardController extends GetxController {
 
   @override
   void onClose() {
+    _isDisposed = true;
     _positionSubscription?.cancel();
+    _searchDebounce?.cancel();
     searchController.dispose();
     _mapController?.dispose();
+    _mapController = null;
     super.onClose();
   }
 

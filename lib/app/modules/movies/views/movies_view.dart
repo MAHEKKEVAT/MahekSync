@@ -42,6 +42,9 @@ class _HoverableStatCardState extends State<_HoverableStatCard> {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
           decoration: BoxDecoration(
+            border: _isHovered
+                ? Border.all(color: widget.accentColor.withValues(alpha: 0.30), width: 1)
+                : null,
             boxShadow: _isHovered
                 ? [
                     BoxShadow(
@@ -326,6 +329,8 @@ class MoviesView extends GetView<MoviesController> {
   // ── HEADER ──
 
   Widget _buildHeader(BuildContext context, bool isDark) {
+    final isMobile = MahekResponsive.isMobile(context);
+    final isTablet = MahekResponsive.isTablet(context);
     return Row(
       children: [
         Column(
@@ -333,37 +338,50 @@ class MoviesView extends GetView<MoviesController> {
           children: [
             TextCustom(
               title: 'Movies',
-              fontSize: 22,
+              fontSize: 28,
               fontFamily: FontFamily.bold,
               color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
             ),
-            spaceH(height: 2),
+            spaceH(height: 4),
+            Container(
+              width: 50,
+              height: 2.5,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppThemeData.primary50, AppThemeData.neonBlue],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            spaceH(height: 6),
             RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(text: 'Track. ', style: TextStyle(fontSize: 13, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
-                  TextSpan(text: 'Watch. ', style: TextStyle(fontSize: 13, fontFamily: FontFamily.bold, color: AppThemeData.primary50)),
-                  TextSpan(text: 'Enjoy.', style: TextStyle(fontSize: 13, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
+                  TextSpan(text: 'Track. ', style: TextStyle(fontSize: 14, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
+                  TextSpan(text: 'Watch. ', style: TextStyle(fontSize: 14, fontFamily: FontFamily.bold, color: AppThemeData.primary50)),
+                  TextSpan(text: 'Enjoy.', style: TextStyle(fontSize: 14, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
                 ],
               ),
             ),
           ],
         ),
         const Spacer(),
-        _buildSearchField(isDark),
-        spaceW(width: 10),
+        if (!isMobile) _buildSearchField(isDark, isTablet: isTablet),
+        if (!isMobile) spaceW(width: 12),
         _buildAddButton(isDark),
       ],
     );
   }
 
-  Widget _buildSearchField(bool isDark) {
+  Widget _buildSearchField(bool isDark, {bool isTablet = false}) {
     return Container(
-      width: 240,
-      height: 42,
+      width: isTablet ? 220 : 300,
+      height: 46,
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
       ),
       child: TextField(
@@ -371,10 +389,10 @@ class MoviesView extends GetView<MoviesController> {
         style: TextStyle(color: isDark ? AppThemeData.grey1 : AppThemeData.grey10, fontSize: 13),
         decoration: InputDecoration(
           hintText: 'Search movies...',
-          hintStyle: TextStyle(color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, fontSize: 13),
-          prefixIcon: Icon(Icons.search_rounded, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, size: 18),
+          hintStyle: TextStyle(color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, fontSize: 13, fontFamily: FontFamily.medium),
+          prefixIcon: Icon(Icons.search_rounded, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6, size: 20),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
     );
@@ -384,18 +402,18 @@ class MoviesView extends GetView<MoviesController> {
     return GestureDetector(
       onTap: () => Get.toNamed(Routes.MOVIE_CRUD),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
           gradient: AppThemeData.appleIntelligenceGradientCool,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.35), blurRadius: 14, offset: const Offset(0, 4))],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.add_rounded, color: Colors.white, size: 18),
+            const Icon(Icons.add_rounded, color: Colors.white, size: 20),
             spaceW(width: 6),
-            TextCustom(title: 'Add Movie', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
+            TextCustom(title: 'Add Movie', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
           ],
         ),
       ),
@@ -438,7 +456,7 @@ class MoviesView extends GetView<MoviesController> {
           children: [
             SizedBox(
               width: cardWidth,
-              height: 260,
+              height: 240,
               child: _HoverableStatCard(
                 accentColor: AppThemeData.primary50,
                 child: _buildStatCard(
@@ -455,7 +473,7 @@ class MoviesView extends GetView<MoviesController> {
             ),
             SizedBox(
               width: cardWidth,
-              height: 260,
+              height: 240,
               child: _HoverableStatCard(
                 accentColor: AppThemeData.neonTeal,
                 child: _buildStatCard(
@@ -472,7 +490,7 @@ class MoviesView extends GetView<MoviesController> {
             ),
             SizedBox(
               width: cardWidth,
-              height: 260,
+              height: 240,
               child: _HoverableStatCard(
                 accentColor: AppThemeData.neonCyan,
                 child: _buildStatCard(
@@ -489,7 +507,7 @@ class MoviesView extends GetView<MoviesController> {
             ),
             SizedBox(
               width: cardWidth,
-              height: 260,
+              height: 240,
               child: _HoverableStatCard(
                 accentColor: AppThemeData.neonOrange,
                 child: _buildStatCard(
@@ -524,11 +542,11 @@ class MoviesView extends GetView<MoviesController> {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: ClipRRect(
 
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
             // Base bg
@@ -571,13 +589,13 @@ class MoviesView extends GetView<MoviesController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  // Top row: Icon + Arrow
+                  // Top row: Icon + details text
                   Row(
                     children: [
                       // Icon circle with glow ring
                       Container(
-                        width: 68,
-                        height: 68,
+                        width: 58,
+                        height: 58,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
@@ -597,27 +615,18 @@ class MoviesView extends GetView<MoviesController> {
                             shape: BoxShape.circle,
                             color: accentColor.withValues(alpha: 0.22),
                           ),
-                          child: Icon(icon, color: accentColor, size: 28),
+                          child: Icon(icon, color: accentColor, size: 24),
                         ),
                       ),
                       const Spacer(),
-                      // Arrow icon
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isDark
-                              ? AppThemeData.grey10.withValues(alpha: 0.18)
-                              : AppThemeData.grey1.withValues(alpha: 0.14),
-                        ),
-                        child: Icon(
-                          Icons.arrow_forward_rounded,
-                          color: isDark
-                              ? AppThemeData.grey10.withValues(alpha: 0.85)
-                              : AppThemeData.grey1.withValues(alpha: 0.70),
-                          size: 18,
-                        ),
+                      // Details text
+                      TextCustom(
+                        title: 'details \u2192',
+                        fontSize: 10,
+                        fontFamily: FontFamily.medium,
+                        color: isDark
+                            ? AppThemeData.grey10.withValues(alpha: 0.55)
+                            : AppThemeData.grey1.withValues(alpha: 0.45),
                       ),
                     ],
                   ),
@@ -625,7 +634,7 @@ class MoviesView extends GetView<MoviesController> {
                   // Large number
                   TextCustom(
                     title: value,
-                    fontSize: 44,
+                    fontSize: 40,
                     fontFamily: FontFamily.bold,
                     color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                   ),
@@ -633,7 +642,7 @@ class MoviesView extends GetView<MoviesController> {
                   // Colored label
                   TextCustom(
                     title: label,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontFamily: FontFamily.bold,
                     color: accentColor,
                   ),
@@ -641,7 +650,7 @@ class MoviesView extends GetView<MoviesController> {
                   // Grey subtitle
                   TextCustom(
                     title: subtitle,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontFamily: FontFamily.regular,
                     color: AppThemeData.grey6,
                   ),
@@ -651,7 +660,7 @@ class MoviesView extends GetView<MoviesController> {
                     children: [
                       Expanded(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(4),
                           child: ShaderMask(
                             shaderCallback: (Rect bounds) {
                               return LinearGradient(
@@ -664,7 +673,7 @@ class MoviesView extends GetView<MoviesController> {
                             blendMode: BlendMode.src,
                             child: LinearProgressIndicator(
                               value: progress.clamp(0.0, 1.0),
-                              minHeight: 10,
+                              minHeight: 8,
                               backgroundColor: isDark
                                   ? AppThemeData.surfaceDark
                                   : AppThemeData.grey3,
@@ -698,14 +707,36 @@ class MoviesView extends GetView<MoviesController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextCustom(title: 'Continue Watching', fontSize: 18, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-        spaceH(height: 14),
+        Row(
+          children: [
+            Icon(Icons.play_circle_outline_rounded, size: 22, color: isDark ? AppThemeData.neonMint : AppThemeData.success500),
+            spaceW(width: 8),
+            TextCustom(title: 'Continue Watching', fontSize: 20, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+          ],
+        ),
+        spaceH(height: 4),
+        Container(
+          width: 40,
+          height: 2.5,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                isDark ? AppThemeData.neonMint : AppThemeData.success500,
+                (isDark ? AppThemeData.neonMint : AppThemeData.success500).withValues(alpha: 0.0),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        spaceH(height: 16),
         _ScrollableHorizontalList(
           height: 175,
-          cardWidth: 400,
+          cardWidth: 420,
           itemCount: watching.length,
           itemBuilder: (ctx, i) => SizedBox(
-            width: 400,
+            width: 420,
             child: _buildContinueWatchingCard(watching[i], isDark),
           ),
         ),
@@ -734,7 +765,7 @@ class MoviesView extends GetView<MoviesController> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: SizedBox(
-                width: 100, height: 148,
+                width: 100, height: 155,
                 child: movie.posterUrl != null && movie.posterUrl!.isNotEmpty
                     ? Stack(fit: StackFit.expand, children: [
                         NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0),
@@ -824,36 +855,51 @@ class MoviesView extends GetView<MoviesController> {
       children: [
         Row(
           children: [
-            TextCustom(title: 'All Movies', fontSize: 18, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+            Icon(Icons.movie_rounded, size: 22, color: AppThemeData.primary50),
+            spaceW(width: 8),
+            TextCustom(title: 'All Movies', fontSize: 20, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
             const Spacer(),
             GestureDetector(
               onTap: () => Get.toNamed(Routes.ALL_MOVIES),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                 decoration: BoxDecoration(
                   gradient: AppThemeData.appleIntelligenceGradientCool,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))],
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.30), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextCustom(title: 'View All', fontSize: 12, fontFamily: FontFamily.semiBold, color: Colors.white),
+                    TextCustom(title: 'View All', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
                     spaceW(width: 6),
-                    Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.white),
+                    Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white),
                   ],
                 ),
               ),
             ),
           ],
         ),
-        spaceH(height: 14),
+        spaceH(height: 4),
+        Container(
+          width: 40,
+          height: 2.5,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppThemeData.primary50, AppThemeData.primary50.withValues(alpha: 0.0)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        spaceH(height: 16),
         _ScrollableHorizontalList(
           height: 175,
-          cardWidth: 400,
+          cardWidth: 420,
           itemCount: latest.length,
           itemBuilder: (ctx, i) => SizedBox(
-            width: 400,
+            width: 420,
             child: _buildAllMovieCard(latest[i], isDark),
           ),
         ),
@@ -876,7 +922,7 @@ class MoviesView extends GetView<MoviesController> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: SizedBox(
-                width: 100, height: 148,
+                width: 100, height: 155,
                 child: movie.posterUrl != null && movie.posterUrl!.isNotEmpty
                     ? Stack(fit: StackFit.expand, children: [
                         NetworkImageWidget(imageUrl: movie.posterUrl!, fit: BoxFit.cover, borderRadius: 0),

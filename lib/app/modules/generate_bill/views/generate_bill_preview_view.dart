@@ -905,35 +905,65 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
     return result;
   }
 
-  // ── Export Section (compact responsive) ──────────────────────────────
+  // ── Export Section (premium) ──────────────────────────────────────
 
   Widget _buildExportSection(BuildContext context, bool isDark, BillModel bill) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3,
           width: 0.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppThemeData.primary50.withValues(alpha: isDark ? 0.06 : 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: AppThemeData.primaryBlack.withValues(alpha: isDark ? 0.15 : 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.file_download_outlined, size: 16, color: AppThemeData.primary50),
-              spaceW(width: 6),
-              TextCustom(
-                title: 'EXPORT',
-                fontSize: 10,
-                fontFamily: FontFamily.medium,
-                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppThemeData.primary50.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.file_download_outlined, size: 18, color: AppThemeData.primary50),
+              ),
+              spaceW(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextCustom(
+                    title: 'Export Invoice',
+                    fontSize: 14,
+                    fontFamily: FontFamily.semiBold,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  ),
+                  TextCustom(
+                    title: 'Download as PDF, share, or export as image',
+                    fontSize: 11,
+                    fontFamily: FontFamily.regular,
+                    color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                  ),
+                ],
               ),
             ],
           ),
-          spaceH(height: 12),
+          spaceH(height: 16),
           _buildExportButtons(context, isDark, bill),
         ],
       ),
@@ -946,7 +976,7 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
     final isTablet = width >= 600 && width < 1200;
 
     final buttons = <_ExportButtonData>[
-      _ExportButtonData(Icons.picture_as_pdf_rounded, 'PDF', AppThemeData.neonRed, () => _onExportPdf(bill)),
+      _ExportButtonData(Icons.picture_as_pdf_rounded, 'PDF', AppThemeData.neonRed, () => _onExportPdf(bill), isPrimary: true),
       _ExportButtonData(Icons.share_rounded, 'Share', AppThemeData.neonBlue, () => _onSharePdf(bill)),
       _ExportButtonData(Icons.print_rounded, 'Print', AppThemeData.neonOrange, () => _onPrintPdf(bill)),
       _ExportButtonData(Icons.image_rounded, 'PNG', AppThemeData.primary300, () => _onSavePng(bill)),
@@ -956,10 +986,26 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
     if (isMobile) {
       return Column(
         children: [
-          for (int i = 0; i < buttons.length; i++) ...[
-            if (i > 0) spaceH(height: 8),
-            _buildCompactExportButton(isDark, buttons[i]),
-          ],
+          Row(
+            children: [
+              Expanded(child: _HoverableExportButton(isDark: isDark, data: buttons[0])),
+              spaceW(width: 10),
+              Expanded(child: _HoverableExportButton(isDark: isDark, data: buttons[1])),
+            ],
+          ),
+          spaceH(height: 10),
+          Row(
+            children: [
+              Expanded(child: _HoverableExportButton(isDark: isDark, data: buttons[2])),
+              spaceW(width: 10),
+              Expanded(child: _HoverableExportButton(isDark: isDark, data: buttons[3])),
+            ],
+          ),
+          spaceH(height: 10),
+          SizedBox(
+            width: (width - 52) / 2,
+            child: _HoverableExportButton(isDark: isDark, data: buttons[4]),
+          ),
         ],
       );
     }
@@ -970,17 +1016,17 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
           Row(
             children: [
               for (int i = 0; i < 3; i++) ...[
-                if (i > 0) spaceW(width: 8),
-                Expanded(child: _buildCompactExportButton(isDark, buttons[i])),
+                if (i > 0) spaceW(width: 10),
+                Expanded(child: _HoverableExportButton(isDark: isDark, data: buttons[i])),
               ],
             ],
           ),
-          spaceH(height: 8),
+          spaceH(height: 10),
           Row(
             children: [
               for (int i = 3; i < 5; i++) ...[
-                if (i > 3) spaceW(width: 8),
-                Expanded(child: _buildCompactExportButton(isDark, buttons[i])),
+                if (i > 3) spaceW(width: 10),
+                Expanded(child: _HoverableExportButton(isDark: isDark, data: buttons[i])),
               ],
             ],
           ),
@@ -991,41 +1037,10 @@ class _GenerateBillPreviewViewState extends State<GenerateBillPreviewView> {
     return Row(
       children: [
         for (int i = 0; i < buttons.length; i++) ...[
-          if (i > 0) spaceW(width: 8),
-          Expanded(child: _buildCompactExportButton(isDark, buttons[i])),
+          if (i > 0) spaceW(width: 10),
+          Expanded(child: _HoverableExportButton(isDark: isDark, data: buttons[i])),
         ],
       ],
-    );
-  }
-
-  Widget _buildCompactExportButton(bool isDark, _ExportButtonData data) {
-    return GestureDetector(
-      onTap: data.onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: data.color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: data.color.withValues(alpha: 0.25), width: 0.8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(data.icon, size: 16, color: data.color),
-            spaceW(width: 6),
-            Text(
-              data.label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: data.color,
-                fontFamily: FontFamily.semiBold,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -1189,5 +1204,110 @@ class _ExportButtonData {
   final String label;
   final Color color;
   final VoidCallback onTap;
-  const _ExportButtonData(this.icon, this.label, this.color, this.onTap);
+  final bool isPrimary;
+  const _ExportButtonData(this.icon, this.label, this.color, this.onTap, {this.isPrimary = false});
+}
+
+class _HoverableExportButton extends StatefulWidget {
+  final bool isDark;
+  final _ExportButtonData data;
+
+  const _HoverableExportButton({required this.isDark, required this.data});
+
+  @override
+  State<_HoverableExportButton> createState() => _HoverableExportButtonState();
+}
+
+class _HoverableExportButtonState extends State<_HoverableExportButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final data = widget.data;
+    final isPrimary = data.isPrimary;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: data.onTap,
+        child: AnimatedScale(
+          scale: _isHovered ? 1.02 : 1.0,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            height: 52,
+            decoration: isPrimary
+                ? BoxDecoration(
+                    gradient: AppThemeData.appleIntelligenceGradientCool,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppThemeData.primary50.withValues(alpha: _isHovered ? 0.45 : 0.30),
+                        blurRadius: _isHovered ? 18 : 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  )
+                : BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        data.color.withValues(alpha: _isHovered ? 0.18 : 0.12),
+                        data.color.withValues(alpha: _isHovered ? 0.08 : 0.04),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: data.color.withValues(alpha: _isHovered ? 0.40 : 0.25),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: data.color.withValues(alpha: _isHovered ? 0.20 : 0.10),
+                        blurRadius: _isHovered ? 16 : 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isPrimary
+                        ? Colors.white.withValues(alpha: 0.20)
+                        : data.color.withValues(alpha: 0.15),
+                  ),
+                  child: Icon(
+                    data.icon,
+                    size: 18,
+                    color: isPrimary ? Colors.white : data.color,
+                  ),
+                ),
+                spaceW(width: 8),
+                Text(
+                  data.label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isPrimary ? Colors.white : data.color,
+                    fontFamily: FontFamily.semiBold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
