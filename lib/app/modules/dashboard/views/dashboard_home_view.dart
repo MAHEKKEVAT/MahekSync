@@ -6,7 +6,7 @@ import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
-import 'package:maheksync/app/utils/responsive.dart';
+import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:provider/provider.dart';
@@ -33,8 +33,8 @@ class _DashboardHomeViewState extends State<DashboardHomeView> {
   @override
   Widget build(BuildContext context) {
     final isDark = Provider.of<DarkThemeProvider>(context).isDarkTheme();
-    final isDesktop = ResponsiveWidget.isDesktop(context);
-    final isTablet = ResponsiveWidget.isTablet(context);
+    final isDesktop = MahekResponsive.compatIsDesktop(context);
+    final isTablet = MahekResponsive.compatIsTablet(context);
     final c = Get.find<DashboardHomeController>();
 
     return Obx(() {

@@ -31,7 +31,7 @@ class MovieCrudController extends GetxController {
   String? get ownerId => MahekConstant.ownerModel?.id;
   MovieModel? _existingMovie;
 
-  final statusOptions = ['NOT_STARTED', 'WATCHING', 'COMPLETED'];
+  final statusOptions = ['NOT_DOWNLOADED', 'NOT_STARTED', 'WATCHING', 'COMPLETED'];
   final genreOptions = [
     'ALL', 'ACTION', 'COMEDY', 'DRAMA', 'THRILLER', 'ROMANCE',
   ];

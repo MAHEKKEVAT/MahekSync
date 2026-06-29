@@ -90,9 +90,9 @@ class DashboardHeroCard extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.white.withValues(alpha: 0.08),
-                  Colors.white.withValues(alpha: 0.01),
-                  Colors.white.withValues(alpha: 0.05),
+                  AppThemeData.primaryWhite.withValues(alpha: 0.08),
+                  AppThemeData.primaryWhite.withValues(alpha: 0.01),
+                  AppThemeData.primaryWhite.withValues(alpha: 0.05),
                 ],
               ),
             ),
@@ -109,7 +109,7 @@ class DashboardHeroCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Colors.white.withValues(alpha: 0.08),
+                    AppThemeData.primaryWhite.withValues(alpha: 0.08),
                     Colors.transparent,
                   ],
                 ),
@@ -126,7 +126,7 @@ class DashboardHeroCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Colors.white.withValues(alpha: 0.06),
+                    AppThemeData.primaryWhite.withValues(alpha: 0.06),
                     Colors.transparent,
                   ],
                 ),
@@ -148,7 +148,7 @@ class DashboardHeroCard extends StatelessWidget {
             child: Icon(
               greetingIcon,
               size: 140,
-              color: Colors.white.withValues(alpha: 0.06),
+              color: AppThemeData.primaryWhite.withValues(alpha: 0.06),
             ),
           ),
 
@@ -166,13 +166,13 @@ class DashboardHeroCard extends StatelessWidget {
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: AppThemeData.primaryWhite.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: Icon(
                         greetingIcon,
                         size: 16,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: AppThemeData.primaryWhite.withValues(alpha: 0.9),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -181,7 +181,7 @@ class DashboardHeroCard extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: FontFamily.medium,
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.75),
+                        color: AppThemeData.primaryWhite.withValues(alpha: 0.75),
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -191,10 +191,10 @@ class DashboardHeroCard extends StatelessWidget {
                 // Full name
                 Text(
                   fullName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: FontFamily.bold,
                     fontSize: 28,
-                    color: Colors.white,
+                    color: AppThemeData.primaryWhite,
                     letterSpacing: -0.5,
                     height: 1.15,
                   ),
@@ -212,19 +212,19 @@ class DashboardHeroCard extends StatelessWidget {
                       icon: Icons.task_alt_rounded,
                       value: controller.overdueTaskCount.toString(),
                       label: 'Tasks',
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: AppThemeData.primaryWhite.withValues(alpha: 0.85),
                     ),
                     _HeroStatChip(
                       icon: Icons.event_rounded,
                       value: controller.overdueReminderCount.toString(),
                       label: 'Due',
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: AppThemeData.primaryWhite.withValues(alpha: 0.85),
                     ),
                     _HeroStatChip(
                       icon: Icons.devices_rounded,
                       value: controller.deviceCount.value.toString(),
                       label: 'Devices',
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: AppThemeData.primaryWhite.withValues(alpha: 0.85),
                     ),
                     _HeroStatChip(
                       icon: Icons.shield_rounded,
@@ -233,8 +233,8 @@ class DashboardHeroCard extends StatelessWidget {
                           : 'Off',
                       label: 'Sentinel',
                       color: controller.sentinelPasswordSet.value
-                          ? Colors.white.withValues(alpha: 0.85)
-                          : Colors.white38,
+                          ? AppThemeData.primaryWhite.withValues(alpha: 0.85)
+                          : AppThemeData.primaryWhite.withValues(alpha: 0.38),
                     ),
                   ],
                 ),
@@ -266,9 +266,9 @@ class _HeroStatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: AppThemeData.primaryWhite.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppThemeData.primaryWhite.withValues(alpha: 0.08)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -277,7 +277,7 @@ class _HeroStatChip extends StatelessWidget {
             width: 26,
             height: 26,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
+              color: AppThemeData.primaryWhite.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 13, color: color),
@@ -289,10 +289,10 @@ class _HeroStatChip extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: FontFamily.bold,
                   fontSize: 13,
-                  color: Colors.white,
+                  color: AppThemeData.primaryWhite,
                   height: 1.2,
                 ),
               ),
@@ -301,7 +301,7 @@ class _HeroStatChip extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: FontFamily.regular,
                   fontSize: 9,
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
                   height: 1.2,
                 ),
               ),
@@ -318,7 +318,7 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.02)
+      ..color = AppThemeData.primaryWhite.withValues(alpha: 0.02)
       ..strokeWidth = 0.5;
 
     const spacing = 40.0;

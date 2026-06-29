@@ -106,8 +106,10 @@ class MovieModel {
         return 'Completed';
       case 'NOT_STARTED':
         return 'Not Started';
+      case 'NOT_DOWNLOADED':
+        return 'Not Downloaded';
       default:
-        return 'Not Started';
+        return 'Not Downloaded';
     }
   }
 

@@ -9,6 +9,10 @@ class MahekResponsive {
   static const double desktopBreakpoint = 1440;
   static const double largeDesktopBreakpoint = 1920;
 
+  // Legacy breakpoints (matches old ResponsiveWidget thresholds)
+  static const double legacyMobileBreakpoint = 650;
+  static const double legacyDesktopBreakpoint = 1100;
+
   // Get screen width
   static double screenWidth(BuildContext context) => MediaQuery.of(context).size.width;
 
@@ -43,6 +47,11 @@ class MahekResponsive {
     final width = screenWidth(context);
     return width >= 2560;
   }
+
+  // Legacy compatibility helpers (650/1100 breakpoints from old ResponsiveWidget)
+  static bool compatIsMobile(BuildContext context) => screenWidth(context) < legacyMobileBreakpoint;
+  static bool compatIsTablet(BuildContext context) => screenWidth(context) >= legacyMobileBreakpoint && screenWidth(context) < legacyDesktopBreakpoint;
+  static bool compatIsDesktop(BuildContext context) => screenWidth(context) >= legacyDesktopBreakpoint;
 
   // Responsive width calculations
   static double responsiveWidth(BuildContext context, {
@@ -137,4 +146,7 @@ extension MahekResponsiveExtension on BuildContext {
   bool get isMonitor27 => MahekResponsive.isMonitor27(this);
   EdgeInsets get responsivePadding => MahekResponsive.responsivePadding(this);
   double get filterPanelWidth => MahekResponsive.filterPanelWidth(this);
+  bool get compatIsMobile => MahekResponsive.compatIsMobile(this);
+  bool get compatIsTablet => MahekResponsive.compatIsTablet(this);
+  bool get compatIsDesktop => MahekResponsive.compatIsDesktop(this);
 }

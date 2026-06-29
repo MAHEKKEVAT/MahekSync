@@ -67,6 +67,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     getCurrentAppTheme();
   }
 
+  @override
+  void reassemble() {
+    super.reassemble();
+    final now = DateTime.now();
+    final d = now.day.toString().padLeft(2, '0');
+    final m = now.month.toString().padLeft(2, '0');
+    final y = now.year;
+    final h = now.hour.toString().padLeft(2, '0');
+    final min = now.minute.toString().padLeft(2, '0');
+    final s = now.second.toString().padLeft(2, '0');
+    final period = now.hour >= 12 ? 'PM' : 'AM';
+    final h12 = now.hour > 12 ? now.hour - 12 : (now.hour == 0 ? 12 : now.hour);
+    debugPrint('✅ HOT RELOAD : $d/$m/$y ${h12.toString().padLeft(2, '0')}:$min:$s $period');
+  }
+
   void getCurrentAppTheme() async {
     themeChangeProvider.darkTheme = await themeChangeProvider.darkThemePreference.isDarkThemee();
   }

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:solar_icons/solar_icons.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
-import 'package:maheksync/app/utils/responsive.dart';
+import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
@@ -19,7 +19,7 @@ class AegisView extends GetView<AegisController> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isMobile = ResponsiveWidget.isMobile(context);
+    final isMobile = MahekResponsive.compatIsMobile(context);
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0A0E1A) : AppThemeData.grey2,

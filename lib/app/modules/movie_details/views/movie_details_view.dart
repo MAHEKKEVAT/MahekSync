@@ -431,11 +431,29 @@ class MovieDetailsView extends GetView<MovieDetailsController> {
   }
 
   String _statusDesc(String? s) {
-    switch (s) { case 'WATCHING': return 'Currently watching. Keep going!'; case 'COMPLETED': return 'Finished watching.'; default: return 'Haven\'t started yet.'; }
+    switch (s) {
+      case 'WATCHING':
+        return 'Currently watching. Keep going!';
+      case 'COMPLETED':
+        return 'Finished watching.';
+      case 'NOT_DOWNLOADED':
+        return 'Not downloaded yet. Download to start.';
+      default:
+        return 'Haven\'t started yet.';
+    }
   }
 
   Color _statusColor(String? s) {
-    switch (s) { case 'WATCHING': return AppThemeData.neonBlue; case 'COMPLETED': return AppThemeData.success300; default: return AppThemeData.pending300; }
+    switch (s) {
+      case 'WATCHING':
+        return AppThemeData.neonBlue;
+      case 'COMPLETED':
+        return AppThemeData.success300;
+      case 'NOT_DOWNLOADED':
+        return AppThemeData.neonLavender;
+      default:
+        return AppThemeData.pending300;
+    }
   }
 
   // ── ACTIVITY ──

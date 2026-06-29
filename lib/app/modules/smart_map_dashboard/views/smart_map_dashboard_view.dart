@@ -7,7 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:solar_icons/solar_icons.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
-import 'package:maheksync/app/utils/responsive.dart';
+import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/dependency/shimmer.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
@@ -21,7 +21,7 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isMobile = ResponsiveWidget.isMobile(context);
+    final isMobile = MahekResponsive.compatIsMobile(context);
     controller.isDarkMode.value = isDark;
 
     return Scaffold(

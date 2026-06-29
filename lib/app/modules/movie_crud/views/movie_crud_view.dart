@@ -252,23 +252,51 @@ class MovieCrudView extends GetView<MovieCrudController> {
               ),
               items: controller.statusOptions.map((String status) {
                 String label;
+                IconData icon;
                 switch (status) {
                   case 'WATCHING':
                     label = 'Watching';
+                    icon = Icons.play_circle_outline_rounded;
                     break;
                   case 'COMPLETED':
                     label = 'Completed';
+                    icon = Icons.check_circle_outline_rounded;
+                    break;
+                  case 'NOT_STARTED':
+                    label = 'Not Started';
+                    icon = Icons.pause_circle_outline_rounded;
+                    break;
+                  case 'NOT_DOWNLOADED':
+                    label = 'Not Downloaded';
+                    icon = Icons.download_rounded;
                     break;
                   default:
-                    label = 'Not Started';
+                    label = 'Not Downloaded';
+                    icon = Icons.download_rounded;
                 }
                 return DropdownMenuItem<String>(
                   value: status,
-                  child: TextCustom(
-                    title: label,
-                    fontSize: 14,
-                    fontFamily: FontFamily.regular,
-                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  child: Row(
+                    children: [
+                      Icon(
+                        icon,
+                        size: 18,
+                        color: status == 'WATCHING'
+                            ? AppThemeData.neonMint
+                            : status == 'COMPLETED'
+                                ? AppThemeData.success300
+                                : status == 'NOT_STARTED'
+                                    ? AppThemeData.neonOrange
+                                    : AppThemeData.neonLavender,
+                      ),
+                      spaceW(width: 10),
+                      TextCustom(
+                        title: label,
+                        fontSize: 14,
+                        fontFamily: FontFamily.regular,
+                        color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                      ),
+                    ],
                   ),
                 );
               }).toList(),

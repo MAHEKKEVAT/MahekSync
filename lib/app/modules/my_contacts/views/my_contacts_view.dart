@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:solar_icons/solar_icons.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
-import 'package:maheksync/app/utils/responsive.dart';
+import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/dependency/shimmer.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
@@ -18,7 +18,7 @@ class MyContactsView extends GetView<MyContactsController> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isMobile = ResponsiveWidget.isMobile(context);
+    final isMobile = MahekResponsive.compatIsMobile(context);
 
     return Scaffold(
       backgroundColor: isDark ? AppThemeData.surfaceVoid : AppThemeData.grey1,

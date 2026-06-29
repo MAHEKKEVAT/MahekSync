@@ -23,6 +23,7 @@ class AllMoviesController extends GetxController {
   int get watchingCount => movies.where((m) => m.status == 'WATCHING').length;
   int get completedCount => movies.where((m) => m.status == 'COMPLETED').length;
   int get notStartedCount => movies.where((m) => m.status == 'NOT_STARTED').length;
+  int get notDownloadedCount => movies.where((m) => m.status == 'NOT_DOWNLOADED').length;
 
   List<String> get availableGenres {
     final genres = <String>{};
@@ -70,6 +71,7 @@ class AllMoviesController extends GetxController {
 
     if (selectedStatus.value != 'ALL') {
       final statusMap = {
+        'NOT DOWNLOADED': 'NOT_DOWNLOADED',
         'NOT STARTED': 'NOT_STARTED',
         'WATCHING': 'WATCHING',
         'COMPLETED': 'COMPLETED',

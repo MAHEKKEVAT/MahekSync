@@ -8,7 +8,7 @@ import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
-import 'package:maheksync/app/utils/responsive.dart';
+import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
@@ -31,7 +31,7 @@ class AdminProfileView extends StatelessWidget {
       children: [
         SingleChildScrollView(
           padding: EdgeInsets.symmetric(
-            horizontal: ResponsiveWidget.isMobile(context) ? 16 : 40,
+            horizontal: MahekResponsive.compatIsMobile(context) ? 16 : 40,
             vertical: 28,
           ),
           child: Column(

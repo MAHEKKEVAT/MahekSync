@@ -344,6 +344,8 @@ class AllMoviesView extends GetView<AllMoviesController> {
         return 1.0;
       case 'not_started':
         return 0.0;
+      case 'not_downloaded':
+        return 0.0;
       default:
         return 0;
     }
@@ -353,8 +355,10 @@ class AllMoviesView extends GetView<AllMoviesController> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth > 1100
-            ? min((constraints.maxWidth - 42) / 4, 500.0)
-            : min((constraints.maxWidth - 14) / 2, 500.0);
+            ? (constraints.maxWidth - 56) / 5
+            : constraints.maxWidth > 600
+                ? (constraints.maxWidth - 28) / 3
+                : constraints.maxWidth;
         return Wrap(
           spacing: 14,
           runSpacing: 14,
@@ -423,6 +427,23 @@ class AllMoviesView extends GetView<AllMoviesController> {
                   icon: Icons.pause_circle_outline_rounded,
                   accentColor: AppThemeData.neonOrange,
                   progress: _progressFor('not_started'),
+                  bgAsset: 'assets/icons/ic_movie_ticket.svg',
+                ),
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              height: 260,
+              child: _HoverableStatCard(
+                accentColor: AppThemeData.neonLavender,
+                child: _buildStatCard(
+                  isDark: isDark,
+                  label: 'Not Downloaded',
+                  subtitle: 'Need to download',
+                  value: controller.notDownloadedCount.toString(),
+                  icon: Icons.download_rounded,
+                  accentColor: AppThemeData.neonLavender,
+                  progress: _progressFor('not_downloaded'),
                   bgAsset: 'assets/icons/ic_movie_ticket.svg',
                 ),
               ),
@@ -545,24 +566,14 @@ class AllMoviesView extends GetView<AllMoviesController> {
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(5),
-                        child: ShaderMask(
-                          shaderCallback: (Rect bounds) {
-                            return LinearGradient(
-                              colors: [
-                                accentColor.withValues(alpha: 0.4),
-                                accentColor,
-                              ],
-                            ).createShader(bounds);
-                          },
-                          blendMode: BlendMode.src,
-                          child: LinearProgressIndicator(
-                            value: progress.clamp(0.0, 1.0),
-                            minHeight: 10,
-                            backgroundColor: isDark
-                                ? AppThemeData.surfaceDark
-                                : AppThemeData.grey3,
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
+                        child: LinearProgressIndicator(
+                          value: progress.clamp(0.0, 1.0),
+                          minHeight: 10,
+                          backgroundColor: isDark
+                              ? AppThemeData.surfaceDark
+                              : AppThemeData.grey3,
+                          valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                          borderRadius: BorderRadius.circular(5),
                         ),
                       ),
                     ),
@@ -787,6 +798,7 @@ class AllMoviesView extends GetView<AllMoviesController> {
   List<Widget> _buildStatusChips(bool isDark) {
     final filters = [
       ('ALL', Icons.all_inclusive_rounded, AppThemeData.primary50),
+      ('NOT DOWNLOADED', Icons.download_rounded, AppThemeData.neonLavender),
       ('NOT STARTED', Icons.pause_circle_outline_rounded, AppThemeData.neonOrange),
       ('WATCHING', Icons.play_circle_outline_rounded, AppThemeData.neonBlue),
       ('COMPLETED', Icons.check_circle_outline_rounded, AppThemeData.neonCyan),
@@ -1135,6 +1147,11 @@ class AllMoviesView extends GetView<AllMoviesController> {
         bgColor = AppThemeData.neonOrange.withValues(alpha: 0.15);
         textColor = AppThemeData.neonOrange;
         label = 'NOT STARTED';
+        break;
+      case 'NOT_DOWNLOADED':
+        bgColor = AppThemeData.neonLavender.withValues(alpha: 0.15);
+        textColor = AppThemeData.neonLavender;
+        label = 'NOT DOWNLOADED';
         break;
       default:
         bgColor = AppThemeData.grey5.withValues(alpha: 0.15);

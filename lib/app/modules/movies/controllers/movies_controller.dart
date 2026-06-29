@@ -18,6 +18,7 @@ class MoviesController extends GetxController {
   int get watchingCount => movies.where((m) => m.status == 'WATCHING').length;
   int get completedCount => movies.where((m) => m.status == 'COMPLETED').length;
   int get notStartedCount => movies.where((m) => m.status == 'NOT_STARTED').length;
+  int get notDownloadedCount => movies.where((m) => m.status == 'NOT_DOWNLOADED').length;
 
   List<MovieModel> get watchingMovies =>
       movies.where((m) => m.status == 'WATCHING').toList();

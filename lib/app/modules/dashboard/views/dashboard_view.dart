@@ -15,7 +15,7 @@ import 'package:provider/provider.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/font_family.dart';
 import '../../../utils/dark_theme_provider.dart';
-import '../../../utils/responsive.dart';
+import '../../../utils/mahek_responsive.dart';
 
 import '../../../widgets/app_logo_widget.dart';
 import '../../../widgets/global_widgets.dart';
@@ -31,9 +31,9 @@ class DashboardView extends GetView<DashboardController> {
   Widget build(BuildContext context) {
     final theme = Provider.of<DarkThemeProvider>(context);
     final isDark = theme.isDarkTheme();
-    final isMobile = ResponsiveWidget.isMobile(context);
-    final isTablet = ResponsiveWidget.isTablet(context);
-    final isDesktop = ResponsiveWidget.isDesktop(context);
+    final isMobile = MahekResponsive.compatIsMobile(context);
+    final isTablet = MahekResponsive.compatIsTablet(context);
+    final isDesktop = MahekResponsive.compatIsDesktop(context);
 
     return _DashboardViewBody(
       isDark: isDark,
@@ -179,8 +179,8 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
   Widget _buildSideNavigation(
       BuildContext context, DarkThemeProvider theme, bool isExpanded) {
     final isDark = theme.isDarkTheme();
-    final isMobile = ResponsiveWidget.isMobile(context);
-    final isDesktop = ResponsiveWidget.isDesktop(context);
+    final isMobile = MahekResponsive.compatIsMobile(context);
+    final isDesktop = MahekResponsive.compatIsDesktop(context);
     final sections = widget.controller.navigationSections;
     final allItems = widget.controller.allItems;
 
@@ -468,7 +468,7 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
 
   Widget _buildMainContent(BuildContext context, DarkThemeProvider theme,
       {GlobalKey<ScaffoldState>? scaffoldKey}) {
-    final isMobile = ResponsiveWidget.isMobile(context);
+    final isMobile = MahekResponsive.compatIsMobile(context);
     final isDark = theme.isDarkTheme();
 
     return Container(
@@ -530,8 +530,8 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
   Widget _buildHeader(BuildContext context, DarkThemeProvider theme,
       {GlobalKey<ScaffoldState>? scaffoldKey}) {
     final isDark = theme.isDarkTheme();
-    final isMobile = ResponsiveWidget.isMobile(context);
-    final isDesktop = ResponsiveWidget.isDesktop(context);
+    final isMobile = MahekResponsive.compatIsMobile(context);
+    final isDesktop = MahekResponsive.compatIsDesktop(context);
     final employee = MahekConstant.ownerModel;
 
     final hour = _now.hour;

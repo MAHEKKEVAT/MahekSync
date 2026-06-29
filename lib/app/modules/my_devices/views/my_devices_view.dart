@@ -1,10 +1,12 @@
 // lib/app/modules/my_devices/views/my_devices_view.dart
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/models/category_model.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
@@ -65,6 +67,80 @@ class MyDevicesView extends GetView<MyDevicesController> {
   }
 
   Widget _buildHeader(bool isDark) {
+    final isMobile = MahekResponsive.compatIsMobile(Get.context!);
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppThemeData.primary50, AppThemeData.primary4],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppThemeData.primary50.withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.devices_rounded, color: Colors.white, size: 26),
+              ),
+              spaceW(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextCustom(
+                      title: 'My Devices',
+                      fontSize: 24,
+                      fontFamily: FontFamily.bold,
+                      color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                    ),
+                    spaceH(height: 2),
+                    Obx(() => TextCustom(
+                      title: '${controller.filteredDevices.length} devices registered',
+                      fontSize: 12,
+                      fontFamily: FontFamily.regular,
+                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                    )),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          spaceH(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: controller.openAddDevicePanel,
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: TextCustom(
+                title: 'Register New Device',
+                fontSize: 13,
+                fontFamily: FontFamily.semiBold,
+                color: Colors.white,
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppThemeData.primary50,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 2,
+                shadowColor: AppThemeData.primary50.withValues(alpha: 0.4),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -77,10 +153,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    AppThemeData.primary50,
-                    AppThemeData.primary4,
-                  ],
+                  colors: [AppThemeData.primary50, AppThemeData.primary4],
                 ),
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
@@ -91,11 +164,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.devices_rounded,
-                color: Colors.white,
-                size: 30,
-              ),
+              child: const Icon(Icons.devices_rounded, color: Colors.white, size: 30),
             ),
             spaceW(width: 16),
             Column(
@@ -171,15 +240,24 @@ class MyDevicesView extends GetView<MyDevicesController> {
       ),
     ];
 
-    return Row(
-      children: stats
-          .map((s) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: _buildStatCard(s, isDark),
-                ),
-              ))
-          .toList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = constraints.maxWidth > 900
+            ? (constraints.maxWidth - 48) / 4
+            : constraints.maxWidth > 500
+                ? (constraints.maxWidth - 24) / 2
+                : constraints.maxWidth;
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: stats.map((s) {
+            return SizedBox(
+              width: cardWidth,
+              child: _buildStatCard(s, isDark),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 
@@ -266,6 +344,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
   }
 
   Widget _buildFilterSearchRow(bool isDark) {
+    final isCompact = MahekResponsive.screenWidth(Get.context!) < 1100;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -279,54 +358,71 @@ class MyDevicesView extends GetView<MyDevicesController> {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          // Category Filter
-          Expanded(
-            flex: 2,
-            child: _buildCategoryFilter(isDark),
-          ),
-          spaceW(width: 14),
-          // Payment Method Filter
-          Expanded(
-            flex: 2,
-            child: _buildPaymentMethodFilter(isDark),
-          ),
-          spaceW(width: 14),
-          // Search Bar
-          Expanded(
-            flex: 4,
-            child: _buildSearchFilter(isDark),
-          ),
-          spaceW(width: 10),
-          // View Toggle
-          _buildViewToggleContainer(isDark),
-          // Clear Filters Button
-          Obx(() {
-            final hasFilters = controller.selectedCategory.value != null ||
-                controller.selectedPaymentMethod.value != null ||
-                controller.searchQuery.isNotEmpty;
-
-            if (!hasFilters) return const SizedBox.shrink();
-
-            return IconButton(
-              onPressed: controller.clearFilters,
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppThemeData.danger300.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+      child: isCompact
+          ? Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: _buildCategoryFilter(isDark)),
+                    spaceW(width: 12),
+                    Expanded(child: _buildPaymentMethodFilter(isDark)),
+                  ],
                 ),
-                child: Icon(
-                  Icons.close_rounded,
-                  color: AppThemeData.danger300,
-                  size: 20,
+                spaceH(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: _buildSearchFilter(isDark)),
+                    spaceW(width: 10),
+                    _buildViewToggleContainer(isDark),
+                    Obx(() {
+                      final hasFilters = controller.selectedCategory.value != null ||
+                          controller.selectedPaymentMethod.value != null ||
+                          controller.searchQuery.isNotEmpty;
+                      if (!hasFilters) return const SizedBox.shrink();
+                      return IconButton(
+                        onPressed: controller.clearFilters,
+                        icon: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppThemeData.danger300.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(Icons.close_rounded, color: AppThemeData.danger300, size: 20),
+                        ),
+                      );
+                    }),
+                  ],
                 ),
-              ),
-            );
-          }),
-        ],
-      ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(flex: 2, child: _buildCategoryFilter(isDark)),
+                spaceW(width: 14),
+                Expanded(flex: 2, child: _buildPaymentMethodFilter(isDark)),
+                spaceW(width: 14),
+                Expanded(flex: 4, child: _buildSearchFilter(isDark)),
+                spaceW(width: 10),
+                _buildViewToggleContainer(isDark),
+                Obx(() {
+                  final hasFilters = controller.selectedCategory.value != null ||
+                      controller.selectedPaymentMethod.value != null ||
+                      controller.searchQuery.isNotEmpty;
+                  if (!hasFilters) return const SizedBox.shrink();
+                  return IconButton(
+                    onPressed: controller.clearFilters,
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppThemeData.danger300.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.close_rounded, color: AppThemeData.danger300, size: 20),
+                    ),
+                  );
+                }),
+              ],
+            ),
     );
   }
 
@@ -1111,8 +1207,9 @@ class MyDevicesView extends GetView<MyDevicesController> {
   }
 
   Widget _buildBottomStatsBar(bool isDark) {
+    final isCompact = MahekResponsive.screenWidth(Get.context!) < 1100;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: isCompact ? 14 : 24, vertical: isCompact ? 12 : 16),
       decoration: BoxDecoration(
         color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
         border: Border(
@@ -1129,139 +1226,133 @@ class MyDevicesView extends GetView<MyDevicesController> {
           ),
         ],
       ),
-      child: Obx(() => Row(
-        children: [
-          // Total Items
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppThemeData.primary50.withValues(alpha: 0.12),
-                  AppThemeData.primary4.withValues(alpha: 0.06),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.inventory_2_outlined,
-                  color: AppThemeData.primary50,
-                  size: 20,
-                ),
-                spaceW(width: 10),
-                TextCustom(
-                  title: '${controller.totalItems}',
-                  fontSize: 18,
-                  fontFamily: FontFamily.bold,
-                  color: AppThemeData.primary50,
-                ),
-                spaceW(width: 6),
-                TextCustom(
-                  title: 'Items',
-                  fontSize: 13,
-                  fontFamily: FontFamily.medium,
-                  color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
-                ),
-              ],
-            ),
-          ),
-          spaceW(width: 16),
-          // Total Price
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppThemeData.success400.withValues(alpha: 0.12),
-                  AppThemeData.success400.withValues(alpha: 0.06),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.attach_money_rounded,
-                  color: AppThemeData.success400,
-                  size: 20,
-                ),
-                spaceW(width: 10),
-                TextCustom(
-                  title: '₹${controller.totalPrice.toStringAsFixed(2)}',
-                  fontSize: 18,
-                  fontFamily: FontFamily.bold,
-                  color: AppThemeData.success400,
-                ),
-                spaceW(width: 6),
-                TextCustom(
-                  title: 'Total',
-                  fontSize: 13,
-                  fontFamily: FontFamily.medium,
-                  color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
-                ),
-              ],
-            ),
-          ),
-          const Spacer(),
-          // Category Chips
-          ...controller.categoryItemCount.entries.take(3).map((entry) {
-            return Container(
-              margin: const EdgeInsets.only(left: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Obx(() {
+        final totalChips = controller.categoryItemCount.length;
+        final visibleChips = math.min(totalChips, 3);
+        return Wrap(
+          spacing: 10,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppThemeData.primary50.withValues(alpha: 0.12),
+                    AppThemeData.primary4.withValues(alpha: 0.06),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Icon(Icons.inventory_2_outlined, color: AppThemeData.primary50, size: 18),
+                  spaceW(width: 8),
                   TextCustom(
-                    title: entry.key,
+                    title: '${controller.totalItems}',
+                    fontSize: 16,
+                    fontFamily: FontFamily.bold,
+                    color: AppThemeData.primary50,
+                  ),
+                  spaceW(width: 4),
+                  TextCustom(
+                    title: 'Items',
                     fontSize: 12,
                     fontFamily: FontFamily.medium,
-                    color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-                  ),
-                  spaceW(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppThemeData.primary50.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextCustom(
-                      title: '${entry.value}',
-                      fontSize: 11,
-                      fontFamily: FontFamily.bold,
-                      color: AppThemeData.primary50,
-                    ),
+                    color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
                   ),
                 ],
               ),
-            );
-          }),
-          if (controller.categoryItemCount.length > 3)
+            ),
             Container(
-              margin: const EdgeInsets.only(left: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppThemeData.success400.withValues(alpha: 0.12),
+                    AppThemeData.success400.withValues(alpha: 0.06),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: TextCustom(
-                title: '+${controller.categoryItemCount.length - 3} more',
-                fontSize: 12,
-                fontFamily: FontFamily.medium,
-                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.attach_money_rounded, color: AppThemeData.success400, size: 18),
+                  spaceW(width: 8),
+                  TextCustom(
+                    title: '₹${controller.totalPrice.toStringAsFixed(2)}',
+                    fontSize: 16,
+                    fontFamily: FontFamily.bold,
+                    color: AppThemeData.success400,
+                  ),
+                  spaceW(width: 4),
+                  TextCustom(
+                    title: 'Total',
+                    fontSize: 12,
+                    fontFamily: FontFamily.medium,
+                    color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
+                  ),
+                ],
               ),
             ),
-        ],
-      )),
+            ...controller.categoryItemCount.entries.take(visibleChips).map((entry) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextCustom(
+                      title: entry.key,
+                      fontSize: 11,
+                      fontFamily: FontFamily.medium,
+                      color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+                    ),
+                    spaceW(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppThemeData.primary50.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextCustom(
+                        title: '${entry.value}',
+                        fontSize: 10,
+                        fontFamily: FontFamily.bold,
+                        color: AppThemeData.primary50,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            if (totalChips > 3)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: TextCustom(
+                  title: '+${totalChips - 3} more',
+                  fontSize: 11,
+                  fontFamily: FontFamily.medium,
+                  color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                ),
+              ),
+          ],
+        );
+      }),
     );
   }
 
