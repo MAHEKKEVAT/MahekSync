@@ -1,8 +1,6 @@
 // lib/app/modules/dashboard/widgets/reminder_timeline_card.dart
 import 'package:flutter/material.dart';
 import 'package:maheksync/app/models/dues_tracker_model.dart';
-import 'package:maheksync/app/models/reminder_model.dart';
-import 'package:maheksync/app/models/personal_task_model.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';

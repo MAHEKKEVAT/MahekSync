@@ -11,7 +11,6 @@ import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/dependency/shimmer.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../constant/show_toast.dart';
 import '../controllers/smart_map_dashboard_controller.dart';
 

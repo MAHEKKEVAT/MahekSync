@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -142,6 +141,77 @@ class ImageKitAPI {
     } catch (e) {
       print('ImageKit bytes upload error: $e');
       return null;
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  //  DELETE METHODS
+  // ══════════════════════════════════════════════════════════════════════════════
+
+  static const String _deleteEndpoint = 'https://api.imagekit.io/v1/files/batch/delete';
+
+  /// Extract file path from ImageKit URL.
+  /// URL: https://ik.imagekit.io/{accountId}/devices/owner/file.jpg
+  /// Returns: /devices/owner/file.jpg
+  static String? _extractFilePath(String imageUrl) {
+    try {
+      final uri = Uri.parse(imageUrl);
+      return uri.path;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Delete a single file from ImageKit by URL.
+  /// Fire-and-forget safe — returns true/false but callers should not block on this.
+  static Future<bool> deleteFile(String fileUrl) async {
+    try {
+      final filePath = _extractFilePath(fileUrl);
+      if (filePath == null || filePath.isEmpty) return false;
+
+      final uri = Uri.parse(_deleteEndpoint);
+      final request = http.Request('DELETE', uri);
+
+      final authString = base64Encode(utf8.encode('$_privateKey:'));
+      request.headers['Authorization'] = 'Basic $authString';
+      request.headers['Content-Type'] = 'application/json';
+
+      request.body = jsonEncode({'filePaths': [filePath]});
+
+      final response = await request.send();
+      return response.statusCode == 200 || response.statusCode == 204;
+    } catch (e) {
+      print('ImageKit delete error: $e');
+      return false;
+    }
+  }
+
+  /// Batch delete multiple files from ImageKit by URLs.
+  /// Best-effort — logs warnings but never throws.
+  static Future<void> deleteFiles(List<String> fileUrls) async {
+    try {
+      final paths = fileUrls
+          .map((url) => _extractFilePath(url))
+          .whereType<String>()
+          .where((p) => p.isNotEmpty)
+          .toList();
+
+      if (paths.isEmpty) return;
+
+      final uri = Uri.parse(_deleteEndpoint);
+      final request = http.Request('DELETE', uri);
+
+      final authString = base64Encode(utf8.encode('$_privateKey:'));
+      request.headers['Authorization'] = 'Basic $authString';
+      request.headers['Content-Type'] = 'application/json';
+
+      request.body = jsonEncode({'filePaths': paths});
+
+      final response = await request.send();
+      final body = await response.stream.bytesToString();
+      print('ImageKit batch delete response: ${response.statusCode} $body');
+    } catch (e) {
+      print('ImageKit batch delete error: $e');
     }
   }
 }

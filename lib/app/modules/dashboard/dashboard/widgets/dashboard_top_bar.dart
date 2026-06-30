@@ -1,7 +1,6 @@
 // lib/app/modules/dashboard/widgets/dashboard_top_bar.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';

@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';

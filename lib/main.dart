@@ -74,7 +74,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final d = now.day.toString().padLeft(2, '0');
     final m = now.month.toString().padLeft(2, '0');
     final y = now.year;
-    final h = now.hour.toString().padLeft(2, '0');
     final min = now.minute.toString().padLeft(2, '0');
     final s = now.second.toString().padLeft(2, '0');
     final period = now.hour >= 12 ? 'PM' : 'AM';

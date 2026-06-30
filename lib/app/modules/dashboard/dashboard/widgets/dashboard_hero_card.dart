@@ -4,6 +4,8 @@ import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
+import 'package:maheksync/app/widgets/text_widget.dart';
 
 class DashboardHeroCard extends StatelessWidget {
   final DashboardHomeController controller;
@@ -175,33 +177,24 @@ class DashboardHeroCard extends StatelessWidget {
                         color: AppThemeData.primaryWhite.withValues(alpha: 0.9),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      greeting,
-                      style: TextStyle(
-                        fontFamily: FontFamily.medium,
-                        fontSize: 14,
-                        color: AppThemeData.primaryWhite.withValues(alpha: 0.75),
-                        letterSpacing: 0.2,
-                      ),
+                    spaceW(width: 10),
+                    TextCustom(
+                      title: greeting,
+                      fontSize: 14,
+                      fontFamily: FontFamily.medium,
+                      color: AppThemeData.primaryWhite.withValues(alpha: 0.75),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                // Full name
-                Text(
-                  fullName,
-                  style: TextStyle(
-                    fontFamily: FontFamily.bold,
-                    fontSize: 28,
-                    color: AppThemeData.primaryWhite,
-                    letterSpacing: -0.5,
-                    height: 1.15,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                spaceH(height: 10),
+                TextCustom(
+                  title: fullName,
+                  fontSize: 28,
+                  fontFamily: FontFamily.bold,
+                  color: AppThemeData.primaryWhite,
+                  maxLine: 1,
                 ),
-                const SizedBox(height: 18),
+                spaceH(height: 18),
 
                 // ── Mini Statistics Row ──────────
                 Wrap(
@@ -282,28 +275,22 @@ class _HeroStatChip extends StatelessWidget {
             ),
             child: Icon(icon, size: 13, color: color),
           ),
-          const SizedBox(width: 7),
+          spaceW(width: 7),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontFamily: FontFamily.bold,
-                  fontSize: 13,
-                  color: AppThemeData.primaryWhite,
-                  height: 1.2,
-                ),
+              TextCustom(
+                title: value,
+                fontSize: 13,
+                fontFamily: FontFamily.bold,
+                color: AppThemeData.primaryWhite,
               ),
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: FontFamily.regular,
-                  fontSize: 9,
-                  color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
-                  height: 1.2,
-                ),
+              TextCustom(
+                title: label,
+                fontSize: 9,
+                fontFamily: FontFamily.regular,
+                color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
               ),
             ],
           ),

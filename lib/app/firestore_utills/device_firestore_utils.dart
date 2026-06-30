@@ -44,9 +44,14 @@ class DeviceFirestoreUtils {
   }
 
   // Delete device
-  static Future<bool> deleteDevice(String deviceId) async {
+  static Future<bool> deleteDevice(DeviceModel device) async {
     try {
-      await _firestore.collection(_collectionName).doc(deviceId).delete();
+      // Delete images from ImageKit (best-effort, don't block)
+      final urls = device.deviceImageUrls;
+      if (urls != null && urls.isNotEmpty) {
+        ImageKitAPI.deleteFiles(urls);
+      }
+      await _firestore.collection(_collectionName).doc(device.id).delete();
       return true;
     } catch (e) {
       print('Error deleting device: $e');

@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
+import 'package:maheksync/app/services/imagekit_api.dart';
 
 class PaymentMethodFirestoreUtils {
   static const String collectionName = 'payment_methods';
@@ -35,6 +36,15 @@ class PaymentMethodFirestoreUtils {
 
   static Future<bool> deletePaymentMethod(String id) async {
     try {
+      // Fetch doc to get image URL before deleting
+      final doc = await _collection.doc(id).get();
+      final data = doc.data() as Map<String, dynamic>?;
+      if (data != null) {
+        final pIcon = data['pIcon'] as String?;
+        if (pIcon != null && pIcon.isNotEmpty) {
+          ImageKitAPI.deleteFile(pIcon);
+        }
+      }
       await _collection.doc(id).delete();
       return true;
     } catch (e) {

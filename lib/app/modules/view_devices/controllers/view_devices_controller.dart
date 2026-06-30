@@ -43,7 +43,7 @@ class ViewDevicesController extends GetxController {
 
     isLoading.value = true;
     try {
-      final success = await DeviceFirestoreUtils.deleteDevice(deviceValue!.id!);
+      final success = await DeviceFirestoreUtils.deleteDevice(deviceValue!);
       if (success) {
         ShowToastDialog.showSuccess('Device deleted successfully!');
         Get.back(result: true);

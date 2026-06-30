@@ -33,6 +33,15 @@ class MovieFirestoreUtils {
 
   static Future<bool> deleteMovie(String movieId) async {
     try {
+      // Fetch doc to get poster URL before deleting
+      final doc = await _firestore.collection(_collectionName).doc(movieId).get();
+      final data = doc.data();
+      if (data != null) {
+        final posterUrl = data['posterUrl'] as String?;
+        if (posterUrl != null && posterUrl.isNotEmpty) {
+          ImageKitAPI.deleteFile(posterUrl);
+        }
+      }
       await _firestore.collection(_collectionName).doc(movieId).delete();
       return true;
     } catch (e) {

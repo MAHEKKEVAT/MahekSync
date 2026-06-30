@@ -165,7 +165,6 @@ class PaymentMethodsView extends GetView<PaymentMethodsController> {
       final selectedIcon = controller.selectedIcon.value;
       final iconBytes = controller.iconBytes.value;
 
-      String? displayUrl;
       if (selectedIcon != null && iconBytes != null) {
         // Show newly selected image
         return _buildIconPreview(isDark, memoryImage: iconBytes);

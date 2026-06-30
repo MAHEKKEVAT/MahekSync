@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/models/category_model.dart';
+import 'package:maheksync/app/services/imagekit_api.dart';
 
 class CategoryFirestoreUtils {
   static const String collectionName = 'categories';
@@ -35,6 +36,15 @@ class CategoryFirestoreUtils {
 
   static Future<bool> deleteCategory(String id) async {
     try {
+      // Fetch doc to get image URL before deleting
+      final doc = await _collection.doc(id).get();
+      final data = doc.data() as Map<String, dynamic>?;
+      if (data != null) {
+        final iconUrl = data['iconUrl'] as String?;
+        if (iconUrl != null && iconUrl.isNotEmpty) {
+          ImageKitAPI.deleteFile(iconUrl);
+        }
+      }
       await _collection.doc(id).delete();
       return true;
     } catch (e) {
