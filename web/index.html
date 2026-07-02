@@ -23,6 +23,19 @@
 <script src="flutter_bootstrap.js" async></script>
 
 <script>
+    // ── GitHub Pages deep-link redirect ────────────────────────────────
+    // 404.html saves the path to sessionStorage before redirecting here.
+    // We restore it so Flutter's router sees the original URL.
+    (function() {
+      var redirectPath = sessionStorage.getItem('redirect_path');
+      if (redirectPath) {
+        sessionStorage.removeItem('redirect_path');
+        history.replaceState(null, '', redirectPath);
+      }
+    })();
+</script>
+
+<script>
     function initMapFallback() {
       if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
         var script = document.createElement('script');

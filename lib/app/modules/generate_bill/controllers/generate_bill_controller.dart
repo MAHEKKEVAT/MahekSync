@@ -498,20 +498,20 @@ class GenerateBillController extends GetxController {
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+        margin: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         build: (context) => [
           _buildPdfHeader(bill, regular, bold, medium),
-          pw.SizedBox(height: 24),
+          pw.SizedBox(height: 12),
           _buildPdfCustomerInfo(bill, regular, bold, medium),
-          pw.SizedBox(height: 20),
+          pw.SizedBox(height: 10),
           _buildPdfItemTable(bill, regular, bold, medium, visibleColumns: visibleColumns),
-          pw.SizedBox(height: 20),
+          pw.SizedBox(height: 10),
           if (bill.notes != null && bill.notes!.isNotEmpty) ...[
             _buildPdfNotes(bill, regular, bold),
-            pw.SizedBox(height: 20),
+            pw.SizedBox(height: 10),
           ],
           _buildPdfTotal(bill, regular, bold),
-          pw.SizedBox(height: 32),
+          pw.SizedBox(height: 16),
           _buildPdfFooter(bill, regular, bold, medium, signatureImage),
         ],
       ),
@@ -615,7 +615,7 @@ class GenerateBillController extends GetxController {
   pw.Widget _buildPdfCustomerInfo(BillModel bill, pw.Font font, pw.Font fontBold, pw.Font fontMedium) {
     return pw.Container(
       width: double.infinity,
-      padding: const pw.EdgeInsets.all(20),
+      padding: const pw.EdgeInsets.all(12),
       decoration: pw.BoxDecoration(
         color: _lightGrey,
         borderRadius: pw.BorderRadius.circular(12),
@@ -628,13 +628,13 @@ class GenerateBillController extends GetxController {
             'BILL TO',
             style: pw.TextStyle(font: font, fontSize: 10, color: _grey, letterSpacing: 1),
           ),
-          pw.SizedBox(height: 6),
+          pw.SizedBox(height: 4),
           pw.Text(
             bill.toName ?? 'N/A',
             style: pw.TextStyle(font: fontBold, fontSize: 18, color: _dark),
           ),
           pw.Container(
-            margin: const pw.EdgeInsets.symmetric(vertical: 14),
+            margin: const pw.EdgeInsets.symmetric(vertical: 10),
             height: 0.5,
             color: _lightGrey,
           ),
@@ -642,7 +642,7 @@ class GenerateBillController extends GetxController {
             'PAYMENT INFO',
             style: pw.TextStyle(font: font, fontSize: 10, color: _grey, letterSpacing: 1),
           ),
-          pw.SizedBox(height: 6),
+          pw.SizedBox(height: 4),
           pw.Text(
             bill.paymentInfo ?? 'N/A',
             style: pw.TextStyle(font: fontMedium, fontSize: 13, color: PdfColor(0.45, 0.45, 0.45)),
@@ -664,7 +664,7 @@ class GenerateBillController extends GetxController {
     return pw.Column(
       children: [
         pw.Container(
-          padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+          padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           decoration: pw.BoxDecoration(
             color: _primary,
             borderRadius: const pw.BorderRadius.only(
@@ -722,7 +722,7 @@ class GenerateBillController extends GetxController {
           final isEven = index % 2 == 0;
 
           return pw.Container(
-            padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            padding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 12),
             decoration: pw.BoxDecoration(
               color: isEven ? _primaryBg : PdfColors.white,
               border: pw.Border(
@@ -812,7 +812,7 @@ class GenerateBillController extends GetxController {
       children: [
         pw.Container(
           width: 240,
-          padding: const pw.EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+          padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 16),
           decoration: pw.BoxDecoration(
             gradient: pw.LinearGradient(
               colors: [_primary, _primaryLight],
@@ -874,10 +874,10 @@ class GenerateBillController extends GetxController {
           crossAxisAlignment: pw.CrossAxisAlignment.end,
           children: [
             if (signatureImage != null)
-              pw.Image(signatureImage, height: 60, width: 120)
+              pw.Image(signatureImage, height: 40, width: 80)
             else
               pw.Container(
-                width: 120,
+                width: 80,
                 height: 1,
                 decoration: pw.BoxDecoration(
                   border: pw.Border(bottom: pw.BorderSide(color: _lightGrey, width: 1)),

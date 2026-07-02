@@ -11,6 +11,8 @@ import 'package:maheksync/app/utils/mahek_reminder.dart';
 import 'package:provider/provider.dart';
 import 'app/constant/global_controller.dart';
 import 'app/modules/auth/controllers/auth_controller.dart';
+import 'app/modules/error_screen/bindings/error_screen_binding.dart';
+import 'app/modules/error_screen/views/error_screen_view.dart';
 import 'app/routes/app_pages.dart';
 import 'app/utils/dark_theme_provider.dart';
 import 'app/utils/preferences.dart';
@@ -112,6 +114,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               themeMode: themeChangeProvider.darkTheme == 1 ? ThemeMode.light : ThemeMode.dark,
               initialRoute: AppPages.INITIAL,
               getPages: AppPages.routes,
+              unknownRoute: GetPage(
+                name: '/not-found',
+                page: () => const ErrorScreenView(),
+                binding: ErrorScreenBinding(),
+              ),
               home: GetBuilder<GlobalController>(
                 init: GlobalController(),
                 builder: (context) {

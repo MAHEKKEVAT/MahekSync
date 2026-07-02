@@ -56,6 +56,8 @@ import '../modules/subscription_details/bindings/subscription_details_binding.da
 import '../modules/subscription_details/views/subscription_details_view.dart';
 import '../modules/view_devices/bindings/view_devices_binding.dart';
 import '../modules/view_devices/views/view_devices_view.dart';
+import '../modules/error_screen/bindings/error_screen_binding.dart';
+import '../modules/error_screen/views/error_screen_view.dart';
 import '../utils/auth_middleware.dart';
 
 part 'app_routes.dart';
@@ -98,6 +100,11 @@ class AppPages {
       name: _Paths.SIGN_UP,
       page: () => const SignUpView(),
       binding: SignUpBinding(),
+    ),
+    GetPage(
+      name: _Paths.ERROR_SCREEN,
+      page: () => const ErrorScreenView(),
+      binding: ErrorScreenBinding(),
     ),
 
     // Standalone pages (NOT nested under dashboard)

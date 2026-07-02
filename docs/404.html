@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <script>
+    // Store the full path so Flutter can pick it up after redirect
+    var path = window.location.pathname;
+    var search = window.location.search;
+    var hash = window.location.hash;
+    sessionStorage.setItem('redirect_path', path + search + hash);
+
+    // Redirect to the base URL (index.html will read sessionStorage)
+    var base = document.querySelector('base').getAttribute('href');
+    window.location.replace(base || '/');
+  </script>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html>

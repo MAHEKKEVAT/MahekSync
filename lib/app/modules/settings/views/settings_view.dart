@@ -6,6 +6,7 @@ import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:provider/provider.dart';
 import '../controllers/settings_controller.dart';
 
@@ -492,6 +493,14 @@ class SettingsView extends GetView<SettingsController> {
             color: AppThemeData.neonTeal,
             isAction: true,
           ),
+          _SettingItem(
+            icon: Icons.error_outline_rounded,
+            title: 'Test Error Screen',
+            value: 'Preview',
+            color: AppThemeData.neonOrange,
+            isAction: true,
+            onTapAction: () => Get.toNamed(Routes.ERROR_SCREEN),
+          ),
         ],
       ),
     ];
@@ -575,7 +584,7 @@ class SettingsView extends GetView<SettingsController> {
       color: Colors.transparent,
       child: InkWell(
         onTap: item.isAction
-            ? () {
+            ? (item.onTapAction ?? () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Opening ${item.title}...'),
@@ -583,7 +592,7 @@ class SettingsView extends GetView<SettingsController> {
                     duration: const Duration(seconds: 1),
                   ),
                 );
-              }
+              })
             : item.isToggle
                 ? item.onToggle
                 : null,
@@ -708,6 +717,7 @@ class _SettingItem {
   final bool isAction;
   final bool toggleValue;
   final VoidCallback? onToggle;
+  final VoidCallback? onTapAction;
 
   const _SettingItem({
     required this.icon,
@@ -718,5 +728,6 @@ class _SettingItem {
     this.isAction = false,
     this.toggleValue = false,
     this.onToggle,
+    this.onTapAction,
   });
 }
