@@ -17,16 +17,16 @@ import 'global_widgets.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  ANIMATED GRADIENT BORDER WRAPPER
-//  Sweep-gradient border that "walks" around the field when focused
+//  Clean single border → sweep gradient on focus
+//  Per-character gradient text on focus via ShaderMask
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _AnimatedBorderField extends StatefulWidget {
-  final Widget Function(FocusNode focusNode) builder;
+  final Widget Function(FocusNode focusNode, bool isFocused) builder;
   final bool isDark;
   final bool isEnabled;
   final Color fillColor;
   final double borderRadius;
-  final double borderWidth;
 
   const _AnimatedBorderField({
     required this.builder,
@@ -34,7 +34,6 @@ class _AnimatedBorderField extends StatefulWidget {
     required this.isEnabled,
     required this.fillColor,
     this.borderRadius = 24,
-    this.borderWidth = 2.0,
   });
 
   @override
@@ -47,6 +46,28 @@ class _AnimatedBorderFieldState extends State<_AnimatedBorderField>
   late FocusNode _focusNode;
   bool _isFocused = false;
   bool _hasError = false;
+
+  static final _borderGradientColors = [
+    AppThemeData.primary50,
+    AppThemeData.neonBlue,
+    AppThemeData.neonTeal,
+    AppThemeData.neonMint,
+    AppThemeData.neonPurple,
+    AppThemeData.primary50,
+  ];
+
+  static final _textGradientColors = [
+    AppThemeData.neonRed,
+    AppThemeData.neonOrange,
+    AppThemeData.neonYellow,
+    AppThemeData.neonMint,
+    AppThemeData.neonCyan,
+    AppThemeData.neonTeal,
+    AppThemeData.neonBlue,
+    AppThemeData.neonPurple,
+    AppThemeData.neonLavender,
+    AppThemeData.neonPink,
+  ];
 
   @override
   void initState() {
@@ -94,9 +115,8 @@ class _AnimatedBorderFieldState extends State<_AnimatedBorderField>
   @override
   Widget build(BuildContext context) {
     final r = widget.borderRadius;
-    final bw = widget.borderWidth;
     final showGradient = _isFocused && !_hasError && widget.isEnabled;
-    final child = widget.builder(_focusNode);
+    final child = widget.builder(_focusNode, _isFocused);
 
     return AnimatedBuilder(
       animation: _controller,
@@ -107,42 +127,50 @@ class _AnimatedBorderFieldState extends State<_AnimatedBorderField>
             boxShadow: showGradient
                 ? [
                     BoxShadow(
-                      color: AppThemeData.primary50.withValues(alpha: 0.20),
-                      blurRadius: 14,
+                      color: AppThemeData.primary50.withValues(alpha: 0.18),
+                      blurRadius: 12,
                       spreadRadius: -1,
                     ),
                   ]
                 : null,
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(r),
+          child: Container(
+            padding: const EdgeInsets.all(1.5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(r),
+              gradient: showGradient
+                  ? SweepGradient(
+                      center: FractionalOffset.center,
+                      transform: GradientRotation(_controller.value * 2 * pi),
+                      colors: _borderGradientColors,
+                    )
+                  : null,
+              color: showGradient ? null : _normalBorderColor,
+            ),
             child: Container(
-              padding: EdgeInsets.all(bw),
               decoration: BoxDecoration(
-                gradient: showGradient
-                    ? SweepGradient(
-                        center: FractionalOffset.center,
-                        transform: GradientRotation(_controller.value * 2 * pi),
-                        colors: [
-                          AppThemeData.primary50,
-                          AppThemeData.neonBlue,
-                          AppThemeData.neonTeal,
-                          AppThemeData.neonMint,
-                          AppThemeData.neonPurple,
-                          AppThemeData.primary50,
-                        ],
-                      )
-                    : null,
-                border: showGradient
-                    ? null
-                    : Border.all(color: _normalBorderColor, width: 1),
+                color: widget.fillColor,
+                borderRadius: BorderRadius.circular(r - 1.5),
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: widget.fillColor,
-                ),
-                child: child,
-              ),
+              child: showGradient
+                  ? AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, maskedChild) {
+                        return ShaderMask(
+                          shaderCallback: (Rect bounds) {
+                            return SweepGradient(
+                              center: FractionalOffset.center,
+                              transform: GradientRotation(_controller.value * 2 * pi),
+                              colors: _textGradientColors,
+                            ).createShader(bounds);
+                          },
+                          blendMode: BlendMode.srcIn,
+                          child: maskedChild,
+                        );
+                      },
+                      child: child,
+                    )
+                  : child,
             ),
           ),
         );
@@ -200,9 +228,7 @@ class TextFieldWidget extends StatelessWidget {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     final isDark = themeChange.isDarkTheme();
     final r = 24.0;
-    final bw = 2.0;
     final fieldFill = fillColor ?? (isDark ? AppThemeData.grey9 : AppThemeData.grey2);
-    final normalBorder = isDark ? AppThemeData.grey8 : AppThemeData.grey4;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,8 +248,7 @@ class TextFieldWidget extends StatelessWidget {
           isEnabled: enabled ?? true,
           fillColor: fieldFill,
           borderRadius: r,
-          borderWidth: bw,
-          builder: (focusNode) => TextFormField(
+          builder: (focusNode, isFocused) => TextFormField(
             focusNode: focusNode,
             validator: validator ?? (value) => value != null && value.isNotEmpty ? null : 'This field required'.tr,
             keyboardType: textInputType ?? TextInputType.text,
@@ -239,16 +264,15 @@ class TextFieldWidget extends StatelessWidget {
             cursorColor: AppThemeData.primary50,
             onTap: onPress != null ? () => onPress!() : null,
             style: TextStyle(
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+              color: isFocused ? Colors.white : (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
               fontFamily: FontFamily.regular,
               fontSize: 16,
             ),
             decoration: InputDecoration(
               errorStyle: const TextStyle(fontFamily: FontFamily.regular, fontSize: 12),
               isDense: true,
-              filled: true,
+              filled: false,
               enabled: enable ?? true,
-              fillColor: fieldFill,
               contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               prefixIcon: prefix != null
                   ? Padding(padding: const EdgeInsets.only(left: 12, right: 8), child: prefix)
@@ -262,27 +286,12 @@ class TextFieldWidget extends StatelessWidget {
                 fontFamily: FontFamily.regular,
                 color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: BorderSide(color: normalBorder, width: 1),
-              ),
-              disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: BorderSide(color: normalBorder, width: 1),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: const BorderSide(color: AppThemeData.danger300, width: 1.5),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: const BorderSide(color: AppThemeData.danger300, width: 1),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: BorderSide(color: normalBorder, width: 1),
-              ),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              focusedErrorBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
             ),
           ),
         ),
@@ -320,9 +329,7 @@ class MobileNumberTextField extends StatelessWidget {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     final isDark = themeChange.isDarkTheme();
     final r = 24.0;
-    final bw = 2.0;
     final fieldFill = isDark ? AppThemeData.grey9 : AppThemeData.grey2;
-    final normalBorder = isDark ? AppThemeData.grey8 : AppThemeData.grey4;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,8 +348,7 @@ class MobileNumberTextField extends StatelessWidget {
           isEnabled: enabled ?? true,
           fillColor: fieldFill,
           borderRadius: r,
-          borderWidth: bw,
-          builder: (focusNode) => TextFormField(
+          builder: (focusNode, isFocused) => TextFormField(
             focusNode: focusNode,
             cursorColor: AppThemeData.primary50,
             validator: (value) => validateMobile(value, countryCode),
@@ -356,16 +362,15 @@ class MobileNumberTextField extends StatelessWidget {
             textAlign: TextAlign.start,
             readOnly: readOnly ?? false,
             style: TextStyle(
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+              color: isFocused ? Colors.white : (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
               fontFamily: FontFamily.regular,
               fontSize: 16,
             ),
             decoration: InputDecoration(
               errorStyle: const TextStyle(fontFamily: FontFamily.regular, fontSize: 12),
               isDense: true,
-              filled: true,
+              filled: false,
               enabled: enabled ?? true,
-              fillColor: fieldFill,
               contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               prefixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -398,27 +403,12 @@ class MobileNumberTextField extends StatelessWidget {
                 fontFamily: FontFamily.regular,
                 color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: BorderSide(color: normalBorder, width: 1),
-              ),
-              disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: BorderSide(color: normalBorder, width: 1),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: const BorderSide(color: AppThemeData.danger300, width: 1.5),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: const BorderSide(color: AppThemeData.danger300, width: 1),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: BorderSide(color: normalBorder, width: 1),
-              ),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              focusedErrorBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
             ),
           ),
         ),
@@ -474,9 +464,7 @@ class CustomFieldTextField extends StatelessWidget {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     final isDark = themeChange.isDarkTheme();
     final r = 24.0;
-    final bw = 2.0;
     final fieldFill = fillColor ?? (isDark ? AppThemeData.grey9 : AppThemeData.grey2);
-    final normalBorder = isDark ? AppThemeData.grey8 : AppThemeData.grey4;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,8 +474,7 @@ class CustomFieldTextField extends StatelessWidget {
           isEnabled: enabled ?? true,
           fillColor: fieldFill,
           borderRadius: r,
-          borderWidth: bw,
-          builder: (focusNode) => TextFormField(
+          builder: (focusNode, isFocused) => TextFormField(
             focusNode: focusNode,
             validator: validator ?? (value) => value != null && value.isNotEmpty ? null : 'This field required'.tr,
             keyboardType: textInputType ?? TextInputType.text,
@@ -503,16 +490,15 @@ class CustomFieldTextField extends StatelessWidget {
             cursorColor: AppThemeData.primary50,
             onTap: onPress != null ? () => onPress!() : null,
             style: TextStyle(
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+              color: isFocused ? Colors.white : (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
               fontFamily: FontFamily.regular,
               fontSize: 16,
             ),
             decoration: InputDecoration(
               errorStyle: const TextStyle(fontFamily: FontFamily.regular, fontSize: 12),
               isDense: true,
-              filled: true,
+              filled: false,
               enabled: enable ?? true,
-              fillColor: fieldFill,
               contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               prefixIcon: prefix != null
                   ? Padding(padding: const EdgeInsets.only(left: 12, right: 8), child: prefix)
@@ -526,27 +512,12 @@ class CustomFieldTextField extends StatelessWidget {
                 fontFamily: FontFamily.regular,
                 color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: BorderSide(color: normalBorder, width: 1),
-              ),
-              disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: BorderSide(color: normalBorder, width: 1),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: const BorderSide(color: AppThemeData.danger300, width: 1.5),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: const BorderSide(color: AppThemeData.danger300, width: 1),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(r),
-                borderSide: BorderSide(color: normalBorder, width: 1),
-              ),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              focusedErrorBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
             ),
           ),
         ),

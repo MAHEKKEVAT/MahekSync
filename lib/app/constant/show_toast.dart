@@ -20,4 +20,8 @@ class ShowToastDialog {
   static void showWarning(String message, {String? subtitle, ToastPosition position = ToastPosition.top}) {
     ToastService().showWarningToast(message, subtitle: subtitle, position: position);
   }
+
+  static void showInfo(String message, {String? subtitle, ToastPosition position = ToastPosition.top}) {
+    ToastService().showInfoToast(message, subtitle: subtitle, position: position);
+  }
 }
