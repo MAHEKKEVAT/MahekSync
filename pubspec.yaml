@@ -16,7 +16,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   get: ^4.7.3
   provider: ^6.1.5+1
-  country_code_picker: ^3.4.1
   nb_utils: ^7.2.0
   cloud_firestore: ^6.3.0
   flutter_svg: ^2.2.4

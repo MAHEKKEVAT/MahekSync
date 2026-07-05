@@ -147,6 +147,7 @@ class DashboardController extends GetxController {
           icon: SolarIconsOutline.map,
           selectedIcon: SolarIconsBold.map,
           route: '/smart-map-dashboard',
+          svgIcon: 'assets/icons/ic_pin.svg',
         ),
         NavigationItem(
           title: 'My Contacts'.tr,

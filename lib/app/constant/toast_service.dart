@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -76,7 +78,7 @@ class ToastService {
     _showToast(
       title: message,
       subtitle: subtitle,
-      accentColor: const Color(0xFF34C759),
+      accentColor: AppThemeData.success300,
       icon: Icons.check_circle_rounded,
     );
   }
@@ -85,7 +87,7 @@ class ToastService {
     _showToast(
       title: message,
       subtitle: subtitle,
-      accentColor: const Color(0xFFFF3B30),
+      accentColor: AppThemeData.danger300,
       icon: Icons.cancel_rounded,
     );
   }
@@ -94,7 +96,7 @@ class ToastService {
     _showToast(
       title: message,
       subtitle: subtitle,
-      accentColor: const Color(0xFFFF9500),
+      accentColor: AppThemeData.neonOrange,
       icon: Icons.warning_rounded,
     );
   }
@@ -103,7 +105,7 @@ class ToastService {
     _showToast(
       title: message,
       subtitle: subtitle,
-      accentColor: const Color(0xFF007AFF),
+      accentColor: AppThemeData.neonBlue,
       icon: Icons.info_rounded,
     );
   }
@@ -241,19 +243,17 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final isDark = widget.isDark;
 
-    final bgColor = isDark
-        ? const Color(0xFFFAFAFA)
-        : const Color(0xFF1C1C1E);
-    final textColor = isDark ? const Color(0xFF1A1A1E) : Colors.white;
+    final bgColor = isDark ? AppThemeData.grey1 : AppThemeData.surfaceElevated;
+    final textColor = isDark ? AppThemeData.grey10 : AppThemeData.primaryWhite;
     final subtitleColor = isDark
-        ? const Color(0xFF1A1A1E).withValues(alpha: 0.50)
-        : Colors.white.withValues(alpha: 0.50);
+        ? AppThemeData.grey10.withValues(alpha: 0.50)
+        : AppThemeData.primaryWhite.withValues(alpha: 0.50);
     final closeBg = isDark
-        ? Colors.black.withValues(alpha: 0.06)
-        : Colors.white.withValues(alpha: 0.08);
+        ? AppThemeData.primaryBlack.withValues(alpha: 0.06)
+        : AppThemeData.primaryWhite.withValues(alpha: 0.08);
     final closeIcon = isDark
-        ? Colors.black.withValues(alpha: 0.35)
-        : Colors.white.withValues(alpha: 0.40);
+        ? AppThemeData.primaryBlack.withValues(alpha: 0.35)
+        : AppThemeData.primaryWhite.withValues(alpha: 0.40);
 
     return Positioned(
       bottom: bottomPadding + 16,
@@ -281,7 +281,7 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                     offset: const Offset(0, 8),
                   ),
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.04 : 0.25),
+                    color: AppThemeData.primaryBlack.withValues(alpha: isDark ? 0.04 : 0.25),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -310,7 +310,7 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                     ),
                     child: Icon(widget.icon, color: widget.accentColor, size: 19),
                   ),
-                  const SizedBox(width: 12),
+                  spaceW(width: 12),
                   // ── Branding + message + subtitle ──
                   Expanded(
                     child: Column(
@@ -328,7 +328,7 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                             height: 1.2,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        spaceH(height: 2),
                         Text(
                           widget.title,
                           style: TextStyle(
@@ -341,7 +341,7 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                           ),
                         ),
                         if (widget.subtitle != null && widget.subtitle!.isNotEmpty) ...[
-                          const SizedBox(height: 2),
+                          spaceH(height: 2),
                           Text(
                             widget.subtitle!,
                             style: TextStyle(
@@ -359,7 +359,7 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  spaceW(width: 8),
                   // ── Now + close ──
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -375,7 +375,7 @@ class _GlassmorphicToastState extends State<_GlassmorphicToast>
                           decoration: TextDecoration.none,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      spaceH(height: 6),
                       GestureDetector(
                         onTap: _dismiss,
                         child: Container(
@@ -467,18 +467,18 @@ class _GlassmorphicLoaderState extends State<_GlassmorphicLoader>
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
                 decoration: BoxDecoration(
                   color: widget.isDark
-                      ? Colors.white.withValues(alpha: 0.92)
-                      : const Color(0xFF1C1C1E).withValues(alpha: 0.90),
+                      ? AppThemeData.primaryWhite.withValues(alpha: 0.92)
+                      : AppThemeData.surfaceElevated.withValues(alpha: 0.90),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: widget.isDark
-                        ? Colors.black.withValues(alpha: 0.06)
-                        : Colors.white.withValues(alpha: 0.1),
+                        ? AppThemeData.primaryBlack.withValues(alpha: 0.06)
+                        : AppThemeData.primaryWhite.withValues(alpha: 0.1),
                     width: 0.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: widget.isDark ? 0.08 : 0.3),
+                      color: AppThemeData.primaryBlack.withValues(alpha: widget.isDark ? 0.08 : 0.3),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),
@@ -488,15 +488,15 @@ class _GlassmorphicLoaderState extends State<_GlassmorphicLoader>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     MahekLoader(size: 40, showBranding: false),
-                    const SizedBox(height: 20),
+                    spaceH(height: 20),
                     Text(
                       widget.message,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: widget.isDark
-                            ? const Color(0xFF1C1C1E).withValues(alpha: 0.8)
-                            : Colors.white.withValues(alpha: 0.9),
+                            ? AppThemeData.surfaceElevated.withValues(alpha: 0.8)
+                            : AppThemeData.primaryWhite.withValues(alpha: 0.9),
                         decoration: TextDecoration.none,
                       ),
                       textAlign: TextAlign.center,

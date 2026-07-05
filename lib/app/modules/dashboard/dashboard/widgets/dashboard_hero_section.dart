@@ -198,7 +198,7 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
                     width: rng.nextDouble() * 2 + 1,
                     height: rng.nextDouble() * 2 + 1,
                     decoration: BoxDecoration(
-                      color: Colors.white
+                      color: AppThemeData.primaryWhite
                           .withValues(alpha: rng.nextDouble() * 0.4 + 0.2),
                       shape: BoxShape.circle,
                     ),
@@ -261,7 +261,7 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
                     style: TextStyle(
                       fontFamily: FontFamily.medium,
                       fontSize: 13,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: AppThemeData.primaryWhite.withValues(alpha: 0.7),
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -269,10 +269,10 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
                   // Name
                   Text(
                     '$firstName $emoji',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: FontFamily.bold,
                       fontSize: 26,
-                      color: Colors.white,
+                      color: AppThemeData.primaryWhite,
                       letterSpacing: -0.5,
                       height: 1.15,
                     ),
@@ -286,7 +286,7 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
                     style: TextStyle(
                       fontFamily: FontFamily.regular,
                       fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: AppThemeData.primaryWhite.withValues(alpha: 0.6),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -349,17 +349,17 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
+                          Text(
                             "View Today's Plan",
                             style: TextStyle(
                               fontFamily: FontFamily.semiBold,
                               fontSize: 12,
-                              color: Colors.white,
+                              color: AppThemeData.primaryWhite,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Icon(Icons.arrow_forward_rounded,
-                              size: 14, color: Colors.white),
+                              size: 14, color: AppThemeData.primaryWhite),
                         ],
                       ),
                     ),
@@ -392,9 +392,9 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: AppThemeData.primaryWhite.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppThemeData.primaryWhite.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -415,10 +415,10 @@ class _StatChip extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: FontFamily.bold,
                   fontSize: 15,
-                  color: Colors.white,
+                  color: AppThemeData.primaryWhite,
                   height: 1.2,
                 ),
               ),
@@ -427,7 +427,7 @@ class _StatChip extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: FontFamily.regular,
                   fontSize: 10,
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
                   height: 1.2,
                 ),
               ),
@@ -493,7 +493,7 @@ class _SeasonPainter extends CustomPainter {
       final x = rng.nextDouble() * size.width;
       final y = rng.nextDouble() * size.height;
       final len = 8.0 + rng.nextDouble() * 12.0;
-      rainPaint.color = Colors.white.withValues(alpha: 0.04 + rng.nextDouble() * 0.03);
+      rainPaint.color = AppThemeData.primaryWhite.withValues(alpha: 0.04 + rng.nextDouble() * 0.03);
       canvas.drawLine(
         Offset(x, y),
         Offset(x - 2, y + len),
@@ -502,7 +502,7 @@ class _SeasonPainter extends CustomPainter {
     }
 
     final cloudPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.03)
+      ..color = AppThemeData.primaryWhite.withValues(alpha: 0.03)
       ..style = PaintingStyle.fill;
     canvas.drawOval(
       Rect.fromCenter(center: Offset(size.width * 0.3, 25), width: 80, height: 30),
@@ -526,7 +526,7 @@ class _SeasonPainter extends CustomPainter {
       final x = rng.nextDouble() * size.width;
       final y = rng.nextDouble() * size.height;
       final r = 1.0 + rng.nextDouble() * 1.5;
-      snowPaint.color = Colors.white.withValues(alpha: 0.06 + rng.nextDouble() * 0.04);
+      snowPaint.color = AppThemeData.primaryWhite.withValues(alpha: 0.06 + rng.nextDouble() * 0.04);
       canvas.drawCircle(Offset(x, y), r, snowPaint);
     }
 
@@ -535,7 +535,7 @@ class _SeasonPainter extends CustomPainter {
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
         colors: [
-          Colors.white.withValues(alpha: 0.04),
+          AppThemeData.primaryWhite.withValues(alpha: 0.04),
           Colors.transparent,
         ],
       ).createShader(Rect.fromLTWH(0, size.height - 40, size.width, 40));
@@ -629,7 +629,7 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.015)
+      ..color = AppThemeData.primaryWhite.withValues(alpha: 0.015)
       ..strokeWidth = 0.5;
     const spacing = 40.0;
     for (double x = 0; x < size.width; x += spacing) {

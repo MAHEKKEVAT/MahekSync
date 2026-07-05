@@ -109,7 +109,7 @@ class LifeOverviewSection extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
-            childAspectRatio: 2.8,
+            childAspectRatio: 2.2,
             children: [
               _MetricTile(
                 title: 'Devices',

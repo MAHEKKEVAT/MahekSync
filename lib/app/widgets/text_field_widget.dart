@@ -2,24 +2,33 @@
 
 import 'dart:math';
 
-import 'package:country_code_picker/country_code_picker.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
-import 'package:maheksync/app/utils/validate_mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
-import 'global_widgets.dart';
-
 // ══════════════════════════════════════════════════════════════════════════════
 //  ANIMATED GRADIENT BORDER WRAPPER
 //  Clean single border → sweep gradient on focus
-//  Per-character gradient text on focus via ShaderMask
+//  Per-character gradient text on focus via RichText overlay
 // ══════════════════════════════════════════════════════════════════════════════
+
+const List<Color> kTextGradientColors = [
+  AppThemeData.neonRed,
+  AppThemeData.neonOrange,
+  AppThemeData.neonYellow,
+  AppThemeData.neonMint,
+  AppThemeData.neonCyan,
+  AppThemeData.neonTeal,
+  AppThemeData.neonBlue,
+  AppThemeData.neonPurple,
+  AppThemeData.neonLavender,
+  AppThemeData.neonPink,
+];
 
 class _AnimatedBorderField extends StatefulWidget {
   final Widget Function(FocusNode focusNode, bool isFocused) builder;
@@ -54,19 +63,6 @@ class _AnimatedBorderFieldState extends State<_AnimatedBorderField>
     AppThemeData.neonMint,
     AppThemeData.neonPurple,
     AppThemeData.primary50,
-  ];
-
-  static final _textGradientColors = [
-    AppThemeData.neonRed,
-    AppThemeData.neonOrange,
-    AppThemeData.neonYellow,
-    AppThemeData.neonMint,
-    AppThemeData.neonCyan,
-    AppThemeData.neonTeal,
-    AppThemeData.neonBlue,
-    AppThemeData.neonPurple,
-    AppThemeData.neonLavender,
-    AppThemeData.neonPink,
   ];
 
   @override
@@ -116,11 +112,11 @@ class _AnimatedBorderFieldState extends State<_AnimatedBorderField>
   Widget build(BuildContext context) {
     final r = widget.borderRadius;
     final showGradient = _isFocused && !_hasError && widget.isEnabled;
-    final child = widget.builder(_focusNode, _isFocused);
 
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
+        final child = widget.builder(_focusNode, _isFocused);
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(r),
@@ -152,25 +148,7 @@ class _AnimatedBorderFieldState extends State<_AnimatedBorderField>
                 color: widget.fillColor,
                 borderRadius: BorderRadius.circular(r - 1.5),
               ),
-              child: showGradient
-                  ? AnimatedBuilder(
-                      animation: _controller,
-                      builder: (context, maskedChild) {
-                        return ShaderMask(
-                          shaderCallback: (Rect bounds) {
-                            return SweepGradient(
-                              center: FractionalOffset.center,
-                              transform: GradientRotation(_controller.value * 2 * pi),
-                              colors: _textGradientColors,
-                            ).createShader(bounds);
-                          },
-                          blendMode: BlendMode.srcIn,
-                          child: maskedChild,
-                        );
-                      },
-                      child: child,
-                    )
-                  : child,
+              child: child,
             ),
           ),
         );
@@ -264,234 +242,15 @@ class TextFieldWidget extends StatelessWidget {
             cursorColor: AppThemeData.primary50,
             onTap: onPress != null ? () => onPress!() : null,
             style: TextStyle(
-              color: isFocused ? Colors.white : (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-              fontFamily: FontFamily.regular,
-              fontSize: 16,
-            ),
-            decoration: InputDecoration(
-              errorStyle: const TextStyle(fontFamily: FontFamily.regular, fontSize: 12),
-              isDense: true,
-              filled: false,
-              enabled: enable ?? true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              prefixIcon: prefix != null
-                  ? Padding(padding: const EdgeInsets.only(left: 12, right: 8), child: prefix)
+              foreground: isFocused
+                  ? (Paint()
+                    ..shader = const LinearGradient(
+                      colors: kTextGradientColors,
+                      tileMode: TileMode.repeated,
+                    ).createShader(const Rect.fromLTWH(0, 0, 120, 30)))
                   : null,
-              suffixIcon: suffix != null
-                  ? Padding(padding: const EdgeInsets.all(12), child: suffix)
-                  : null,
-              hintText: hintText.tr,
-              hintStyle: TextStyle(
-                fontSize: 16,
-                fontFamily: FontFamily.regular,
-                color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-              ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              focusedErrorBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-//  MOBILE NUMBER TEXT FIELD
-// ══════════════════════════════════════════════════════════════════════════════
-
-class MobileNumberTextField extends StatelessWidget {
-  final String title;
-  String countryCode = "";
-  final ValueChanged<String> onCountryCodeChanged;
-  final TextEditingController controller;
-  final Function() onPress;
-  final bool? enabled;
-  final bool? readOnly;
-
-  MobileNumberTextField({
-    super.key,
-    required this.controller,
-    required this.countryCode,
-    required this.onCountryCodeChanged,
-    required this.onPress,
-    required this.title,
-    this.enabled,
-    this.readOnly,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
-    final isDark = themeChange.isDarkTheme();
-    final r = 24.0;
-    final fieldFill = isDark ? AppThemeData.grey9 : AppThemeData.grey2;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: TextCustom(
-            title: title.tr,
-            fontSize: 14,
-            fontFamily: FontFamily.medium,
-            color: isDark ? AppThemeData.grey4 : AppThemeData.grey8,
-          ),
-        ),
-        _AnimatedBorderField(
-          isDark: isDark,
-          isEnabled: enabled ?? true,
-          fillColor: fieldFill,
-          borderRadius: r,
-          builder: (focusNode, isFocused) => TextFormField(
-            focusNode: focusNode,
-            cursorColor: AppThemeData.primary50,
-            validator: (value) => validateMobile(value, countryCode),
-            keyboardType: TextInputType.numberWithOptions(decimal: true, signed: true),
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.allow(RegExp("[0-9]")),
-              PhoneNumberInputFormatter(mask: phoneMaskForCountryCode(countryCode), maxLength: phoneMaxLengthForCountryCode(countryCode)),
-            ],
-            textCapitalization: TextCapitalization.sentences,
-            controller: controller,
-            textAlign: TextAlign.start,
-            readOnly: readOnly ?? false,
-            style: TextStyle(
-              color: isFocused ? Colors.white : (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-              fontFamily: FontFamily.regular,
-              fontSize: 16,
-            ),
-            decoration: InputDecoration(
-              errorStyle: const TextStyle(fontFamily: FontFamily.regular, fontSize: 12),
-              isDense: true,
-              filled: false,
-              enabled: enabled ?? true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              prefixIcon: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CountryCodePicker(
-                    searchStyle: TextStyle(color: isDark ? AppThemeData.grey2 : AppThemeData.grey10, fontFamily: FontFamily.regular),
-                    showFlag: true,
-                    onChanged: (value) {
-                      final code = value.dialCode.toString();
-                      onCountryCodeChanged(code);
-                    },
-                    dialogTextStyle: TextStyle(fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey2 : AppThemeData.grey10),
-                    dialogBackgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey2,
-                    initialSelection: countryCode,
-                    comparator: (a, b) => b.name!.compareTo(a.name.toString()),
-                    backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey2,
-                    flagDecoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(2))),
-                    textStyle: TextStyle(fontSize: 15, color: isDark ? AppThemeData.grey4 : AppThemeData.grey8, fontFamily: FontFamily.regular),
-                  ),
-                  Text(
-                    "|",
-                    style: TextStyle(fontSize: 16, fontFamily: FontFamily.light, color: isDark ? AppThemeData.grey7 : AppThemeData.grey4),
-                  ),
-                  spaceW(width: 16),
-                ],
-              ),
-              hintText: "Enter Mobile Number".tr,
-              hintStyle: TextStyle(
-                fontSize: 16,
-                fontFamily: FontFamily.regular,
-                color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-              ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              focusedErrorBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-//  CUSTOM FIELD TEXT FIELD
-// ══════════════════════════════════════════════════════════════════════════════
-
-class CustomFieldTextField extends StatelessWidget {
-  final String hintText;
-  final validator;
-  final String? icon;
-  bool? obscureText = false;
-  Color? color;
-  Color? fillColor;
-  final int? line;
-  final TextEditingController controller;
-  final Function()? onPress;
-  final Widget? prefix;
-  final Widget? suffix;
-  final bool? enable;
-  final bool? enabled;
-  final bool? readOnly;
-  final TextInputType? textInputType;
-  final List<TextInputFormatter>? inputFormatters;
-
-  CustomFieldTextField({
-    super.key,
-    this.textInputType,
-    this.validator,
-    this.enable,
-    this.icon,
-    this.prefix,
-    this.suffix,
-    this.obscureText,
-    required this.hintText,
-    required this.controller,
-    this.onPress,
-    this.enabled,
-    this.readOnly,
-    this.color,
-    this.fillColor,
-    this.line,
-    this.inputFormatters,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
-    final isDark = themeChange.isDarkTheme();
-    final r = 24.0;
-    final fieldFill = fillColor ?? (isDark ? AppThemeData.grey9 : AppThemeData.grey2);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _AnimatedBorderField(
-          isDark: isDark,
-          isEnabled: enabled ?? true,
-          fillColor: fieldFill,
-          borderRadius: r,
-          builder: (focusNode, isFocused) => TextFormField(
-            focusNode: focusNode,
-            validator: validator ?? (value) => value != null && value.isNotEmpty ? null : 'This field required'.tr,
-            keyboardType: textInputType ?? TextInputType.text,
-            inputFormatters: inputFormatters,
-            textCapitalization: TextCapitalization.sentences,
-            controller: controller,
-            textAlign: TextAlign.start,
-            enabled: enabled,
-            obscureText: obscureText ?? false,
-            readOnly: readOnly ?? false,
-            maxLines: line ?? 1,
-            textAlignVertical: TextAlignVertical.center,
-            cursorColor: AppThemeData.primary50,
-            onTap: onPress != null ? () => onPress!() : null,
-            style: TextStyle(
-              color: isFocused ? Colors.white : (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-              fontFamily: FontFamily.regular,
+              color: isFocused ? null : (isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+              fontFamily: isFocused ? FontFamily.bold : FontFamily.regular,
               fontSize: 16,
             ),
             decoration: InputDecoration(

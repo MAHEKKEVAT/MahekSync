@@ -23,7 +23,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppThemeData.grey10 : AppThemeData.grey2,
+      backgroundColor: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
       body: Obx(() {
         if (controller.isLoading.value) {
           return Center(
@@ -92,7 +92,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.devices_rounded, color: Colors.white, size: 26),
+                child: Icon(Icons.devices_rounded, color: AppThemeData.primaryWhite, size: 26),
               ),
               spaceW(width: 12),
               Expanded(
@@ -127,7 +127,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                 title: 'Register New Device',
                 fontSize: 13,
                 fontFamily: FontFamily.semiBold,
-                color: Colors.white,
+                color: AppThemeData.primaryWhite,
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppThemeData.primary50,
@@ -164,7 +164,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                   ),
                 ],
               ),
-              child: const Icon(Icons.devices_rounded, color: Colors.white, size: 30),
+              child: Icon(Icons.devices_rounded, color: AppThemeData.primaryWhite, size: 30),
             ),
             spaceW(width: 16),
             Column(
@@ -194,7 +194,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
             title: 'Register New Device',
             fontSize: 14,
             fontFamily: FontFamily.semiBold,
-            color: Colors.white,
+            color: AppThemeData.primaryWhite,
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppThemeData.primary50,
@@ -218,7 +218,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
         color: AppThemeData.primary50,
       ),
       _DeviceStatData(
-        icon: Icons.attach_money_rounded,
+        icon: Icons.currency_rupee_rounded,
         label: 'Total Value',
         value: '₹${controller.totalPrice.toStringAsFixed(0)}',
         sub: 'Portfolio worth',
@@ -263,26 +263,19 @@ class MyDevicesView extends GetView<MyDevicesController> {
 
   Widget _buildStatCard(_DeviceStatData stat, bool isDark) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            stat.color.withValues(alpha: isDark ? 0.2 : 0.12),
-            stat.color.withValues(alpha: isDark ? 0.08 : 0.04),
-          ],
-        ),
+        color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: stat.color.withValues(alpha: isDark ? 0.25 : 0.18),
+          color: stat.color.withValues(alpha: isDark ? 0.2 : 0.15),
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -301,7 +294,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                 ),
               ],
             ),
-            child: Icon(stat.icon, size: 20, color: Colors.white),
+            child: Icon(stat.icon, size: 22, color: AppThemeData.primaryWhite),
           ),
           spaceW(width: 14),
           Expanded(
@@ -321,7 +314,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                   stat.value,
                   style: TextStyle(
                     fontFamily: FontFamily.bold,
-                    fontSize: 22,
+                    fontSize: 24,
                     color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                     letterSpacing: -0.5,
                   ),
@@ -352,7 +345,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            color: AppThemeData.primaryBlack.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -852,7 +845,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
           icon,
           size: 22,
           color: isSelected
-              ? Colors.white
+              ? AppThemeData.primaryWhite
               : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
         ),
       ),
@@ -879,7 +872,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
         maxCrossAxisExtent: 350,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
-        childAspectRatio: 0.85,
+        childAspectRatio: 0.9,
       ),
       itemCount: controller.filteredDevices.length,
       itemBuilder: (context, index) {
@@ -899,74 +892,116 @@ class MyDevicesView extends GetView<MyDevicesController> {
   }
 
   Widget _buildDeviceGridCard(DeviceModel device, bool isDark) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-            isDark ? AppThemeData.grey9.withValues(alpha: 0.5) : AppThemeData.grey1,
+    return _HoverableCard(
+      onTap: () => Get.toNamed(Routes.VIEW_DEVICES, arguments: device),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Warranty Badge only
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (device.warrantyEndDate != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: device.isWarrantyExpired
+                            ? AppThemeData.danger300.withValues(alpha: 0.12)
+                            : AppThemeData.success400.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextCustom(
+                        title: device.isWarrantyExpired ? 'Expired' : 'Active',
+                        fontSize: 11,
+                        fontFamily: FontFamily.bold,
+                        color: device.isWarrantyExpired
+                            ? AppThemeData.danger300
+                            : AppThemeData.success400,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            // Device Image
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 14),
+                decoration: BoxDecoration(
+                  color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: device.primaryImageUrl.isNotEmpty
+                    ? ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    device.primaryImageUrl,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                    errorBuilder: (ctx, _, __) => _buildPlaceholderImage(isDark),
+                  ),
+                )
+                    : _buildPlaceholderImage(isDark),
+              ),
+            ),
+            // Device Info
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextCustom(
+                    title: device.deviceName ?? 'Unknown Device',
+                    fontSize: 16,
+                    fontFamily: FontFamily.bold,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                    maxLine: 1,
+                  ),
+                  spaceH(height: 6),
+                  TextCustom(
+                    title: device.formattedPrice,
+                    fontSize: 20,
+                    fontFamily: FontFamily.bold,
+                    color: AppThemeData.success400,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Status Badges
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppThemeData.primary50.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: TextCustom(
-                    title: device.condition ?? 'NEW',
-                    fontSize: 11,
-                    fontFamily: FontFamily.bold,
-                    color: AppThemeData.primary50,
-                  ),
-                ),
-                if (device.warrantyEndDate != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: device.isWarrantyExpired
-                          ? AppThemeData.danger300.withValues(alpha: 0.12)
-                          : AppThemeData.success400.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: TextCustom(
-                      title: device.isWarrantyExpired ? 'Expired' : 'Active',
-                      fontSize: 11,
-                      fontFamily: FontFamily.bold,
-                      color: device.isWarrantyExpired
-                          ? AppThemeData.danger300
-                          : AppThemeData.success400,
-                    ),
-                  ),
-              ],
-            ),
+    );
+  }
+
+  Widget _buildDeviceListCard(DeviceModel device, bool isDark) {
+    return _HoverableCard(
+      onTap: () => Get.toNamed(Routes.VIEW_DEVICES, arguments: device),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3,
           ),
-          // Device Image
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 14),
+        ),
+        child: Row(
+          children: [
+            // Image
+            Container(
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
-                color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+                color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: device.primaryImageUrl.isNotEmpty
@@ -974,385 +1009,267 @@ class MyDevicesView extends GetView<MyDevicesController> {
                 borderRadius: BorderRadius.circular(16),
                 child: Image.network(
                   device.primaryImageUrl,
-                  width: double.infinity,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => _buildPlaceholderImage(isDark),
+                  errorBuilder: (ctx, _, __) => _buildPlaceholderImage(isDark),
                 ),
               )
                   : _buildPlaceholderImage(isDark),
             ),
-          ),
-          // Device Info
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextCustom(
-                  title: device.deviceName ?? 'Unknown Device',
-                  fontSize: 16,
-                  fontFamily: FontFamily.bold,
-                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                  maxLine: 1,
-                ),
-                spaceH(height: 4),
-                TextCustom(
-                  title: device.formattedPrice,
-                  fontSize: 20,
-                  fontFamily: FontFamily.bold,
-                  color: AppThemeData.primary50,
-                ),
-                spaceH(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    OutlinedButton(
-                      onPressed: () => Get.toNamed(Routes.VIEW_DEVICES, arguments: device),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+            spaceW(width: 18),
+            // Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (device.warrantyEndDate != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: device.isWarrantyExpired
+                                ? AppThemeData.danger300.withValues(alpha: 0.12)
+                                : AppThemeData.success400.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: TextCustom(
+                            title: device.isWarrantyExpired ? 'Expired' : 'Active',
+                            fontSize: 10,
+                            fontFamily: FontFamily.bold,
+                            color: device.isWarrantyExpired
+                                ? AppThemeData.danger300
+                                : AppThemeData.success400,
+                          ),
                         ),
-                        side: BorderSide(
-                          color: AppThemeData.primary50.withValues(alpha: 0.5),
-                        ),
+                    ],
+                  ),
+                  spaceH(height: 8),
+                  TextCustom(
+                    title: device.deviceName ?? 'Unknown Device',
+                    fontSize: 17,
+                    fontFamily: FontFamily.bold,
+                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                  ),
+                  spaceH(height: 4),
+                  TextCustom(
+                    title: device.formattedPrice,
+                    fontSize: 18,
+                    fontFamily: FontFamily.bold,
+                    color: AppThemeData.success400,
+                  ),
+                  spaceH(height: 6),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.category_rounded,
+                        size: 14,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
                       ),
-                      child: TextCustom(
-                        title: 'View Details',
+                      spaceW(width: 4),
+                      TextCustom(
+                        title: device.category ?? 'Uncategorized',
                         fontSize: 12,
-                        fontFamily: FontFamily.semiBold,
-                        color: AppThemeData.primary50,
+                        fontFamily: FontFamily.regular,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      spaceW(width: 16),
+                      Icon(
+                        Icons.payment_rounded,
+                        size: 14,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      ),
+                      spaceW(width: 4),
+                      TextCustom(
+                        title: device.paymentMethod ?? 'N/A',
+                        fontSize: 12,
+                        fontFamily: FontFamily.regular,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDeviceListCard(DeviceModel device, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
-            isDark ? AppThemeData.grey9.withValues(alpha: 0.5) : AppThemeData.grey1,
+            // Chevron indicator
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 22,
+              color: isDark ? AppThemeData.grey5 : AppThemeData.grey4,
+            ),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Image
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: device.primaryImageUrl.isNotEmpty
-                ? ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                device.primaryImageUrl,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => _buildPlaceholderImage(isDark),
-              ),
-            )
-                : _buildPlaceholderImage(isDark),
-          ),
-          spaceW(width: 18),
-          // Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppThemeData.primary50.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextCustom(
-                        title: device.condition ?? 'NEW',
-                        fontSize: 10,
-                        fontFamily: FontFamily.bold,
-                        color: AppThemeData.primary50,
-                      ),
-                    ),
-                    spaceW(width: 8),
-                    if (device.warrantyEndDate != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: device.isWarrantyExpired
-                              ? AppThemeData.danger300.withValues(alpha: 0.12)
-                              : AppThemeData.success400.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: TextCustom(
-                          title: device.isWarrantyExpired ? 'Expired' : 'Active',
-                          fontSize: 10,
-                          fontFamily: FontFamily.bold,
-                          color: device.isWarrantyExpired
-                              ? AppThemeData.danger300
-                              : AppThemeData.success400,
-                        ),
-                      ),
-                  ],
-                ),
-                spaceH(height: 8),
-                TextCustom(
-                  title: device.deviceName ?? 'Unknown Device',
-                  fontSize: 17,
-                  fontFamily: FontFamily.bold,
-                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                ),
-                spaceH(height: 4),
-                TextCustom(
-                  title: device.formattedPrice,
-                  fontSize: 18,
-                  fontFamily: FontFamily.bold,
-                  color: AppThemeData.primary50,
-                ),
-                spaceH(height: 6),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.category_rounded,
-                      size: 14,
-                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    ),
-                    spaceW(width: 4),
-                    TextCustom(
-                      title: device.category ?? 'Uncategorized',
-                      fontSize: 12,
-                      fontFamily: FontFamily.regular,
-                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    ),
-                    spaceW(width: 16),
-                    Icon(
-                      Icons.payment_rounded,
-                      size: 14,
-                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    ),
-                    spaceW(width: 4),
-                    TextCustom(
-                      title: device.paymentMethod ?? 'N/A',
-                      fontSize: 12,
-                      fontFamily: FontFamily.regular,
-                      color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Actions
-          Column(
-            children: [
-              OutlinedButton(
-                onPressed: () => Get.toNamed(Routes.VIEW_DEVICES, arguments: device),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  side: BorderSide(
-                    color: AppThemeData.primary50.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: TextCustom(
-                  title: 'View',
-                  fontSize: 13,
-                  fontFamily: FontFamily.semiBold,
-                  color: AppThemeData.primary50,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
 
   Widget _buildPlaceholderImage(bool isDark) {
     return Container(
-      color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
+      color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
       child: Center(
         child: Icon(
           Icons.devices_outlined,
           size: 40,
-          color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
+          color: isDark ? AppThemeData.grey6 : AppThemeData.grey4,
         ),
       ),
     );
   }
 
   Widget _buildBottomStatsBar(bool isDark) {
-    final isCompact = MahekResponsive.screenWidth(Get.context!) < 1100;
+    final screenWidth = MahekResponsive.screenWidth(Get.context!);
+    final isMobile = screenWidth < 650;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: isCompact ? 14 : 24, vertical: isCompact ? 12 : 16),
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+        color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
         border: Border(
           top: BorderSide(
-            color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
+            color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3,
             width: 0.5,
           ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Top accent line
+          Container(
+            height: 3,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppThemeData.primary50.withValues(alpha: 0.6),
+                  AppThemeData.primary50.withValues(alpha: 0.2),
+                  AppThemeData.neonTeal.withValues(alpha: 0.2),
+                  AppThemeData.neonTeal.withValues(alpha: 0.6),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 14 : 24,
+              vertical: isMobile ? 12 : 14,
+            ),
+            child: Obx(() {
+              final totalChips = controller.categoryItemCount.length;
+              final visibleChips = math.min(totalChips, isMobile ? 2 : 4);
+              return Row(
+                children: [
+                  // Items chip
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppThemeData.primary50.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.inventory_2_outlined, color: AppThemeData.primary50, size: 18),
+                        spaceW(width: 8),
+                        TextCustom(
+                          title: '${controller.totalItems}',
+                          fontSize: 20,
+                          fontFamily: FontFamily.bold,
+                          color: AppThemeData.primary50,
+                        ),
+                        spaceW(width: 4),
+                        TextCustom(
+                          title: 'Items',
+                          fontSize: 12,
+                          fontFamily: FontFamily.medium,
+                          color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
+                        ),
+                      ],
+                    ),
+                  ),
+                  spaceW(width: 10),
+                  // Total price chip
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppThemeData.success400.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.currency_rupee_rounded, color: AppThemeData.success400, size: 18),
+                        spaceW(width: 6),
+                        TextCustom(
+                          title: controller.totalPrice.toStringAsFixed(2),
+                          fontSize: 20,
+                          fontFamily: FontFamily.bold,
+                          color: AppThemeData.success400,
+                        ),
+                      ],
+                    ),
+                  ),
+                  spaceW(width: 10),
+                  // Category chips
+                  if (!isMobile) ...[
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ...controller.categoryItemCount.entries.take(visibleChips).map((entry) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      TextCustom(
+                                        title: entry.key,
+                                        fontSize: 11,
+                                        fontFamily: FontFamily.medium,
+                                        color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+                                      ),
+                                      spaceW(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: AppThemeData.primary50.withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: TextCustom(
+                                          title: '${entry.value}',
+                                          fontSize: 10,
+                                          fontFamily: FontFamily.bold,
+                                          color: AppThemeData.primary50,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }),
+                            if (totalChips > visibleChips)
+                              TextCustom(
+                                title: '+${totalChips - visibleChips} more',
+                                fontSize: 11,
+                                fontFamily: FontFamily.medium,
+                                color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            }),
           ),
         ],
       ),
-      child: Obx(() {
-        final totalChips = controller.categoryItemCount.length;
-        final visibleChips = math.min(totalChips, 3);
-        return Wrap(
-          spacing: 10,
-          runSpacing: 8,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppThemeData.primary50.withValues(alpha: 0.12),
-                    AppThemeData.primary4.withValues(alpha: 0.06),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.inventory_2_outlined, color: AppThemeData.primary50, size: 18),
-                  spaceW(width: 8),
-                  TextCustom(
-                    title: '${controller.totalItems}',
-                    fontSize: 16,
-                    fontFamily: FontFamily.bold,
-                    color: AppThemeData.primary50,
-                  ),
-                  spaceW(width: 4),
-                  TextCustom(
-                    title: 'Items',
-                    fontSize: 12,
-                    fontFamily: FontFamily.medium,
-                    color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppThemeData.success400.withValues(alpha: 0.12),
-                    AppThemeData.success400.withValues(alpha: 0.06),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.attach_money_rounded, color: AppThemeData.success400, size: 18),
-                  spaceW(width: 8),
-                  TextCustom(
-                    title: '₹${controller.totalPrice.toStringAsFixed(2)}',
-                    fontSize: 16,
-                    fontFamily: FontFamily.bold,
-                    color: AppThemeData.success400,
-                  ),
-                  spaceW(width: 4),
-                  TextCustom(
-                    title: 'Total',
-                    fontSize: 12,
-                    fontFamily: FontFamily.medium,
-                    color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
-                  ),
-                ],
-              ),
-            ),
-            ...controller.categoryItemCount.entries.take(visibleChips).map((entry) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextCustom(
-                      title: entry.key,
-                      fontSize: 11,
-                      fontFamily: FontFamily.medium,
-                      color: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-                    ),
-                    spaceW(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppThemeData.primary50.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: TextCustom(
-                        title: '${entry.value}',
-                        fontSize: 10,
-                        fontFamily: FontFamily.bold,
-                        color: AppThemeData.primary50,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-            if (totalChips > 3)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark ? AppThemeData.grey9 : AppThemeData.grey1,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: TextCustom(
-                  title: '+${totalChips - 3} more',
-                  fontSize: 11,
-                  fontFamily: FontFamily.medium,
-                  color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                ),
-              ),
-          ],
-        );
-      }),
     );
   }
 
@@ -1417,7 +1334,7 @@ class MyDevicesView extends GetView<MyDevicesController> {
                 title: 'Add New Device',
                 fontSize: 15,
                 fontFamily: FontFamily.semiBold,
-                color: Colors.white,
+                color: AppThemeData.primaryWhite,
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppThemeData.primary50,
@@ -1448,4 +1365,67 @@ class _DeviceStatData {
     required this.sub,
     required this.color,
   });
+}
+
+// ── HOVERABLE CARD WRAPPER ──
+
+class _HoverableCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _HoverableCard({required this.child, this.onTap});
+
+  @override
+  State<_HoverableCard> createState() => _HoverableCardState();
+}
+
+class _HoverableCardState extends State<_HoverableCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _isHovered ? 1.04 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              boxShadow: _isHovered
+                  ? [
+                      BoxShadow(
+                        color: AppThemeData.primary50.withValues(alpha: 0.2),
+                        blurRadius: 24,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: AppThemeData.primary50.withValues(alpha: 0.10),
+                        blurRadius: 48,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: AppThemeData.primaryBlack.withValues(alpha: isDark ? 0.25 : 0.06),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
+  }
 }
