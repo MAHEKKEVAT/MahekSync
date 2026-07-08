@@ -78,7 +78,7 @@ class ReminderView extends GetView<ReminderController> {
           ),
           child: Icon(
             Icons.alarm_rounded,
-            color: Colors.white,
+            color: AppThemeData.primaryWhite,
             size: isMobile ? 24 : 28,
           ),
         ),
@@ -123,14 +123,14 @@ class ReminderView extends GetView<ReminderController> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.add_rounded, color: Colors.white, size: 18),
+                Icon(Icons.add_rounded, color: AppThemeData.primaryWhite, size: 18),
                 if (!isMobile) ...[
                   spaceW(width: 6),
                   TextCustom(
                     title: 'Add Reminder',
                     fontSize: 13,
                     fontFamily: FontFamily.semiBold,
-                    color: Colors.white,
+                    color: AppThemeData.primaryWhite,
                   ),
                 ],
               ],
@@ -146,30 +146,10 @@ class ReminderView extends GetView<ReminderController> {
 
     return Obx(() {
       final stats = [
-        _StatData(
-          icon: Icons.alarm_on_rounded,
-          label: 'Active',
-          value: '${controller.activeCount}',
-          color: AppThemeData.success400,
-        ),
-        _StatData(
-          icon: Icons.priority_high_rounded,
-          label: 'High Priority',
-          value: '${controller.highCount}',
-          color: AppThemeData.danger300,
-        ),
-        _StatData(
-          icon: Icons.event_busy_rounded,
-          label: 'Expired',
-          value: '${controller.expiredCount}',
-          color: AppThemeData.grey5,
-        ),
-        _StatData(
-          icon: Icons.list_rounded,
-          label: 'Total',
-          value: '${controller.reminders.length}',
-          color: AppThemeData.neonTeal,
-        ),
+        (icon: Icons.alarm_on_rounded, label: 'Active', value: '${controller.activeCount}', color: AppThemeData.success400),
+        (icon: Icons.priority_high_rounded, label: 'High Priority', value: '${controller.highCount}', color: AppThemeData.danger300),
+        (icon: Icons.event_busy_rounded, label: 'Expired', value: '${controller.expiredCount}', color: AppThemeData.grey5),
+        (icon: Icons.list_rounded, label: 'Total', value: '${controller.reminders.length}', color: AppThemeData.neonTeal),
       ];
 
       if (isMobile) {
@@ -207,7 +187,7 @@ class ReminderView extends GetView<ReminderController> {
     });
   }
 
-  Widget _buildStatCard(_StatData stat, bool isDark) {
+  Widget _buildStatCard(({IconData icon, String label, String value, Color color}) stat, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -257,7 +237,6 @@ class ReminderView extends GetView<ReminderController> {
     final isMobile = context.isMobile;
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         TextCustom(
           title: 'All Reminders',
@@ -265,42 +244,97 @@ class ReminderView extends GetView<ReminderController> {
           fontFamily: FontFamily.bold,
           color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
         ),
-        Row(
-          children: [
-            _buildImportanceFilter(isDark, context: context),
-            spaceW(width: 10),
-            _buildSortDropdown(isDark, context: context),
-            spaceW(width: 10),
-            Container(
-              decoration: BoxDecoration(
-                color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isDark
-                      ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
-                      : AppThemeData.grey3,
-                ),
-              ),
-              child: Row(
-                children: [
-                  _buildViewToggle(
-                    icon: Icons.grid_view_rounded,
-                    isSelected: controller.isGridView.value,
-                    onTap: () => controller.isGridView.value = true,
-                    isDark: isDark,
-                  ),
-                  _buildViewToggle(
-                    icon: Icons.view_list_rounded,
-                    isSelected: !controller.isGridView.value,
-                    onTap: () => controller.isGridView.value = false,
-                    isDark: isDark,
-                  ),
-                ],
-              ),
+        const Spacer(),
+        if (!isMobile) ...[
+          _buildSearchBar(isDark),
+          spaceW(width: 12),
+        ],
+        _buildImportanceFilter(isDark, context: context),
+        spaceW(width: 10),
+        _buildSortDropdown(isDark, context: context),
+        spaceW(width: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isDark
+                  ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+                  : AppThemeData.grey3,
             ),
-          ],
+          ),
+          child: Row(
+            children: [
+              _buildViewToggle(
+                icon: Icons.grid_view_rounded,
+                isSelected: controller.isGridView.value,
+                onTap: () => controller.isGridView.value = true,
+                isDark: isDark,
+              ),
+              _buildViewToggle(
+                icon: Icons.view_list_rounded,
+                isSelected: !controller.isGridView.value,
+                onTap: () => controller.isGridView.value = false,
+                isDark: isDark,
+              ),
+            ],
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSearchBar(bool isDark) {
+    return Container(
+      height: 36,
+      constraints: const BoxConstraints(maxWidth: 260),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isDark
+              ? AppThemeData.surfaceBorder.withValues(alpha: 0.3)
+              : AppThemeData.grey3,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.search_rounded, size: 16, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+          spaceW(width: 8),
+          Expanded(
+            child: Obx(() => TextField(
+              controller: controller.searchController,
+              onChanged: controller.updateSearchQuery,
+              style: TextStyle(
+                fontFamily: FontFamily.medium,
+                fontSize: 12,
+                color: isDark ? AppThemeData.grey3 : AppThemeData.grey8,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Search reminders...',
+                hintStyle: TextStyle(
+                  fontFamily: FontFamily.medium,
+                  fontSize: 12,
+                  color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                isDense: true,
+                suffixIcon: controller.searchQuery.value.isNotEmpty
+                    ? GestureDetector(
+                        onTap: () {
+                          controller.searchController.clear();
+                          controller.updateSearchQuery('');
+                        },
+                        child: Icon(Icons.close_rounded, size: 14, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                      )
+                    : null,
+              ),
+            )),
+          ),
+        ],
+      ),
     );
   }
 
@@ -370,7 +404,7 @@ class ReminderView extends GetView<ReminderController> {
         offset.dy + 400,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: isDark ? AppThemeData.surfaceElevated : Colors.white,
+      color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
       elevation: 8,
       items: ['ALL', 'HIGH', 'MEDIUM', 'LOW'].map((option) {
         final isSelected = controller.selectedImportance.value == option;
@@ -464,7 +498,7 @@ class ReminderView extends GetView<ReminderController> {
         offset.dy + 420,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: isDark ? AppThemeData.surfaceElevated : Colors.white,
+      color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
       elevation: 8,
       items: controller.sortOptions.map((option) {
         final isSelected = controller.selectedSortOption.value == option;
@@ -516,7 +550,7 @@ class ReminderView extends GetView<ReminderController> {
           icon,
           size: 16,
           color: isSelected
-              ? Colors.white
+              ? AppThemeData.primaryWhite
               : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
         ),
       ),
@@ -540,7 +574,7 @@ class ReminderView extends GetView<ReminderController> {
         maxCrossAxisExtent: 380,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 1.6,
+        childAspectRatio: 1.5,
       ),
       itemCount: controller.filteredReminders.length,
       itemBuilder: (context, index) =>
@@ -559,62 +593,132 @@ class ReminderView extends GetView<ReminderController> {
     );
   }
 
-  Widget _buildGridCard(ReminderModel reminder, bool isDark) {
-    final color = reminder.importanceColor;
+  BoxDecoration _cardDecoration(bool isDark) {
+    return BoxDecoration(
+      color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: isDark
+            ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
+            : AppThemeData.grey3.withValues(alpha: 0.5),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: AppThemeData.primaryBlack.withValues(alpha: isDark ? 0.15 : 0.04),
+          blurRadius: 8,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReminderIcon(ReminderModel reminder, Color color, double size, double radius) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: reminder.iconUrl != null && reminder.iconUrl!.isNotEmpty
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(radius),
+              child: NetworkImageWidget(
+                imageUrl: reminder.iconUrl!,
+                fit: BoxFit.cover,
+              ),
+            )
+          : Icon(reminder.importanceIcon, color: color, size: size * 0.5),
+    );
+  }
+
+  Widget _buildStatusBadge(ReminderModel reminder) {
     final daysLeft = reminder.daysRemaining;
     final isExpired = reminder.isExpired;
+
+    if (!isExpired && daysLeft > 0) {
+      final isUrgent = reminder.isExpiringSoon;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: (isUrgent ? AppThemeData.danger300 : AppThemeData.success400).withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          '${daysLeft}d left',
+          style: TextStyle(
+            fontFamily: FontFamily.bold,
+            fontSize: 10,
+            color: isUrgent ? AppThemeData.danger300 : AppThemeData.success400,
+          ),
+        ),
+      );
+    }
+    if (isExpired) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: AppThemeData.danger300.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          'Expired',
+          style: TextStyle(
+            fontFamily: FontFamily.bold,
+            fontSize: 10,
+            color: AppThemeData.danger300,
+          ),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildActiveToggle(ReminderModel reminder, bool isDark, {bool compact = false}) {
     final isActive = reminder.isActive ?? true;
+    return GestureDetector(
+      onTap: () => controller.toggleReminder(reminder),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 8, vertical: compact ? 3 : 4),
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppThemeData.success400.withValues(alpha: 0.12)
+              : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          isActive ? (compact ? 'ON' : 'Active') : 'Off',
+          style: TextStyle(
+            fontFamily: FontFamily.bold,
+            fontSize: compact ? 9 : 10,
+            color: isActive
+                ? AppThemeData.success400
+                : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridCard(ReminderModel reminder, bool isDark) {
+    final color = reminder.importanceColor;
+    final isExpired = reminder.isExpired;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () => controller.goToEdit(reminder),
         child: Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark
-                  ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
-                  : AppThemeData.grey3.withValues(alpha: 0.5),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
+          decoration: _cardDecoration(isDark),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top section: icon + name + days badge
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                 child: Row(
                   children: [
-                    // Icon with importance glow
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: color.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      child: reminder.iconUrl != null && reminder.iconUrl!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: NetworkImageWidget(
-                                imageUrl: reminder.iconUrl!,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Icon(reminder.importanceIcon, color: color, size: 20),
-                    ),
+                    _buildReminderIcon(reminder, color, 40, 12),
                     spaceW(width: 10),
                     Expanded(
                       child: Column(
@@ -637,50 +741,11 @@ class ReminderView extends GetView<ReminderController> {
                         ],
                       ),
                     ),
-                    // Days remaining badge
-                    if (!isExpired && daysLeft > 0)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: reminder.isExpiringSoon
-                              ? AppThemeData.danger300.withValues(alpha: 0.12)
-                              : AppThemeData.success400.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${daysLeft}d left',
-                          style: TextStyle(
-                            fontFamily: FontFamily.bold,
-                            fontSize: 10,
-                            color: reminder.isExpiringSoon
-                                ? AppThemeData.danger300
-                                : AppThemeData.success400,
-                          ),
-                        ),
-                      )
-                    else if (isExpired)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppThemeData.danger300.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Expired',
-                          style: TextStyle(
-                            fontFamily: FontFamily.bold,
-                            fontSize: 10,
-                            color: AppThemeData.danger300,
-                          ),
-                        ),
-                      ),
+                    _buildStatusBadge(reminder),
                   ],
                 ),
               ),
-
               spaceH(height: 8),
-
-              // Description
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: TextCustom(
@@ -691,10 +756,7 @@ class ReminderView extends GetView<ReminderController> {
                   maxLine: 2,
                 ),
               ),
-
               const Spacer(),
-
-              // Bottom: due date + toggle + actions
               Container(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
                 child: Row(
@@ -719,31 +781,8 @@ class ReminderView extends GetView<ReminderController> {
                             : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
                       ),
                     ),
-                    // Active toggle
-                    GestureDetector(
-                      onTap: () => controller.toggleReminder(reminder),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isActive
-                              ? AppThemeData.success400.withValues(alpha: 0.12)
-                              : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          isActive ? 'Active' : 'Off',
-                          style: TextStyle(
-                            fontFamily: FontFamily.bold,
-                            fontSize: 10,
-                            color: isActive
-                                ? AppThemeData.success400
-                                : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                          ),
-                        ),
-                      ),
-                    ),
+                    _buildActiveToggle(reminder, isDark),
                     spaceW(width: 6),
-                    // More actions
                     GestureDetector(
                       onTap: () => _showReminderActions(reminder, isDark),
                       child: Container(
@@ -773,16 +812,10 @@ class ReminderView extends GetView<ReminderController> {
     final color = reminder.importanceColor;
     final daysLeft = reminder.daysRemaining;
     final isExpired = reminder.isExpired;
-    final isActive = reminder.isActive ?? true;
 
-    // Calculate progress for remaining time
     double progress = 0;
     if (!isExpired && daysLeft > 0) {
       progress = (daysLeft / 30).clamp(0.0, 1.0);
-    } else if (isExpired) {
-      progress = 0;
-    } else {
-      progress = 1;
     }
 
     return MouseRegion(
@@ -791,46 +824,11 @@ class ReminderView extends GetView<ReminderController> {
         onTap: () => controller.goToEdit(reminder),
         child: Container(
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark
-                  ? AppThemeData.surfaceBorder.withValues(alpha: 0.15)
-                  : AppThemeData.grey3.withValues(alpha: 0.5),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
+          decoration: _cardDecoration(isDark),
           child: Row(
             children: [
-              // Icon
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: color.withValues(alpha: 0.2)),
-                ),
-                child: reminder.iconUrl != null && reminder.iconUrl!.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: NetworkImageWidget(
-                          imageUrl: reminder.iconUrl!,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : Icon(reminder.importanceIcon, color: color, size: 22),
-              ),
+              _buildReminderIcon(reminder, color, 48, 14),
               spaceW(width: 14),
-
-              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -845,7 +843,6 @@ class ReminderView extends GetView<ReminderController> {
                             color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                           ),
                         ),
-                        // Importance chip
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
@@ -898,9 +895,10 @@ class ReminderView extends GetView<ReminderController> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: reminder.isExpiringSoon
-                                  ? AppThemeData.danger300.withValues(alpha: 0.12)
-                                  : AppThemeData.success400.withValues(alpha: 0.12),
+                              color: (reminder.isExpiringSoon
+                                      ? AppThemeData.danger300
+                                      : AppThemeData.success400)
+                                  .withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -934,7 +932,6 @@ class ReminderView extends GetView<ReminderController> {
                         ],
                       ],
                     ),
-                    // Progress bar for time remaining
                     if (!isExpired && daysLeft > 0) ...[
                       spaceH(height: 6),
                       ClipRRect(
@@ -952,41 +949,25 @@ class ReminderView extends GetView<ReminderController> {
                   ],
                 ),
               ),
-
               spaceW(width: 12),
-
-              // Actions column
               Column(
                 children: [
-                  // Active toggle
+                  _buildActiveToggle(reminder, isDark, compact: true),
+                  spaceH(height: 8),
                   GestureDetector(
-                    onTap: () => controller.toggleReminder(reminder),
+                    onTap: () => _showReminderActions(reminder, isDark),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: isActive
-                            ? AppThemeData.success400.withValues(alpha: 0.12)
-                            : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
+                        color: (isDark ? AppThemeData.grey5 : AppThemeData.grey6).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(
-                        isActive ? 'ON' : 'OFF',
-                        style: TextStyle(
-                          fontFamily: FontFamily.bold,
-                          fontSize: 9,
-                          color: isActive
-                              ? AppThemeData.success400
-                              : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                        ),
+                      child: Icon(
+                        Icons.more_vert_rounded,
+                        size: 16,
+                        color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
                       ),
                     ),
-                  ),
-                  spaceH(height: 8),
-                  _buildActionBtn(
-                    Icons.more_vert_rounded,
-                    isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                    () => _showReminderActions(reminder, isDark),
-                    isDark,
                   ),
                 ],
               ),
@@ -1003,7 +984,7 @@ class ReminderView extends GetView<ReminderController> {
         margin: const EdgeInsets.all(16),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isDark ? AppThemeData.surfaceElevated : Colors.white,
+          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -1011,13 +992,11 @@ class ReminderView extends GetView<ReminderController> {
           children: [
             ListTile(
               leading: Icon(Icons.edit_outlined, color: AppThemeData.primary50, size: 20),
-              title: Text(
-                'Edit Reminder',
-                style: TextStyle(
-                  fontFamily: FontFamily.medium,
-                  fontSize: 14,
-                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                ),
+              title: TextCustom(
+                title: 'Edit Reminder',
+                fontSize: 14,
+                fontFamily: FontFamily.medium,
+                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
               ),
               onTap: () {
                 Get.back();
@@ -1030,13 +1009,11 @@ class ReminderView extends GetView<ReminderController> {
                 color: (reminder.isActive ?? true) ? AppThemeData.pending400 : AppThemeData.success400,
                 size: 20,
               ),
-              title: Text(
-                (reminder.isActive ?? true) ? 'Pause Reminder' : 'Resume Reminder',
-                style: TextStyle(
-                  fontFamily: FontFamily.medium,
-                  fontSize: 14,
-                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                ),
+              title: TextCustom(
+                title: (reminder.isActive ?? true) ? 'Pause Reminder' : 'Resume Reminder',
+                fontSize: 14,
+                fontFamily: FontFamily.medium,
+                color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
               ),
               onTap: () {
                 Get.back();
@@ -1044,14 +1021,12 @@ class ReminderView extends GetView<ReminderController> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppThemeData.danger300, size: 20),
-              title: Text(
-                'Delete Reminder',
-                style: TextStyle(
-                  fontFamily: FontFamily.medium,
-                  fontSize: 14,
-                  color: AppThemeData.danger300,
-                ),
+              leading: Icon(Icons.delete_outline, color: AppThemeData.danger300, size: 20),
+              title: TextCustom(
+                title: 'Delete Reminder',
+                fontSize: 14,
+                fontFamily: FontFamily.medium,
+                color: AppThemeData.danger300,
               ),
               onTap: () {
                 Get.back();
@@ -1060,25 +1035,6 @@ class ReminderView extends GetView<ReminderController> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildActionBtn(
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-    bool isDark,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(7),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: color, size: 16),
       ),
     );
   }
@@ -1142,13 +1098,13 @@ class ReminderView extends GetView<ReminderController> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.add_rounded, color: Colors.white, size: 18),
+                    Icon(Icons.add_rounded, color: AppThemeData.primaryWhite, size: 18),
                     spaceW(width: 6),
                     TextCustom(
                       title: 'Add Reminder',
                       fontSize: 14,
                       fontFamily: FontFamily.semiBold,
-                      color: Colors.white,
+                      color: AppThemeData.primaryWhite,
                     ),
                   ],
                 ),
@@ -1159,18 +1115,4 @@ class ReminderView extends GetView<ReminderController> {
       ),
     );
   }
-}
-
-class _StatData {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  const _StatData({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
 }

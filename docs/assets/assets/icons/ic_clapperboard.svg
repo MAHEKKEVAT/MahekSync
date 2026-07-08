@@ -1,52 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
-  <!-- Shadow under board -->
-  <rect x="36" y="174" width="128" height="6" rx="3" fill="currentColor" opacity="0.12"/>
-  <!-- Main board body -->
-  <rect x="30" y="85" width="140" height="85" rx="6" fill="currentColor" opacity="0.55"/>
-  <!-- Board inner edge highlight -->
-  <rect x="30" y="85" width="140" height="85" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.12"/>
-  <!-- Top clapper arm -->
-  <path d="M28 60 L172 60 L170 88 L30 88 Z" fill="currentColor" opacity="0.7"/>
-  <!-- Clapper arm edge line -->
-  <line x1="30" y1="88" x2="170" y2="88" stroke="currentColor" stroke-width="1.5" opacity="0.18"/>
-  <!-- Clapper hinge bolt left -->
-  <circle cx="44" cy="74" r="8" fill="currentColor" opacity="0.4"/>
-  <circle cx="44" cy="74" r="4" fill="currentColor" opacity="0.25"/>
-  <circle cx="44" cy="74" r="1.5" fill="currentColor" opacity="0.15"/>
-  <!-- Clapper hinge bolt right -->
-  <circle cx="156" cy="74" r="8" fill="currentColor" opacity="0.4"/>
-  <circle cx="156" cy="74" r="4" fill="currentColor" opacity="0.25"/>
-  <circle cx="156" cy="74" r="1.5" fill="currentColor" opacity="0.15"/>
+  <!-- Floor shadow -->
+  <ellipse cx="100" cy="180" rx="62" ry="6" fill="currentColor" opacity="0.08"/>
+
+  <!-- Background ambient glow -->
+  <ellipse cx="100" cy="110" rx="72" ry="50" fill="currentColor" opacity="0.06"/>
+
+  <!-- Board body — layer 1: base acrylic -->
+  <rect x="28" y="80" width="144" height="92" rx="22" fill="currentColor" opacity="0.30"/>
+  <!-- Board body — layer 2: inner glass panel -->
+  <rect x="34" y="86" width="132" height="80" rx="16" fill="currentColor" opacity="0.12"/>
+  <!-- Board body — layer 3: frosted highlight strip -->
+  <rect x="34" y="86" width="132" height="10" rx="5" fill="currentColor" opacity="0.08"/>
+  <!-- Board body — layer 4: gradient band -->
+  <rect x="40" y="100" width="120" height="40" rx="8" fill="currentColor" opacity="0.06"/>
+
+  <!-- Engraved horizontal grooves -->
+  <rect x="44" y="108" width="112" height="2" rx="1" fill="currentColor" opacity="0.08"/>
+  <rect x="44" y="128" width="112" height="2" rx="1" fill="currentColor" opacity="0.08"/>
+  <rect x="44" y="148" width="112" height="2" rx="1" fill="currentColor" opacity="0.08"/>
+
+  <!-- Clapper arm — layer 1: base, 5° perspective -->
+  <path d="M24 56 L176 50 L174 84 L26 90 Z" fill="currentColor" opacity="0.45"/>
+  <!-- Clapper arm — layer 2: glass sheen -->
+  <path d="M28 58 L172 52 L172 62 L28 68 Z" fill="currentColor" opacity="0.10"/>
+  <!-- Clapper arm — layer 3: edge bloom -->
+  <path d="M26 56 L174 50 L174 54 L26 60 Z" fill="currentColor" opacity="0.06"/>
+
   <!-- Diagonal stripes on clapper arm -->
-  <path d="M58 60 L76 88" stroke="currentColor" stroke-width="9" opacity="0.28" stroke-linecap="round"/>
-  <path d="M90 60 L108 88" stroke="currentColor" stroke-width="9" opacity="0.28" stroke-linecap="round"/>
-  <path d="M122 60 L140 88" stroke="currentColor" stroke-width="9" opacity="0.28" stroke-linecap="round"/>
-  <!-- Film strip perforations (left side) -->
-  <rect x="22" y="92" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="22" y="104" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="22" y="116" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="22" y="128" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="22" y="140" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="22" y="152" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <!-- Film strip perforations (right side) -->
-  <rect x="172" y="92" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="172" y="104" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="172" y="116" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="172" y="128" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="172" y="140" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <rect x="172" y="152" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.15"/>
-  <!-- Board surface lines -->
-  <line x1="44" y1="106" x2="156" y2="106" stroke="currentColor" stroke-width="2" opacity="0.18"/>
-  <line x1="44" y1="126" x2="156" y2="126" stroke="currentColor" stroke-width="2" opacity="0.18"/>
-  <line x1="44" y1="146" x2="156" y2="146" stroke="currentColor" stroke-width="2" opacity="0.18"/>
-  <!-- Text placeholder lines on board -->
-  <rect x="48" y="94" width="36" height="5" rx="2.5" fill="currentColor" opacity="0.18"/>
-  <rect x="92" y="94" width="54" height="5" rx="2.5" fill="currentColor" opacity="0.12"/>
-  <!-- Film reel circle on board -->
-  <circle cx="62" cy="136" r="10" stroke="currentColor" stroke-width="2" opacity="0.18" fill="none"/>
-  <circle cx="62" cy="136" r="4" fill="currentColor" opacity="0.14"/>
-  <!-- Small film frame rectangles -->
-  <rect x="84" y="130" width="18" height="14" rx="2" fill="currentColor" opacity="0.08"/>
-  <rect x="108" y="130" width="18" height="14" rx="2" fill="currentColor" opacity="0.08"/>
-  <rect x="132" y="130" width="18" height="14" rx="2" fill="currentColor" opacity="0.08"/>
+  <path d="M54 56 L74 86" stroke="currentColor" stroke-width="10" opacity="0.20" stroke-linecap="round"/>
+  <path d="M86 54 L106 84" stroke="currentColor" stroke-width="10" opacity="0.20" stroke-linecap="round"/>
+  <path d="M118 52 L138 82" stroke="currentColor" stroke-width="10" opacity="0.20" stroke-linecap="round"/>
+
+  <!-- Hinge bolt left — 3-layer metallic -->
+  <circle cx="40" cy="70" r="10" fill="currentColor" opacity="0.35"/>
+  <circle cx="40" cy="70" r="5.5" fill="currentColor" opacity="0.20"/>
+  <circle cx="40" cy="70" r="2.5" fill="currentColor" opacity="0.12"/>
+  <!-- Hinge bolt right — 3-layer metallic -->
+  <circle cx="160" cy="68" r="10" fill="currentColor" opacity="0.35"/>
+  <circle cx="160" cy="68" r="5.5" fill="currentColor" opacity="0.20"/>
+  <circle cx="160" cy="68" r="2.5" fill="currentColor" opacity="0.12"/>
+
+  <!-- Film perforations left — 4 soft rounded rects -->
+  <rect x="18" y="94" width="6" height="8" rx="3" fill="currentColor" opacity="0.10"/>
+  <rect x="18" y="110" width="6" height="8" rx="3" fill="currentColor" opacity="0.10"/>
+  <rect x="18" y="126" width="6" height="8" rx="3" fill="currentColor" opacity="0.10"/>
+  <rect x="18" y="142" width="6" height="8" rx="3" fill="currentColor" opacity="0.10"/>
+  <!-- Film perforations right — 4 soft rounded rects -->
+  <rect x="176" y="94" width="6" height="8" rx="3" fill="currentColor" opacity="0.10"/>
+  <rect x="176" y="110" width="6" height="8" rx="3" fill="currentColor" opacity="0.10"/>
+  <rect x="176" y="126" width="6" height="8" rx="3" fill="currentColor" opacity="0.10"/>
+  <rect x="176" y="142" width="6" height="8" rx="3" fill="currentColor" opacity="0.10"/>
+
+  <!-- Text placeholder lines — engraved -->
+  <rect x="48" y="96" width="42" height="4" rx="2" fill="currentColor" opacity="0.08"/>
+  <rect x="96" y="96" width="56" height="4" rx="2" fill="currentColor" opacity="0.06"/>
 </svg>

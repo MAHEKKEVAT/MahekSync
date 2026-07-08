@@ -349,41 +349,26 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
                               ),
                               child: Row(
                                 children: [
-                                  Container(
+                                   Container(
                                     width: 24,
                                     alignment: Alignment.center,
-                                    child: item.svgIcon != null
-                                        ? SvgPicture.asset(
-                                            item.svgIcon!,
-                                            width: 22,
-                                            height: 22,
-                                            colorFilter: ColorFilter.mode(
-                                              isSelected
-                                                  ? (isDark
-                                                        ? AppThemeData
-                                                              .textNeonPurple
-                                                        : AppThemeData
-                                                              .primary50)
-                                                  : (isDark
-                                                        ? AppThemeData.grey4
-                                                        : AppThemeData.grey7),
-                                              BlendMode.srcIn,
-                                            ),
-                                          )
-                                        : Icon(
-                                            isSelected
-                                                ? item.selectedIcon
-                                                : item.icon,
-                                            color: isSelected
-                                                ? (isDark
-                                                      ? AppThemeData
-                                                            .textNeonPurple
-                                                      : AppThemeData.primary50)
-                                                : (isDark
-                                                      ? AppThemeData.grey4
-                                                      : AppThemeData.grey7),
-                                            size: 22,
-                                          ),
+                                    child: SvgPicture.asset(
+                                      item.svgIcon,
+                                      width: 22,
+                                      height: 22,
+                                      colorFilter: ColorFilter.mode(
+                                        isSelected
+                                            ? (isDark
+                                                  ? AppThemeData
+                                                        .textNeonPurple
+                                                  : AppThemeData
+                                                        .primary50)
+                                            : (isDark
+                                                  ? AppThemeData.grey4
+                                                  : AppThemeData.grey7),
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
                                   ),
                                   if (isExpanded) ...[
                                     spaceW(width: 14),
@@ -707,6 +692,8 @@ class _DashboardViewBodyState extends State<_DashboardViewBody>
                     if (!isDesktop)
                       _PremiumHeaderBadge(isDark: true, now: _now),
                     const Spacer(),
+                    _SleepReminderCard(now: _now),
+                    spaceW(width: 5),
                     Material(
                       color: Colors.transparent,
                       child: InkWell(
@@ -1224,6 +1211,219 @@ class _PremiumHeaderBadge extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Sleep Reminder Card ──────────────────────────────────
+class _SleepReminderCard extends StatefulWidget {
+  final DateTime now;
+
+  const _SleepReminderCard({required this.now});
+
+  @override
+  State<_SleepReminderCard> createState() => _SleepReminderCardState();
+}
+
+class _SleepReminderCardState extends State<_SleepReminderCard>
+    with TickerProviderStateMixin {
+  static const _hardWorkMessages = [
+    'Keep pushing, greatness takes time! ??',
+    'Your hard work will pay off soon! ??',
+    'Stay focused, stay grinding! ??',
+    'Every minute counts, keep going! ?',
+    'Discipline is the bridge to success! ??',
+    'Work hard, dream bigger! ??',
+    'Consistency beats talent every day! ??',
+    'You''re building something amazing! ???',
+    'No shortcuts, just hard work! ??',
+    'The grind never stops, neither do you! ?',
+  ];
+
+  static final _borderGradientColors = [
+    AppThemeData.primary50,
+    AppThemeData.neonBlue,
+    AppThemeData.neonTeal,
+    AppThemeData.neonMint,
+    AppThemeData.neonPurple,
+    AppThemeData.primary50,
+  ];
+
+  late int _randomIndex;
+  late AnimationController _borderAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _randomIndex = DateTime.now().millisecondsSinceEpoch % _hardWorkMessages.length;
+    _borderAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
+  }
+
+  @override
+  void dispose() {
+    _borderAnim.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hour = widget.now.hour;
+    final isOvertime = hour < 4;
+
+    if (isOvertime && !_borderAnim.isAnimating) {
+      _borderAnim.repeat();
+    } else if (!isOvertime && _borderAnim.isAnimating) {
+      _borderAnim.stop();
+      _borderAnim.reset();
+    }
+
+    if (hour >= 4 && hour < 22) return _buildHardWorkCard();
+    if (hour >= 22) return _buildCountdownCard();
+    return _buildOvertimeCard();
+  }
+
+  Widget _buildHardWorkCard() {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 600),
+      child: Container(
+        key: ValueKey(_randomIndex),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppThemeData.primaryBlack,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppThemeData.primaryWhite.withValues(alpha: 0.15),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.workspace_premium_rounded, size: 16, color: AppThemeData.primaryWhite),
+            spaceW(width: 8),
+            TextCustom(
+              title: _hardWorkMessages[_randomIndex],
+              fontSize: 14,
+              fontFamily: FontFamily.semiBold,
+              color: AppThemeData.primaryWhite,
+              maxLine: 1,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCountdownCard() {
+    final now = widget.now;
+    final midnight = DateTime(now.year, now.month, now.day + 1);
+    final remaining = midnight.difference(now);
+    final h = remaining.inHours;
+    final m = remaining.inMinutes.remainder(60);
+    final s = remaining.inSeconds.remainder(60);
+    final timeStr = '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppThemeData.primaryBlack,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppThemeData.primaryWhite.withValues(alpha: 0.15),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.nightlight_round, size: 16, color: AppThemeData.primaryWhite),
+          spaceW(width: 8),
+          TextCustom(
+            title: 'Sleep time coming in',
+            fontSize: 14,
+            fontFamily: FontFamily.semiBold,
+            color: AppThemeData.primaryWhite,
+            maxLine: 1,
+          ),
+          spaceW(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppThemeData.primaryWhite.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: TextCustom(
+              title: timeStr,
+              fontSize: 15,
+              fontFamily: FontFamily.bold,
+              color: AppThemeData.primaryWhite,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOvertimeCard() {
+    final now = widget.now;
+    final midnight = DateTime(now.year, now.month, now.day);
+    final overtime = now.difference(midnight);
+    final h = overtime.inHours;
+    final m = overtime.inMinutes.remainder(60);
+    final s = overtime.inSeconds.remainder(60);
+    final timeStr = '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+
+    return AnimatedBuilder(
+      animation: _borderAnim,
+      builder: (context, _) {
+        return Container(
+          padding: const EdgeInsets.all(1.5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: SweepGradient(
+              center: FractionalOffset.center,
+              transform: GradientRotation(_borderAnim.value * 2 * math.pi),
+              colors: _borderGradientColors,
+            ),
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppThemeData.primaryBlack,
+              borderRadius: BorderRadius.circular(10.5),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.alarm_rounded, size: 16, color: AppThemeData.primaryWhite),
+                spaceW(width: 8),
+                TextCustom(
+                  title: 'You''re still awake!',
+                  fontSize: 14,
+                  fontFamily: FontFamily.semiBold,
+                  color: AppThemeData.primaryWhite,
+                  maxLine: 1,
+                ),
+                spaceW(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppThemeData.primaryWhite.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: TextCustom(
+                    title: '$timeStr overtime',
+                    fontSize: 15,
+                    fontFamily: FontFamily.bold,
+                    color: AppThemeData.primaryWhite,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

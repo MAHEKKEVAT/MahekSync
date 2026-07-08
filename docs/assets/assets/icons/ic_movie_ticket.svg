@@ -1,43 +1,60 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
-  <!-- Ticket body -->
-  <rect x="16" y="62" width="168" height="76" rx="10" fill="currentColor" opacity="0.5"/>
-  <!-- Top border accent stripe -->
-  <rect x="16" y="58" width="168" height="10" rx="5" fill="currentColor" opacity="0.35"/>
-  <!-- Bottom border accent stripe -->
-  <rect x="16" y="132" width="168" height="10" rx="5" fill="currentColor" opacity="0.35"/>
-  <!-- Scalloped tear line notches (top) -->
-  <circle cx="128" cy="62" r="9" fill="currentColor" opacity="0.12"/>
-  <!-- Scalloped tear line notches (bottom) -->
-  <circle cx="128" cy="138" r="9" fill="currentColor" opacity="0.12"/>
-  <!-- Tear line dashed -->
-  <line x1="128" y1="74" x2="128" y2="126" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.22"/>
-  <!-- Left stub: inner rectangle frame -->
-  <rect x="26" y="74" width="92" height="52" rx="6" fill="currentColor" opacity="0.14"/>
-  <!-- Left stub: decorative double border -->
-  <rect x="30" y="78" width="84" height="44" rx="4" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.18"/>
-  <!-- Left stub: centered diamond pattern -->
-  <polygon points="72,86 82,96 72,106 62,96" fill="currentColor" opacity="0.2"/>
-  <polygon points="72,90 78,96 72,102 66,96" fill="none" stroke="currentColor" stroke-width="1" opacity="0.15"/>
-  <!-- Left stub: small decorative circles -->
-  <circle cx="46" cy="96" r="4" fill="currentColor" opacity="0.15"/>
-  <circle cx="46" cy="96" r="2" fill="currentColor" opacity="0.1"/>
-  <circle cx="98" cy="96" r="4" fill="currentColor" opacity="0.15"/>
-  <circle cx="98" cy="96" r="2" fill="currentColor" opacity="0.1"/>
-  <!-- Right stub: concentric circles -->
-  <circle cx="154" cy="100" r="18" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.2"/>
-  <circle cx="154" cy="100" r="12" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.16"/>
-  <circle cx="154" cy="100" r="6" fill="currentColor" opacity="0.18"/>
-  <!-- Right stub: corner dots -->
-  <circle cx="140" cy="80" r="2.5" fill="currentColor" opacity="0.15"/>
-  <circle cx="168" cy="80" r="2.5" fill="currentColor" opacity="0.15"/>
-  <circle cx="140" cy="120" r="2.5" fill="currentColor" opacity="0.15"/>
-  <circle cx="168" cy="120" r="2.5" fill="currentColor" opacity="0.15"/>
-  <!-- Right stub: barcode-style lines -->
-  <rect x="140" y="126" width="2" height="10" rx="1" fill="currentColor" opacity="0.18"/>
-  <rect x="144" y="126" width="1" height="10" rx="0.5" fill="currentColor" opacity="0.12"/>
-  <rect x="147" y="126" width="3" height="10" rx="1" fill="currentColor" opacity="0.18"/>
-  <rect x="152" y="126" width="1" height="10" rx="0.5" fill="currentColor" opacity="0.12"/>
-  <rect x="155" y="126" width="2" height="10" rx="1" fill="currentColor" opacity="0.18"/>
-  <rect x="159" y="126" width="1" height="10" rx="0.5" fill="currentColor" opacity="0.12"/>
-  <rect x="162" y="126" width="2" height="10" rx="1" fill="currentColor" opacity="0.15"/>
+  <!-- Floor shadow -->
+  <ellipse cx="100" cy="156" rx="66" ry="5" fill="currentColor" opacity="0.08"/>
+
+  <!-- Background ambiance -->
+  <rect x="12" y="48" width="176" height="100" rx="20" fill="currentColor" opacity="0.05"/>
+
+  <!-- Ticket body — layer 1: base frosted acrylic -->
+  <rect x="14" y="54" width="172" height="92" rx="22" fill="currentColor" opacity="0.35"/>
+  <!-- Ticket body — layer 2: inner glass panel -->
+  <rect x="20" y="60" width="160" height="80" rx="16" fill="currentColor" opacity="0.10"/>
+  <!-- Ticket body — layer 3: frosted highlight strip -->
+  <rect x="20" y="60" width="160" height="8" rx="4" fill="currentColor" opacity="0.06"/>
+
+  <!-- Accent stripe top — holographic -->
+  <rect x="14" y="48" width="172" height="12" rx="6" fill="currentColor" opacity="0.28"/>
+  <!-- Accent stripe bottom -->
+  <rect x="14" y="140" width="172" height="12" rx="6" fill="currentColor" opacity="0.28"/>
+  <!-- Stripe glass reflection — top -->
+  <rect x="20" y="50" width="100" height="4" rx="2" fill="currentColor" opacity="0.06"/>
+
+  <!-- Tear perforation notches -->
+  <circle cx="128" cy="54" r="9" fill="currentColor" opacity="0.08"/>
+  <circle cx="128" cy="146" r="9" fill="currentColor" opacity="0.08"/>
+  <!-- Tear dashed line -->
+  <line x1="128" y1="66" x2="128" y2="134" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.15"/>
+
+  <!-- Left stub — glass panel -->
+  <rect x="22" y="66" width="96" height="68" rx="14" fill="currentColor" opacity="0.10"/>
+
+  <!-- Left stub — diamond emboss -->
+  <polygon points="70,80 80,96 70,112 60,96" fill="currentColor" opacity="0.16"/>
+
+  <!-- Left stub — decorative circles -->
+  <circle cx="40" cy="96" r="6" fill="currentColor" opacity="0.12"/>
+  <circle cx="40" cy="96" r="3" fill="currentColor" opacity="0.08"/>
+  <circle cx="100" cy="96" r="6" fill="currentColor" opacity="0.12"/>
+  <circle cx="100" cy="96" r="3" fill="currentColor" opacity="0.08"/>
+
+  <!-- Right stub — holographic concentric circles -->
+  <circle cx="154" cy="100" r="22" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.16"/>
+  <circle cx="154" cy="100" r="14" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.12"/>
+  <circle cx="154" cy="100" r="7" fill="currentColor" opacity="0.14"/>
+
+  <!-- Right stub — minimal barcode -->
+  <rect x="140" y="124" width="2" height="12" rx="1" fill="currentColor" opacity="0.12"/>
+  <rect x="144" y="124" width="1" height="12" rx="0.5" fill="currentColor" opacity="0.08"/>
+  <rect x="147" y="124" width="3" height="12" rx="1" fill="currentColor" opacity="0.12"/>
+  <rect x="152" y="124" width="1" height="12" rx="0.5" fill="currentColor" opacity="0.08"/>
+  <rect x="155" y="124" width="2" height="12" rx="1" fill="currentColor" opacity="0.12"/>
+
+  <!-- Right stub — corner dots -->
+  <circle cx="140" cy="78" r="2" fill="currentColor" opacity="0.10"/>
+  <circle cx="168" cy="78" r="2" fill="currentColor" opacity="0.10"/>
+  <circle cx="140" cy="122" r="2" fill="currentColor" opacity="0.10"/>
+  <circle cx="168" cy="122" r="2" fill="currentColor" opacity="0.10"/>
+
+  <!-- Ticket glass reflection — top-right angle -->
+  <rect x="118" y="62" width="54" height="5" rx="2.5" fill="currentColor" opacity="0.05"/>
 </svg>

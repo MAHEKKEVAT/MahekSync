@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
+import 'package:maheksync/app/widgets/text_widget.dart';
 
 class CategoryShowcaseRow extends StatelessWidget {
   final DashboardHomeController controller;
@@ -234,7 +236,7 @@ class _CategoryCardState extends State<_CategoryCard> {
               BoxShadow(
                 color: _hovered
                     ? widget.accentColor.withValues(alpha: 0.08)
-                    : Colors.black.withValues(alpha: widget.isDark ? 0.12 : 0.03),
+                    : AppThemeData.primaryBlack.withValues(alpha: widget.isDark ? 0.12 : 0.03),
                 blurRadius: _hovered ? 20 : 10,
                 offset: const Offset(0, 4),
               ),
@@ -272,15 +274,8 @@ class _CategoryCardState extends State<_CategoryCard> {
                       children: [
                         Icon(Icons.warning_amber_rounded,
                             size: 10, color: AppThemeData.neonPink),
-                        const SizedBox(width: 3),
-                        Text(
-                          'Pending',
-                          style: TextStyle(
-                            fontFamily: FontFamily.bold,
-                            fontSize: 8,
-                            color: AppThemeData.neonPink,
-                          ),
-                        ),
+                        spaceW(width: 3),
+                        TextCustom(title: 'Pending', fontSize: 8, fontFamily: FontFamily.bold, color: AppThemeData.neonPink),
                       ],
                     ),
                   ),
@@ -315,7 +310,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                                 opacity: 0.15),
                           ),
                           child:
-                              Icon(widget.icon, size: 18, color: Colors.white),
+                              Icon(widget.icon, size: 18, color: AppThemeData.primaryWhite),
                         ),
                         if (widget.onViewAll != null)
                           GestureDetector(
@@ -331,15 +326,13 @@ class _CategoryCardState extends State<_CategoryCard> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    'View All',
-                                    style: TextStyle(
-                                      fontFamily: FontFamily.medium,
-                                      fontSize: 9,
-                                      color: widget.accentColor,
-                                    ),
+                                  TextCustom(
+                                    title: 'View All',
+                                    fontSize: 9,
+                                    fontFamily: FontFamily.medium,
+                                    color: widget.accentColor,
                                   ),
-                                  const SizedBox(width: 3),
+                                  spaceW(width: 3),
                                   Icon(
                                       Icons.arrow_forward_ios_rounded,
                                       size: 8,
@@ -350,39 +343,33 @@ class _CategoryCardState extends State<_CategoryCard> {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    spaceH(height: 16),
 
                     // Count
-                    Text(
-                      widget.count.toString(),
-                      style: TextStyle(
-                        fontFamily: FontFamily.bold,
-                        fontSize: 28,
-                        color: widget.isDark
-                            ? AppThemeData.grey1
-                            : AppThemeData.grey10,
-                        letterSpacing: -1,
-                        height: 1.1,
-                      ),
+                    TextCustom(
+                      title: widget.count.toString(),
+                      fontSize: 28,
+                      fontFamily: FontFamily.bold,
+                      color: widget.isDark
+                          ? AppThemeData.grey1
+                          : AppThemeData.grey10,
                     ),
-                    const SizedBox(height: 2),
+                    spaceH(height: 2),
 
                     // Title + subtitle
                     Row(
                       children: [
                         Flexible(
-                          child: Text(
-                            widget.title,
-                            style: TextStyle(
-                              fontFamily: FontFamily.medium,
-                              fontSize: 13,
-                              color: widget.isDark
-                                  ? AppThemeData.grey3
-                                  : AppThemeData.grey8,
-                            ),
+                          child: TextCustom(
+                            title: widget.title,
+                            fontSize: 13,
+                            fontFamily: FontFamily.medium,
+                            color: widget.isDark
+                                ? AppThemeData.grey3
+                                : AppThemeData.grey8,
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        spaceW(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
@@ -390,18 +377,16 @@ class _CategoryCardState extends State<_CategoryCard> {
                             color: widget.accentColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          child: Text(
-                            widget.subtitle,
-                            style: TextStyle(
-                              fontFamily: FontFamily.medium,
-                              fontSize: 9,
-                              color: widget.accentColor,
-                            ),
+                          child: TextCustom(
+                            title: widget.subtitle,
+                            fontSize: 9,
+                            fontFamily: FontFamily.medium,
+                            color: widget.accentColor,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    spaceH(height: 14),
 
                     // Latest item row with image
                     Container(
@@ -471,35 +456,29 @@ class _CategoryCardState extends State<_CategoryCard> {
                                   color:
                                       widget.accentColor.withValues(alpha: 0.6)),
                             ),
-                          const SizedBox(width: 10),
+                          spaceW(width: 10),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  widget.latestName,
-                                  style: TextStyle(
-                                    fontFamily: FontFamily.medium,
-                                    fontSize: 11,
-                                    color: widget.isDark
-                                        ? AppThemeData.grey2
-                                        : AppThemeData.grey9,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                TextCustom(
+                                  title: widget.latestName,
+                                  fontSize: 11,
+                                  fontFamily: FontFamily.medium,
+                                  color: widget.isDark
+                                      ? AppThemeData.grey2
+                                      : AppThemeData.grey9,
+                                  maxLine: 1,
                                 ),
                                 if (widget.latestDetail.isNotEmpty)
-                                  Text(
-                                    widget.latestDetail,
-                                    style: TextStyle(
-                                      fontFamily: FontFamily.regular,
-                                      fontSize: 9,
-                                      color: widget.isDark
-                                          ? AppThemeData.grey5
-                                          : AppThemeData.grey6,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                  TextCustom(
+                                    title: widget.latestDetail,
+                                    fontSize: 9,
+                                    fontFamily: FontFamily.regular,
+                                    color: widget.isDark
+                                        ? AppThemeData.grey5
+                                        : AppThemeData.grey6,
+                                    maxLine: 1,
                                   ),
                               ],
                             ),

@@ -2,11 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/constants.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/firestore_utills/reminder_firestore_utils.dart';
 import 'package:maheksync/app/models/reminder_model.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
+import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
+import 'package:maheksync/app/widgets/text_widget.dart';
 
 class ReminderController extends GetxController {
   final reminders = <ReminderModel>[].obs;
@@ -16,6 +19,7 @@ class ReminderController extends GetxController {
   final isGridView = true.obs;
   final selectedImportance = 'ALL'.obs;
   final selectedSortOption = 'Expiry: Soonest'.obs;
+  final searchController = TextEditingController();
 
   final importances = ['ALL', 'HIGH', 'MEDIUM', 'LOW'];
   final sortOptions = ['Expiry: Soonest', 'Expiry: Latest', 'Importance: High', 'Importance: Low', 'Name: A to Z', 'Recently Added'];
@@ -30,6 +34,12 @@ class ReminderController extends GetxController {
   void onInit() {
     super.onInit();
     loadReminders();
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 
   void loadReminders() {
@@ -122,15 +132,15 @@ class ReminderController extends GetxController {
                 child: const Icon(Icons.delete_outline, color: AppThemeData.danger300, size: 28),
               ),
               spaceH(height: 16),
-              const Text('Delete Reminder', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+              TextCustom(title: 'Delete Reminder', fontSize: 18, fontFamily: FontFamily.bold, color: AppThemeData.primaryWhite),
               spaceH(height: 8),
-              Text('Delete "${reminder.name}"?', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14)),
+              TextCustom(title: 'Delete "${reminder.name}"?', fontSize: 14, color: AppThemeData.primaryWhite.withValues(alpha: 0.6)),
               spaceH(height: 24),
               Row(
                 children: [
-                  Expanded(child: OutlinedButton(onPressed: () => Get.back(result: false), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Cancel', style: TextStyle(color: Colors.white70)))),
+                  Expanded(child: RoundShapeButton(title: 'Cancel', buttonColor: AppThemeData.grey10, buttonTextColor: AppThemeData.grey4, borderColor: AppThemeData.grey7, onTap: () => Get.back(result: false), height: 48, borderRadius: 12)),
                   spaceW(width: 12),
-                  Expanded(child: ElevatedButton(onPressed: () => Get.back(result: true), style: ElevatedButton.styleFrom(backgroundColor: AppThemeData.danger300, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))),
+                  Expanded(child: RoundShapeButton(title: 'Delete', buttonColor: AppThemeData.danger300, buttonTextColor: AppThemeData.primaryWhite, onTap: () => Get.back(result: true), height: 48, borderRadius: 12)),
                 ],
               ),
             ],

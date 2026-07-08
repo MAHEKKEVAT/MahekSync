@@ -33,7 +33,6 @@ import 'package:maheksync/app/modules/aegis/controllers/aegis_controller.dart';
 import 'package:maheksync/app/modules/aegis/views/aegis_view.dart';
 import 'package:maheksync/app/modules/movies/controllers/movies_controller.dart';
 import 'package:maheksync/app/modules/movies/views/movies_view.dart';
-import 'package:solar_icons/solar_icons.dart';
 
 import '../../../utils/app_colors.dart';
 import '../../../utils/font_family.dart';
@@ -57,8 +56,6 @@ class DashboardController extends GetxController {
       items: [
         NavigationItem(
           title: "Dashboard".tr,
-          icon: Icons.dashboard_outlined,
-          selectedIcon: Icons.dashboard,
           route: Routes.DASHBOARD,
           svgIcon: 'assets/icons/ic_dashboard.svg',
         ),
@@ -70,65 +67,48 @@ class DashboardController extends GetxController {
       items: [
         NavigationItem(
           title: 'My Devices'.tr,
-          icon: Icons.devices_outlined,
-          selectedIcon: Icons.devices_rounded,
           route: Routes.MY_DEVICES,
           svgIcon: 'assets/icons/ic_devices.svg',
         ),
         NavigationItem(
           title: 'Payment Methods'.tr,
-          icon: Icons.payment_outlined,
-          selectedIcon: Icons.payment_rounded,
           route: Routes.PAYEMENT_METHOD,
           svgIcon: 'assets/icons/ic_payment.svg',
         ),
         NavigationItem(
           title: 'Categories'.tr,
-          icon: Icons.category_outlined,
-          selectedIcon: Icons.category_rounded,
           route: Routes.CATEGORIES,
           svgIcon: 'assets/icons/ic_categories.svg',
         ),
         NavigationItem(
           title: 'My Purchases'.tr,
-          icon: Icons.shopping_bag_outlined,
-          selectedIcon: Icons.shopping_bag_rounded,
           route: Routes.MY_PURCHASES,
           svgIcon: 'assets/icons/ic_purchases.svg',
         ),
         NavigationItem(
           title: 'Subscriptions'.tr,
-          icon: Icons.subscriptions_outlined,
-          selectedIcon: Icons.subscriptions_rounded,
           route: Routes.SUBSCRIPTION,
           svgIcon: 'assets/icons/ic_subscriptions.svg',
         ),
         NavigationItem(
           title: 'Reminders'.tr,
-          icon: Icons.alarm_outlined,
-          selectedIcon: Icons.alarm_rounded,
           route: Routes.REMINDER,
           svgIcon: 'assets/icons/ic_reminder.svg',
         ),
         NavigationItem(
           title: 'Dues Tracker'.tr,
-          icon: Icons.account_balance_wallet_outlined,
-          selectedIcon: Icons.account_balance_wallet_rounded,
           route: Routes.DUES_TRACKER,
           svgIcon: 'assets/icons/ic_dues.svg',
         ),
         NavigationItem(
           title: 'Generate Bill'.tr,
-          icon: Icons.receipt_long_outlined,
-          selectedIcon: Icons.receipt_long_rounded,
           route: Routes.GENERATE_BILL,
           svgIcon: 'assets/icons/ic_bill.svg',
         ),
         NavigationItem(
           title: 'Movies'.tr,
-          icon: Icons.movie_outlined,
-          selectedIcon: Icons.movie_rounded,
           route: Routes.MOVIES,
+          svgIcon: 'assets/icons/ic_movies.svg',
         ),
       ],
     ),
@@ -137,28 +117,21 @@ class DashboardController extends GetxController {
       items: [
         NavigationItem(
           title: 'Personal Tasks'.tr,
-          icon: Icons.task_alt_outlined,
-          selectedIcon: Icons.task_alt_rounded,
           route: Routes.PERSONAL_TASKS,
           svgIcon: 'assets/icons/ic_tasks.svg',
         ),
         NavigationItem(
           title: 'Smart Map'.tr,
-          icon: SolarIconsOutline.map,
-          selectedIcon: SolarIconsBold.map,
           route: '/smart-map-dashboard',
           svgIcon: 'assets/icons/ic_pin.svg',
         ),
         NavigationItem(
           title: 'My Contacts'.tr,
-          icon: SolarIconsOutline.usersGroupRounded,
-          selectedIcon: SolarIconsBold.usersGroupRounded,
           route: '/my-contacts',
+          svgIcon: 'assets/icons/ic_contacts.svg',
         ),
         NavigationItem(
           title: 'Image to Text'.tr,
-          icon: Icons.image_outlined,
-          selectedIcon: Icons.image_rounded,
           svgIcon: 'assets/icons/ic_image_text.svg',
           route: Routes.IMAGE_TO_TEXT,
         ),
@@ -170,15 +143,11 @@ class DashboardController extends GetxController {
       items: [
         NavigationItem(
           title: 'Settings'.tr,
-          icon: Icons.settings_outlined,
-          selectedIcon: Icons.settings,
           route: Routes.SETTINGS,
           svgIcon: 'assets/icons/ic_settings.svg',
         ),
         NavigationItem(
           title: 'Policy Settings'.tr,
-          icon: Icons.gavel_outlined,
-          selectedIcon: Icons.gavel,
           route: Routes.POLICY_SETTINGS,
           svgIcon: 'assets/icons/ic_policy.svg',
         ),
@@ -187,7 +156,7 @@ class DashboardController extends GetxController {
     NavigationSection(
       title: 'SECURITY'.tr,
       items: [
-        NavigationItem(title: 'Aegis'.tr, icon: SolarIconsOutline.shieldKeyhole, selectedIcon: SolarIconsBold.shieldKeyhole, route: Routes.AEGIS),
+        NavigationItem(title: 'Aegis'.tr, route: Routes.AEGIS, svgIcon: 'assets/icons/ic_aegis.svg'),
       ],
     ),
   ];
@@ -442,16 +411,12 @@ class NavigationSection {
 
 class NavigationItem {
   final String title;
-  final IconData icon;
-  final IconData selectedIcon;
   final String route;
-  final String? svgIcon;
+  final String svgIcon;
 
   NavigationItem({
     required this.title,
-    required this.icon,
-    required this.selectedIcon,
     required this.route,
-    this.svgIcon,
+    required this.svgIcon,
   });
 }
