@@ -1,9 +1,14 @@
 // lib/app/modules/view_devices/controllers/view_devices_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/firestore_utills/device_firestore_utils.dart';
 import 'package:maheksync/app/models/device_model.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
+import 'package:maheksync/app/utils/app_colors.dart';
+import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
+import 'package:maheksync/app/widgets/text_widget.dart';
 import '../../../constant/show_toast.dart';
 
 class ViewDevicesController extends GetxController {
@@ -60,27 +65,68 @@ class ViewDevicesController extends GetxController {
   void confirmDelete() {
     final deviceValue = device.value;
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Device'),
-        content: Text('Are you sure you want to delete "${deviceValue?.deviceName}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: AppThemeData.primaryBlack,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56, height: 56,
+                decoration: BoxDecoration(
+                  color: AppThemeData.danger300.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(Icons.delete_outline, color: AppThemeData.danger300, size: 28),
+              ),
+              spaceH(height: 16),
+              TextCustom(
+                title: 'Delete Device',
+                fontSize: 18,
+                fontFamily: FontFamily.bold,
+                color: AppThemeData.primaryWhite,
+              ),
+              spaceH(height: 8),
+              TextCustom(
+                title: 'Delete "${deviceValue?.deviceName}"?',
+                fontSize: 14,
+                color: AppThemeData.primaryWhite.withValues(alpha: 0.6),
+              ),
+              spaceH(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: RoundShapeButton(
+                      title: 'Cancel',
+                      buttonColor: AppThemeData.grey10,
+                      buttonTextColor: AppThemeData.grey4,
+                      borderColor: AppThemeData.grey7,
+                      onTap: () => Get.back(),
+                      height: 48,
+                      borderRadius: 12,
+                    ),
+                  ),
+                  spaceW(width: 12),
+                  Expanded(
+                    child: RoundShapeButton(
+                      title: 'Delete',
+                      buttonColor: AppThemeData.danger300,
+                      buttonTextColor: AppThemeData.primaryWhite,
+                      onTap: () {
+                        Get.back();
+                        deleteDevice();
+                      },
+                      height: 48,
+                      borderRadius: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              deleteDevice();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -112,8 +158,8 @@ class ViewDevicesController extends GetxController {
 
   Color get warrantyStatusColor {
     final deviceValue = device.value;
-    if (deviceValue?.warrantyEndDate == null) return Colors.grey;
-    return deviceValue!.isWarrantyExpired ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+    if (deviceValue?.warrantyEndDate == null) return AppThemeData.grey5;
+    return deviceValue!.isWarrantyExpired ? AppThemeData.danger300 : AppThemeData.success400;
   }
 
   List<String> get allImages {
