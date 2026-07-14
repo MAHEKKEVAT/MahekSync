@@ -47,7 +47,7 @@ class TextCustom extends StatelessWidget {
             ? TextDecoration.lineThrough
             : isUnderLine
             ? TextDecoration.underline
-            : null,
+            : TextDecoration.none,
         fontFamily: fontFamily,
       ),
     );
@@ -88,7 +88,7 @@ class TitleTextCustom extends StatelessWidget {
             ? TextDecoration.lineThrough
             : isUnderLine
             ? TextDecoration.underline
-            : null,
+            : TextDecoration.none,
         fontFamily: fontFamily,
       ),
     );

@@ -22,27 +22,35 @@ class GenerateBillListView extends StatelessWidget {
     final controller = Get.find<GenerateBillController>();
     final isMobile = MediaQuery.of(context).size.width < 650;
 
-    return Scaffold(
-      backgroundColor: isDark ? AppThemeData.primaryBlack : AppThemeData.grey1,
-      body: SafeArea(
-        child: Column(
+    return Container(
+      color: isDark ? AppThemeData.primaryBlack : AppThemeData.grey1,
+      child: SafeArea(
+        child: Stack(
           children: [
-            _buildHeader(context, isDark, controller),
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return Center(child: MahekLoader());
-                }
-                if (controller.bills.isEmpty) {
-                  return _buildEmptyState(isDark, context, controller);
-                }
-                return _buildContent(context, isDark, controller, isMobile);
-              }),
+            Column(
+              children: [
+                _buildHeader(context, isDark, controller),
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoading.value) {
+                      return Center(child: MahekLoader());
+                    }
+                    if (controller.bills.isEmpty) {
+                      return _buildEmptyState(isDark, context, controller);
+                    }
+                    return _buildContent(context, isDark, controller, isMobile);
+                  }),
+                ),
+              ],
+            ),
+            Positioned(
+              bottom: 24,
+              right: 24,
+              child: _buildGenerateButton(context, isDark, controller),
             ),
           ],
         ),
       ),
-      floatingActionButton: _buildGenerateButton(context, isDark, controller),
     );
   }
 
