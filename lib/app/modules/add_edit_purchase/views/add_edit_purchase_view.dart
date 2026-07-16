@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:maheksync/app/widgets/mahek_loader.dart';
+
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:maheksync/app/models/category_model.dart';
@@ -49,7 +49,10 @@ class AddEditPurchaseView extends GetView<AddEditPurchaseController> {
             if (controller.isLoading.value) {
               return Padding(
                 padding: const EdgeInsets.all(16),
-                child: const MahekLoader(size: 20, showBranding: false),
+                child: SizedBox(
+                  width: 20, height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppThemeData.primary50),
+                ),
               );
             }
             return TextButton(
@@ -869,7 +872,10 @@ class AddEditPurchaseView extends GetView<AddEditPurchaseController> {
               ),
               child: Center(
                 child: controller.isLoading.value
-                    ? const MahekLoader(size: 20, showBranding: false)
+                    ? const SizedBox(
+                        width: 20, height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
                     : TextCustom(
                         title: controller.isEditMode.value ? 'Update Purchase' : 'Complete Entry',
                         fontSize: 15,
@@ -904,14 +910,17 @@ class AddEditPurchaseView extends GetView<AddEditPurchaseController> {
           ],
         ),
         child: Center(
-          child: controller.isLoading.value
-              ? const MahekLoader(size: 20, showBranding: false)
-              : TextCustom(
-                  title: controller.isEditMode.value ? 'Update Purchase' : 'Complete Entry',
-                  fontSize: 15,
-                  fontFamily: FontFamily.semiBold,
-                  color: Colors.white,
-                ),
+        child: controller.isLoading.value
+            ? const SizedBox(
+                width: 20, height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              )
+            : TextCustom(
+                title: controller.isEditMode.value ? 'Update Purchase' : 'Complete Entry',
+                fontSize: 15,
+                fontFamily: FontFamily.semiBold,
+                color: Colors.white,
+              ),
         ),
       ),
     ));

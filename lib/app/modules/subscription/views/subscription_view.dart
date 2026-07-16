@@ -75,6 +75,8 @@ class SubscriptionView extends GetView<SubscriptionController> {
           label: const TextCustom(title: 'Add New', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppThemeData.primary50,
+            elevation: 4,
+            shadowColor: AppThemeData.primary50.withValues(alpha: 0.4),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
@@ -103,43 +105,60 @@ class SubscriptionView extends GetView<SubscriptionController> {
   Widget _buildStatCard(IconData icon, String label, String value, String sub, Color color, bool isDark) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+          color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: isDark ? AppThemeData.grey8 : AppThemeData.grey3, width: 0.5),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03), blurRadius: 10, offset: const Offset(0, 3))],
+          border: Border.all(color: color.withValues(alpha: 0.15), width: 1),
+          boxShadow: [
+            BoxShadow(color: color.withValues(alpha: isDark ? 0.08 : 0.05), blurRadius: 16, offset: const Offset(0, 4)),
+            BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.03), blurRadius: 10, offset: const Offset(0, 3)),
+          ],
         ),
-        child: Row(
+        child: Column(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              height: 3,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
+                gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.3)]),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
               ),
-              child: Icon(icon, color: color, size: 22),
             ),
-            spaceW(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
                 children: [
-                  TextCustom(title: label, fontSize: 9, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                  spaceH(height: 4),
-                  TextCustom(title: value, fontSize: 20, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
-                  spaceH(height: 2),
-                  TextCustom(title: sub, fontSize: 10, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [color.withValues(alpha: 0.25), color.withValues(alpha: 0.08)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, color: color, size: 22),
+                  ),
+                  spaceW(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextCustom(title: label, fontSize: 9, fontFamily: FontFamily.medium, color: color.withValues(alpha: 0.7)),
+                        spaceH(height: 4),
+                        TextCustom(title: value, fontSize: 20, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
+                        spaceH(height: 2),
+                        TextCustom(title: sub, fontSize: 10, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 40,
+                    height: 30,
+                    child: CustomPaint(painter: _SparklinePainter(color: color)),
+                  ),
                 ],
-              ),
-            ),
-            // Mini sparkline
-            SizedBox(
-              width: 40,
-              height: 30,
-              child: CustomPaint(
-                painter: _SparklinePainter(color: color),
               ),
             ),
           ],
@@ -154,10 +173,13 @@ class SubscriptionView extends GetView<SubscriptionController> {
   Widget _buildSearchBar(bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+        color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02), blurRadius: 8, offset: const Offset(0, 2))],
-        border: Border.all(color: isDark ? AppThemeData.grey8 : AppThemeData.grey3, width: 0.5),
+        boxShadow: [
+          BoxShadow(color: AppThemeData.primary50.withValues(alpha: isDark ? 0.04 : 0.03), blurRadius: 12, offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+        border: Border.all(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3, width: 0.5),
       ),
       child: TextField(
         onChanged: controller.updateSearchQuery,
@@ -167,7 +189,14 @@ class SubscriptionView extends GetView<SubscriptionController> {
           hintStyle: TextStyle(fontFamily: FontFamily.regular, fontSize: 14, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
           prefixIcon: Container(
             margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: AppThemeData.primary50.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppThemeData.primary50.withValues(alpha: 0.2), AppThemeData.primary50.withValues(alpha: 0.08)],
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: Icon(Icons.search_rounded, color: AppThemeData.primary50, size: 20),
           ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -212,14 +241,17 @@ class SubscriptionView extends GetView<SubscriptionController> {
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppThemeData.primary50
-                    : (isDark ? AppThemeData.grey9 : AppThemeData.grey1),
+                    : (isDark ? AppThemeData.surfaceElevated : AppThemeData.grey1),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected
                       ? AppThemeData.primary50
-                      : (isDark ? AppThemeData.grey8 : AppThemeData.grey3),
-                  width: 0.5,
+                      : (isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3),
+                  width: isSelected ? 1 : 0.5,
                 ),
+                boxShadow: isSelected
+                    ? [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.3), blurRadius: 10)]
+                    : null,
               ),
               child: Text(
                 cat,
@@ -228,7 +260,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
                   fontFamily: FontFamily.medium,
                   color: isSelected
                       ? Colors.white
-                      : (isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                      : (isDark ? AppThemeData.grey4 : AppThemeData.grey6),
                 ),
               ),
             ),
@@ -342,6 +374,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
           gradient: isSelected ? LinearGradient(colors: [AppThemeData.primary50, AppThemeData.primary4]) : null,
           borderRadius: BorderRadius.circular(10),
           color: isSelected ? null : Colors.transparent,
+          boxShadow: isSelected ? [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.3), blurRadius: 8)] : null,
         ),
         child: Icon(icon, size: 18, color: isSelected ? Colors.white : (isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
       ),
@@ -393,93 +426,117 @@ class SubscriptionView extends GetView<SubscriptionController> {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+        color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: statusColor.withValues(alpha: 0.4), width: 1.5),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), blurRadius: 12, offset: const Offset(0, 4))],
+        border: Border.all(color: statusColor.withValues(alpha: 0.2), width: 1),
+        boxShadow: [
+          BoxShadow(color: statusColor.withValues(alpha: isDark ? 0.06 : 0.04), blurRadius: 16, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04), blurRadius: 10, offset: const Offset(0, 3)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ─── TOP SECTION ───
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Icon + Name + Status + Menu
-                Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: sub.hasIcon
-                          ? ClipRRect(borderRadius: BorderRadius.circular(14), child: NetworkImageWidget(imageUrl: sub.iconUrl!, fit: BoxFit.cover, height: 48, width: 48))
-                          : Icon(Icons.subscriptions_rounded, color: statusColor, size: 24),
-                    ),
-                    spaceW(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextCustom(title: sub.name ?? 'Unknown', fontSize: 16, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10, maxLine: 1),
-                          spaceH(height: 2),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
-                            child: TextCustom(title: sub.formattedCategory, fontSize: 10, fontFamily: FontFamily.medium, color: statusColor),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
-                      child: TextCustom(title: sub.status ?? 'ACTIVE', fontSize: 10, fontFamily: FontFamily.bold, color: statusColor),
-                    ),
-                    spaceW(width: 6),
-                    GestureDetector(
-                      onTap: () => _showCardMenu(sub, isDark, context: context),
-                      child: Icon(Icons.more_vert_rounded, size: 18, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                    ),
-                  ],
-                ),
-                spaceH(height: 14),
-                // Price + Progress bar
-                TextCustom(title: sub.formattedPrice, fontSize: 22, fontFamily: FontFamily.bold, color: AppThemeData.primary50),
-                spaceH(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: sub.remainingPercentage,
-                    minHeight: 6,
-                    backgroundColor: (isDark ? AppThemeData.grey8 : AppThemeData.grey3).withValues(alpha: 0.4),
-                    valueColor: AlwaysStoppedAnimation<Color>(usedColor),
-                  ),
-                ),
-                spaceH(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextCustom(title: '$usedPercent% used', fontSize: 11, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
-                    TextCustom(title: '${sub.daysRemaining} days left', fontSize: 11, fontFamily: FontFamily.semiBold, color: sub.isExpiringCritical ? AppThemeData.danger300 : AppThemeData.success400),
-                  ],
-                ),
-                spaceH(height: 4),
-                TextCustom(title: 'Renews on ${sub.formattedNextBillingDate}', fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
-              ],
+          Container(
+            height: 3,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [statusColor, statusColor.withValues(alpha: 0.2)]),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
             ),
           ),
-          const Spacer(),
+          // ─── TOP SECTION ───
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon + Name + Status + Menu
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [statusColor.withValues(alpha: 0.15), statusColor.withValues(alpha: 0.05)],
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: sub.hasIcon
+                            ? ClipRRect(borderRadius: BorderRadius.circular(14), child: NetworkImageWidget(imageUrl: sub.iconUrl!, fit: BoxFit.cover, height: 48, width: 48))
+                            : Icon(Icons.subscriptions_rounded, color: statusColor, size: 24),
+                      ),
+                      spaceW(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextCustom(title: sub.name ?? 'Unknown', fontSize: 16, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10, maxLine: 1),
+                            spaceH(height: 2),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
+                              child: TextCustom(title: sub.formattedCategory, fontSize: 10, fontFamily: FontFamily.medium, color: statusColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: [statusColor.withValues(alpha: 0.18), statusColor.withValues(alpha: 0.08)]),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: TextCustom(title: sub.status ?? 'ACTIVE', fontSize: 10, fontFamily: FontFamily.bold, color: statusColor),
+                      ),
+                      spaceW(width: 6),
+                      GestureDetector(
+                        onTap: () => _showCardMenu(sub, isDark, context: context),
+                        child: Icon(Icons.more_vert_rounded, size: 18, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                      ),
+                    ],
+                  ),
+                  spaceH(height: 14),
+                  // Price + Progress bar
+                  TextCustom(title: sub.formattedPrice, fontSize: 22, fontFamily: FontFamily.bold, color: statusColor),
+                  spaceH(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [BoxShadow(color: usedColor.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 1))],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: sub.remainingPercentage,
+                        minHeight: 6,
+                        backgroundColor: (isDark ? AppThemeData.grey8 : AppThemeData.grey3).withValues(alpha: 0.4),
+                        valueColor: AlwaysStoppedAnimation<Color>(usedColor),
+                      ),
+                    ),
+                  ),
+                  spaceH(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextCustom(title: '$usedPercent% used', fontSize: 11, fontFamily: FontFamily.medium, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
+                      TextCustom(title: '${sub.daysRemaining} days left', fontSize: 11, fontFamily: FontFamily.semiBold, color: sub.isExpiringCritical ? AppThemeData.danger300 : AppThemeData.success400),
+                    ],
+                  ),
+                  spaceH(height: 4),
+                  TextCustom(title: 'Renews on ${sub.formattedNextBillingDate}', fontSize: 11, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey6 : AppThemeData.grey5),
+                ],
+              ),
+            ),
+          ),
           // ─── BILLING ROW ───
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: (isDark ? AppThemeData.grey9 : AppThemeData.grey1).withValues(alpha: 0.5),
+              color: statusColor.withValues(alpha: isDark ? 0.04 : 0.03),
               borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(18), bottomRight: Radius.circular(18)),
             ),
             child: Row(
@@ -502,11 +559,11 @@ class SubscriptionView extends GetView<SubscriptionController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: isDark ? AppThemeData.grey8 : AppThemeData.grey3, width: 0.5)),
+              border: Border(top: BorderSide(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3, width: 0.5)),
             ),
             child: Row(
               children: [
-                Expanded(child: _buildActionChip(Icons.visibility_rounded, 'View Details', AppThemeData.primary50, () => controller.goToDetails(sub), isDark)),
+                Expanded(child: _buildActionChip(Icons.visibility_rounded, 'View Details', AppThemeData.primary50, () => controller.goToDetails(sub), isDark, isPrimary: true)),
                 spaceW(width: 8),
                 Expanded(child: _buildActionChip(Icons.edit_rounded, 'Edit', isDark ? AppThemeData.grey4 : AppThemeData.grey7, () => controller.goToEdit(sub), isDark)),
                 spaceW(width: 8),
@@ -529,13 +586,23 @@ class SubscriptionView extends GetView<SubscriptionController> {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppThemeData.primaryBlack : AppThemeData.primaryWhite,
+        color: isDark ? AppThemeData.surfaceElevated : AppThemeData.primaryWhite,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: statusColor.withValues(alpha: 0.4), width: 1.5),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), blurRadius: 12, offset: const Offset(0, 4))],
+        border: Border.all(color: statusColor.withValues(alpha: 0.2), width: 1),
+        boxShadow: [
+          BoxShadow(color: statusColor.withValues(alpha: isDark ? 0.06 : 0.04), blurRadius: 16, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04), blurRadius: 10, offset: const Offset(0, 3)),
+        ],
       ),
       child: Column(
         children: [
+          Container(
+            height: 3,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [statusColor, statusColor.withValues(alpha: 0.2)]),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -544,7 +611,11 @@ class SubscriptionView extends GetView<SubscriptionController> {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: isDark ? AppThemeData.grey9 : AppThemeData.grey2,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [statusColor.withValues(alpha: 0.15), statusColor.withValues(alpha: 0.05)],
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: sub.hasIcon
@@ -563,7 +634,10 @@ class SubscriptionView extends GetView<SubscriptionController> {
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(colors: [statusColor.withValues(alpha: 0.18), statusColor.withValues(alpha: 0.08)]),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             child: TextCustom(title: sub.status ?? 'ACTIVE', fontSize: 10, fontFamily: FontFamily.bold, color: statusColor),
                           ),
                           spaceW(width: 6),
@@ -590,19 +664,25 @@ class SubscriptionView extends GetView<SubscriptionController> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                TextCustom(title: sub.formattedPrice, fontSize: 20, fontFamily: FontFamily.bold, color: AppThemeData.primary50),
+                TextCustom(title: sub.formattedPrice, fontSize: 20, fontFamily: FontFamily.bold, color: statusColor),
                 spaceW(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: sub.remainingPercentage,
-                          minHeight: 6,
-                          backgroundColor: (isDark ? AppThemeData.grey8 : AppThemeData.grey3).withValues(alpha: 0.4),
-                          valueColor: AlwaysStoppedAnimation<Color>(usedColor),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [BoxShadow(color: usedColor.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 1))],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: sub.remainingPercentage,
+                            minHeight: 6,
+                            backgroundColor: (isDark ? AppThemeData.grey8 : AppThemeData.grey3).withValues(alpha: 0.4),
+                            valueColor: AlwaysStoppedAnimation<Color>(usedColor),
+                          ),
                         ),
                       ),
                       spaceH(height: 4),
@@ -624,7 +704,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: (isDark ? AppThemeData.grey9 : AppThemeData.grey1).withValues(alpha: 0.5),
+              color: statusColor.withValues(alpha: isDark ? 0.04 : 0.03),
               borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(18), bottomRight: Radius.circular(18)),
             ),
             child: Row(
@@ -647,11 +727,11 @@ class SubscriptionView extends GetView<SubscriptionController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: isDark ? AppThemeData.grey8 : AppThemeData.grey3, width: 0.5)),
+              border: Border(top: BorderSide(color: isDark ? AppThemeData.surfaceBorder : AppThemeData.grey3, width: 0.5)),
             ),
             child: Row(
               children: [
-                Expanded(child: _buildActionChip(Icons.visibility_rounded, 'View Details', AppThemeData.primary50, () => controller.goToDetails(sub), isDark)),
+                Expanded(child: _buildActionChip(Icons.visibility_rounded, 'View Details', AppThemeData.primary50, () => controller.goToDetails(sub), isDark, isPrimary: true)),
                 spaceW(width: 8),
                 Expanded(child: _buildActionChip(Icons.edit_rounded, 'Edit', isDark ? AppThemeData.grey4 : AppThemeData.grey7, () => controller.goToEdit(sub), isDark)),
                 spaceW(width: 8),
@@ -667,21 +747,28 @@ class SubscriptionView extends GetView<SubscriptionController> {
   // ═══════════════════════════════════════
   // SHARED WIDGETS
   // ═══════════════════════════════════════
-  Widget _buildActionChip(IconData icon, String label, Color color, VoidCallback onTap, bool isDark) {
+  Widget _buildActionChip(IconData icon, String label, Color color, VoidCallback onTap, bool isDark, {bool isPrimary = false}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(10),
-        ),
+        decoration: isPrimary
+            ? BoxDecoration(
+                gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.7)]),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [BoxShadow(color: color.withValues(alpha: 0.25), blurRadius: 8, offset: const Offset(0, 2))],
+              )
+            : BoxDecoration(
+                color: color.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: color.withValues(alpha: 0.15), width: 0.5),
+              ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 14, color: color),
+            Icon(icon, size: 14, color: isPrimary ? Colors.white : color),
             spaceW(width: 6),
-            TextCustom(title: label, fontSize: 11, fontFamily: FontFamily.medium, color: color),
+            TextCustom(title: label, fontSize: 11, fontFamily: FontFamily.medium, color: isPrimary ? Colors.white : color),
           ],
         ),
       ),

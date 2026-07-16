@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,9 +14,6 @@ import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../controllers/movie_details_controller.dart';
-
-// Conditional import for web URL
-import 'dart:html' as html;
 
 class MovieDetailsView extends GetView<MovieDetailsController> {
   const MovieDetailsView({super.key});
@@ -494,11 +490,8 @@ class MovieDetailsView extends GetView<MovieDetailsController> {
   // ── HELPERS ──
 
   void _copyMovieLink(MovieModel movie) {
-    if (kIsWeb) {
-      final url = '${html.window.location.origin}/movie-details';
-      Clipboard.setData(ClipboardData(text: url));
-    }
-    ShowToastDialog.showSuccess('Movie link copied!');
+    Clipboard.setData(ClipboardData(text: movie.movieName ?? ''));
+    ShowToastDialog.showSuccess('Movie name copied!');
   }
 
   BoxDecoration _cardDeco(bool isDark, {Color? accent}) {
