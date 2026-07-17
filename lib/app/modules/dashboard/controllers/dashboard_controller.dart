@@ -338,7 +338,7 @@ class DashboardController extends GetxController {
         if (!Get.isRegistered<SubscriptionController>()) {
           Get.put(SubscriptionController());
         }
-        return const SubscriptionView();
+        return SubscriptionView();
       case Routes.REMINDER:
         if (!Get.isRegistered<ReminderController>()) {
           Get.put(ReminderController());

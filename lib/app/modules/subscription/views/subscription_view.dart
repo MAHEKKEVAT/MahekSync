@@ -14,7 +14,8 @@ import '../../../models/subscription_model.dart';
 import '../controllers/subscription_controller.dart';
 
 class SubscriptionView extends GetView<SubscriptionController> {
-  const SubscriptionView({super.key});
+  SubscriptionView({super.key});
+  final _sortButtonKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
           spaceH(height: 14),
           _buildCategoryChips(isDark),
           spaceH(height: 14),
-          _buildSortAndToggleRow(isDark, context: context),
+          _buildSortAndToggleRow(isDark),
           spaceH(height: 16),
           _buildSubscriptionsContent(isDark),
         ],
@@ -280,12 +281,13 @@ class SubscriptionView extends GetView<SubscriptionController> {
   // ═══════════════════════════════════════
   // SORT + VIEW TOGGLE ROW
   // ═══════════════════════════════════════
-  Widget _buildSortAndToggleRow(bool isDark, {required BuildContext context}) {
+  Widget _buildSortAndToggleRow(bool isDark) {
     return Row(
       children: [
         // Sort dropdown
         GestureDetector(
-          onTap: () => _showSortMenu(isDark, context: context),
+          key: _sortButtonKey,
+          onTap: () => _showSortMenu(isDark),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
@@ -329,9 +331,9 @@ class SubscriptionView extends GetView<SubscriptionController> {
     );
   }
 
-  void _showSortMenu(bool isDark, {required BuildContext context}) {
-    final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+  void _showSortMenu(bool isDark) {
+    final RenderBox button = _sortButtonKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox overlay = Navigator.of(_sortButtonKey.currentContext!).overlay!.context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
@@ -341,7 +343,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
     );
 
     showMenu(
-      context: context,
+      context: _sortButtonKey.currentContext!,
       color: isDark ? AppThemeData.grey9 : AppThemeData.primaryWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       position: position,

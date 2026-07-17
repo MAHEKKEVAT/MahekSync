@@ -1,7 +1,5 @@
-// lib/app/modules/subscription_details/views/subscription_details_view.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:maheksync/app/models/subscription_model.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
@@ -37,10 +35,27 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
         ),
         title: TextCustom(title: sub.name ?? 'Details', fontSize: 18, fontFamily: FontFamily.bold, color: isDark ? AppThemeData.grey1 : AppThemeData.grey10),
         actions: [
-          TextButton.icon(
-            onPressed: () => _showRenewDialog(sub, context: context),
-            icon: const Icon(Icons.refresh_rounded, size: 18, color: AppThemeData.success400),
-            label: TextCustom(title: 'Renew', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.success400),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: SizedBox(
+              height: 36,
+              child: RoundShapeButton(
+                title: '',
+                buttonColor: Colors.transparent,
+                buttonTextColor: AppThemeData.success400,
+                borderColor: AppThemeData.success400.withValues(alpha: 0.3),
+                onTap: () => _showRenewDialog(sub, context: context),
+                borderRadius: 10,
+                titleWidget: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.refresh_rounded, size: 16, color: AppThemeData.success400),
+                    spaceW(width: 6),
+                    TextCustom(title: 'Renew', fontSize: 13, fontFamily: FontFamily.semiBold, color: AppThemeData.success400),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -51,7 +66,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   }
 
   // ═══════════════════════════════════════
-  // DESKTOP LAYOUT
+  // DESKTOP LAYOUT — side by side
   // ═══════════════════════════════════════
   Widget _buildDesktopLayout(SubscriptionModel sub, bool isDark, BuildContext context) {
     return Row(
@@ -85,7 +100,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   }
 
   // ═══════════════════════════════════════
-  // SMALL LAYOUT
+  // SMALL LAYOUT — stacked
   // ═══════════════════════════════════════
   Widget _buildSmallLayout(SubscriptionModel sub, bool isDark, BuildContext context) {
     return SingleChildScrollView(
@@ -117,59 +132,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   }
 
   // ═══════════════════════════════════════
-  // ACTION BUTTONS
-  // ═══════════════════════════════════════
-  Widget _buildActionButtons(SubscriptionModel sub, bool isDark, {required BuildContext context}) {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: 48,
-            child: RoundShapeButton(
-              title: '',
-              buttonColor: Colors.transparent,
-              buttonTextColor: AppThemeData.success400,
-              borderColor: AppThemeData.success400.withValues(alpha: 0.3),
-              onTap: () => _showRenewDialog(sub, context: context),
-              borderRadius: 14,
-              titleWidget: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.refresh_rounded, size: 18, color: AppThemeData.success400),
-                  spaceW(width: 8),
-                  TextCustom(title: 'Renew', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.success400),
-                ],
-              ),
-            ),
-          ),
-        ),
-        spaceW(width: 12),
-        Expanded(
-          child: SizedBox(
-            height: 48,
-            child: RoundShapeButton(
-              title: '',
-              buttonColor: AppThemeData.primary50,
-              buttonTextColor: AppThemeData.primaryWhite,
-              onTap: () => Get.toNamed('/subscription-crud', arguments: sub),
-              borderRadius: 14,
-              titleWidget: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.edit_rounded, size: 18, color: Colors.white),
-                  spaceW(width: 8),
-                  TextCustom(title: 'Edit', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ═══════════════════════════════════════
-  // IMAGE GALLERY
+  // IMAGE GALLERY — left panel / top
   // ═══════════════════════════════════════
   Widget _buildImageGallery(SubscriptionModel sub, bool isDark) {
     final images = sub.imageUrls ?? [];
@@ -220,7 +183,16 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                       padding: const EdgeInsets.all(16),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: NetworkImageWidget(imageUrl: images[index], fit: BoxFit.contain),
+                        child: Image.network(
+                          images[index],
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: isDark ? AppThemeData.grey9 : const Color(0xFFF1F5F9),
+                            child: Icon(Icons.broken_image_outlined, size: 48, color: AppThemeData.grey5),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -284,24 +256,29 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                     itemCount: images.length,
                     separatorBuilder: (context, index) => spaceW(width: 8),
                     itemBuilder: (context, index) {
-                      final isSelected = selectedImageIndex.value == index;
                       return GestureDetector(
                         onTap: () => selectedImageIndex.value = index,
-                        child: Container(
-                          width: 60, height: 60,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isSelected ? AppThemeData.primary50 : (isDark ? AppThemeData.grey7 : AppThemeData.grey4),
-                              width: isSelected ? 2.5 : 1,
+                        child: Obx(() {
+                          final active = selectedImageIndex.value == index;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 60, height: 60,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: active ? AppThemeData.primary50 : (isDark ? AppThemeData.grey7 : AppThemeData.grey4),
+                                width: active ? 2.5 : 1,
+                              ),
+                              boxShadow: active ? [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.3), blurRadius: 6)] : null,
                             ),
-                            boxShadow: isSelected ? [BoxShadow(color: AppThemeData.primary50.withValues(alpha: 0.3), blurRadius: 6)] : null,
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: NetworkImageWidget(imageUrl: images[index], fit: BoxFit.cover),
-                          ),
-                        ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(images[index], fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Container(color: isDark ? AppThemeData.grey8 : AppThemeData.grey2, child: Icon(Icons.image, color: AppThemeData.grey5, size: 20)),
+                              ),
+                            ),
+                          );
+                        }),
                       );
                     },
                   ),
@@ -516,6 +493,58 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   }
 
   // ═══════════════════════════════════════
+  // ACTION BUTTONS
+  // ═══════════════════════════════════════
+  Widget _buildActionButtons(SubscriptionModel sub, bool isDark, {required BuildContext context}) {
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: 48,
+            child: RoundShapeButton(
+              title: '',
+              buttonColor: Colors.transparent,
+              buttonTextColor: AppThemeData.success400,
+              borderColor: AppThemeData.success400.withValues(alpha: 0.3),
+              onTap: () => _showRenewDialog(sub, context: context),
+              borderRadius: 14,
+              titleWidget: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.refresh_rounded, size: 18, color: AppThemeData.success400),
+                  spaceW(width: 8),
+                  TextCustom(title: 'Renew', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.success400),
+                ],
+              ),
+            ),
+          ),
+        ),
+        spaceW(width: 12),
+        Expanded(
+          child: SizedBox(
+            height: 48,
+            child: RoundShapeButton(
+              title: '',
+              buttonColor: AppThemeData.primary50,
+              buttonTextColor: AppThemeData.primaryWhite,
+              onTap: () => Get.toNamed('/subscription-crud', arguments: sub),
+              borderRadius: 14,
+              titleWidget: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.edit_rounded, size: 18, color: Colors.white),
+                  spaceW(width: 8),
+                  TextCustom(title: 'Edit', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ═══════════════════════════════════════
   // REUSABLE COMPONENTS
   // ═══════════════════════════════════════
   Widget _buildSectionHeader(String title, IconData icon, Color color, bool isDark) {
@@ -585,7 +614,7 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                           children: [
                             const Icon(Icons.calendar_today_rounded, color: AppThemeData.success400, size: 20),
                             spaceW(width: 12),
-                            Text(DateFormat('dd MMMM yyyy').format(tempDate), style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+                            TextCustom(title: '${tempDate.day}/${tempDate.month}/${tempDate.year}', fontSize: 15, fontFamily: FontFamily.semiBold, color: AppThemeData.primaryWhite),
                           ],
                         ),
                       ),
@@ -594,27 +623,31 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                     Row(
                       children: [
                         Expanded(
-                          child: RoundShapeButton(
-                            title: '',
-                            buttonColor: Colors.transparent,
-                            buttonTextColor: AppThemeData.grey4,
-                            borderColor: AppThemeData.grey7,
-                            onTap: () => Navigator.pop(context),
-                            borderRadius: 12,
+                          child: SizedBox(
                             height: 48,
-                            titleWidget: TextCustom(title: 'Cancel', fontSize: 14, color: AppThemeData.grey4),
+                            child: RoundShapeButton(
+                              title: '',
+                              buttonColor: Colors.transparent,
+                              buttonTextColor: AppThemeData.grey4,
+                              borderColor: AppThemeData.grey7,
+                              onTap: () => Navigator.pop(context),
+                              borderRadius: 12,
+                              titleWidget: TextCustom(title: 'Cancel', fontSize: 14, color: AppThemeData.grey4),
+                            ),
                           ),
                         ),
                         spaceW(width: 12),
                         Expanded(
-                          child: RoundShapeButton(
-                            title: '',
-                            buttonColor: AppThemeData.success400,
-                            buttonTextColor: AppThemeData.primaryWhite,
-                            onTap: () => Navigator.pop(context, tempDate),
-                            borderRadius: 12,
+                          child: SizedBox(
                             height: 48,
-                            titleWidget: TextCustom(title: 'Confirm Renewal', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+                            child: RoundShapeButton(
+                              title: '',
+                              buttonColor: AppThemeData.success400,
+                              buttonTextColor: AppThemeData.primaryWhite,
+                              onTap: () => Navigator.pop(context, tempDate),
+                              borderRadius: 12,
+                              titleWidget: TextCustom(title: 'Confirm Renewal', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+                            ),
                           ),
                         ),
                       ],
@@ -634,9 +667,6 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
   }
 }
 
-// ═══════════════════════════════════════
-// FORMATTED CATEGORY ON MODEL
-// ═══════════════════════════════════════
 extension _SubscriptionModelExt on SubscriptionModel {
   String get formattedCategory {
     switch (category) {
