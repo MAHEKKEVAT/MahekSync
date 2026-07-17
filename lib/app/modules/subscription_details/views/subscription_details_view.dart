@@ -9,6 +9,7 @@ import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:maheksync/app/widgets/water_bubble_progress.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import '../controllers/subscription_details_controller.dart';
 
 class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
@@ -124,14 +125,20 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
         Expanded(
           child: SizedBox(
             height: 48,
-            child: OutlinedButton.icon(
-              onPressed: () => _showRenewDialog(sub, context: context),
-              icon: const Icon(Icons.refresh_rounded, size: 18, color: AppThemeData.success400),
-              label: TextCustom(title: 'Renew', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.success400),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                side: BorderSide(color: AppThemeData.success400.withValues(alpha: 0.3)),
+            child: RoundShapeButton(
+              title: '',
+              buttonColor: Colors.transparent,
+              buttonTextColor: AppThemeData.success400,
+              borderColor: AppThemeData.success400.withValues(alpha: 0.3),
+              onTap: () => _showRenewDialog(sub, context: context),
+              borderRadius: 14,
+              titleWidget: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.refresh_rounded, size: 18, color: AppThemeData.success400),
+                  spaceW(width: 8),
+                  TextCustom(title: 'Renew', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.success400),
+                ],
               ),
             ),
           ),
@@ -140,14 +147,19 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
         Expanded(
           child: SizedBox(
             height: 48,
-            child: ElevatedButton.icon(
-              onPressed: () => Get.toNamed('/subscription-crud', arguments: sub),
-              icon: const Icon(Icons.edit_rounded, size: 18, color: Colors.white),
-              label: TextCustom(title: 'Edit', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppThemeData.primary50,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            child: RoundShapeButton(
+              title: '',
+              buttonColor: AppThemeData.primary50,
+              buttonTextColor: AppThemeData.primaryWhite,
+              onTap: () => Get.toNamed('/subscription-crud', arguments: sub),
+              borderRadius: 14,
+              titleWidget: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.edit_rounded, size: 18, color: Colors.white),
+                  spaceW(width: 8),
+                  TextCustom(title: 'Edit', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+                ],
               ),
             ),
           ),
@@ -582,18 +594,27 @@ class SubscriptionDetailsView extends GetView<SubscriptionDetailsController> {
                     Row(
                       children: [
                         Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), side: BorderSide(color: AppThemeData.grey7)),
-                            child: TextCustom(title: 'Cancel', fontSize: 14, color: AppThemeData.grey4),
+                          child: RoundShapeButton(
+                            title: '',
+                            buttonColor: Colors.transparent,
+                            buttonTextColor: AppThemeData.grey4,
+                            borderColor: AppThemeData.grey7,
+                            onTap: () => Navigator.pop(context),
+                            borderRadius: 12,
+                            height: 48,
+                            titleWidget: TextCustom(title: 'Cancel', fontSize: 14, color: AppThemeData.grey4),
                           ),
                         ),
                         spaceW(width: 12),
                         Expanded(
-                          child: ElevatedButton(
-                            onPressed: () => Navigator.pop(context, tempDate),
-                            style: ElevatedButton.styleFrom(backgroundColor: AppThemeData.success400, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                            child: TextCustom(title: 'Confirm Renewal', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+                          child: RoundShapeButton(
+                            title: '',
+                            buttonColor: AppThemeData.success400,
+                            buttonTextColor: AppThemeData.primaryWhite,
+                            onTap: () => Navigator.pop(context, tempDate),
+                            borderRadius: 12,
+                            height: 48,
+                            titleWidget: TextCustom(title: 'Confirm Renewal', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
                           ),
                         ),
                       ],

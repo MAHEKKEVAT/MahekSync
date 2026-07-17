@@ -9,6 +9,7 @@ import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/dependency/shimmer.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import '../../../constant/show_toast.dart';
@@ -850,190 +851,6 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
     );
   }
 
-  Widget _savedTab(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            TextCustom(
-              title: 'Saved Locations',
-              fontSize: 13,
-              fontFamily: FontFamily.bold,
-              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-            ),
-            const Spacer(),
-            GestureDetector(
-              onTap: () => controller.saveCurrentLocation(),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppThemeData.primary50.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppThemeData.primary50.withValues(alpha: 0.3),
-                    width: 0.5,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      SolarIconsOutline.bookmark,
-                      size: 12,
-                      color: AppThemeData.primary50,
-                    ),
-                    spaceW(width: 4),
-                    TextCustom(
-                      title: 'Save Current',
-                      fontSize: 10,
-                      fontFamily: FontFamily.bold,
-                      color: AppThemeData.primary50,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        spaceH(height: 12),
-        Obx(() {
-          if (controller.savedLocations.isEmpty) {
-            return Container(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                children: [
-                  Icon(
-                    SolarIconsOutline.bookmark,
-                    size: 40,
-                    color: isDark ? AppThemeData.grey8 : AppThemeData.grey3,
-                  ),
-                  spaceH(height: 12),
-                  TextCustom(
-                    title: 'No saved locations yet',
-                    fontSize: 13,
-                    fontFamily: FontFamily.medium,
-                    color: isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-                  ),
-                  spaceH(height: 4),
-                  TextCustom(
-                    title: 'Save your current location to access it quickly',
-                    fontSize: 11,
-                    fontFamily: FontFamily.regular,
-                    color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          }
-          return Column(
-            children: controller.savedLocations.asMap().entries.map((entry) {
-              final index = entry.key;
-              final loc = entry.value;
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: Dismissible(
-                  key: Key('saved_$index'),
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (_) => controller.removeSavedLocation(index),
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 16),
-                    decoration: BoxDecoration(
-                      color: AppThemeData.danger300.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      SolarIconsOutline.trashBin2,
-                      color: AppThemeData.danger300,
-                      size: 18,
-                    ),
-                  ),
-                  child: GestureDetector(
-                    onTap: () => controller.goToSavedLocation(loc),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppThemeData.primaryBlack.withValues(alpha: 0.2)
-                            : AppThemeData.grey1.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isDark
-                              ? AppThemeData.grey8.withValues(alpha: 0.1)
-                              : AppThemeData.grey3.withValues(alpha: 0.2),
-                          width: 0.5,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppThemeData.neonTeal,
-                                  AppThemeData.neonMint,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(
-                              SolarIconsBold.bookmark,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                          ),
-                          spaceW(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                TextCustom(
-                                  title: loc.name,
-                                  fontSize: 12,
-                                  fontFamily: FontFamily.semiBold,
-                                  color: isDark
-                                      ? AppThemeData.grey1
-                                      : AppThemeData.grey10,
-                                ),
-                                TextCustom(
-                                  title: loc.address,
-                                  fontSize: 10,
-                                  fontFamily: FontFamily.regular,
-                                  color: isDark
-                                      ? AppThemeData.grey6
-                                      : AppThemeData.grey5,
-                                  maxLine: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            SolarIconsOutline.altArrowRight,
-                            size: 14,
-                            color: isDark
-                                ? AppThemeData.grey6
-                                : AppThemeData.grey5,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          );
-        }),
-      ],
-    );
-  }
-
   Widget _liveLocationCard(bool isDark) {
     return Obx(
       () => Container(
@@ -1422,45 +1239,50 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
         Row(
           children: [
             Expanded(
-              child: ElevatedButton.icon(
-                onPressed: controller.recenterMap,
-                icon: Icon(SolarIconsBold.gps, size: 16),
-                label: const TextCustom(
-                  title: 'Recenter',
-                  fontSize: 13,
-                  fontFamily: FontFamily.semiBold,
-                  color: Colors.white,
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppThemeData.primary50,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              child: RoundShapeButton(
+                title: 'Recenter',
+                buttonColor: AppThemeData.primary50,
+                buttonTextColor: Colors.white,
+                onTap: controller.recenterMap,
+                borderRadius: 12,
+                height: 48,
+                titleWidget: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(SolarIconsBold.gps, size: 16, color: Colors.white),
+                    spaceW(width: 8),
+                    const TextCustom(
+                      title: 'Recenter',
+                      fontSize: 13,
+                      fontFamily: FontFamily.semiBold,
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
               ),
             ),
             spaceW(width: 10),
             Expanded(
-              child: OutlinedButton.icon(
-                onPressed: controller.shareLocation,
-                icon: Icon(
-                  SolarIconsOutline.share,
-                  size: 16,
-                  color: AppThemeData.primary50,
-                ),
-                label: TextCustom(
-                  title: 'Share',
-                  fontSize: 13,
-                  fontFamily: FontFamily.semiBold,
-                  color: AppThemeData.primary50,
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  side: BorderSide(color: AppThemeData.primary50),
+              child: RoundShapeButton(
+                title: 'Share',
+                buttonColor: Colors.transparent,
+                buttonTextColor: AppThemeData.primary50,
+                onTap: controller.shareLocation,
+                borderColor: AppThemeData.primary50,
+                borderRadius: 12,
+                height: 48,
+                titleWidget: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(SolarIconsOutline.share, size: 16, color: AppThemeData.primary50),
+                    spaceW(width: 8),
+                    TextCustom(
+                      title: 'Share',
+                      fontSize: 13,
+                      fontFamily: FontFamily.semiBold,
+                      color: AppThemeData.primary50,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -1737,26 +1559,24 @@ class SmartMapDashboardView extends GetView<SmartMapDashboardController> {
                 textAlign: TextAlign.center,
               ),
               spaceH(height: 28),
-              ElevatedButton.icon(
-                onPressed: controller.requestPermission,
-                icon: Icon(SolarIconsBold.gps, size: 18),
-                label: const TextCustom(
-                  title: 'Grant Permission',
-                  fontSize: 14,
-                  fontFamily: FontFamily.semiBold,
-                  color: Colors.white,
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppThemeData.primary50,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 28,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 0,
-                  shadowColor: AppThemeData.primary50.withValues(alpha: 0.3),
+              RoundShapeButton(
+                title: 'Grant Permission',
+                buttonColor: AppThemeData.primary50,
+                buttonTextColor: Colors.white,
+                onTap: controller.requestPermission,
+                borderRadius: 14,
+                titleWidget: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(SolarIconsBold.gps, size: 18, color: Colors.white),
+                    spaceW(width: 8),
+                    const TextCustom(
+                      title: 'Grant Permission',
+                      fontSize: 14,
+                      fontFamily: FontFamily.semiBold,
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
               ),
             ],

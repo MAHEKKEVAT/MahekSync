@@ -18,6 +18,7 @@ import '../../../widgets/global_widgets.dart';
 import '../../../widgets/network_image_widget.dart';
 import '../../../widgets/text_widget.dart';
 import '../../../widgets/text_field_widget.dart';
+import '../../../constant/round_shape_button.dart';
 import '../../../models/dues_tracker_model.dart';
 import '../../../models/payment_method_model.dart';
 
@@ -500,21 +501,25 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
   }
 
   Widget _buildAddButton(bool isDark, {bool compact = false, required BuildContext context}) {
-    return ElevatedButton.icon(
-      onPressed: () => _showAddEditDialog(context, isDark),
-      icon: Icon(SolarIconsOutline.addCircle, size: compact ? 18 : 20),
-      label: TextCustom(
-        title: 'Add Due', fontSize: compact ? 13 : 14,
-        fontFamily: FontFamily.semiBold, color: AppThemeData.primaryWhite,
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppThemeData.primary50,
-        foregroundColor: AppThemeData.primaryWhite,
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 16 : 24, vertical: compact ? 12 : 14,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        elevation: 0,
+    return RoundShapeButton(
+      title: '',
+      buttonColor: AppThemeData.primary50,
+      buttonTextColor: AppThemeData.primaryWhite,
+      onTap: () => _showAddEditDialog(context, isDark),
+      borderRadius: 28,
+      height: compact ? 40 : 48,
+      titleWidget: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(SolarIconsOutline.addCircle, size: compact ? 18 : 20, color: AppThemeData.primaryWhite),
+          if (!compact) ...[
+            spaceW(width: 8),
+            TextCustom(
+              title: 'Add Due', fontSize: 14,
+              fontFamily: FontFamily.semiBold, color: AppThemeData.primaryWhite,
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -1132,37 +1137,22 @@ class DuesTrackerView extends GetView<DuesTrackerController> {
                       const SizedBox(height: 28),
 
                       // Save Button
-                      SizedBox(
+                      RoundShapeButton(
+                        title: due == null ? 'Create Due Entry' : 'Save Changes',
+                        buttonColor: AppThemeData.primary50,
+                        buttonTextColor: AppThemeData.primaryWhite,
+                        onTap: () {
+                          if (formKey.currentState!.validate()) {
+                            controller.customerNameController.text = nameController.text.trim();
+                            controller.amountController.text = amountController.text.trim();
+                            controller.noteController.text = noteController.text.trim();
+                            controller.selectedDueTypeForm.value = selectedType.value;
+                            controller.saveDue();
+                          }
+                        },
                         width: double.infinity,
                         height: 50,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              // Sync text fields back to controller
-                              controller.customerNameController.text = nameController.text.trim();
-                              controller.amountController.text = amountController.text.trim();
-                              controller.noteController.text = noteController.text.trim();
-                              controller.selectedDueTypeForm.value = selectedType.value;
-
-                              // NOTE: No more paymentMethodController sync —
-                              // selectedPaymentMethodObj is already set by the dropdown
-
-                              controller.saveDue();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppThemeData.primary50,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: TextCustom(
-                            title: due == null ? 'Create Due Entry' : 'Save Changes',
-                            fontSize: 16, fontFamily: FontFamily.bold,
-                            color: AppThemeData.primaryWhite,
-                          ),
-                        ),
+                        borderRadius: 16,
                       ),
                     ],
                   ),

@@ -13,6 +13,7 @@ import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import '../controllers/add_new_devices_controller.dart';
 
 class AddNewDevicesView extends GetView<AddNewDevicesController> {
@@ -1089,18 +1090,15 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton(
-            onPressed: controller.discardChanges,
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              side: BorderSide(
-                color: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
-              ),
-            ),
-            child: TextCustom(
+          child: RoundShapeButton(
+            title: '',
+            buttonColor: Colors.transparent,
+            buttonTextColor: isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+            borderColor: isDark ? AppThemeData.grey7 : AppThemeData.grey4,
+            onTap: controller.discardChanges,
+            borderRadius: 14,
+            height: 52,
+            titleWidget: TextCustom(
               title: 'Discard',
               fontSize: 15,
               fontFamily: FontFamily.semiBold,
@@ -1110,18 +1108,14 @@ class AddNewDevicesView extends GetView<AddNewDevicesController> {
         ),
         spaceW(width: 12),
         Expanded(
-          child: Obx(() => ElevatedButton(
-            onPressed: controller.isLoading.value ? null : controller.registerDevice,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppThemeData.primary50,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              elevation: 2,
-              shadowColor: AppThemeData.primary50.withValues(alpha: 0.4),
-            ),
-            child: controller.isLoading.value
+          child: Obx(() => RoundShapeButton(
+            title: '',
+            buttonColor: AppThemeData.primary50,
+            buttonTextColor: AppThemeData.primaryWhite,
+            onTap: controller.isLoading.value ? () {} : controller.registerDevice,
+            borderRadius: 14,
+            height: 52,
+            titleWidget: controller.isLoading.value
                 ? const MahekLoader(size: 20, showBranding: false)
                 : Row(
               mainAxisAlignment: MainAxisAlignment.center,

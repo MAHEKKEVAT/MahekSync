@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:solar_icons/solar_icons.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_field_widget.dart';
@@ -35,12 +36,19 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
           color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
         ),
         actions: [
-          TextButton(
-            onPressed: controller.isLoading.value ? null : controller.saveTask,
-            child: Obx(() => controller.isLoading.value
-                ?  const MahekLoader(size: 20, showBranding: false)
-                : TextCustom(title: 'Save', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.primary50)),
-          ),
+          Obx(() => controller.isLoading.value
+              ? const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: MahekLoader(size: 20, showBranding: false),
+                )
+              : RoundShapeButton(
+                  title: 'Save',
+                  buttonColor: AppThemeData.primary50,
+                  buttonTextColor: AppThemeData.primaryWhite,
+                  onTap: controller.saveTask,
+                  borderRadius: 8,
+                  height: 36,
+                )),
         ],
       ),
       body: SingleChildScrollView(
@@ -432,29 +440,30 @@ class PersonalTaskCrudView extends GetView<PersonalTaskCrudController> {
   Widget _buildSaveButton(bool isDark) {
     return Obx(() => SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: controller.isLoading.value ? null : controller.saveTask,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppThemeData.primary50,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          disabledBackgroundColor: AppThemeData.primary50.withValues(alpha: 0.5),
-        ),
-        child: controller.isLoading.value
+      child: RoundShapeButton(
+        title: controller.isEditMode.value ? 'Update Task' : 'Create Task',
+        buttonColor: controller.isLoading.value
+            ? AppThemeData.primary50.withValues(alpha: 0.5)
+            : AppThemeData.primary50,
+        buttonTextColor: Colors.white,
+        onTap: controller.isLoading.value ? () {} : controller.saveTask,
+        borderRadius: 14,
+        height: 52,
+        titleWidget: controller.isLoading.value
             ? const MahekLoader(size: 22, showBranding: false)
             : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(SolarIconsBold.checkCircle, color: Colors.white, size: 18),
-            spaceW(width: 8),
-            TextCustom(
-              title: controller.isEditMode.value ? 'Update Task' : 'Create Task',
-              fontSize: 15,
-              fontFamily: FontFamily.semiBold,
-              color: Colors.white,
-            ),
-          ],
-        ),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(SolarIconsBold.checkCircle, color: Colors.white, size: 18),
+                  spaceW(width: 8),
+                  TextCustom(
+                    title: controller.isEditMode.value ? 'Update Task' : 'Create Task',
+                    fontSize: 15,
+                    fontFamily: FontFamily.semiBold,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
       ),
     ));
   }

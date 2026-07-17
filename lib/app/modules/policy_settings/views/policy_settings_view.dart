@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
@@ -104,10 +105,18 @@ class PolicySettingsView extends GetView<PolicySettingsController> {
                 ],
               ),
               // Save Button
-              Obx(() => ElevatedButton.icon(
-                onPressed: controller.isSaving.value ? null : controller.savePolicies,
-                icon: controller.isSaving.value
-                    ? const SizedBox(
+              Obx(() => RoundShapeButton(
+                title: controller.isSaving.value ? 'Saving...' : 'Save All',
+                buttonColor: AppThemeData.primary50,
+                buttonTextColor: Colors.white,
+                onTap: controller.isSaving.value ? () {} : controller.savePolicies,
+                borderRadius: 14,
+                height: 48,
+                titleWidget: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (controller.isSaving.value)
+                      const SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
@@ -115,21 +124,16 @@ class PolicySettingsView extends GetView<PolicySettingsController> {
                           color: Colors.white,
                         ),
                       )
-                    : const Icon(Icons.save_rounded, size: 20),
-                label: TextCustom(
-                  title: controller.isSaving.value ? 'Saving...' : 'Save All',
-                  fontSize: 14,
-                  fontFamily: FontFamily.semiBold,
-                  color: Colors.white,
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppThemeData.primary50,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 2,
-                  shadowColor: AppThemeData.primary50.withValues(alpha: 0.4),
+                    else
+                      const Icon(Icons.save_rounded, size: 20, color: Colors.white),
+                    const SizedBox(width: 8),
+                    TextCustom(
+                      title: controller.isSaving.value ? 'Saving...' : 'Save All',
+                      fontSize: 14,
+                      fontFamily: FontFamily.semiBold,
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
               )),
             ],

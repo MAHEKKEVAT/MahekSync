@@ -9,6 +9,7 @@ import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import '../../../models/subscription_model.dart';
 import '../controllers/subscription_controller.dart';
 
@@ -69,16 +70,21 @@ class SubscriptionView extends GetView<SubscriptionController> {
             TextCustom(title: 'Manage and track all your recurring payments', fontSize: 13, fontFamily: FontFamily.regular, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
           ],
         ),
-        ElevatedButton.icon(
-          onPressed: controller.goToAdd,
-          icon: const Icon(Icons.add_rounded, size: 18),
-          label: const TextCustom(title: 'Add New', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppThemeData.primary50,
-            elevation: 4,
-            shadowColor: AppThemeData.primary50.withValues(alpha: 0.4),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        RoundShapeButton(
+          title: 'Add New',
+          buttonColor: AppThemeData.primary50,
+          buttonTextColor: Colors.white,
+          onTap: controller.goToAdd,
+          height: 48,
+          width: 150,
+          borderRadius: 14,
+          titleWidget: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.add_rounded, size: 18, color: Colors.white),
+              spaceW(width: 6),
+              const TextCustom(title: 'Add New', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
+            ],
           ),
         ),
       ],
@@ -867,9 +873,9 @@ class SubscriptionView extends GetView<SubscriptionController> {
                     spaceH(height: 24),
                     Row(
                       children: [
-                        Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(context), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), side: BorderSide(color: Colors.white.withValues(alpha: 0.2))), child: const Text('Cancel', style: TextStyle(color: Colors.white70)))),
+                        Expanded(child: RoundShapeButton(title: 'Cancel', buttonColor: Colors.transparent, buttonTextColor: Colors.white70, borderColor: Colors.white.withValues(alpha: 0.2), onTap: () => Navigator.pop(context), height: 48, borderRadius: 12)),
                         spaceW(width: 12),
-                        Expanded(child: ElevatedButton(onPressed: () => Navigator.pop(context, tempDate), style: ElevatedButton.styleFrom(backgroundColor: AppThemeData.success400, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Confirm Renewal', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))),
+                        Expanded(child: RoundShapeButton(title: 'Confirm Renewal', buttonColor: AppThemeData.success400, buttonTextColor: Colors.white, onTap: () => Navigator.pop(context, tempDate), height: 48, borderRadius: 12)),
                       ],
                     ),
                   ],
@@ -913,11 +919,21 @@ class SubscriptionView extends GetView<SubscriptionController> {
             spaceH(height: 8),
             TextCustom(title: 'Track your recurring payments', fontSize: 14, color: isDark ? AppThemeData.grey5 : AppThemeData.grey6),
             spaceH(height: 24),
-            ElevatedButton.icon(
-              onPressed: controller.goToAdd,
-              icon: const Icon(Icons.add_rounded),
-              label: const TextCustom(title: 'Add Subscription', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
-              style: ElevatedButton.styleFrom(backgroundColor: AppThemeData.primary50, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+            RoundShapeButton(
+              title: 'Add Subscription',
+              buttonColor: AppThemeData.primary50,
+              buttonTextColor: Colors.white,
+              onTap: controller.goToAdd,
+              height: 48,
+              borderRadius: 14,
+              titleWidget: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.add_rounded, size: 18, color: Colors.white),
+                  spaceW(width: 8),
+                  const TextCustom(title: 'Add Subscription', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+                ],
+              ),
             ),
           ],
         ),

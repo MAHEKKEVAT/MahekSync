@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../utils/app_colors.dart';
 import '../utils/dark_theme_provider.dart';
 import '../utils/font_family.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'global_widgets.dart';
 import 'text_widget.dart';
 
@@ -48,46 +49,26 @@ class PermissionDialog extends StatelessWidget {
             const SizedBox(height: 20),
             Row(children: [
               Expanded(
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: themeChange.isDarkTheme() ? AppThemeData.grey10 : AppThemeData.grey1,
-                    minimumSize: const Size(1, 50),
-                  ),
-                  child: TextCustom(
-                    title: 'Cancel'.tr,
-                    fontSize: 16,
-                    fontFamily: FontFamily.medium,
-                  ),
-                  onPressed: () => Navigator.pop(context),
+                child: RoundShapeButton(
+                  title: 'Cancel'.tr,
+                  buttonColor: themeChange.isDarkTheme() ? AppThemeData.grey10 : AppThemeData.grey1,
+                  buttonTextColor: themeChange.isDarkTheme() ? AppThemeData.grey1 : AppThemeData.grey10,
+                  onTap: () => Navigator.pop(context),
+                  borderRadius: 25,
+                  height: 50,
                 ),
               ),
               spaceW(width: 10),
               Expanded(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: double.infinity),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppThemeData.primary50,
-                      padding: const EdgeInsets.only(top: 12, bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                        side:  BorderSide(
-                          color: AppThemeData.primary50,
-                        ),
-                      ),
-                    ),
-                    child: TextCustom(
-                      title: 'Settings'.tr,
-                      fontSize: 16,
-                      fontFamily: FontFamily.medium,
-                      color: AppThemeData.primaryWhite,
-                    ),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                    },
-                  ),
+                child: RoundShapeButton(
+                  title: 'Settings'.tr,
+                  buttonColor: AppThemeData.primary50,
+                  buttonTextColor: AppThemeData.primaryWhite,
+                  onTap: () => Navigator.pop(context),
+                  borderRadius: 25,
+                  height: 50,
                 ),
-              )
+              ),
             ]),
           ]),
         ),

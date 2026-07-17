@@ -8,6 +8,7 @@ import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/dependency/shimmer.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:maheksync/app/models/my_contacts_model.dart';
 import '../controllers/my_contacts_controller.dart';
@@ -370,100 +371,57 @@ class MyContactsView extends GetView<MyContactsController> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: AppThemeData.appleIntelligenceGradientCool,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: AppThemeData.neonGlow(
-                AppThemeData.neonPurple,
-                blur: 12,
-                opacity: 0.25,
-              ),
-            ),
-            child: ElevatedButton.icon(
-              onPressed: controller.openAddDrawer,
-              icon: Icon(SolarIconsOutline.addCircle, size: 18),
-              label: TextCustom(
-                title: 'Add Contact',
-                fontSize: 13,
-                fontFamily: FontFamily.semiBold,
-                color: Colors.white,
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+          child: RoundShapeButton(
+            title: 'Add Contact',
+            buttonColor: Colors.transparent,
+            buttonTextColor: Colors.white,
+            onTap: controller.openAddDrawer,
+            height: 44,
+            borderRadius: 12,
+            titleWidget: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(SolarIconsOutline.addCircle, size: 18, color: Colors.white),
+                spaceW(width: 6),
+                TextCustom(title: 'Add Contact', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
+              ],
             ),
           ),
         ),
         spaceW(width: 8),
-        Container(
-          decoration: AppThemeData.neonGlowBox(
-            glowColor: AppThemeData.neonMint,
-            bgColor: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
-            radius: 12,
-            glowOpacity: 0.1,
-          ),
-          child: OutlinedButton.icon(
-            onPressed: controller.importVcfFile,
-            icon: Icon(
-              SolarIconsOutline.documentText,
-              size: 18,
-              color: AppThemeData.neonMint,
-            ),
-            label: TextCustom(
-              title: 'VCF',
-              fontSize: 13,
-              fontFamily: FontFamily.semiBold,
-              color: AppThemeData.neonMint,
-            ),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              side: BorderSide(
-                color: AppThemeData.neonMint.withValues(alpha: 0.4),
-              ),
-              backgroundColor: Colors.transparent,
-            ),
+        RoundShapeButton(
+          title: 'VCF',
+          buttonColor: Colors.transparent,
+          buttonTextColor: AppThemeData.neonMint,
+          borderColor: AppThemeData.neonMint.withValues(alpha: 0.4),
+          onTap: controller.importVcfFile,
+          height: 44,
+          borderRadius: 12,
+          titleWidget: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(SolarIconsOutline.documentText, size: 18, color: AppThemeData.neonMint),
+              spaceW(width: 6),
+              TextCustom(title: 'VCF', fontSize: 13, fontFamily: FontFamily.semiBold, color: AppThemeData.neonMint),
+            ],
           ),
         ),
         spaceW(width: 8),
-        Container(
-          decoration: AppThemeData.neonGlowBox(
-            glowColor: AppThemeData.neonTeal,
-            bgColor: isDark ? AppThemeData.surfaceDeep : AppThemeData.grey1,
-            radius: 12,
-            glowOpacity: 0.1,
-          ),
-          child: OutlinedButton.icon(
-            onPressed: controller.importMobileContacts,
-            icon: Icon(
-              SolarIconsOutline.import,
-              size: 18,
-              color: AppThemeData.neonTeal,
-            ),
-            label: TextCustom(
-              title: 'Import',
-              fontSize: 13,
-              fontFamily: FontFamily.semiBold,
-              color: AppThemeData.neonTeal,
-            ),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              side: BorderSide(
-                color: AppThemeData.neonTeal.withValues(alpha: 0.4),
-              ),
-              backgroundColor: Colors.transparent,
-            ),
+        RoundShapeButton(
+          title: 'Import',
+          buttonColor: Colors.transparent,
+          buttonTextColor: AppThemeData.neonTeal,
+          borderColor: AppThemeData.neonTeal.withValues(alpha: 0.4),
+          onTap: controller.importMobileContacts,
+          height: 44,
+          borderRadius: 12,
+          titleWidget: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(SolarIconsOutline.import, size: 18, color: AppThemeData.neonTeal),
+              spaceW(width: 6),
+              TextCustom(title: 'Import', fontSize: 13, fontFamily: FontFamily.semiBold, color: AppThemeData.neonTeal),
+            ],
           ),
         ),
       ],
@@ -1039,68 +997,41 @@ Mobile Number : ${contact.mobileNumber}
       children: [
         SizedBox(
           width: double.infinity,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: AppThemeData.appleIntelligenceGradientCool,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: AppThemeData.neonGlow(
-                AppThemeData.neonPurple,
-                blur: 10,
-                opacity: 0.2,
-              ),
-            ),
-            child: ElevatedButton.icon(
-              onPressed: () => controller.openEditDrawer(contact),
-              icon: Icon(SolarIconsOutline.pen, size: 16),
-              label: TextCustom(
-                title: 'Edit Contact',
-                fontSize: 13,
-                fontFamily: FontFamily.semiBold,
-                color: Colors.white,
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+          child: RoundShapeButton(
+            title: 'Edit Contact',
+            buttonColor: Colors.transparent,
+            buttonTextColor: Colors.white,
+            onTap: () => controller.openEditDrawer(contact),
+            height: 44,
+            borderRadius: 12,
+            titleWidget: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(SolarIconsOutline.pen, size: 16, color: Colors.white),
+                spaceW(width: 6),
+                TextCustom(title: 'Edit Contact', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
+              ],
             ),
           ),
         ),
         spaceH(height: 10),
         SizedBox(
           width: double.infinity,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppThemeData.danger300.withValues(alpha: 0.4),
-                width: 0.5,
-              ),
-            ),
-            child: OutlinedButton.icon(
-              onPressed: () => _confirmDelete(contact, isDark),
-              icon: Icon(
-                SolarIconsOutline.trashBinTrash,
-                size: 16,
-                color: AppThemeData.danger300,
-              ),
-              label: TextCustom(
-                title: 'Delete Contact',
-                fontSize: 13,
-                fontFamily: FontFamily.semiBold,
-                color: AppThemeData.danger300,
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                side: BorderSide(color: Colors.transparent),
-                backgroundColor: Colors.transparent,
-              ),
+          child: RoundShapeButton(
+            title: 'Delete Contact',
+            buttonColor: Colors.transparent,
+            buttonTextColor: AppThemeData.danger300,
+            borderColor: AppThemeData.danger300.withValues(alpha: 0.4),
+            onTap: () => _confirmDelete(contact, isDark),
+            height: 44,
+            borderRadius: 12,
+            titleWidget: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(SolarIconsOutline.trashBinTrash, size: 16, color: AppThemeData.danger300),
+                spaceW(width: 6),
+                TextCustom(title: 'Delete Contact', fontSize: 13, fontFamily: FontFamily.semiBold, color: AppThemeData.danger300),
+              ],
             ),
           ),
         ),
@@ -1335,35 +1266,25 @@ Mobile Number : ${contact.mobileNumber}
         spaceH(height: 28),
         SizedBox(
           width: double.infinity,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: AppThemeData.appleIntelligenceGradientCool,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: AppThemeData.neonGlow(
-                AppThemeData.neonPurple,
-                blur: 12,
-                opacity: 0.25,
-              ),
-            ),
-            child: ElevatedButton.icon(
-              onPressed: () => controller.saveContact(),
-              icon: Icon(SolarIconsBold.checkCircle, size: 18),
-              label: TextCustom(
-                title: controller.isEditing.value
-                    ? 'Update Contact'
-                    : 'Save Contact',
-                fontSize: 14,
-                fontFamily: FontFamily.semiBold,
-                color: Colors.white,
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+          child: RoundShapeButton(
+            title: controller.isEditing.value ? 'Update Contact' : 'Save Contact',
+            buttonColor: Colors.transparent,
+            buttonTextColor: Colors.white,
+            onTap: () => controller.saveContact(),
+            height: 48,
+            borderRadius: 14,
+            titleWidget: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(SolarIconsBold.checkCircle, size: 18, color: Colors.white),
+                spaceW(width: 8),
+                TextCustom(
+                  title: controller.isEditing.value ? 'Update Contact' : 'Save Contact',
+                  fontSize: 14,
+                  fontFamily: FontFamily.semiBold,
+                  color: Colors.white,
                 ),
-              ),
+              ],
             ),
           ),
         ),

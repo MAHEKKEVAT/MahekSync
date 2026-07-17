@@ -8,6 +8,8 @@ import 'package:maheksync/app/models/purchase_model.dart';
 import 'package:maheksync/app/firestore_utills/category_firestore_utils.dart';
 import 'package:maheksync/app/firestore_utills/payment_method_firestore_utils.dart';
 import 'package:maheksync/app/firestore_utills/purchase_firestore_utils.dart';
+import 'package:maheksync/app/utils/app_colors.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import '../../../routes/app_pages.dart';
 
 class MyPurchasesController extends GetxController {
@@ -199,17 +201,21 @@ class MyPurchasesController extends GetxController {
         title: const Text('Delete Purchase'),
         content: Text('Are you sure you want to delete "${purchase.assetName}"?'),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
+          RoundShapeButton(
+            title: 'Cancel',
+            buttonColor: Colors.transparent,
+            buttonTextColor: AppThemeData.primary50,
+            onTap: () => Get.back(result: false),
+            borderRadius: 12,
+            height: 44,
           ),
-          ElevatedButton(
-            onPressed: () => Get.back(result: true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Delete'),
+          RoundShapeButton(
+            title: 'Delete',
+            buttonColor: AppThemeData.danger300,
+            buttonTextColor: Colors.white,
+            onTap: () => Get.back(result: true),
+            borderRadius: 12,
+            height: 44,
           ),
         ],
       ),

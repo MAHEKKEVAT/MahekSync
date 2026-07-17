@@ -8,6 +8,7 @@ import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:maheksync/app/widgets/text_field_widget.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import '../../../constant/show_toast.dart';
 import '../controllers/sign_up_controller.dart';
@@ -629,41 +630,38 @@ class _SignUpViewState extends State<SignUpView> {
           ),
         ],
       ),
-      child: ElevatedButton(
-        onPressed: controller.isLoading.value
-            ? null
+      child: RoundShapeButton(
+        title: 'Create Account',
+        buttonColor: Colors.transparent,
+        buttonTextColor: Colors.white,
+        onTap: controller.isLoading.value
+            ? () {}
             : () {
-          if (_formKey.currentState!.validate()) {
-            controller.signUpWithEmailAndPassword();
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          disabledBackgroundColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-        child: controller.isLoading.value
+                if (_formKey.currentState!.validate()) {
+                  controller.signUpWithEmailAndPassword();
+                }
+              },
+        borderRadius: 14,
+        height: 54,
+        titleWidget: controller.isLoading.value
             ? const MahekLoader(size: 24, showBranding: false)
             : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextCustom(
-              title: 'Create Account',
-              fontSize: 16,
-              fontFamily: FontFamily.semiBold,
-              color: Colors.white,
-            ),
-            spaceW(width: 8),
-            const Icon(
-              Icons.arrow_forward_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-          ],
-        ),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextCustom(
+                    title: 'Create Account',
+                    fontSize: 16,
+                    fontFamily: FontFamily.semiBold,
+                    color: Colors.white,
+                  ),
+                  spaceW(width: 8),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ],
+              ),
       ),
     ));
   }

@@ -8,10 +8,10 @@ import 'package:provider/provider.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
-import 'package:maheksync/app/utils/mahek_responsive.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:maheksync/app/widgets/text_field_widget.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:solar_icons/solar_icons.dart';
 import '../../auth/controllers/auth_controller.dart';
 
@@ -748,8 +748,11 @@ class _LoginScreenViewState extends State<LoginScreenView>
                 // ── Button content ─────────────────────────────────
                 SizedBox(
                   height: s.buttonHeight,
-                  child: ElevatedButton(
-                    onPressed: loading ? null : () {
+                  child: RoundShapeButton(
+                    title: '',
+                    buttonColor: Colors.transparent,
+                    buttonTextColor: Colors.white,
+                    onTap: loading ? () {} : () {
                       if (_formKey.currentState!.validate()) {
                         controller.signInWithEmailAndPassword(
                           email: controller.emailController.text.trim(),
@@ -758,16 +761,8 @@ class _LoginScreenViewState extends State<LoginScreenView>
                         );
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      disabledBackgroundColor: Colors.transparent,
-                      disabledForegroundColor: Colors.transparent,
-                      padding: EdgeInsets.zero,
-                      alignment: Alignment.center,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(s.buttonBorderRadius)),
-                    ),
-                    child: loading
+                    borderRadius: s.buttonBorderRadius,
+                    titleWidget: loading
                         ? const SizedBox(
                             width: 22, height: 22,
                             child: CircularProgressIndicator(

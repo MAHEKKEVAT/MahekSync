@@ -10,6 +10,7 @@ import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/fire_store_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../constant/show_toast.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/text_field_widget.dart';
 
 class AuthController extends GetxController {
@@ -212,12 +213,19 @@ class AuthController extends GetxController {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
+          RoundShapeButton(
+            title: 'Cancel',
+            buttonColor: Colors.transparent,
+            buttonTextColor: AppThemeData.primary50,
+            onTap: () => Get.back(),
+            borderRadius: 12,
+            height: 44,
           ),
-          ElevatedButton(
-            onPressed: () async {
+          RoundShapeButton(
+            title: 'Send Reset Link',
+            buttonColor: const Color(0xFF5D54F2),
+            buttonTextColor: Colors.white,
+            onTap: () async {
               if (emailController.text.isNotEmpty) {
                 try {
                   await _auth.sendPasswordResetEmail(
@@ -234,14 +242,8 @@ class AuthController extends GetxController {
                 }
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF5D54F2),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Send Reset Link'),
+            borderRadius: 12,
+            height: 44,
           ),
         ],
       ),

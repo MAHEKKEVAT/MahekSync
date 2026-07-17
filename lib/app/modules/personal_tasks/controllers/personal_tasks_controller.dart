@@ -4,6 +4,7 @@ import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/models/personal_task_model.dart';
 import 'package:maheksync/app/routes/app_pages.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/firestore_utills/personal_task_firestore_utils.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:solar_icons/solar_icons.dart';
@@ -283,38 +284,25 @@ class PersonalTasksController extends GetxController {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Get.back(result: false),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white70),
-                      ),
+                    child: RoundShapeButton(
+                      title: 'Cancel',
+                      buttonColor: Colors.transparent,
+                      buttonTextColor: Colors.white70,
+                      onTap: () => Get.back(result: false),
+                      borderColor: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: 12,
+                      height: 48,
                     ),
                   ),
                   spaceW(width: 12),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Get.back(result: true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppThemeData.danger300,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Delete',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                    child: RoundShapeButton(
+                      title: 'Delete',
+                      buttonColor: AppThemeData.danger300,
+                      buttonTextColor: AppThemeData.primaryWhite,
+                      onTap: () => Get.back(result: true),
+                      borderRadius: 12,
+                      height: 48,
                     ),
                   ),
                 ],

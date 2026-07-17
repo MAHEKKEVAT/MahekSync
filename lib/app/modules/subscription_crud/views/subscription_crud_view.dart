@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_field_widget.dart';
@@ -40,9 +41,13 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
                   padding: const EdgeInsets.all(16),
                   child: const MahekLoader(size: 20, showBranding: false),
                 )
-              : TextButton(
-                  onPressed: controller.saveSubscription,
-                  child: TextCustom(title: 'Save', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.primary50),
+              : RoundShapeButton(
+                  title: 'Save',
+                  buttonColor: AppThemeData.primary50,
+                  buttonTextColor: AppThemeData.primaryWhite,
+                  onTap: controller.saveSubscription,
+                  borderRadius: 8,
+                  height: 36,
                 )),
         ],
       ),
@@ -157,14 +162,14 @@ class SubscriptionCrudView extends GetView<SubscriptionCrudController> {
               Obx(() => SizedBox(
                 width: double.infinity,
                 height: 52,
-                child: ElevatedButton(
-                  onPressed: controller.isLoading.value ? null : controller.saveSubscription,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppThemeData.primary50,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
-                  ),
-                  child: controller.isLoading.value
+                child: RoundShapeButton(
+                  title: controller.isEditMode.value ? 'Update Subscription' : 'Add Subscription',
+                  buttonColor: AppThemeData.primary50,
+                  buttonTextColor: Colors.white,
+                  onTap: controller.isLoading.value ? () {} : controller.saveSubscription,
+                  borderRadius: 16,
+                  height: 52,
+                  titleWidget: controller.isLoading.value
                       ? const MahekLoader(size: 22, showBranding: false)
                       : TextCustom(
                           title: controller.isEditMode.value ? 'Update Subscription' : 'Add Subscription',

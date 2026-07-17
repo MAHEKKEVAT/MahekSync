@@ -11,6 +11,7 @@ import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/mahek_loader.dart';
 import 'package:maheksync/app/widgets/network_image_widget.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import '../../../models/device_model.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/my_devices_controller.dart';
@@ -120,21 +121,25 @@ class MyDevicesView extends GetView<MyDevicesController> {
           spaceH(height: 16),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: controller.openAddDevicePanel,
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: TextCustom(
-                title: 'Register New Device',
-                fontSize: 13,
-                fontFamily: FontFamily.semiBold,
-                color: AppThemeData.primaryWhite,
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppThemeData.primary50,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 2,
-                shadowColor: AppThemeData.primary50.withValues(alpha: 0.4),
+            child: RoundShapeButton(
+              title: '',
+              buttonColor: AppThemeData.primary50,
+              buttonTextColor: AppThemeData.primaryWhite,
+              onTap: controller.openAddDevicePanel,
+              height: 48,
+              borderRadius: 14,
+              titleWidget: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                   Icon(Icons.add_rounded, size: 18, color: AppThemeData.primaryWhite),
+                  spaceW(width: 8),
+                  TextCustom(
+                    title: 'Register New Device',
+                    fontSize: 13,
+                    fontFamily: FontFamily.semiBold,
+                    color: AppThemeData.primaryWhite,
+                  ),
+                ],
               ),
             ),
           ),
@@ -187,21 +192,25 @@ class MyDevicesView extends GetView<MyDevicesController> {
             ),
           ],
         ),
-        ElevatedButton.icon(
-          onPressed: controller.openAddDevicePanel,
-          icon: const Icon(Icons.add_rounded, size: 20),
-          label: TextCustom(
-            title: 'Register New Device',
-            fontSize: 14,
-            fontFamily: FontFamily.semiBold,
-            color: AppThemeData.primaryWhite,
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppThemeData.primary50,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            elevation: 2,
-            shadowColor: AppThemeData.primary50.withValues(alpha: 0.4),
+        RoundShapeButton(
+          title: '',
+          buttonColor: AppThemeData.primary50,
+          buttonTextColor: AppThemeData.primaryWhite,
+          onTap: controller.openAddDevicePanel,
+          height: 52,
+          borderRadius: 14,
+          titleWidget: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+               Icon(Icons.add_rounded, size: 20, color: AppThemeData.primaryWhite),
+              spaceW(width: 8),
+              TextCustom(
+                title: 'Register New Device',
+                fontSize: 14,
+                fontFamily: FontFamily.semiBold,
+                color: AppThemeData.primaryWhite,
+              ),
+            ],
           ),
         ),
       ],
@@ -1327,21 +1336,25 @@ class MyDevicesView extends GetView<MyDevicesController> {
               color: isDark ? AppThemeData.grey5 : AppThemeData.grey6,
             ),
             spaceH(height: 28),
-            ElevatedButton.icon(
-              onPressed: controller.openAddDevicePanel,
-              icon: const Icon(Icons.add_rounded),
-              label: TextCustom(
-                title: 'Add New Device',
-                fontSize: 15,
-                fontFamily: FontFamily.semiBold,
-                color: AppThemeData.primaryWhite,
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppThemeData.primary50,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+            RoundShapeButton(
+              title: '',
+              buttonColor: AppThemeData.primary50,
+              buttonTextColor: AppThemeData.primaryWhite,
+              onTap: controller.openAddDevicePanel,
+              height: 52,
+              borderRadius: 14,
+              titleWidget: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add_rounded, color: AppThemeData.primaryWhite),
+                  spaceW(width: 8),
+                  TextCustom(
+                    title: 'Add New Device',
+                    fontSize: 15,
+                    fontFamily: FontFamily.semiBold,
+                    color: AppThemeData.primaryWhite,
+                  ),
+                ],
               ),
             ),
           ],

@@ -5,6 +5,7 @@ import 'package:maheksync/app/constant/constants.dart';
 import 'package:maheksync/app/firestore_utills/subscription_firestore_utils.dart';
 import 'package:maheksync/app/models/subscription_model.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import '../../../routes/app_pages.dart';
 
@@ -151,9 +152,9 @@ class SubscriptionController extends GetxController {
               spaceH(height: 24),
               Row(
                 children: [
-                  Expanded(child: OutlinedButton(onPressed: () => Get.back(result: false), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), side: BorderSide(color: Colors.white.withValues(alpha: 0.2))), child: const Text('Cancel', style: TextStyle(color: Colors.white70)))),
+                  Expanded(child: RoundShapeButton(title: 'Cancel', buttonColor: Colors.transparent, buttonTextColor: Colors.white70, onTap: () => Get.back(result: false), borderColor: Colors.white.withValues(alpha: 0.2), borderRadius: 12, height: 48)),
                   spaceW(width: 12),
-                  Expanded(child: ElevatedButton(onPressed: () => Get.back(result: true), style: ElevatedButton.styleFrom(backgroundColor: AppThemeData.danger300, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))),
+                  Expanded(child: RoundShapeButton(title: 'Delete', buttonColor: AppThemeData.danger300, buttonTextColor: AppThemeData.primaryWhite, onTap: () => Get.back(result: true), borderRadius: 12, height: 48)),
                 ],
               ),
             ],

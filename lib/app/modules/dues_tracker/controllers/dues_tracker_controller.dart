@@ -8,7 +8,9 @@ import 'package:maheksync/app/models/dues_tracker_model.dart';
 import 'package:maheksync/app/models/payment_method_model.dart';
 import 'package:maheksync/app/firestore_utills/dues_tracker_firestore_utils.dart';
 import 'package:maheksync/app/firestore_utills/payment_method_firestore_utils.dart';
+import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/constant/show_toast.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 
 class DuesTrackerController extends GetxController {
@@ -460,20 +462,21 @@ class DuesTrackerController extends GetxController {
           'Are you sure you want to delete the due for "${due.customerName}"? This action cannot be undone.',
         ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
+          RoundShapeButton(
+            title: 'Cancel',
+            buttonColor: Colors.transparent,
+            buttonTextColor: AppThemeData.primary50,
+            onTap: () => Get.back(result: false),
+            borderRadius: 12,
+            height: 44,
           ),
-          ElevatedButton(
-            onPressed: () => Get.back(result: true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Delete'),
+          RoundShapeButton(
+            title: 'Delete',
+            buttonColor: AppThemeData.danger300,
+            buttonTextColor: Colors.white,
+            onTap: () => Get.back(result: true),
+            borderRadius: 12,
+            height: 44,
           ),
         ],
       ),

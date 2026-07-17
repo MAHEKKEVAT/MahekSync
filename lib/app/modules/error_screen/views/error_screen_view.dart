@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/dark_theme_provider.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/constant/round_shape_button.dart';
 import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:provider/provider.dart';
@@ -142,19 +143,14 @@ class ErrorScreenView extends GetView<ErrorScreenController> {
     return SizedBox(
       width: double.infinity,
       height: 50,
-      child: ElevatedButton(
-        onPressed: () => controller.goToLogin(),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppThemeData.primary50,
-          foregroundColor: AppThemeData.primaryWhite,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          elevation: 0,
-          padding: EdgeInsets.zero,
-        ),
-        child: Row(
+      child: RoundShapeButton(
+        title: 'Go to Login',
+        buttonColor: AppThemeData.primary50,
+        buttonTextColor: AppThemeData.primaryWhite,
+        onTap: () => controller.goToLogin(),
+        borderRadius: 14,
+        height: 50,
+        titleWidget: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextCustom(
