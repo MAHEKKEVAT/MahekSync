@@ -1,6 +1,4 @@
 // lib/app/models/purchase_model.dart
-import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -93,7 +91,7 @@ class PurchaseModel {
     };
   }
 
-  String get formattedPrice => '\$${price?.toStringAsFixed(2) ?? '0.00'}';
+  String get formattedPrice => '₹${price?.toStringAsFixed(2) ?? '0.00'}';
 
   String get formattedPurchaseDate => purchaseDate != null
       ? '${purchaseDate!.month}/${purchaseDate!.day}/${purchaseDate!.year}'

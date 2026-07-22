@@ -45,6 +45,7 @@ abstract class Routes {
   static const MOVIE_CRUD = _Paths.MOVIE_CRUD;
   static const MOVIE_DETAILS = _Paths.MOVIE_DETAILS;
   static const ERROR_SCREEN = _Paths.ERROR_SCREEN;
+  static const WEATHER = _Paths.WEATHER;
 }
 
 abstract class _Paths {
@@ -92,4 +93,5 @@ abstract class _Paths {
   static const MOVIE_CRUD = '/movie-crud';
   static const MOVIE_DETAILS = '/movie-details';
   static const ERROR_SCREEN = '/error-screen';
+  static const WEATHER = '/weather';
 }

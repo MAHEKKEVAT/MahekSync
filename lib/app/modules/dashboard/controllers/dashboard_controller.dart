@@ -33,6 +33,8 @@ import 'package:maheksync/app/modules/aegis/controllers/aegis_controller.dart';
 import 'package:maheksync/app/modules/aegis/views/aegis_view.dart';
 import 'package:maheksync/app/modules/movies/controllers/movies_controller.dart';
 import 'package:maheksync/app/modules/movies/views/movies_view.dart';
+import 'package:maheksync/app/modules/weather/controllers/weather_controller.dart';
+import 'package:maheksync/app/modules/weather/views/weather_view.dart';
 
 import '../../../utils/app_colors.dart';
 import '../../../utils/font_family.dart';
@@ -134,6 +136,11 @@ class DashboardController extends GetxController {
           title: 'Image to Text'.tr,
           svgIcon: 'assets/icons/ic_image_text.svg',
           route: Routes.IMAGE_TO_TEXT,
+        ),
+        NavigationItem(
+          title: 'Weather'.tr,
+          route: Routes.WEATHER,
+          svgIcon: 'assets/icons/ic_weather.svg',
         ),
       ],
     ),
@@ -376,6 +383,12 @@ class DashboardController extends GetxController {
           Get.put(ImageToTextController());
         }
         return const ImageToTextView();
+
+      case Routes.WEATHER:
+        if (!Get.isRegistered<WeatherController>()) {
+          Get.put(WeatherController());
+        }
+        return const WeatherView();
 
       case Routes.GENERATE_BILL:
         if (!Get.isRegistered<GenerateBillController>()) {

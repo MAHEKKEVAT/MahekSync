@@ -58,6 +58,8 @@ import '../modules/view_devices/bindings/view_devices_binding.dart';
 import '../modules/view_devices/views/view_devices_view.dart';
 import '../modules/error_screen/bindings/error_screen_binding.dart';
 import '../modules/error_screen/views/error_screen_view.dart';
+import '../modules/weather/bindings/weather_binding.dart';
+import '../modules/weather/views/weather_view.dart';
 import '../utils/auth_middleware.dart';
 
 part 'app_routes.dart';
@@ -105,6 +107,12 @@ class AppPages {
       name: _Paths.ERROR_SCREEN,
       page: () => const ErrorScreenView(),
       binding: ErrorScreenBinding(),
+    ),
+    GetPage(
+      name: _Paths.WEATHER,
+      page: () => const WeatherView(),
+      binding: WeatherBinding(),
+      middlewares: [AuthMiddleware()],
     ),
 
     // Standalone pages (NOT nested under dashboard)
