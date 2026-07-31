@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 
 class DashboardStatCard extends StatefulWidget {
@@ -67,12 +68,18 @@ class _DashboardStatCardState extends State<DashboardStatCard>
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (_) {
-        setState(() => _isHovered = true);
+        _isHovered = true;
         _animController.forward();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       },
       onExit: (_) {
-        setState(() => _isHovered = false);
+        _isHovered = false;
         _animController.reverse();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       },
       child: GestureDetector(
         onTap: widget.onTap,
@@ -99,7 +106,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
               BoxShadow(
                 color: _isHovered
                     ? widget.accentColor.withValues(alpha: 0.08)
-                    : Colors.black.withValues(alpha: widget.isDark ? 0.12 : 0.03),
+                    : AppThemeData.primaryBlack.withValues(alpha: widget.isDark ? 0.12 : 0.03),
                 blurRadius: _isHovered ? 20 : 10,
                 offset: const Offset(0, 4),
               ),
@@ -184,12 +191,12 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                                 border: Border.all(
                                   color: widget.isDark
                                       ? AppThemeData.surfaceBorder.withValues(alpha: 0.5)
-                                      : Colors.white,
+                                       : AppThemeData.primaryWhite,
                                   width: 2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
+                                    color: AppThemeData.primaryBlack.withValues(alpha: 0.2),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
@@ -253,7 +260,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                             gradient: widget.iconGradient,
                             borderRadius: BorderRadius.circular(9),
                           ),
-                          child: Icon(widget.icon, size: 15, color: Colors.white),
+                           child: Icon(widget.icon, size: 15, color: AppThemeData.primaryWhite),
                         ),
                         if (widget.onViewAll != null)
                           GestureDetector(
@@ -264,18 +271,16 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                                 color: widget.accentColor.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(7),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'View All',
-                                    style: TextStyle(
-                                      fontFamily: FontFamily.medium,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                     TextCustom(
+                                      title: 'View All',
                                       fontSize: 9,
+                                      fontFamily: FontFamily.medium,
                                       color: widget.accentColor,
                                     ),
-                                  ),
-                                  const SizedBox(width: 3),
+                                   spaceW(width: 3),
                                   Icon(
                                     Icons.arrow_forward_ios_rounded,
                                     size: 7,
@@ -288,22 +293,18 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                       ],
                     ),
 
-                    const SizedBox(height: 14),
+                    spaceH(height: 14),
 
                     // ── Count ───────────────────────────
-                    Text(
-                      widget.count.toString(),
-                      style: TextStyle(
-                        fontFamily: FontFamily.bold,
-                        fontSize: 26,
-                        color: widget.isDark
-                            ? AppThemeData.grey1
-                            : AppThemeData.grey10,
-                        letterSpacing: -0.8,
-                        height: 1.1,
-                      ),
+                    TextCustom(
+                      title: widget.count.toString(),
+                      fontSize: 26,
+                      fontFamily: FontFamily.bold,
+                      color: widget.isDark
+                          ? AppThemeData.grey1
+                          : AppThemeData.grey10,
                     ),
-                    const SizedBox(height: 3),
+                    spaceH(height: 3),
 
                     // ── Title + Subtitle ────────────────
                     Row(
@@ -319,20 +320,18 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                           ),
                         ),
                         if (widget.subtitle.isNotEmpty) ...[
-                          const SizedBox(width: 6),
+                          spaceW(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: widget.accentColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            child: Text(
-                              widget.subtitle,
-                              style: TextStyle(
-                                fontFamily: FontFamily.medium,
-                                fontSize: 9,
-                                color: widget.accentColor,
-                              ),
+                            child: TextCustom(
+                              title: widget.subtitle,
+                              fontSize: 9,
+                              fontFamily: FontFamily.medium,
+                              color: widget.accentColor,
                             ),
                           ),
                         ],
@@ -341,7 +340,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
 
                     // ── Preview Item Names ──────────────
                     if (widget.previewItems.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                      spaceH(height: 8),
                       Wrap(
                         spacing: 4,
                         runSpacing: 4,
@@ -354,15 +353,13 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                                   : AppThemeData.grey3.withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            child: Text(
-                              item.length > 14 ? '${item.substring(0, 14)}...' : item,
-                              style: TextStyle(
-                                fontFamily: FontFamily.regular,
-                                fontSize: 9,
-                                color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: TextCustom(
+                              title: item.length > 14 ? '${item.substring(0, 14)}...' : item,
+                              fontSize: 9,
+                              fontFamily: FontFamily.regular,
+                              color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+                              maxLine: 1,
+                              textOverflow: TextOverflow.ellipsis,
                             ),
                           );
                         }).toList(),
@@ -406,7 +403,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                         opacity: 0.2,
                       ),
                     ),
-                    child: Icon(widget.icon, size: 20, color: Colors.white),
+                    child: Icon(widget.icon, size: 20, color: AppThemeData.primaryWhite),
                   ),
                   if (widget.onViewAll != null)
                     GestureDetector(
@@ -417,18 +414,16 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                           color: widget.accentColor.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(7),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'View All',
-                              style: TextStyle(
-                                fontFamily: FontFamily.medium,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                               TextCustom(
+                                title: 'View All',
                                 fontSize: 9,
+                                fontFamily: FontFamily.medium,
                                 color: widget.accentColor,
                               ),
-                            ),
-                            const SizedBox(width: 3),
+                            spaceW(width: 3),
                             Icon(
                               Icons.arrow_forward_ios_rounded,
                               size: 8,
@@ -441,20 +436,16 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                 ],
               ),
 
-              const SizedBox(height: 16),
+              spaceH(height: 16),
 
               // ── Count ──────────────────────────────
-              Text(
-                widget.count.toString(),
-                style: TextStyle(
-                  fontFamily: FontFamily.bold,
-                  fontSize: 28,
-                  color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                  letterSpacing: -1,
-                  height: 1.1,
-                ),
+              TextCustom(
+                title: widget.count.toString(),
+                fontSize: 28,
+                fontFamily: FontFamily.bold,
+                color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
               ),
-              const SizedBox(height: 2),
+              spaceH(height: 2),
 
               // ── Title + Subtitle ───────────────────
               Row(
@@ -468,20 +459,18 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                     ),
                   ),
                   if (widget.subtitle.isNotEmpty) ...[
-                    const SizedBox(width: 6),
+                    spaceW(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: widget.accentColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text(
-                        widget.subtitle,
-                        style: TextStyle(
-                          fontFamily: FontFamily.medium,
-                          fontSize: 9,
-                          color: widget.accentColor,
-                        ),
+                      child: TextCustom(
+                        title: widget.subtitle,
+                        fontSize: 9,
+                        fontFamily: FontFamily.medium,
+                        color: widget.accentColor,
                       ),
                     ),
                   ],
@@ -490,7 +479,7 @@ class _DashboardStatCardState extends State<DashboardStatCard>
 
               // ── Preview Items ──────────────────────
               if (widget.previewItems.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                spaceH(height: 8),
                 Wrap(
                   spacing: 4,
                   runSpacing: 4,
@@ -503,15 +492,13 @@ class _DashboardStatCardState extends State<DashboardStatCard>
                             : AppThemeData.grey3,
                         borderRadius: BorderRadius.circular(5),
                       ),
-                      child: Text(
-                        item.length > 12 ? '${item.substring(0, 12)}...' : item,
-                        style: TextStyle(
-                          fontFamily: FontFamily.regular,
-                          fontSize: 9,
-                          color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      child: TextCustom(
+                        title: item.length > 12 ? '${item.substring(0, 12)}...' : item,
+                        fontSize: 9,
+                        fontFamily: FontFamily.regular,
+                        color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
+                        maxLine: 1,
+                        textOverflow: TextOverflow.ellipsis,
                       ),
                     );
                   }).toList(),

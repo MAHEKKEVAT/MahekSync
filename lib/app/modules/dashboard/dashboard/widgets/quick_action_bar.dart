@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
+import 'package:maheksync/app/widgets/text_widget.dart';
 
 class QuickActionBar extends StatelessWidget {
   final bool isDark;
@@ -121,11 +123,19 @@ class _QuickActionButton extends StatefulWidget {
 class _QuickActionButtonState extends State<_QuickActionButton> {
   bool _isHovered = false;
 
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       child: GestureDetector(
         onTap: widget.action.onTap,
         child: AnimatedContainer(
@@ -167,18 +177,16 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
               Icon(
                 widget.action.icon,
                 size: 16,
-                color: _isHovered ? Colors.white : widget.action.accentColor,
+                color: _isHovered ? AppThemeData.primaryWhite : widget.action.accentColor,
               ),
-              const SizedBox(width: 7),
-              Text(
-                widget.action.title,
-                style: TextStyle(
-                  fontFamily: FontFamily.medium,
-                  fontSize: 12,
-                  color: _isHovered
-                      ? widget.action.accentColor
-                      : (widget.isDark ? AppThemeData.grey3 : AppThemeData.grey8),
-                ),
+              spaceW(width: 7),
+              TextCustom(
+                title: widget.action.title,
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: _isHovered
+                    ? widget.action.accentColor
+                    : (widget.isDark ? AppThemeData.grey3 : AppThemeData.grey8),
               ),
             ],
           ),

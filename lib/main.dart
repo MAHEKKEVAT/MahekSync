@@ -7,6 +7,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:get/get.dart';
 import 'package:maheksync/app/constant/toast_service.dart';
 import 'package:maheksync/app/modules/splash_screen/views/splash_screen_view.dart';
+import 'package:maheksync/app/theme/app_theme.dart';
 import 'package:maheksync/app/utils/mahek_reminder.dart';
 import 'package:provider/provider.dart';
 import 'app/constant/global_controller.dart';
@@ -16,7 +17,6 @@ import 'app/modules/error_screen/views/error_screen_view.dart';
 import 'app/routes/app_pages.dart';
 import 'app/utils/dark_theme_provider.dart';
 import 'app/utils/preferences.dart';
-import 'app/utils/styles.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -34,7 +34,6 @@ void main() async {
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
 
-  // Only activate App Check in production
   if (!kDebugMode && !kIsWeb) {
     await FirebaseAppCheck.instance.activate(
       androidProvider: AndroidProvider.playIntegrity,
@@ -87,6 +86,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     themeChangeProvider.darkTheme = await themeChangeProvider.darkThemePreference.isDarkThemee();
   }
 
+  ThemeData _buildTheme() {
+    return themeChangeProvider.isDarkTheme()
+        ? AppTheme.dark()
+        : AppTheme.light();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -102,16 +107,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               navigatorKey: navigatorKey,
               title: 'Mahek Owner'.tr,
               debugShowCheckedModeBanner: false,
-              theme: Styles.themeData(
-                themeChangeProvider.darkTheme == 0
-                    ? true
-                    : themeChangeProvider.darkTheme == 1
-                    ? false
-                    : themeChangeProvider.getSystemThem(),
-                context,
-              ),
-              darkTheme: Styles.themeData(true, context),
-              themeMode: themeChangeProvider.darkTheme == 1 ? ThemeMode.light : ThemeMode.dark,
+              theme: _buildTheme(),
+              darkTheme: AppTheme.dark(),
+              themeMode: themeChangeProvider.themeMode,
               initialRoute: AppPages.INITIAL,
               getPages: AppPages.routes,
               unknownRoute: GetPage(

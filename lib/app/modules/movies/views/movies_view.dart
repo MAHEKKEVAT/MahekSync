@@ -27,11 +27,19 @@ class _HoverableStatCard extends StatefulWidget {
 class _HoverableStatCardState extends State<_HoverableStatCard> {
   bool _isHovered = false;
 
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       cursor: SystemMouseCursors.click,
       child: AnimatedScale(
         scale: _isHovered ? 1.03 : 1.0,
@@ -93,13 +101,21 @@ class _HoverableCard extends StatefulWidget {
 class _HoverableCardState extends State<_HoverableCard> {
   bool _isHovered = false;
 
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onTap,
@@ -410,9 +426,9 @@ class MoviesView extends GetView<MoviesController> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+            Icon(Icons.add_rounded, color: AppThemeData.primaryWhite, size: 20),
             spaceW(width: 6),
-            TextCustom(title: 'Add Movie', fontSize: 14, fontFamily: FontFamily.semiBold, color: Colors.white),
+            TextCustom(title: 'Add Movie', fontSize: 14, fontFamily: FontFamily.semiBold, color: AppThemeData.primaryWhite),
           ],
         ),
       ),
@@ -884,9 +900,9 @@ class MoviesView extends GetView<MoviesController> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextCustom(title: 'View All', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
+                    TextCustom(title: 'View All', fontSize: 13, fontFamily: FontFamily.semiBold, color: AppThemeData.primaryWhite),
                     spaceW(width: 6),
-                    Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white),
+                    Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppThemeData.primaryWhite),
                   ],
                 ),
               ),

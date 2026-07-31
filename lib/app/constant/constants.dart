@@ -37,17 +37,6 @@ class MahekConstant {
   static UserModel? ownerModel;
   static String senderId = "";
 
-  // Ad Settings (from settings/ad_settings)
-  static bool autoApproveAds = false;
-  static bool autoApproveEditedAds = false;
-  static bool freeAdListing = false;
-  static bool unlimitedAdDuration = false;
-  static int freeAdListingDays = 30;
-  static int minRange = 50;
-  static int maxRange = 200;
-
-  static  int pageSize = 10;
-
   static String? selectedMap;
 
   static String jsonFileURL = "";
@@ -72,14 +61,6 @@ class MahekConstant {
 
   static TextStyle defaultTextStyle({double size = 24.00, Color color = Colors.black}) {
     return TextStyle(fontSize: size, color: color, fontWeight: FontWeight.w600, fontFamily: FontFamily.medium);
-  }
-
-  static void isDemoSet(bool? isDemoMahekConstant) {
-    if (kDebugMode) {
-      MahekConstant.isDemo = false;
-    } else {
-      MahekConstant.isDemo = isDemoMahekConstant ?? true;
-    }
   }
 
   static Widget loader({BuildContext? context}) {
@@ -144,9 +125,6 @@ class MahekConstant {
     String maskedNumber = 'x' * (mobileNumber!.length - 2) + mobileNumber.substring(mobileNumber.length - 2);
     return MahekConstant.isDemo ? "$countryCode $maskedNumber" : "$countryCode $mobileNumber";
   }
-
-
-
 
   static InputDecoration DefaultInputDecoration(BuildContext context, {Color? fillColor}) {
     final themeChange = Provider.of<DarkThemeProvider>(context);

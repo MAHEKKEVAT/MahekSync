@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:maheksync/app/theme/weather_theme.dart';
 
 class WeatherParticles extends StatefulWidget {
   final bool isRainy;
@@ -25,6 +26,7 @@ class _WeatherParticlesState extends State<WeatherParticles>
   final _rainDrops = <_RainDrop>[];
   final _snowFlakes = <_SnowFlake>[];
   final _stars = <_Star>[];
+  final _clouds = <_Cloud>[];
   final _rng = Random();
 
   @override
@@ -41,40 +43,52 @@ class _WeatherParticlesState extends State<WeatherParticles>
     _rainDrops.clear();
     _snowFlakes.clear();
     _stars.clear();
+    _clouds.clear();
 
     if (widget.isRainy) {
-      for (int i = 0; i < 120; i++) {
+      for (int i = 0; i < 60; i++) {
         _rainDrops.add(_RainDrop(
           x: _rng.nextDouble(),
           y: _rng.nextDouble(),
-          speed: 0.03 + _rng.nextDouble() * 0.05,
-          length: 12 + _rng.nextDouble() * 18,
-          opacity: 0.25 + _rng.nextDouble() * 0.35,
-          width: 0.8 + _rng.nextDouble() * 0.8,
+          speed: 0.04 + _rng.nextDouble() * 0.06,
+          length: 15 + _rng.nextDouble() * 20,
+          opacity: 0.15 + _rng.nextDouble() * 0.25,
+          width: 0.6 + _rng.nextDouble() * 0.6,
         ));
       }
     }
     if (widget.isSnowy) {
-      for (int i = 0; i < 80; i++) {
+      for (int i = 0; i < 40; i++) {
         _snowFlakes.add(_SnowFlake(
           x: _rng.nextDouble(),
           y: _rng.nextDouble(),
-          speed: 0.004 + _rng.nextDouble() * 0.008,
-          drift: 0.003 + _rng.nextDouble() * 0.006,
-          size: 1.5 + _rng.nextDouble() * 3.0,
-          opacity: 0.3 + _rng.nextDouble() * 0.4,
+          speed: 0.003 + _rng.nextDouble() * 0.006,
+          drift: 0.002 + _rng.nextDouble() * 0.005,
+          size: 1.5 + _rng.nextDouble() * 2.5,
+          opacity: 0.2 + _rng.nextDouble() * 0.3,
         ));
       }
     }
     if (widget.isNight) {
-      for (int i = 0; i < 60; i++) {
+      for (int i = 0; i < 50; i++) {
         _stars.add(_Star(
           x: _rng.nextDouble(),
-          y: _rng.nextDouble() * 0.6,
-          size: 0.5 + _rng.nextDouble() * 1.5,
-          baseOpacity: 0.3 + _rng.nextDouble() * 0.5,
+          y: _rng.nextDouble() * 0.5,
+          size: 0.4 + _rng.nextDouble() * 1.2,
+          baseOpacity: 0.2 + _rng.nextDouble() * 0.4,
           twinkleSpeed: 0.5 + _rng.nextDouble() * 2.0,
           twinkleOffset: _rng.nextDouble() * 2 * pi,
+        ));
+      }
+    }
+    if (widget.isRainy || widget.isSnowy) {
+      for (int i = 0; i < 3; i++) {
+        _clouds.add(_Cloud(
+          x: -0.2 + _rng.nextDouble() * 1.4,
+          y: 0.05 + _rng.nextDouble() * 0.25,
+          width: 0.3 + _rng.nextDouble() * 0.3,
+          speed: 0.001 + _rng.nextDouble() * 0.002,
+          opacity: 0.04 + _rng.nextDouble() * 0.06,
         ));
       }
     }
@@ -103,12 +117,17 @@ class _WeatherParticlesState extends State<WeatherParticles>
     if (!hasAnyParticles && !widget.isClear) {
       return const SizedBox.shrink();
     }
+
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
+    final particleColor = wt?.particleColor ?? Colors.white;
+    final cloudColor = wt?.cloudColor ?? Colors.white;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
         for (final d in _rainDrops) {
           d.y += d.speed;
-          d.x -= d.speed * 0.15;
+          d.x -= d.speed * 0.12;
           if (d.y > 1.1 || d.x < -0.1) {
             d.y = -0.05 - _rng.nextDouble() * 0.1;
             d.x = _rng.nextDouble();
@@ -122,15 +141,22 @@ class _WeatherParticlesState extends State<WeatherParticles>
             s.x = _rng.nextDouble();
           }
         }
+        for (final c in _clouds) {
+          c.x += c.speed;
+          if (c.x > 1.3) c.x = -0.4;
+        }
         return CustomPaint(
           willChange: true,
           painter: _ParticlePainter(
             rainDrops: _rainDrops,
             snowFlakes: _snowFlakes,
             stars: _stars,
+            clouds: _clouds,
             animValue: _controller.value,
             isNight: widget.isNight,
             isClear: widget.isClear,
+            particleColor: particleColor,
+            cloudColor: cloudColor,
           ),
           size: Size.infinite,
         );
@@ -175,30 +201,49 @@ class _Star {
   });
 }
 
+class _Cloud {
+  double x, y, width, speed, opacity;
+  _Cloud({
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.speed,
+    required this.opacity,
+  });
+}
+
 class _ParticlePainter extends CustomPainter {
   final List<_RainDrop> rainDrops;
   final List<_SnowFlake> snowFlakes;
   final List<_Star> stars;
+  final List<_Cloud> clouds;
   final double animValue;
   final bool isNight;
   final bool isClear;
+  final Color particleColor;
+  final Color cloudColor;
 
   _ParticlePainter({
     required this.rainDrops,
     required this.snowFlakes,
     required this.stars,
+    required this.clouds,
     required this.animValue,
     required this.isNight,
     required this.isClear,
+    required this.particleColor,
+    required this.cloudColor,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.width <= 0 || size.height <= 0) return;
 
+    _paintClouds(canvas, size);
+
     if (isNight) _paintStars(canvas, size);
-    if (isNight) _paintMoonGlow(canvas, size);
-    if (isClear && !isNight) _paintSunRays(canvas, size);
+    if (isNight) _paintMoon(canvas, size);
+    if (isClear && !isNight) _paintSunGlow(canvas, size);
 
     final rainPaint = Paint()..strokeCap = StrokeCap.round;
     for (final d in rainDrops) {
@@ -206,10 +251,10 @@ class _ParticlePainter extends CustomPainter {
       final y = d.y * size.height;
       rainPaint
         ..strokeWidth = d.width
-        ..color = Colors.white.withValues(alpha: d.opacity);
+        ..color = particleColor.withValues(alpha: d.opacity);
       canvas.drawLine(
         Offset(x, y),
-        Offset(x - d.length * 0.2, y + d.length),
+        Offset(x - d.length * 0.15, y + d.length),
         rainPaint,
       );
     }
@@ -218,10 +263,32 @@ class _ParticlePainter extends CustomPainter {
     for (final s in snowFlakes) {
       final x = s.x * size.width;
       final y = s.y * size.height;
-      snowPaint.color = Colors.white.withValues(alpha: s.opacity);
+      snowPaint.color = particleColor.withValues(alpha: s.opacity);
       canvas.drawOval(
-        Rect.fromCenter(center: Offset(x, y), width: s.size * 0.8, height: s.size),
+        Rect.fromCenter(center: Offset(x, y), width: s.size * 0.7, height: s.size),
         snowPaint,
+      );
+    }
+  }
+
+  void _paintClouds(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+    for (final c in clouds) {
+      final x = c.x * size.width;
+      final y = c.y * size.height;
+      final w = c.width * size.width;
+      paint.color = cloudColor.withValues(alpha: c.opacity);
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(x, y), width: w, height: w * 0.35),
+        paint,
+      );
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(x + w * 0.25, y - w * 0.08), width: w * 0.6, height: w * 0.3),
+        paint,
+      );
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(x - w * 0.2, y + w * 0.05), width: w * 0.5, height: w * 0.25),
+        paint,
       );
     }
   }
@@ -230,57 +297,41 @@ class _ParticlePainter extends CustomPainter {
     final paint = Paint()..style = PaintingStyle.fill;
     for (final s in stars) {
       final twinkle = (sin(animValue * 2 * pi * s.twinkleSpeed + s.twinkleOffset) + 1) / 2;
-      final opacity = s.baseOpacity * (0.4 + 0.6 * twinkle);
+      final opacity = s.baseOpacity * (0.3 + 0.7 * twinkle);
       final x = s.x * size.width;
       final y = s.y * size.height;
-      paint.color = Colors.white.withValues(alpha: opacity);
+      paint.color = particleColor.withValues(alpha: opacity);
       canvas.drawCircle(Offset(x, y), s.size, paint);
     }
   }
 
-  void _paintMoonGlow(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.82, size.height * 0.08);
-    final moonPaint = Paint()
+  void _paintMoon(Canvas canvas, Size size) {
+    final center = Offset(size.width * 0.82, size.height * 0.06);
+
+    final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0x15FFFFFF),
-          const Color(0x08FFFFFF),
+          particleColor.withValues(alpha: 0.06),
           Colors.transparent,
         ],
-      ).createShader(Rect.fromCircle(center: center, radius: 80));
-    canvas.drawCircle(center, 80, moonPaint);
+      ).createShader(Rect.fromCircle(center: center, radius: 60));
+    canvas.drawCircle(center, 60, glowPaint);
 
-    final moonBodyPaint = Paint()..color = const Color(0x30FFFFFF);
-    canvas.drawCircle(center, 16, moonBodyPaint);
+    final bodyPaint = Paint()..color = particleColor.withValues(alpha: 0.2);
+    canvas.drawCircle(center, 14, bodyPaint);
   }
 
-  void _paintSunRays(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.85, size.height * 0.06);
-    final rayPaint = Paint()
-      ..strokeWidth = 0.8
-      ..strokeCap = StrokeCap.round;
+  void _paintSunGlow(Canvas canvas, Size size) {
+    final center = Offset(size.width * 0.85, size.height * 0.05);
 
-    for (int i = 0; i < 8; i++) {
-      final angle = (i * pi / 4) + (animValue * 0.3);
-      final innerR = 30.0;
-      final outerR = 60.0 + sin(animValue * 2 * pi + i) * 10;
-      final opacity = 0.06 + sin(animValue * 2 * pi + i * 0.7) * 0.03;
-      rayPaint.color = const Color(0xFFFFF3E0).withValues(alpha: opacity);
-      canvas.drawLine(
-        Offset(center.dx + cos(angle) * innerR, center.dy + sin(angle) * innerR),
-        Offset(center.dx + cos(angle) * outerR, center.dy + sin(angle) * outerR),
-        rayPaint,
-      );
-    }
-
-    final sunGlowPaint = Paint()
+    final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0x0AFFF8E1),
+          particleColor.withValues(alpha: 0.03),
           Colors.transparent,
         ],
       ).createShader(Rect.fromCircle(center: center, radius: 50));
-    canvas.drawCircle(center, 50, sunGlowPaint);
+    canvas.drawCircle(center, 50, glowPaint);
   }
 
   @override

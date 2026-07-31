@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'dark_theme_preference.dart';
@@ -15,16 +16,31 @@ class DarkThemeProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Returns the effective [ThemeMode] for MaterialApp.
+  ThemeMode get themeMode {
+    switch (_darkTheme) {
+      case 0:
+        return ThemeMode.dark;
+      case 1:
+        return ThemeMode.light;
+      default:
+        return ThemeMode.system;
+    }
+  }
+
   bool isDarkTheme() {
     return darkTheme == 0
         ? true
         : darkTheme == 1
             ? false
-            : DarkThemeProvider().getSystemThem();
+            : _getSystemDark();
   }
 
-  bool getSystemThem() {
-    var brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
+  bool _getSystemDark() {
+    final brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
     return brightness == Brightness.dark;
   }
+
+  @Deprecated('Use _getSystemDark() instead')
+  bool getSystemThem() => _getSystemDark();
 }

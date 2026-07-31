@@ -69,8 +69,8 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                       onTap: controller.isSaving.value ? () {} : controller.savePurchase,
                       borderRadius: 10,
                       titleWidget: controller.isSaving.value
-                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : const TextCustom(title: 'Save', fontSize: 13, color: Colors.white),
+                          ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppThemeData.primaryWhite))
+                          : TextCustom(title: 'Save', fontSize: 13, color: AppThemeData.primaryWhite),
                     ),
                   ),
                   spaceW(width: 8),
@@ -246,7 +246,7 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                           BoxShadow(color: AppThemeData.neonBlue.withValues(alpha: 0.05), blurRadius: 40, spreadRadius: -8),
                         ]
                       : [
-                          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 4)),
+                          BoxShadow(color: AppThemeData.primaryBlack.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 4)),
                         ],
                 ),
                 child: Obx(() {
@@ -302,7 +302,7 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                                   BoxShadow(color: AppThemeData.neonPurple.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4)),
                                 ],
                               ),
-                              child: const Icon(Icons.add_photo_alternate_rounded, color: Colors.white, size: 22),
+                              child: Icon(Icons.add_photo_alternate_rounded, color: AppThemeData.primaryWhite, size: 22),
                             ),
                           ),
                         ),
@@ -326,7 +326,7 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                               title: '${selectedIndex + 1} / ${allImages.length}',
                               fontSize: 13,
                               fontFamily: FontFamily.semiBold,
-                              color: Colors.white,
+                              color: AppThemeData.primaryWhite,
                             ),
                           ),
                         ),
@@ -415,13 +415,13 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
             decoration: BoxDecoration(
               color: isDark
                   ? AppThemeData.surfaceLight.withValues(alpha: 0.8)
-                  : Colors.black.withValues(alpha: 0.3),
+                  : AppThemeData.primaryBlack.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(25),
               boxShadow: isDark
                   ? [BoxShadow(color: AppThemeData.neonPurple.withValues(alpha: 0.2), blurRadius: 12)]
                   : null,
             ),
-            child: Icon(icon, color: Colors.white, size: 28),
+            child: Icon(icon, color: AppThemeData.primaryWhite, size: 28),
           ),
         ),
       ),
@@ -462,9 +462,9 @@ class MyPurchasesDetailsView extends GetView<MyPurchasesDetailsController> {
                 titleWidget: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.add_photo_alternate_rounded, size: 18, color: Colors.white),
+                    Icon(Icons.add_photo_alternate_rounded, size: 18, color: AppThemeData.primaryWhite),
                     spaceW(width: 8),
-                    const TextCustom(title: 'Add Images', fontSize: 14, color: Colors.white),
+                    TextCustom(title: 'Add Images', fontSize: 14, color: AppThemeData.primaryWhite),
                   ],
                 ),
               ),
@@ -937,11 +937,19 @@ class _NeonGlowContainer extends StatefulWidget {
 class _NeonGlowContainerState extends State<_NeonGlowContainer> {
   bool _isHovered = false;
 
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       child: AnimatedScale(
         scale: _isHovered ? 1.015 : 1.0,
         duration: const Duration(milliseconds: 200),
@@ -973,7 +981,7 @@ class _NeonGlowContainerState extends State<_NeonGlowContainer> {
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
+                      color: AppThemeData.primaryBlack.withValues(alpha: 0.04),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -1009,11 +1017,19 @@ class _NeonThumbnail extends StatefulWidget {
 class _NeonThumbnailState extends State<_NeonThumbnail> {
   bool _isHovered = false;
 
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedScale(
@@ -1065,7 +1081,7 @@ class _NeonThumbnailState extends State<_NeonThumbnail> {
                           color: AppThemeData.danger300,
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Icon(Icons.close_rounded, color: Colors.white, size: 14),
+                        child: Icon(Icons.close_rounded, color: AppThemeData.primaryWhite, size: 14),
                       ),
                     ),
                   ),

@@ -39,4 +39,30 @@ class WeatherApi {
     if (results == null) return [];
     return results.map((e) => CitySearchResult.fromJson(e)).toList();
   }
+
+  static Future<String?> reverseGeocode(double lat, double lng) async {
+    try {
+      final uri = Uri.parse(
+        'https://nominatim.openstreetmap.org/reverse'
+        '?lat=$lat&lon=$lng&format=json&zoom=10',
+      );
+      final response = await http.get(uri, headers: {
+        'User-Agent': 'MahekSync/1.0',
+      });
+      if (response.statusCode != 200) return null;
+      final data = json.decode(response.body);
+      final address = data['address'] as Map<String, dynamic>?;
+      if (address == null) return null;
+      final city = address['city'] ??
+          address['town'] ??
+          address['village'] ??
+          address['state'] ??
+          '';
+      final country = address['country'] ?? '';
+      if (city.isEmpty) return null;
+      return country.isNotEmpty ? '$city, $country' : city;
+    } catch (_) {
+      return null;
+    }
+  }
 }

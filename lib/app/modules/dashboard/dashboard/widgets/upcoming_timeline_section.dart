@@ -3,6 +3,7 @@ import 'package:maheksync/app/models/dues_tracker_model.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 
 class UpcomingTimelineSection extends StatelessWidget {
@@ -53,11 +54,11 @@ class UpcomingTimelineSection extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.schedule_rounded,
-                        size: 18, color: Colors.white),
+                    child: Icon(Icons.schedule_rounded,
+                        size: 18, color: AppThemeData.primaryWhite),
                   ),
-                  const SizedBox(width: 14),
-                  TextCustom(
+                   spaceW(width: 14),
+                   TextCustom(
                     title: 'Upcoming Timeline',
                     fontSize: 17,
                     fontFamily: FontFamily.bold,
@@ -82,19 +83,17 @@ class UpcomingTimelineSection extends StatelessWidget {
                             : AppThemeData.grey3.withValues(alpha: 0.4),
                       ),
                     ),
-                    child: Text(
-                      'View Calendar',
-                      style: TextStyle(
-                        fontFamily: FontFamily.medium,
-                        fontSize: 11,
-                        color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
-                      ),
+                    child: TextCustom(
+                      title: 'View Calendar',
+                      fontSize: 11,
+                      fontFamily: FontFamily.medium,
+                      color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 18),
+          spaceH(height: 18),
 
           if (items.isEmpty)
             _EmptyTimeline(isDark: isDark)
@@ -108,21 +107,19 @@ class UpcomingTimelineSection extends StatelessWidget {
 
           // View full timeline
           if (items.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            spaceH(height: 12),
             GestureDetector(
               onTap: onViewAll,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'View Full Timeline',
-                    style: TextStyle(
-                      fontFamily: FontFamily.medium,
-                      fontSize: 12,
-                      color: AppThemeData.neonPurple,
-                    ),
+                  TextCustom(
+                    title: 'View Full Timeline',
+                    fontSize: 12,
+                    fontFamily: FontFamily.medium,
+                    color: AppThemeData.neonPurple,
                   ),
-                  const SizedBox(width: 4),
+                  spaceW(width: 4),
                   Icon(Icons.arrow_forward_rounded,
                       size: 14, color: AppThemeData.neonPurple),
                 ],
@@ -221,14 +218,22 @@ class _TimelineCard extends StatefulWidget {
 class _TimelineCardState extends State<_TimelineCard> {
   bool _hovered = false;
 
+  void _onHover(bool v) {
+    if (_hovered == v) return;
+    _hovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
     return Padding(
       padding: EdgeInsets.only(bottom: widget.isLast ? 0 : 10),
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
+        onEnter: (_) => _onHover(true),
+        onExit: (_) => _onHover(false),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
@@ -258,27 +263,23 @@ class _TimelineCardState extends State<_TimelineCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.dateLabel,
-                      style: TextStyle(
-                        fontFamily: FontFamily.semiBold,
-                        fontSize: 11,
-                        color: widget.isDark ? AppThemeData.grey3 : AppThemeData.grey8,
-                      ),
+                    TextCustom(
+                      title: item.dateLabel,
+                      fontSize: 11,
+                      fontFamily: FontFamily.semiBold,
+                      color: widget.isDark ? AppThemeData.grey3 : AppThemeData.grey8,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.date,
-                      style: TextStyle(
-                        fontFamily: FontFamily.regular,
-                        fontSize: 10,
-                        color: widget.isDark ? AppThemeData.grey6 : AppThemeData.grey5,
-                      ),
+                    spaceH(height: 2),
+                    TextCustom(
+                      title: item.date,
+                      fontSize: 10,
+                      fontFamily: FontFamily.regular,
+                      color: widget.isDark ? AppThemeData.grey6 : AppThemeData.grey5,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              spaceW(width: 12),
               // Dot + line
               Column(
                 children: [
@@ -308,45 +309,39 @@ class _TimelineCardState extends State<_TimelineCard> {
                     ),
                 ],
               ),
-              const SizedBox(width: 14),
+              spaceW(width: 14),
               // Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.title,
-                      style: TextStyle(
-                        fontFamily: FontFamily.semiBold,
-                        fontSize: 13,
-                        color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    TextCustom(
+                      title: item.title,
+                      fontSize: 13,
+                      fontFamily: FontFamily.semiBold,
+                      color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                      maxLine: 1,
+                      textOverflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      item.subtitle,
-                      style: TextStyle(
-                        fontFamily: FontFamily.regular,
-                        fontSize: 11,
-                        color: widget.isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    spaceH(height: 3),
+                    TextCustom(
+                      title: item.subtitle,
+                      fontSize: 11,
+                      fontFamily: FontFamily.regular,
+                      color: widget.isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      maxLine: 1,
+                      textOverflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              spaceW(width: 8),
               // Time
-              Text(
-                item.time,
-                style: TextStyle(
-                  fontFamily: FontFamily.medium,
-                  fontSize: 11,
-                  color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-                ),
+              TextCustom(
+                title: item.time,
+                fontSize: 11,
+                fontFamily: FontFamily.medium,
+                color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
               ),
             ],
           ),
@@ -370,7 +365,7 @@ class _EmptyTimeline extends StatelessWidget {
             Icon(Icons.event_available_rounded,
                 size: 36,
                 color: isDark ? AppThemeData.grey7 : AppThemeData.grey5),
-            const SizedBox(height: 10),
+            spaceH(height: 10),
             TextCustom(
               title: 'Nothing upcoming',
               fontSize: 13,

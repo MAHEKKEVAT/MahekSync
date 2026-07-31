@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:solar_icons/solar_icons.dart';
 
@@ -59,10 +60,10 @@ class LifeOverviewSection extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.grid_view_rounded,
-                        size: 18, color: Colors.white),
+                    child: Icon(Icons.grid_view_rounded,
+                        size: 18, color: AppThemeData.primaryWhite),
                   ),
-                  const SizedBox(width: 14),
+                  spaceW(width: 14),
                   TextCustom(
                     title: 'Life Overview',
                     fontSize: 17,
@@ -88,19 +89,17 @@ class LifeOverviewSection extends StatelessWidget {
                             : AppThemeData.grey3.withValues(alpha: 0.4),
                       ),
                     ),
-                    child: Text(
-                      'View All',
-                      style: TextStyle(
-                        fontFamily: FontFamily.medium,
-                        fontSize: 11,
-                        color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
-                      ),
+                    child: TextCustom(
+                      title: 'View All',
+                      fontSize: 11,
+                      fontFamily: FontFamily.medium,
+                      color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 20),
+          spaceH(height: 20),
 
           // 2x2 Grid
           GridView.count(
@@ -175,11 +174,19 @@ class _MetricTile extends StatefulWidget {
 class _MetricTileState extends State<_MetricTile> {
   bool _hovered = false;
 
+  void _onHover(bool v) {
+    if (_hovered == v) return;
+    _hovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -229,29 +236,24 @@ class _MetricTileState extends State<_MetricTile> {
                 ),
                 child: Icon(widget.icon, size: 16, color: widget.accentColor),
               ),
-              const SizedBox(width: 12),
+              spaceW(width: 12),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.value,
-                      style: TextStyle(
-                        fontFamily: FontFamily.bold,
-                        fontSize: 18,
-                        color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                        letterSpacing: -0.5,
-                      ),
+                    TextCustom(
+                      title: widget.value,
+                      fontSize: 18,
+                      fontFamily: FontFamily.bold,
+                      color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                     ),
-                    const SizedBox(height: 1),
-                    Text(
-                      widget.title,
-                      style: TextStyle(
-                        fontFamily: FontFamily.medium,
-                        fontSize: 10,
-                        color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-                      ),
+                    spaceH(height: 1),
+                    TextCustom(
+                      title: widget.title,
+                      fontSize: 10,
+                      fontFamily: FontFamily.medium,
+                      color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
                     ),
                   ],
                 ),

@@ -310,32 +310,25 @@ class MyDevicesView extends GetView<MyDevicesController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  stat.label,
-                  style: TextStyle(
-                    fontFamily: FontFamily.medium,
-                    fontSize: 11,
-                    color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
-                  ),
+                TextCustom(
+                  title: stat.label,
+                  fontSize: 11,
+                  fontFamily: FontFamily.medium,
+                  color: isDark ? AppThemeData.grey4 : AppThemeData.grey6,
                 ),
                 spaceH(height: 3),
-                Text(
-                  stat.value,
-                  style: TextStyle(
-                    fontFamily: FontFamily.bold,
-                    fontSize: 24,
-                    color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                    letterSpacing: -0.5,
-                  ),
+                TextCustom(
+                  title: stat.value,
+                  fontSize: 24,
+                  fontFamily: FontFamily.bold,
+                  color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                 ),
                 spaceH(height: 2),
-                Text(
-                  stat.sub,
-                  style: TextStyle(
-                    fontFamily: FontFamily.medium,
-                    fontSize: 10,
-                    color: stat.color,
-                  ),
+                TextCustom(
+                  title: stat.sub,
+                  fontSize: 10,
+                  fontFamily: FontFamily.medium,
+                  color: stat.color,
                 ),
               ],
             ),
@@ -665,14 +658,11 @@ class MyDevicesView extends GetView<MyDevicesController> {
                         ),
                         spaceW(width: 8),
                         Expanded(
-                          child: Text(
-                            category.name ?? 'Unknown',
-                            style: TextStyle(
-                              fontFamily: FontFamily.medium,
-                              fontSize: 13,
-                              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                          child: TextCustom(
+                            title: category.name ?? 'Unknown',
+                            fontSize: 13,
+                            fontFamily: FontFamily.medium,
+                            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                           ),
                         ),
                       ],
@@ -802,14 +792,11 @@ class MyDevicesView extends GetView<MyDevicesController> {
                         ),
                         spaceW(width: 8),
                         Expanded(
-                          child: Text(
-                            method.pName ?? 'Unknown',
-                            style: TextStyle(
-                              fontFamily: FontFamily.medium,
-                              fontSize: 13,
-                              color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                          child: TextCustom(
+                            title: method.pName ?? 'Unknown',
+                            fontSize: 13,
+                            fontFamily: FontFamily.medium,
+                            color: isDark ? AppThemeData.grey1 : AppThemeData.grey10,
                           ),
                         ),
                       ],
@@ -1395,13 +1382,21 @@ class _HoverableCard extends StatefulWidget {
 class _HoverableCardState extends State<_HoverableCard> {
   bool _isHovered = false;
 
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onTap,

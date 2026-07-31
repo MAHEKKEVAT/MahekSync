@@ -6,19 +6,26 @@ import 'package:maheksync/app/models/weather_model.dart';
 import 'package:maheksync/app/services/weather_api.dart';
 
 class WeatherController extends GetxController {
+  static const _fallbackLat = 21.1702;
+  static const _fallbackLng = 72.8311;
+  static const _fallbackCity = 'Surat, Gujarat';
+
   final isLoading = true.obs;
   final hasError = false.obs;
   final currentWeather = Rxn<CurrentWeather>();
   final forecast = <DailyForecast>[].obs;
   final hourlyForecast = <HourlyForecast>[].obs;
   final highlights = <WeatherHighlight>[].obs;
-  final cityName = 'Surat, Gujarat'.obs;
+  final cityName = 'Getting location...'.obs;
   final isCelsius = true.obs;
-  final latitude = 21.1702.obs;
-  final longitude = 72.8311.obs;
+  final latitude = Rxn<double>();
+  final longitude = Rxn<double>();
   final sunrise = Rxn<DateTime>();
   final sunset = Rxn<DateTime>();
   final dataFetchTime = Rxn<DateTime>();
+
+  double get _lat => latitude.value ?? _fallbackLat;
+  double get _lng => longitude.value ?? _fallbackLng;
 
   String get weatherCondition {
     final cw = currentWeather.value;
@@ -52,33 +59,56 @@ class WeatherController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _determinePosition();
+    _initLocation();
   }
 
-  Future<void> _determinePosition() async {
+  Future<void> _initLocation() async {
+    isLoading.value = true;
+
+    final located = await _determinePosition();
+
+    if (!located) {
+      latitude.value = _fallbackLat;
+      longitude.value = _fallbackLng;
+      cityName.value = _fallbackCity;
+    }
+
+    await fetchAll();
+  }
+
+  Future<bool> _determinePosition() async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        await fetchAll();
-        return;
-      }
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return false;
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-          await fetchAll();
-          return;
+        if (permission == LocationPermission.denied ||
+            permission == LocationPermission.deniedForever) {
+          return false;
         }
       }
 
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+        ),
       ).timeout(const Duration(seconds: 5));
+
       latitude.value = position.latitude;
       longitude.value = position.longitude;
-    } catch (_) {}
-    await fetchAll();
+
+      final name = await WeatherApi.reverseGeocode(
+        position.latitude,
+        position.longitude,
+      );
+      cityName.value = name ?? _fallbackCity;
+
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> fetchAll() async {
@@ -86,8 +116,8 @@ class WeatherController extends GetxController {
     hasError.value = false;
     try {
       final data = await WeatherApi.fetchWeather(
-        latitude: latitude.value,
-        longitude: longitude.value,
+        latitude: _lat,
+        longitude: _lng,
       );
       final current = data['current'];
       if (current != null) {

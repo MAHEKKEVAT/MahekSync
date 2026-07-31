@@ -293,7 +293,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
                       ),
                     ),
 
-                    SizedBox(width: s.sceneGap),
+                    spaceW(width: s.sceneGap),
 
                     // RIGHT SIDE
                     Expanded(
@@ -416,18 +416,18 @@ class _LoginScreenViewState extends State<LoginScreenView>
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: AppThemeData.neonGlow(AppThemeData.neonPurple, blur: 28, opacity: _glowCtrl.value * 0.5),
                       ),
-                      child: Icon(SolarIconsBold.bolt, color: Colors.white, size: s.logoSize * 0.54),
+                      child: Icon(SolarIconsBold.bolt, color: AppThemeData.primaryWhite, size: s.logoSize * 0.54),
                     );
                   },
                 ),
                 spaceW(width: 14),
                 ShaderMask(
                   shaderCallback: (b) => AppThemeData.geminiGradient.createShader(b),
-                  child: Text('MAHEK', style: TextStyle(fontFamily: FontFamily.bold, fontSize: s.logoFontSize, letterSpacing: 3, color: Colors.white)),
+                  child: Text('MAHEK', style: TextStyle(fontFamily: FontFamily.bold, fontSize: s.logoFontSize, letterSpacing: 3, color: AppThemeData.primaryWhite)),
                 ),
               ],
             ),
-            SizedBox(height: 90),
+            spaceH(height: 90),
 
             // ── Headline — responsive size ────────────────────────────
             ShaderMask(
@@ -438,12 +438,12 @@ class _LoginScreenViewState extends State<LoginScreenView>
                   fontFamily: FontFamily.bold,
                   fontSize: s.headlineSize,
                   height: 1.08,
-                  color: Colors.white,
+                  color: AppThemeData.primaryWhite,
                   letterSpacing: -1.5,
                 ),
               ),
             ),
-            SizedBox(height: s.sectionGap * 0.75),
+            spaceH(height: s.sectionGap * 0.75),
 
             // ── Description — constrained width ───────────────────────
             ConstrainedBox(
@@ -458,7 +458,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
                 ),
               ),
             ),
-            SizedBox(height: s.sectionGap),
+                    spaceH(height: s.sectionGap),
 
             // ── Feature pills ────────────────────────────────────────
             Wrap(
@@ -470,7 +470,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
                 _buildFeaturePill(SolarIconsBold.lockKeyhole, 'Zero-Trust Vault', AppThemeData.neonPink, s),
               ],
             ),
-            SizedBox(height: 70),
+            spaceH(height: 70),
 
             // ── Footer chips ─────────────────────────────────────────
             Row(
@@ -501,7 +501,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             Icon(icon, color: c, size: s.pillIconSize),
             spaceW(width: 6),
-            Text(label, style: TextStyle(fontFamily: FontFamily.medium, fontSize: s.pillFontSize, color: c.withValues(alpha: 0.9), letterSpacing: 0.3)),
+            TextCustom(title: label, fontSize: s.pillFontSize, fontFamily: FontFamily.medium, color: c.withValues(alpha: 0.9)),
           ]),
         );
       },
@@ -512,7 +512,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(border: Border.all(color: c.withValues(alpha: 0.15)), borderRadius: BorderRadius.circular(30)),
-      child: Text(text, style: TextStyle(fontFamily: FontFamily.medium, fontSize: 10, letterSpacing: 1.5, color: c.withValues(alpha: 0.5))),
+      child: TextCustom(title: text, fontSize: 10, fontFamily: FontFamily.medium, color: c.withValues(alpha: 0.5)),
     );
   }
 
@@ -543,7 +543,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
                     width: 1.5,
                   ),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 60, offset: const Offset(0, 20)),
+                    BoxShadow(color: AppThemeData.surfaceVoid.withValues(alpha: 0.4), blurRadius: 60, offset: const Offset(0, 20)),
                     ...AppThemeData.neonGlow(AppThemeData.neonPurple, blur: 40, opacity: _glowCtrl.value * 0.12),
                     BoxShadow(color: AppThemeData.neonBlue.withValues(alpha: 0.03), blurRadius: 0, offset: const Offset(0, -1)),
                   ],
@@ -563,7 +563,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
                     // ── Welcome heading ──────────────────────────────
                     ShaderMask(
                       shaderCallback: (b) => AppThemeData.appleIntelligenceGradientCool.createShader(b),
-                      child: TextCustom(title: 'Welcome Back', fontSize: 30, fontFamily: FontFamily.bold, color: Colors.white),
+                      child: TextCustom(title: 'Welcome Back', fontSize: 30, fontFamily: FontFamily.bold, color: AppThemeData.primaryWhite),
                     ),
                     spaceH(height: 6),
                     TextCustom(
@@ -571,7 +571,8 @@ class _LoginScreenViewState extends State<LoginScreenView>
                       fontSize: 14, fontFamily: FontFamily.regular,
                       color: AppThemeData.textNeonBlue.withValues(alpha: 0.6),
                     ),
-                    SizedBox(height: s.sectionGap),
+            spaceH(height: s.sectionGap),
+
 
                     // ── Form ─────────────────────────────────────────
                     Form(
@@ -580,9 +581,9 @@ class _LoginScreenViewState extends State<LoginScreenView>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInputLabel('EMAIL ADDRESS'),
-                          SizedBox(height: s.smallGap),
+                          spaceH(height: s.smallGap),
                           _buildEmailField(s),
-                          SizedBox(height: s.fieldGap),
+                          spaceH(height: s.fieldGap),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -590,16 +591,16 @@ class _LoginScreenViewState extends State<LoginScreenView>
                               _buildForgotPassword(),
                             ],
                           ),
-                          SizedBox(height: s.smallGap),
+                          spaceH(height: s.smallGap),
                           _buildPasswordField(s),
-                          SizedBox(height: s.fieldGap * 0.9),
+                          spaceH(height: s.fieldGap * 0.9),
                           _buildRememberMe(),
-                          SizedBox(height: s.sectionGap * 0.85),
+                          spaceH(height: s.sectionGap * 0.85),
                           _buildSignInButton(s),
                         ],
                       ),
                     ),
-                    SizedBox(height: s.sectionGap * 0.75),
+            spaceH(height: s.sectionGap * 0.75),
 
                     // ── Sign up + M circle ───────────────────────────
                     Row(
@@ -622,13 +623,11 @@ class _LoginScreenViewState extends State<LoginScreenView>
   // ── Input label ─────────────────────────────────────────────────────
 
   Widget _buildInputLabel(String text) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontFamily: FontFamily.bold, fontSize: 10,
-        color: AppThemeData.textNeonPurple.withValues(alpha: 0.6),
-        letterSpacing: 2,
-      ),
+    return TextCustom(
+      title: text,
+      fontSize: 10,
+      fontFamily: FontFamily.bold,
+      color: AppThemeData.textNeonPurple.withValues(alpha: 0.6),
     );
   }
 
@@ -697,7 +696,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
             borderRadius: BorderRadius.circular(5),
             boxShadow: _rememberMe ? AppThemeData.neonGlow(AppThemeData.neonPurple, blur: 8, opacity: 0.15) : [],
           ),
-          child: _rememberMe ? const Icon(SolarIconsBold.checkCircle, size: 10, color: Colors.white) : null,
+          child: _rememberMe ? Icon(SolarIconsBold.checkCircle, size: 10, color: AppThemeData.primaryWhite) : null,
         ),
         spaceW(width: 8),
         TextCustom(title: 'Remember session', fontSize: 12, fontFamily: FontFamily.regular, color: AppThemeData.textNeonBlue.withValues(alpha: 0.5)),
@@ -737,9 +736,9 @@ class _LoginScreenViewState extends State<LoginScreenView>
                         width: 80, height: s.buttonHeight,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(colors: [
-                            Colors.white.withValues(alpha: 0),
-                            Colors.white.withValues(alpha: 0.15),
-                            Colors.white.withValues(alpha: 0),
+                            AppThemeData.primaryWhite.withValues(alpha: 0),
+                            AppThemeData.primaryWhite.withValues(alpha: 0.15),
+                            AppThemeData.primaryWhite.withValues(alpha: 0),
                           ]),
                         ),
                       ),
@@ -751,7 +750,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
                   child: RoundShapeButton(
                     title: '',
                     buttonColor: Colors.transparent,
-                    buttonTextColor: Colors.white,
+                    buttonTextColor: AppThemeData.primaryWhite,
                     onTap: loading ? () {} : () {
                       if (_formKey.currentState!.validate()) {
                         controller.signInWithEmailAndPassword(
@@ -763,11 +762,11 @@ class _LoginScreenViewState extends State<LoginScreenView>
                     },
                     borderRadius: s.buttonBorderRadius,
                     titleWidget: loading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 22, height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(AppThemeData.primaryWhite),
                             ),
                           )
                         : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -776,14 +775,14 @@ class _LoginScreenViewState extends State<LoginScreenView>
                         style: TextStyle(
                           fontSize: 15,
                           fontFamily: FontFamily.semiBold,
-                          color: Colors.white,
-                          shadows: const [
-                            Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1)),
+                          color: AppThemeData.primaryWhite,
+                          shadows: [
+                            Shadow(color: AppThemeData.primaryBlack, blurRadius: 4, offset: Offset(0, 1)),
                           ],
                         ),
                       ),
                       spaceW(width: 8),
-                      const Icon(SolarIconsOutline.arrowRight, color: Colors.white, size: 18, shadows: [Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1))]),
+                      Icon(SolarIconsOutline.arrowRight, color: AppThemeData.primaryWhite, size: 18, shadows: [Shadow(color: AppThemeData.primaryBlack, blurRadius: 4, offset: Offset(0, 1))]),
                     ]),
                   ),
                 ),
@@ -805,7 +804,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
         onTap: () => Get.toNamed(Routes.SIGN_UP),
         child: ShaderMask(
           shaderCallback: (b) => AppThemeData.geminiGradient.createShader(b),
-          child: const TextCustom(title: 'Create Account', fontSize: 13, fontFamily: FontFamily.semiBold, color: Colors.white),
+          child: TextCustom(title: 'Create Account', fontSize: 13, fontFamily: FontFamily.semiBold, color: AppThemeData.primaryWhite),
         ),
       ),
     ]);
@@ -843,7 +842,7 @@ class _LoginScreenViewState extends State<LoginScreenView>
                 gradient: AppThemeData.appleIntelligenceGradientCool,
                 boxShadow: AppThemeData.neonGlow(AppThemeData.neonPurple, blur: 12, opacity: _glowCtrl.value * 0.2),
               ),
-              child: const Center(child: Text('M', style: TextStyle(fontFamily: FontFamily.bold, fontSize: 13, color: Colors.white))),
+              child: Center(child: TextCustom(title: 'M', fontSize: 13, fontFamily: FontFamily.bold, color: AppThemeData.primaryWhite)),
             ),
           ),
         );
@@ -867,12 +866,12 @@ class _LoginScreenViewState extends State<LoginScreenView>
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             // Logo
             Row(children: [
-              Container(width: 40, height: 40, decoration: BoxDecoration(gradient: AppThemeData.appleIntelligenceGradientCool, borderRadius: BorderRadius.circular(12)), child: const Icon(SolarIconsBold.bolt, color: Colors.white, size: 22)),
+              Container(width: 40, height: 40, decoration: BoxDecoration(gradient: AppThemeData.appleIntelligenceGradientCool, borderRadius: BorderRadius.circular(12)), child: Icon(SolarIconsBold.bolt, color: AppThemeData.primaryWhite, size: 22)),
               spaceW(width: 10),
-              ShaderMask(shaderCallback: (b) => AppThemeData.geminiGradient.createShader(b), child: const Text('MAHEK', style: TextStyle(fontFamily: FontFamily.bold, fontSize: 18, letterSpacing: 2.5, color: Colors.white))),
+              ShaderMask(shaderCallback: (b) => AppThemeData.geminiGradient.createShader(b), child: Text('MAHEK', style: TextStyle(fontFamily: FontFamily.bold, fontSize: 18, letterSpacing: 2.5, color: AppThemeData.primaryWhite))),
             ]),
             spaceH(height: 40),
-            ShaderMask(shaderCallback: (b) => AppThemeData.appleIntelligenceGradientCool.createShader(b), child: const TextCustom(title: 'Welcome Back', fontSize: 28, fontFamily: FontFamily.bold, color: Colors.white)),
+            ShaderMask(shaderCallback: (b) => AppThemeData.appleIntelligenceGradientCool.createShader(b), child: TextCustom(title: 'Welcome Back', fontSize: 28, fontFamily: FontFamily.bold, color: AppThemeData.primaryWhite)),
             spaceH(height: 6),
             TextCustom(title: 'Authenticate to your workspace', fontSize: 14, fontFamily: FontFamily.regular, color: AppThemeData.textNeonBlue.withValues(alpha: 0.6)),
             spaceH(height: 32),

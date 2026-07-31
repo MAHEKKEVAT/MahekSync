@@ -1,11 +1,12 @@
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:maheksync/app/models/weather_model.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/theme/weather_theme.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
+import 'weather_painter.dart';
 
 class WeatherDetailCards extends StatelessWidget {
   final CurrentWeather? current;
@@ -23,102 +24,529 @@ class WeatherDetailCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 900;
+    final screenW = MediaQuery.of(context).size.width;
+    final isDesktop = screenW >= 900;
 
-    return Wrap(
-      spacing: 16,
-      runSpacing: 16,
+    if (isDesktop) {
+      return _buildDesktopGrid();
+    }
+    return _buildMobileGrid();
+  }
+
+  Widget _buildDesktopGrid() {
+    return Column(
       children: [
-        _SunriseSunsetCard(
-          sunrise: sunrise,
-          sunset: sunset,
-          isWide: !isMobile,
+        Row(
+          children: [
+            Expanded(child: _FeelsLikeCard(current: current)),
+            const SizedBox(width: 12),
+            Expanded(child: _UvIndexCard(current: current)),
+          ],
         ),
-        _PrecipitationCard(
-          rainChance: forecast.isNotEmpty ? forecast.first.precipitationProbability : 0,
+        const SizedBox(height: 12),
+        _WindCompassCard(current: current),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+                child: _SunriseSunsetCard(
+                    sunrise: sunrise, sunset: sunset)),
+            const SizedBox(width: 12),
+            Expanded(
+                child: _PrecipitationCard(
+              rainChance: forecast.isNotEmpty
+                  ? forecast.first.precipitationProbability
+                  : 0,
+            )),
+          ],
         ),
-        _WindCard(current: current),
-        _PressureCard(current: current),
-        _UvCard(current: current),
-        _HumidityCard(current: current),
-        _VisibilityCard(current: current),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _HumidityCard(current: current)),
+            const SizedBox(width: 12),
+            Expanded(child: _PressureCard(current: current)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _VisibilityCard(current: current)),
+            const SizedBox(width: 12),
+            Expanded(child: _DewPointCard(current: current)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileGrid() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _FeelsLikeCard(current: current)),
+            const SizedBox(width: 12),
+            Expanded(child: _UvIndexCard(current: current)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _WindCompassCard(current: current),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+                child: _SunriseSunsetCard(
+                    sunrise: sunrise, sunset: sunset)),
+            const SizedBox(width: 12),
+            Expanded(
+                child: _PrecipitationCard(
+              rainChance: forecast.isNotEmpty
+                  ? forecast.first.precipitationProbability
+                  : 0,
+            )),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _HumidityCard(current: current)),
+            const SizedBox(width: 12),
+            Expanded(child: _PressureCard(current: current)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _VisibilityCard(current: current)),
+            const SizedBox(width: 12),
+            Expanded(child: _DewPointCard(current: current)),
+          ],
+        ),
       ],
     );
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-//  SUNRISE / SUNSET ARC
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+//  FEELS LIKE — Temperature differential bars
+// ══════════════════════════════════════════════════════════════════════
 
-class _SunriseSunsetCard extends StatelessWidget {
-  final DateTime? sunrise;
-  final DateTime? sunset;
-  final bool isWide;
-
-  const _SunriseSunsetCard({this.sunrise, this.sunset, this.isWide = false});
+class _FeelsLikeCard extends StatelessWidget {
+  final CurrentWeather? current;
+  const _FeelsLikeCard({this.current});
 
   @override
   Widget build(BuildContext context) {
-    final srStr = sunrise != null ? DateFormat('h:mm a').format(sunrise!) : '—';
-    final ssStr = sunset != null ? DateFormat('h:mm a').format(sunset!) : '—';
+    final feels = current?.feelsLike.round().toString() ?? '—';
+    final actual = current?.temperature ?? 0;
+    final feelsVal = current?.feelsLike ?? 0;
+
+    final temps = [actual, feelsVal];
+    final minT = temps.reduce(min) - 3;
+    final maxT = temps.reduce(max) + 3;
+
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
+
+    return PremiumGlassCard(
+      glowColor: wt?.accentBlue ?? const Color(0xFF5E5CE6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.thermostat_outlined,
+                  color: (wt?.accentBlue ?? const Color(0xFF5E5CE6)).withValues(alpha: 0.7),
+                  size: 14),
+              const SizedBox(width: 6),
+              TextCustom(
+                title: 'Feels Like',
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '$feels°',
+            style: TextStyle(
+              fontSize: 36,
+              fontFamily: FontFamily.bold,
+              color: wt?.textPrimary ?? Colors.white,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 40,
+            child: CustomPaint(
+              size: Size.infinite,
+              painter: FeelsLikePainter(
+                actualTemp: actual,
+                feelsTemp: feelsVal,
+                minTemp: minT,
+                maxTemp: maxT,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: wt?.accentBlue ?? const Color(0xFF5E5CE6),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 4),
+              TextCustom(
+                title: 'Actual',
+                fontSize: 10,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.4),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: wt?.accentOrange ?? const Color(0xFFFF9F0A),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 4),
+              TextCustom(
+                title: 'Feels like',
+                fontSize: 10,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.4),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          TextCustom(
+            title: _feelsDescription(current?.feelsLike, current?.temperature),
+            fontSize: 11,
+            color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.35),
+            maxLine: 2,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _feelsDescription(double? feels, double? actual) {
+    if (feels == null || actual == null) return '';
+    final diff = feels - actual;
+    if (diff < -2) return 'Wind is making it feel colder.';
+    if (diff > 2) return 'Humidity is making it feel warmer.';
+    return 'Similar to actual temperature.';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  UV INDEX — Gradient arc meter
+// ══════════════════════════════════════════════════════════════════════
+
+class _UvIndexCard extends StatelessWidget {
+  final CurrentWeather? current;
+  const _UvIndexCard({this.current});
+
+  @override
+  Widget build(BuildContext context) {
+    final uv = current?.uvIndex ?? 0;
+    final label = current?.uvLabel ?? '—';
+
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
+
+    return PremiumGlassCard(
+      glowColor: _uvColor(uv),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.wb_sunny_outlined,
+                  color: _uvColor(uv).withValues(alpha: 0.7), size: 14),
+              const SizedBox(width: 6),
+              TextCustom(
+                title: 'UV Index',
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 70,
+            child: CustomPaint(
+              size: Size.infinite,
+              painter: UvArcPainter(uvValue: uv),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Center(
+            child: Text(
+              uv.toStringAsFixed(0),
+              style: TextStyle(
+                fontSize: 28,
+                fontFamily: FontFamily.bold,
+                color: wt?.textPrimary ?? Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Center(
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: _uvColor(uv).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: TextCustom(
+                title: label,
+                fontSize: 11,
+                fontFamily: FontFamily.semiBold,
+                color: _uvColor(uv),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _uvColor(double uv) {
+    if (uv <= 2) return const Color(0xFF34C759);
+    if (uv <= 5) return const Color(0xFFFFCC00);
+    if (uv <= 7) return const Color(0xFFFF9500);
+    if (uv <= 10) return const Color(0xFFFF3B30);
+    return const Color(0xFFAF52DE);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  WIND COMPASS — Full width compass card
+// ══════════════════════════════════════════════════════════════════════
+
+class _WindCompassCard extends StatelessWidget {
+  final CurrentWeather? current;
+  const _WindCompassCard({this.current});
+
+  @override
+  Widget build(BuildContext context) {
+    final speed = current?.windSpeed.toStringAsFixed(1) ?? '—';
+    final dir = current?.windDirectionText ?? '—';
+    final deg = current?.windDirection ?? 0;
+
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
+
+    return PremiumGlassCard(
+      glowColor: wt?.accentCyan ?? const Color(0xFF64D2FF),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.explore_rounded,
+                        color:
+                            (wt?.accentCyan ?? const Color(0xFF64D2FF)).withValues(alpha: 0.7),
+                        size: 14),
+                    const SizedBox(width: 6),
+                    TextCustom(
+                      title: 'Wind',
+                      fontSize: 12,
+                      fontFamily: FontFamily.medium,
+                      color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      speed,
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontFamily: FontFamily.bold,
+                        color: wt?.textPrimary ?? Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: TextCustom(
+                        title: 'km/h',
+                        fontSize: 12,
+                        color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.45),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: (wt?.accentCyan ?? const Color(0xFF64D2FF)).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextCustom(
+                    title: dir,
+                    fontSize: 12,
+                    fontFamily: FontFamily.semiBold,
+                    color: (wt?.accentCyan ?? const Color(0xFF64D2FF)).withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          SizedBox(
+            width: 140,
+            height: 140,
+            child: CustomPaint(
+              painter: WindCompassPainter(
+                direction: deg.toDouble(),
+                animationValue: 0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  SUNRISE / SUNSET — Enhanced arc with golden sun
+// ══════════════════════════════════════════════════════════════════════
+
+class _SunriseSunsetCard extends StatefulWidget {
+  final DateTime? sunrise;
+  final DateTime? sunset;
+  const _SunriseSunsetCard({this.sunrise, this.sunset});
+
+  @override
+  State<_SunriseSunsetCard> createState() => _SunriseSunsetCardState();
+}
+
+class _SunriseSunsetCardState extends State<_SunriseSunsetCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
+    final srStr = widget.sunrise != null
+        ? DateFormat('h:mm a').format(widget.sunrise!)
+        : '—';
+    final ssStr = widget.sunset != null
+        ? DateFormat('h:mm a').format(widget.sunset!)
+        : '—';
 
     double progress = 0.5;
-    if (sunrise != null && sunset != null) {
+    if (widget.sunrise != null && widget.sunset != null) {
       final now = DateTime.now();
-      final total = sunset!.difference(sunrise!).inMinutes;
-      final elapsed = now.difference(sunrise!).inMinutes;
+      final total = widget.sunset!.difference(widget.sunrise!).inMinutes;
+      final elapsed = now.difference(widget.sunrise!).inMinutes;
       progress = (elapsed / total).clamp(0.0, 1.0);
     }
 
-    return _GlassDetailCard(
-      width: isWide ? 300 : double.infinity,
-      accentColor: AppThemeData.neonOrange,
-      title: 'Sunrise & Sunset',
-      icon: Icons.wb_twilight_rounded,
+    return PremiumGlassCard(
+      glowColor: wt?.accentYellow ?? const Color(0xFFFFD60A),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 100,
-            child: CustomPaint(
-              size: Size(isWide ? 270 : double.infinity, 100),
-              painter: _SunriseArcPainter(progress: progress),
-            ),
+          Row(
+            children: [
+              Icon(Icons.wb_twilight_outlined,
+                  color:
+                      (wt?.accentYellow ?? const Color(0xFFFFD60A)).withValues(alpha: 0.7),
+                  size: 14),
+              const SizedBox(width: 6),
+              TextCustom(
+                title: 'Sunrise & Sunset',
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
+          AnimatedBuilder(
+            animation: _animController,
+            builder: (context, _) {
+              return SizedBox(
+                height: 90,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return CustomPaint(
+                      size: Size(constraints.maxWidth, 90),
+                      painter: SunriseArcPainter(
+                        progress: progress,
+                        animationValue: _animController.value,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextCustom(
                     title: 'Sunrise',
-                    fontSize: 11,
-                    color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
+                    fontSize: 10,
+                    color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.4),
                   ),
-                  const SizedBox(height: 2),
                   TextCustom(
                     title: srStr,
-                    fontSize: 14,
+                    fontSize: 13,
                     fontFamily: FontFamily.semiBold,
-                    color: AppThemeData.primaryWhite,
+                    color: wt?.textPrimary ?? Colors.white,
                   ),
                 ],
               ),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   TextCustom(
                     title: 'Sunset',
-                    fontSize: 11,
-                    color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
+                    fontSize: 10,
+                    color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.4),
                   ),
-                  const SizedBox(height: 2),
                   TextCustom(
                     title: ssStr,
-                    fontSize: 14,
+                    fontSize: 13,
                     fontFamily: FontFamily.semiBold,
-                    color: AppThemeData.primaryWhite,
+                    color: wt?.textPrimary ?? Colors.white,
                   ),
                 ],
               ),
@@ -130,205 +558,237 @@ class _SunriseSunsetCard extends StatelessWidget {
   }
 }
 
-class _SunriseArcPainter extends CustomPainter {
-  final double progress;
-  _SunriseArcPainter({required this.progress});
+// ══════════════════════════════════════════════════════════════════════
+//  PRECIPITATION — Water fill gauge
+// ══════════════════════════════════════════════════════════════════════
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height - 8;
-    final radius = size.width * 0.42;
-
-    final trackPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..color = AppThemeData.surfaceLight;
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: radius),
-      pi,
-      pi,
-      false,
-      trackPaint,
-    );
-
-    final activePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round
-      ..shader = SweepGradient(
-        colors: [
-          AppThemeData.neonOrange,
-          AppThemeData.neonYellow,
-        ],
-        startAngle: pi,
-        endAngle: 2 * pi,
-      ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: radius));
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: radius),
-      pi,
-      pi * progress,
-      false,
-      activePaint,
-    );
-
-    final dotAngle = pi + pi * progress;
-    final dotX = cx + radius * cos(dotAngle);
-    final dotY = cy + radius * sin(dotAngle);
-
-    final dotGlowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppThemeData.neonOrange.withValues(alpha: 0.4),
-          Colors.transparent,
-        ],
-      ).createShader(Rect.fromCircle(center: Offset(dotX, dotY), radius: 12));
-    canvas.drawCircle(Offset(dotX, dotY), 12, dotGlowPaint);
-
-    final dotPaint = Paint()..color = AppThemeData.neonOrange;
-    canvas.drawCircle(Offset(dotX, dotY), 5, dotPaint);
-    final dotCenter = Paint()..color = AppThemeData.primaryWhite;
-    canvas.drawCircle(Offset(dotX, dotY), 2, dotCenter);
-  }
-
-  @override
-  bool shouldRepaint(_SunriseArcPainter old) => old.progress != progress;
-}
-
-// ════════════════════════════════════════════════════════════════
-//  PRECIPITATION
-// ════════════════════════════════════════════════════════════════
-
-class _PrecipitationCard extends StatelessWidget {
+class _PrecipitationCard extends StatefulWidget {
   final int rainChance;
   const _PrecipitationCard({required this.rainChance});
 
   @override
-  Widget build(BuildContext context) {
-    final color = rainChance > 50 ? AppThemeData.neonTeal : AppThemeData.neonBlue;
-    return _GlassDetailCard(
-      accentColor: color,
-      title: 'Precipitation',
-      icon: Icons.water_drop_outlined,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 80,
-              height: 80,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: AppThemeData.neonGlow(color, blur: 16, spread: -4, opacity: 0.15),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 80,
-                    height: 80,
-                    child: CircularProgressIndicator(
-                      value: rainChance / 100,
-                      strokeWidth: 6,
-                      backgroundColor: AppThemeData.surfaceLight,
-                      valueColor: AlwaysStoppedAnimation<Color>(color),
-                      strokeCap: StrokeCap.round,
-                    ),
-                  ),
-                  TextCustom(
-                    title: '$rainChance%',
-                    fontSize: 18,
-                    fontFamily: FontFamily.bold,
-                    color: AppThemeData.primaryWhite,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: TextCustom(
-                title: rainChance > 50
-                    ? 'Rain expected later today.'
-                    : rainChance > 20
-                        ? 'Light rain possible.'
-                        : 'Low chance of rain.',
-                fontSize: 13,
-                color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
-                maxLine: 2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  State<_PrecipitationCard> createState() => _PrecipitationCardState();
 }
 
-// ════════════════════════════════════════════════════════════════
-//  WIND
-// ════════════════════════════════════════════════════════════════
+class _PrecipitationCardState extends State<_PrecipitationCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
 
-class _WindCard extends StatelessWidget {
-  final CurrentWeather? current;
-  const _WindCard({this.current});
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final speed = current?.windSpeed.toStringAsFixed(1) ?? '—';
-    final dir = current?.windDirectionText ?? '—';
-    return _GlassDetailCard(
-      accentColor: AppThemeData.neonBlue,
-      title: 'Wind',
-      icon: Icons.air,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: Row(
-          children: [
-            TextCustom(
-              title: speed,
-              fontSize: 36,
-              fontFamily: FontFamily.bold,
-              color: AppThemeData.primaryWhite,
-            ),
-            const SizedBox(width: 6),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextCustom(
-                  title: 'km/h',
-                  fontSize: 12,
-                  color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppThemeData.neonBlue.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
+    final rain = widget.rainChance;
+
+    return PremiumGlassCard(
+      glowColor: AppThemeData.neonTeal,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.water_drop_outlined,
+                  color: AppThemeData.neonTeal.withValues(alpha: 0.7),
+                  size: 14),
+              const SizedBox(width: 6),
+              TextCustom(
+                title: 'Precipitation',
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 100,
+            child: AnimatedBuilder(
+              animation: _animController,
+              builder: (context, _) {
+                return CustomPaint(
+                  size: Size.infinite,
+                  painter: PrecipitationFillPainter(
+                    percentage: rain.toDouble(),
+                    animationValue: _animController.value,
                   ),
-                  child: TextCustom(
-                    title: dir,
-                    fontSize: 12,
-                    fontFamily: FontFamily.semiBold,
-                    color: AppThemeData.neonBlue,
-                  ),
-                ),
-              ],
+                );
+              },
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '$rain',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontFamily: FontFamily.bold,
+                  color: wt?.textPrimary ?? Colors.white,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: TextCustom(
+                  title: '%',
+                  fontSize: 16,
+                  fontFamily: FontFamily.semiBold,
+                  color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          TextCustom(
+            title: rain > 50
+                ? 'Rain expected.'
+                : rain > 20
+                    ? 'Light rain possible.'
+                    : 'Low chance of rain.',
+            fontSize: 11,
+            color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.4),
+            maxLine: 2,
+          ),
+        ],
       ),
     );
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-//  PRESSURE
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+//  HUMIDITY — Liquid wave fill
+// ══════════════════════════════════════════════════════════════════════
+
+class _HumidityCard extends StatefulWidget {
+  final CurrentWeather? current;
+  const _HumidityCard({this.current});
+
+  @override
+  State<_HumidityCard> createState() => _HumidityCardState();
+}
+
+class _HumidityCardState extends State<_HumidityCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
+    final humidity = widget.current?.humidity ?? 0;
+    final label = humidity > 70 ? 'High' : 'Normal';
+
+    return PremiumGlassCard(
+      glowColor: wt?.accentBlue ?? const Color(0xFF5E5CE6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.water_drop_outlined,
+                  color: (wt?.accentBlue ?? const Color(0xFF5E5CE6)).withValues(alpha: 0.7),
+                  size: 14),
+              const SizedBox(width: 6),
+              TextCustom(
+                title: 'Humidity',
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 80,
+            child: AnimatedBuilder(
+              animation: _animController,
+              builder: (context, _) {
+                return CustomPaint(
+                  size: Size.infinite,
+                  painter: HumidityWavePainter(
+                    humidity: humidity,
+                    animationValue: _animController.value,
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${humidity.toInt()}',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontFamily: FontFamily.bold,
+                  color: wt?.textPrimary ?? Colors.white,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: TextCustom(
+                  title: '%',
+                  fontSize: 16,
+                  fontFamily: FontFamily.semiBold,
+                  color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: (wt?.accentBlue ?? const Color(0xFF5E5CE6)).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: TextCustom(
+                  title: label,
+                  fontSize: 10,
+                  fontFamily: FontFamily.semiBold,
+                  color:
+                      (wt?.accentBlue ?? const Color(0xFF5E5CE6)).withValues(alpha: 0.85),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  PRESSURE — Circular gauge
+// ══════════════════════════════════════════════════════════════════════
 
 class _PressureCard extends StatelessWidget {
   final CurrentWeather? current;
@@ -336,144 +796,73 @@ class _PressureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final value = current?.pressure.toStringAsFixed(0) ?? '—';
-    return _GlassDetailCard(
-      accentColor: AppThemeData.neonPurple,
-      title: 'Pressure',
-      icon: Icons.speed,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: Row(
-          children: [
-            TextCustom(
-              title: value,
-              fontSize: 36,
-              fontFamily: FontFamily.bold,
-              color: AppThemeData.primaryWhite,
-            ),
-            const SizedBox(width: 6),
-            TextCustom(
-              title: 'hPa',
-              fontSize: 12,
-              color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
+    final pressure = current?.pressure ?? 0;
 
-// ════════════════════════════════════════════════════════════════
-//  UV INDEX
-// ════════════════════════════════════════════════════════════════
-
-class _UvCard extends StatelessWidget {
-  final CurrentWeather? current;
-  const _UvCard({this.current});
-
-  @override
-  Widget build(BuildContext context) {
-    final uv = current?.uvIndex.toStringAsFixed(1) ?? '—';
-    final label = current?.uvLabel ?? '—';
-    return _GlassDetailCard(
-      accentColor: AppThemeData.neonOrange,
-      title: 'UV Index',
-      icon: Icons.wb_sunny_outlined,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextCustom(
-              title: uv,
-              fontSize: 36,
-              fontFamily: FontFamily.bold,
-              color: AppThemeData.primaryWhite,
-            ),
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: AppThemeData.neonOrange.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: TextCustom(
-                title: label,
+    return PremiumGlassCard(
+      glowColor: wt?.accentGreen ?? const Color(0xFF34C759),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.speed_rounded,
+                  color: (wt?.accentGreen ?? const Color(0xFF34C759)).withValues(alpha: 0.7),
+                  size: 14),
+              const SizedBox(width: 6),
+              TextCustom(
+                title: 'Pressure',
                 fontSize: 12,
-                fontFamily: FontFamily.semiBold,
-                color: AppThemeData.neonOrange,
+                fontFamily: FontFamily.medium,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: CustomPaint(
+                painter: PressureGaugePainter(pressure: pressure),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════════════════════════
-//  HUMIDITY
-// ════════════════════════════════════════════════════════════════
-
-class _HumidityCard extends StatelessWidget {
-  final CurrentWeather? current;
-  const _HumidityCard({this.current});
-
-  @override
-  Widget build(BuildContext context) {
-    final humidity = current?.humidity.toInt().toString() ?? '—';
-    final label = current != null && current!.humidity > 70 ? 'High' : 'Normal';
-    return _GlassDetailCard(
-      accentColor: AppThemeData.neonTeal,
-      title: 'Humidity',
-      icon: Icons.water_drop_outlined,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          ),
+          const SizedBox(height: 4),
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                TextCustom(
-                  title: humidity,
-                  fontSize: 36,
-                  fontFamily: FontFamily.bold,
-                  color: AppThemeData.primaryWhite,
+                Text(
+                  pressure.toStringAsFixed(0),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontFamily: FontFamily.bold,
+                    color: wt?.textPrimary ?? Colors.white,
+                  ),
                 ),
-                TextCustom(
-                  title: '%',
-                  fontSize: 18,
-                  fontFamily: FontFamily.semiBold,
-                  color: AppThemeData.primaryWhite.withValues(alpha: 0.5),
+                const SizedBox(width: 2),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: TextCustom(
+                    title: 'hPa',
+                    fontSize: 11,
+                    color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.45),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: AppThemeData.neonTeal.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: TextCustom(
-                title: label,
-                fontSize: 12,
-                fontFamily: FontFamily.semiBold,
-                color: AppThemeData.neonTeal,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-//  VISIBILITY
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+//  VISIBILITY — Mountain horizon
+// ══════════════════════════════════════════════════════════════════════
 
 class _VisibilityCard extends StatelessWidget {
   final CurrentWeather? current;
@@ -481,103 +870,132 @@ class _VisibilityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
     final vis = current?.visibilityText ?? '—';
-    return _GlassDetailCard(
-      accentColor: AppThemeData.neonMint,
-      title: 'Visibility',
-      icon: Icons.visibility_outlined,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: TextCustom(
-          title: vis,
-          fontSize: 28,
-          fontFamily: FontFamily.bold,
-          color: AppThemeData.primaryWhite,
-        ),
+    final visKm = (current?.visibility ?? 0) / 1000;
+
+    return PremiumGlassCard(
+      glowColor: wt?.accentPurple ?? const Color(0xFFAF52DE),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.visibility_outlined,
+                  color: (wt?.accentPurple ?? const Color(0xFFAF52DE)).withValues(alpha: 0.7),
+                  size: 14),
+              const SizedBox(width: 6),
+              TextCustom(
+                title: 'Visibility',
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 80,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CustomPaint(
+                size: Size.infinite,
+                painter: VisibilityMountainPainter(visibilityKm: visKm),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            vis,
+            style: TextStyle(
+              fontSize: 28,
+              fontFamily: FontFamily.bold,
+              color: wt?.textPrimary ?? Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-//  SHARED GLASS CARD
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+//  DEW POINT — Calculated from humidity + temperature
+// ══════════════════════════════════════════════════════════════════════
 
-class _GlassDetailCard extends StatelessWidget {
-  final Widget child;
-  final Color accentColor;
-  final String title;
-  final IconData icon;
-  final double? width;
-
-  const _GlassDetailCard({
-    required this.child,
-    required this.accentColor,
-    required this.title,
-    required this.icon,
-    this.width,
-  });
+class _DewPointCard extends StatelessWidget {
+  final CurrentWeather? current;
+  const _DewPointCard({this.current});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          width: width,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppThemeData.surfaceDeep.withValues(alpha: 0.55),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: AppThemeData.primaryWhite.withValues(alpha: 0.07),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppThemeData.surfaceVoid.withValues(alpha: 0.4),
-                blurRadius: 32,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Stack(
+    final wt = Theme.of(context).extension<WeatherThemeExtension>();
+    final temp = current?.temperature ?? 0;
+    final rh = current?.humidity ?? 0;
+    final dewPoint = _calculateDewPoint(temp, rh);
+    final label = _dewPointLabel(dewPoint);
+
+    return PremiumGlassCard(
+      glowColor: wt?.accentGreen ?? const Color(0xFF32D74B),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: const BoxDecoration(gradient: AppThemeData.glassShimmerDark),
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(icon, color: accentColor, size: 14),
-                      ),
-                      const SizedBox(width: 8),
-                      TextCustom(
-                        title: title,
-                        fontSize: 15,
-                        fontFamily: FontFamily.semiBold,
-                        color: AppThemeData.primaryWhite,
-                      ),
-                    ],
-                  ),
-                  child,
-                ],
+              Icon(Icons.grain_rounded,
+                  color: (wt?.accentGreen ?? const Color(0xFF32D74B)).withValues(alpha: 0.7),
+                  size: 14),
+              const SizedBox(width: 6),
+              TextCustom(
+                title: 'Dew Point',
+                fontSize: 12,
+                fontFamily: FontFamily.medium,
+                color: wt?.textMuted ?? Colors.white.withValues(alpha: 0.5),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 12),
+          Text(
+            '${dewPoint.round()}°',
+            style: TextStyle(
+              fontSize: 36,
+              fontFamily: FontFamily.bold,
+              color: wt?.textPrimary ?? Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: (wt?.accentGreen ?? const Color(0xFF32D74B)).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: TextCustom(
+              title: label,
+              fontSize: 11,
+              fontFamily: FontFamily.semiBold,
+              color:
+                  (wt?.accentGreen ?? const Color(0xFF32D74B)).withValues(alpha: 0.85),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  double _calculateDewPoint(double temp, double humidity) {
+    const a = 17.27;
+    const b = 237.7;
+    final alpha = (a * temp) / (b + temp) + log(humidity / 100);
+    return (b * alpha) / (a - alpha);
+  }
+
+  String _dewPointLabel(double dp) {
+    if (dp < 10) return 'Very Dry';
+    if (dp < 15) return 'Comfortable';
+    if (dp < 20) return 'Slightly Humid';
+    if (dp < 25) return 'Humid';
+    return 'Very Humid';
   }
 }

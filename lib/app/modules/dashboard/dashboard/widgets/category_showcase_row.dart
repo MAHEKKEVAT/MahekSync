@@ -209,11 +209,19 @@ class _CategoryCard extends StatefulWidget {
 class _CategoryCardState extends State<_CategoryCard> {
   bool _hovered = false;
 
+  void _onHover(bool v) {
+    if (_hovered == v) return;
+    _hovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       child: GestureDetector(
         onTap: widget.onViewAll,
         child: AnimatedContainer(

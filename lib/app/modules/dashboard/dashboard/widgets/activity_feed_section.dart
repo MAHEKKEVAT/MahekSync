@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 
 class ActivityFeedSection extends StatelessWidget {
@@ -53,10 +54,10 @@ class ActivityFeedSection extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.history_rounded,
-                        size: 18, color: Colors.white),
+                    child: Icon(Icons.history_rounded,
+                        size: 18, color: AppThemeData.primaryWhite),
                   ),
-                  const SizedBox(width: 14),
+                  spaceW(width: 14),
                   TextCustom(
                     title: 'Recent Activity',
                     fontSize: 17,
@@ -82,19 +83,17 @@ class ActivityFeedSection extends StatelessWidget {
                             : AppThemeData.grey3.withValues(alpha: 0.4),
                       ),
                     ),
-                    child: Text(
-                      'View All',
-                      style: TextStyle(
-                        fontFamily: FontFamily.medium,
-                        fontSize: 11,
-                        color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
-                      ),
+                    child: TextCustom(
+                      title: 'View All',
+                      fontSize: 11,
+                      fontFamily: FontFamily.medium,
+                      color: isDark ? AppThemeData.grey3 : AppThemeData.grey7,
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 18),
+          spaceH(height: 18),
 
           if (activities.isEmpty)
             _EmptyActivity(isDark: isDark)
@@ -234,14 +233,22 @@ class _ActivityCard extends StatefulWidget {
 class _ActivityCardState extends State<_ActivityCard> {
   bool _hovered = false;
 
+  void _onHover(bool v) {
+    if (_hovered == v) return;
+    _hovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final a = widget.activity;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
+        onEnter: (_) => _onHover(true),
+        onExit: (_) => _onHover(false),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
@@ -281,33 +288,29 @@ class _ActivityCardState extends State<_ActivityCard> {
               else
                 _iconContainer(a),
 
-              const SizedBox(width: 12),
+              spaceW(width: 12),
 
               // Title + description
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      a.title,
-                      style: TextStyle(
-                        fontFamily: FontFamily.semiBold,
-                        fontSize: 12,
-                        color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    TextCustom(
+                      title: a.title,
+                      fontSize: 12,
+                      fontFamily: FontFamily.semiBold,
+                      color: widget.isDark ? AppThemeData.grey1 : AppThemeData.grey10,
+                      maxLine: 1,
+                      textOverflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      '${a.category} \u00B7 ${a.timeAgo}',
-                      style: TextStyle(
-                        fontFamily: FontFamily.regular,
-                        fontSize: 10,
-                        color: widget.isDark ? AppThemeData.grey5 : AppThemeData.grey6,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    spaceH(height: 3),
+                    TextCustom(
+                      title: '${a.category} \u00B7 ${a.timeAgo}',
+                      fontSize: 10,
+                      fontFamily: FontFamily.regular,
+                      color: widget.isDark ? AppThemeData.grey5 : AppThemeData.grey6,
+                      maxLine: 1,
+                      textOverflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -317,13 +320,11 @@ class _ActivityCardState extends State<_ActivityCard> {
               if (a.statusIcon != null)
                 Icon(a.statusIcon, size: 18, color: a.statusColor)
               else if (a.id.startsWith('pur_'))
-                Text(
-                  a.description,
-                  style: TextStyle(
-                    fontFamily: FontFamily.semiBold,
-                    fontSize: 11,
-                    color: a.statusColor,
-                  ),
+                TextCustom(
+                  title: a.description,
+                  fontSize: 11,
+                  fontFamily: FontFamily.semiBold,
+                  color: a.statusColor,
                 )
               else
                 Icon(Icons.arrow_forward_rounded,
@@ -370,7 +371,7 @@ class _EmptyActivity extends StatelessWidget {
             Icon(Icons.history_rounded,
                 size: 32,
                 color: isDark ? AppThemeData.grey7 : AppThemeData.grey5),
-            const SizedBox(height: 8),
+            spaceH(height: 8),
             TextCustom(
               title: 'No recent activity',
               fontSize: 13,

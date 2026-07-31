@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:maheksync/app/modules/dashboard/controllers/dashboard_home_controller.dart';
 import 'package:maheksync/app/utils/app_colors.dart';
 import 'package:maheksync/app/utils/font_family.dart';
+import 'package:maheksync/app/widgets/global_widgets.dart';
 import 'package:maheksync/app/widgets/text_widget.dart';
 import 'package:solar_icons/solar_icons.dart';
 
@@ -57,10 +58,10 @@ class TodayFocusSection extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(SolarIconsBold.checklist,
-                    size: 18, color: Colors.white),
+                child: Icon(SolarIconsBold.checklist,
+                    size: 18, color: AppThemeData.primaryWhite),
               ),
-              const SizedBox(width: 14),
+              spaceW(width: 14),
               TextCustom(
                 title: "Today's Focus",
                 fontSize: 17,
@@ -69,7 +70,7 @@ class TodayFocusSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          spaceH(height: 18),
 
           // Timeline items
           if (controller.overdueTasks.isNotEmpty)
@@ -114,21 +115,19 @@ class TodayFocusSection extends StatelessWidget {
                 )),
 
           // View All
-          const SizedBox(height: 12),
+          spaceH(height: 12),
           GestureDetector(
             onTap: onViewAll,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'View All Tasks',
-                  style: TextStyle(
-                    fontFamily: FontFamily.medium,
-                    fontSize: 12,
-                    color: AppThemeData.neonPurple,
-                  ),
+                TextCustom(
+                  title: 'View All Tasks',
+                  fontSize: 12,
+                  fontFamily: FontFamily.medium,
+                  color: AppThemeData.neonPurple,
                 ),
-                const SizedBox(width: 4),
+                spaceW(width: 4),
                 Icon(Icons.arrow_forward_rounded,
                     size: 14, color: AppThemeData.neonPurple),
               ],
@@ -195,14 +194,14 @@ class TodayFocusSection extends StatelessWidget {
                 color: AppThemeData.success400,
               ),
             ),
-            const SizedBox(height: 14),
+            spaceH(height: 14),
             TextCustom(
               title: 'All clear!',
               fontSize: 15,
               fontFamily: FontFamily.semiBold,
               color: isDark ? AppThemeData.grey2 : AppThemeData.grey9,
             ),
-            const SizedBox(height: 4),
+            spaceH(height: 4),
             TextCustom(
               title: 'No overdue tasks, pending dues, or urgent alerts.',
               fontSize: 12,
@@ -244,13 +243,21 @@ class _TimelineItem extends StatefulWidget {
 class _TimelineItemState extends State<_TimelineItem> {
   bool _hovered = false;
 
+  void _onHover(bool v) {
+    if (_hovered == v) return;
+    _hovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
+        onEnter: (_) => _onHover(true),
+        onExit: (_) => _onHover(false),
         child: GestureDetector(
           onTap: widget.onTap,
           child: AnimatedContainer(
@@ -278,18 +285,15 @@ class _TimelineItemState extends State<_TimelineItem> {
                 // Time column
                 SizedBox(
                   width: 50,
-                  child: Text(
-                    widget.time,
+                  child: TextCustom(
+                    title: widget.time,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: FontFamily.bold,
-                      fontSize: 11,
-                      color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
-                      height: 1.3,
-                    ),
+                    fontSize: 11,
+                    fontFamily: FontFamily.bold,
+                    color: widget.isDark ? AppThemeData.grey4 : AppThemeData.grey7,
                   ),
                 ),
-                const SizedBox(width: 12),
+                spaceW(width: 12),
                 // Dot + line
                 Column(
                   children: [
@@ -318,41 +322,37 @@ class _TimelineItemState extends State<_TimelineItem> {
                     ),
                   ],
                 ),
-                const SizedBox(width: 14),
+                spaceW(width: 14),
                 // Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.title,
-                        style: TextStyle(
-                          fontFamily: FontFamily.semiBold,
-                          fontSize: 13,
-                          color: widget.isDark
-                              ? AppThemeData.grey1
-                              : AppThemeData.grey10,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      TextCustom(
+                        title: widget.title,
+                        fontSize: 13,
+                        fontFamily: FontFamily.semiBold,
+                        color: widget.isDark
+                            ? AppThemeData.grey1
+                            : AppThemeData.grey10,
+                        maxLine: 1,
+                        textOverflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        widget.subtitle,
-                        style: TextStyle(
-                          fontFamily: FontFamily.regular,
-                          fontSize: 11,
-                          color: widget.isDark
-                              ? AppThemeData.grey5
-                              : AppThemeData.grey6,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      spaceH(height: 3),
+                      TextCustom(
+                        title: widget.subtitle,
+                        fontSize: 11,
+                        fontFamily: FontFamily.regular,
+                        color: widget.isDark
+                            ? AppThemeData.grey5
+                            : AppThemeData.grey6,
+                        maxLine: 1,
+                        textOverflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                spaceW(width: 8),
                 // Priority badge
                 Container(
                   padding:
@@ -361,13 +361,11 @@ class _TimelineItemState extends State<_TimelineItem> {
                     color: widget.priorityColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
-                    widget.priorityLabel,
-                    style: TextStyle(
-                      fontFamily: FontFamily.semiBold,
-                      fontSize: 10,
-                      color: widget.priorityColor,
-                    ),
+                  child: TextCustom(
+                    title: widget.priorityLabel,
+                    fontSize: 10,
+                    fontFamily: FontFamily.semiBold,
+                    color: widget.priorityColor,
                   ),
                 ),
               ],

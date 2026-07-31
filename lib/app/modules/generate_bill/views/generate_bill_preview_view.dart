@@ -1052,14 +1052,22 @@ class _HoverableExportButton extends StatefulWidget {
 class _HoverableExportButtonState extends State<_HoverableExportButton> {
   bool _isHovered = false;
 
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
     final isPrimary = data.isPrimary;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: data.onTap,

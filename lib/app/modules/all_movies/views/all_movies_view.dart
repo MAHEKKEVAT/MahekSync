@@ -27,11 +27,19 @@ class _HoverableStatCard extends StatefulWidget {
 class _HoverableStatCardState extends State<_HoverableStatCard> {
   bool _isHovered = false;
 
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       cursor: SystemMouseCursors.click,
       child: AnimatedScale(
         scale: _isHovered ? 1.03 : 1.0,
@@ -89,13 +97,21 @@ class _HoverableCard extends StatefulWidget {
 class _HoverableCardState extends State<_HoverableCard> {
   bool _isHovered = false;
 
+  void _onHover(bool v) {
+    if (_isHovered == v) return;
+    _isHovered = v;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onTap,
@@ -818,7 +834,7 @@ class AllMoviesView extends GetView<AllMoviesController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 13, color: isActive ? color : (isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
-              const SizedBox(width: 5),
+              spaceW(width: 5),
               TextCustom(
                 title: label,
                 fontSize: 11,
@@ -852,7 +868,7 @@ class AllMoviesView extends GetView<AllMoviesController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(genreIcon, size: 13, color: isActive ? color : (isDark ? AppThemeData.grey5 : AppThemeData.grey6)),
-              const SizedBox(width: 5),
+              spaceW(width: 5),
               TextCustom(
                 title: g[0] + g.substring(1).toLowerCase(),
                 fontSize: 11,
@@ -1043,7 +1059,7 @@ class AllMoviesView extends GetView<AllMoviesController> {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 20),
       itemCount: controller.displayedMovies.length,
-      separatorBuilder: (a, b) => const SizedBox(height: 10),
+      separatorBuilder: (a, b) => spaceH(height: 10),
       itemBuilder: (context, index) {
         return _buildMovieListCard(controller.displayedMovies[index], isDark);
       },
